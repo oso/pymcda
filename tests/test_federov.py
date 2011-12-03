@@ -36,9 +36,9 @@ a = alternatives([a1, a2, a3, a4, a5, a6, a7, a8,
                   a17, a18, a19, a20, a21, a22, a23, a24])
 
 # Criteria
-c1 = criterion('c1', weight=1) 
-c2 = criterion('c2', weight=1) 
-c3 = criterion('c3', weight=1) 
+c1 = criterion('c1', weight=1)
+c2 = criterion('c2', weight=1)
+c3 = criterion('c3', weight=1)
 c = criteria([c1, c2, c3])
 
 # Alternative performances
@@ -77,21 +77,10 @@ p0_a = [a1, a11, a24, a18]
 p0_pt = [ap1, ap11, ap24, ap18]
 
 print "Initial plan"
+pprint.pprint(p0_a)
 pprint.pprint(p0_pt)
 
 p_a, p_pt = federov(a, c, pt, 4, p0_a, p0_pt)
 print "Optimal set"
 pprint.pprint(p_a)
 pprint.pprint(p_pt)
-
-#from numpy import matrix, transpose, linalg, sqrt, power
-#m1 = matrix([[1, 1.2, 5.1], [1, 1.2, 4.9], [1, 1.8, 4.3], [1, 3, 3.9]])
-#m2 = matrix([[1, 1.2, 5.1], [1, 3.0, 5.1], [1, 1.8, 4.3], [1, 3, 3.9]])
-#m3 = matrix([[1, 1.2, 5.1], [1, 3.0, 5.1], [1, 1.6, 4.1], [1, 3, 3.9]])
-#m4 = matrix([[1, 1.2, 5.5], [1, 3.0, 5.1], [1, 1.6, 4.1], [1, 3, 3.9]])
-#m5 = matrix([[1, 1.2, 5.5], [1, 3.0, 5.1], [1, 1.6, 4.1], [1, 3.6, 3.9]])
-#m6 = matrix([[1, 1.2, 5.5], [1, 1.2, 4.3], [1, 2.4, 5.5], [1, 3.6, 3.9]])
-#m = [m1, m2, m3, m4, m5, m6]
-#for mi in m:
-#    print mi
-#    print linalg.det(transpose(mi)*mi)
