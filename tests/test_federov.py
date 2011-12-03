@@ -1,10 +1,31 @@
 import sys
 sys.path.insert(0, "..")
 import pprint
+import matplotlib.pyplot as plt
 from mcda.types import alternative, alternatives
 from mcda.types import criterion, criteria
 from mcda.types import alternative_performances, performance_table
-from tools.federov import federov
+from tools.federov import generate_init_plan, federov
+
+def plot(pt, p_pt):
+    xs = []
+    ys = []
+    x = []
+    y = []
+    for ap in pt:
+        xi = ap('c2')
+        yi = ap('c3')
+        if ap in p_pt:
+            xs.append(xi)
+            ys.append(yi)
+        else:
+            x.append(xi)
+            y.append(yi)
+
+    plt.plot(x, y, 'bo')
+    plt.plot(xs, ys, 'ro')
+    plt.axis([0.6, 4.2, 3.5, 5.9])
+    plt.show()
 
 # Alternatives
 a1 = alternative('a1')
@@ -52,7 +73,7 @@ ap7 = alternative_performances('a7', {'c1': 1, 'c2': 1.8, 'c3': 5.1})
 ap8 = alternative_performances('a8', {'c1': 1, 'c2': 1.8, 'c3': 4.7})
 ap9 = alternative_performances('a9', {'c1': 1, 'c2': 1.8, 'c3': 4.3})
 ap10 = alternative_performances('a10', {'c1': 1, 'c2': 1.8, 'c3': 3.9})
-ap11 = alternative_performances('a11', {'c1': 1, 'c2': 1.6, 'c3': 4.1})
+ap11 = alternative_performances('a11', {'c1': 1, 'c2': 1.5, 'c3': 4.1})
 ap12 = alternative_performances('a12', {'c1': 1, 'c2': 2.4, 'c3': 5.5})
 ap13 = alternative_performances('a13', {'c1': 1, 'c2': 2.4, 'c3': 5.1})
 ap14 = alternative_performances('a14', {'c1': 1, 'c2': 2.4, 'c3': 4.7})
@@ -73,14 +94,19 @@ pt = performance_table([ap1, ap2, ap3, ap4, ap5, ap6, ap7, ap8,
 print "Performance table"
 pprint.pprint(pt)
 
-p0_a = [a1, a11, a24, a18]
-p0_pt = [ap1, ap11, ap24, ap18]
+p0_a = [a1, a2, a3, a4]
+p0_pt = [ap1, ap2, ap3, ap4]
+#p0_a = [a1, a11, a24, a18]
+#p0_pt = [ap1, ap11, ap24, ap18]
+p0_a, p0_pt = generate_init_plan(a, pt, 4)
 
 print "Initial plan"
 pprint.pprint(p0_a)
 pprint.pprint(p0_pt)
+plot(pt, p0_pt)
 
 p_a, p_pt = federov(a, c, pt, 4, p0_a, p0_pt)
 print "Optimal set"
 pprint.pprint(p_a)
 pprint.pprint(p_pt)
+plot(pt, p_pt)
