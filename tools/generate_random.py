@@ -9,8 +9,7 @@ def generate_random_alternatives(number):
     alts = alternatives()
     for i in range(number):
         a = alternative()
-        a.id = "a%d" % i
-#        a.name = "a%d" % i
+        a.id = "a%d" % (i+1)
         alts.append(a)
 
     return alts
@@ -20,8 +19,7 @@ def generate_random_criteria(number, seed=1234):
 
     crits = criteria()
     for i in range(number):
-        c = criterion("c%d" % i)
-#        c.name = "c%d" %i
+        c = criterion("c%d" % (i+1))
         c.weight = random.randint(0,100)
         crits.append(c)
 
