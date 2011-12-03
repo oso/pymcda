@@ -5,7 +5,8 @@ import logging
 from numpy import matrix, multiply, transpose, linalg
 from mcda.types import alternatives, performance_table
 
-logging.basicConfig(level=logging.DEBUG)
+FORMAT = '%(asctime)s: %(message)s'
+logging.basicConfig(level=logging.DEBUG, format=FORMAT)
 
 def generate_init_plan(a, pt, n):
     a_in = alternatives()
@@ -66,7 +67,7 @@ def federov(a, c, pt, n, p0_a=None, p0_pt=None):
     # Compute D criterion
     xtx = compute_xtx(p_pt, c)
     d = compute_d_criterion(xtx, n) 
-    logging.debug("D: %g" % d)
+    logging.debug("D = %g" % d)
 
     # Optimisation cycle
     z=0
@@ -100,7 +101,7 @@ def federov(a, c, pt, n, p0_a=None, p0_pt=None):
         i = p_pt.index(alt_i_p)
         p_pt[i] = alt_j_p
 
-        logging.debug("D: %g" % d1)
+        logging.debug("D = %g" % d1)
 
         xtx = xtx1
 
