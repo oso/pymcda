@@ -112,8 +112,8 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_criteria
     from tools.generate_random import generate_random_performance_table
 
-    a = generate_random_alternatives(1000)
-    c = generate_random_criteria(2)
+    a = generate_random_alternatives(100)
+    c = generate_random_criteria(4)
     pt = generate_random_performance_table(a, c)
 
     p_a, p_pt = federov(a, c, pt, 4)

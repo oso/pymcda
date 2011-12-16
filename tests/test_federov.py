@@ -22,6 +22,7 @@ def plot(pt, p_pt):
             x.append(xi)
             y.append(yi)
 
+    plt.title('T=a+b1*x1+b2*x2+b12*x1*x2')
     plt.plot(x, y, 'bo')
     plt.plot(xs, ys, 'ro')
     plt.axis([0.6, 4.2, 3.5, 5.9])
@@ -94,13 +95,8 @@ pt = performance_table([ap1, ap2, ap3, ap4, ap5, ap6, ap7, ap8,
 print "Performance table"
 pprint.pprint(pt)
 
-p0_a = [a1, a2, a3, a4]
-p0_pt = [ap1, ap2, ap3, ap4]
-#p0_a = [a1, a11, a24, a18]
-#p0_pt = [ap1, ap11, ap24, ap18]
-p0_a, p0_pt = generate_init_plan(a, pt, 4)
-
 print "Initial plan"
+p0_a, p0_pt = generate_init_plan(a, pt, 4)
 pprint.pprint(p0_a)
 pprint.pprint(p0_pt)
 plot(pt, p0_pt)
