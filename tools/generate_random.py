@@ -4,6 +4,7 @@ import random
 from mcda.types import alternative, alternatives
 from mcda.types import alternative_performances, performance_table
 from mcda.types import criterion, criteria
+from mcda.types import criterion_value, criteria_values
 
 def generate_random_alternatives(number):
     alts = alternatives()
@@ -14,26 +15,39 @@ def generate_random_alternatives(number):
 
     return alts
 
-def generate_random_criteria(number, seed=1234):
-    random.seed(seed)
+def generate_random_criteria(number, seed=None):
+    if seed is not None:
+        random.seed(seed)
 
     crits = criteria()
     for i in range(number):
         c = criterion("c%d" % (i+1))
-        c.weight = random.randint(0,100)
         crits.append(c)
 
     return crits
 
-def generate_random_performance_table(alts, crits, seed=5678):
-    random.seed(seed)
+def generate_random_criteria_values(crits, seed=None):
+    if seed is not None:
+        random.seed(seed)
+
+    cvals = criteria_values()
+    for c in crits:
+        cval = criterion_value()
+        cval.criterion_id = c.id
+        cval.value = random.random()
+        cvals.append(cval)
+
+    return cvals
+
+def generate_random_performance_table(alts, crits, seed=None):
+    if seed is not None:
+        random.seed(seed)
 
     pt = performance_table()
     for a in alts:
         perfs = {}
         for c in crits:
             perfs[c.id] = random.random()
-#            perfs[c.id] = random.randint(0,100)
         ap = alternative_performances(a.id, perfs)
         pt.append(ap)
 
@@ -41,8 +55,10 @@ def generate_random_performance_table(alts, crits, seed=5678):
 
 if __name__ == "__main__":
     alts = generate_random_alternatives(10)
-    print alts
+    print(alts)
     crits = generate_random_criteria(5)
-    print crits
+    print(crits)
+    cv = generate_random_criteria_values(crits)
+    print(cv)
     pt = generate_random_performance_table(alts, crits)
-    print pt
+    print(pt)
