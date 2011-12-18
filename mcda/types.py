@@ -66,7 +66,7 @@ class criterion:
     DISABLED = 1
     ENABLED = 0
 
-    def __init__(self, id, name=None, disabled=False, direction=1,
+    def __init__(self, id=None, name=None, disabled=False, direction=1,
                  weight=None, thresholds=None):
         self.id = id
         self.name = name
@@ -77,7 +77,7 @@ class criterion:
 
     def __repr__(self):
         if self.name is not None:
-            return "%s (%s)" % (self.id, self.name)
+            return "%s" % self.name
         else:
             return "%s" % self.id
 
@@ -150,6 +150,42 @@ class criterion:
             value = critval.find('.//value')
             if value is not None:
                 self.weight = unmarshal(value.getchildren()[0])
+
+class criteria_values(list):
+
+    def __call__(self, criterion_id):
+        for cval in self:
+            if cval.criterion_id == criterion_id:
+                return cval
+
+        raise KeyError("Criterion value %s not found" % criterion_id)
+
+    def to_xmcda(self):
+        xmcda = ElementTree.Element('criteriaValues')
+        for cval in self:
+            cv = cval.to_xmcda()
+            xmcda.append(cv)
+        return xmcda
+
+class criterion_value():
+
+    def __init__(self, id=None, name=None, criterion_id=None, value=None):
+        self.id = id
+        self.name = name
+        self.criterion_id = criterion_id
+        self.value = value
+
+    def to_xmcda(self):
+        xmcda = ElementTree.Element('criterionValue')
+        if self.id is not None:
+            xmcda.set('id', self.id)
+        if self.name is not None:
+            xmcda.set('name', self.name)
+        critid = ElementTree.SubElement(xmcda, 'criterionID')
+        critid.text = self.criterion_id
+        val = ElementTree.SubElement(xmcda, 'value')
+        val.append(marshal(value))
+        return xmcda
 
 class alternatives(list):
 
