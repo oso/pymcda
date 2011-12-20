@@ -5,6 +5,7 @@ from mcda.types import alternative, alternatives
 from mcda.types import alternative_performances, performance_table
 from mcda.types import criterion, criteria
 from mcda.types import criterion_value, criteria_values
+from mcda.types import category, categories
 
 def generate_random_alternatives(number):
     alts = alternatives()
@@ -53,6 +54,16 @@ def generate_random_performance_table(alts, crits, seed=None):
 
     return pt
 
+def generate_random_categories(number):
+    cats = categories()
+    for i in range(number):
+        c = category()
+        c.id = "cat%d" % (i+1)
+        c.rank = i+1
+        cats.append(c)
+
+    return cats
+
 if __name__ == "__main__":
     alts = generate_random_alternatives(10)
     print(alts)
@@ -62,3 +73,5 @@ if __name__ == "__main__":
     print(cv)
     pt = generate_random_performance_table(alts, crits)
     print(pt)
+    cats = generate_random_categories(3)
+    print(cats)
