@@ -89,7 +89,7 @@ class criterion:
         scale = ElementTree.SubElement(xmcda, 'scale')
         quant = ElementTree.SubElement(scale, 'quantitative')
         prefd = ElementTree.SubElement(quant, 'preferenceDirection')
-        if self.direction == 1:
+        if self.direction == MAXIMIZE:
             prefd.text = 'max'
         else:
             prefd.text = 'min'
@@ -197,27 +197,16 @@ class alternatives(list):
 
 class alternative:
 
-    def __init__(self, id=None, name=None, performances=None, disabled=False):
+    def __init__(self, id=None, name=None, disabled=False):
         self.id = id
         self.name = name
-        self.performances = performances
         self.disabled = disabled
 
     def __repr__(self):
         if self.name is not None:
-            return "%s (%s)" % (self.id, self.name)
+            return "%s" % self.name
         else:
             return "%s" % self.id
-
-    def __add__(self, other):
-        a = self.performances
-        b = other.performances
-        return dict( (n, a.get(n, 0)+b.get(n, 0)) for n in set(a)|set(b) )
-
-    def __sub__(self, other):
-        a = self.performances
-        b = other.performances
-        return dict( (n, a.get(n, 0)-b.get(n, 0)) for n in set(a)|set(b) )
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('alternative', id=self.id)
@@ -230,24 +219,7 @@ class alternative:
         else:
             active.text = 'false'
 
-        if self.performances:
-            xmcda2 = ElementTree.Element('alternativePerformances')
-            altid = ElementTree.SubElement(xmcda2, 'alternativeID')
-            altid.text = self.id
-
-            for crit, val in self.performances.iteritems():
-                perf = ElementTree.SubElement(xmcda2, 'performance')
-
-                critid = ElementTree.SubElement(perf, 'criterionID')
-                critid.text = crit.id
-
-                value = ElementTree.SubElement(perf, 'value')
-                p = marshal(val)
-                value.append(p)
-        else:
-            xmcda2 = None
-
-        return (xmcda, xmcda2)
+        return xmcda
 
     def from_xmcda(self, xmcda):
         if xmcda.tag != 'alternative':
