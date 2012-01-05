@@ -2,18 +2,17 @@ from mcda.types import alternative_affectation, alternatives_affectations
 
 class electre_tri:
 
-    def __init__(self, criteria, cv, pt, profiles, lbda):
+    def __init__(self, criteria, cv, profiles, lbda):
         self.criteria = criteria
         self.cv = cv
-        self.pt = pt
         self.profiles = profiles
         self.lbda = lbda
 
-    def __get_threshold_by_profile(self, c, threshold_id, profile_number):
+    def __get_threshold_by_profile(self, c, threshold_id, profile_rank):
         if c.thresholds is None:
             return None
 
-        threshid = "%s%s" % (threshold_id, profile_number)
+        threshid = "%s%s" % (threshold_id, profile_rank)
         if c.thresholds.has_threshold(threshid):
             return c.thresholds(threshid).values.value
         elif c.thresholds.has_threshold(threshold_id):
@@ -21,13 +20,13 @@ class electre_tri:
         else:
             return None
 
-    def __partial_concordance(self, x, y, c, profile_number):
+    def __partial_concordance(self, x, y, c, profile_rank):
         # compute g_j(b) - g_j(a)
         diff = (y.performances[c.id]-x.performances[c.id])*c.direction
 
         # compute c_j(a, b)
-        p = self.__get_threshold_by_profile(c, 'p', profile_number)
-        q = self.__get_threshold_by_profile(c, 'q', profile_number)
+        p = self.__get_threshold_by_profile(c, 'p', profile_rank)
+        q = self.__get_threshold_by_profile(c, 'q', profile_rank)
         if q is None:
             q = 0
         if p is None:
@@ -42,14 +41,14 @@ class electre_tri:
             den = float(p-q)
             return num/den
 
-    def __concordance(self, x, y, clist, cv, profile_number):
+    def __concordance(self, x, y, clist, cv, profile_rank):
         wsum = 0
         pjcj = 0
         for c in clist:
             if c.disabled == 1:
                 continue
 
-            cj = self.__partial_concordance(x, y, c, profile_number)
+            cj = self.__partial_concordance(x, y, c, profile_rank)
 
             cval = cv(c.id)
             weight = cval.value
@@ -60,13 +59,13 @@ class electre_tri:
 
         return pjcj/wsum
 
-    def __partial_discordance(self, x, y, c, profile_number):
+    def __partial_discordance(self, x, y, c, profile_rank):
         # compute g_j(b) - g_j(a)
         diff = (y.performances[c.id]-x.performances[c.id])*c.direction
 
         # compute d_j(a,b)
-        p = self.__get_threshold_by_profile(c, 'p', profile_number)
-        v = self.__get_threshold_by_profile(c, 'v', profile_number)
+        p = self.__get_threshold_by_profile(c, 'p', profile_rank)
+        v = self.__get_threshold_by_profile(c, 'v', profile_rank)
         if v is None:
             return 0
         elif diff > v:
@@ -78,15 +77,15 @@ class electre_tri:
             den = float(v-p)
             return num/den
 
-    def __credibility(self, x, y, clist, cv, profile_number):
-        concordance = self.__concordance(x, y, clist, cv, profile_number)
+    def __credibility(self, x, y, clist, cv, profile_rank):
+        concordance = self.__concordance(x, y, clist, cv, profile_rank)
 
         sigma = concordance
         for c in clist:
             if c.disabled == 1:
                 continue
 
-            dj = self.__partial_discordance(x, y, c, profile_number)
+            dj = self.__partial_discordance(x, y, c, profile_rank)
             if dj > concordance:
                 num = float(1-dj)
                 den = float(1-concordance)
@@ -94,9 +93,9 @@ class electre_tri:
 
         return sigma
 
-    def __outrank(self, action_perfs, criteria, cv, profile, profile_number, lbda):
-        s_ab = self.__credibility(action_perfs, profile, criteria, cv, profile_number)
-        s_ba = self.__credibility(profile, action_perfs, criteria, cv, profile_number)
+    def __outrank(self, action_perfs, criteria, cv, profile, profile_rank, lbda):
+        s_ab = self.__credibility(action_perfs, profile, criteria, cv, profile_rank)
+        s_ba = self.__credibility(profile, action_perfs, criteria, cv, profile_rank)
 
         if s_ab >= lbda:
             if s_ba >= lbda:
@@ -109,15 +108,16 @@ class electre_tri:
             else:
                 return "R"
 
-    def pessimist(self):
+    def pessimist(self, pt):
         profiles = self.profiles[:]
         profiles.reverse()
         nprofiles = len(profiles)+1
         affectations = alternatives_affectations([])
-        for action_perfs in self.pt:
+        for action_perfs in pt:
             category = nprofiles
             for i, profile in enumerate(profiles):
-                outr = self.__outrank(action_perfs, self.criteria, self.cv, profile, i+1, self.lbda)
+                outr = self.__outrank(action_perfs, self.criteria, self.cv,
+                                      profile, i+1, self.lbda)
                 if outr != "S" and outr != "I":
                     category -= 1
 
@@ -127,13 +127,14 @@ class electre_tri:
 
         return affectations
 
-    def optimist(self):
+    def optimist(self, pt):
         profiles = self.profiles
         affectations = alternatives_affectations([])
-        for action_perfs in self.pt:
+        for action_perfs in pt:
             category = 1
             for i, profile in enumerate(profiles):
-                outr = self.__outrank(action_perfs, self.criteria, profile, i+1, self.lbda)
+                outr = self.__outrank(action_perfs, self.criteria, self.cv,
+                                      profile, i+1, self.lbda)
                 if outr != "-":
                     category += 1
 
