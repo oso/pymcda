@@ -43,31 +43,23 @@ class criteria(list):
             root.append(crit_xmcda)
         return root
 
-    def from_xmcda(self, xmcda, xmcda_critval=None):
+    def from_xmcda(self, xmcda):
+        if xmcda.tag != 'criteria':
+            raise TypeError('criteria::invalid tag')
+
         tag_list = xmcda.getiterator('criterion')
         for tag in tag_list:
             c = criterion(None)
             c.from_xmcda(tag)
             self.append(c)
 
-        if xmcda_critval is not None:
-            tag_list = xmcda_critval.getiterator('criterionValue')
-            for tag in tag_list:
-                c_id = tag.find('criterionID')
-                if c_id is not None:
-                    c_id = c_id.text
-
-                if self.has_criterion(c_id):
-                    c = self(c_id)
-                    c.from_xmcda(xmcda_critval=tag)
-
 class criterion:
 
-    DISABLED = 1
-    ENABLED = 0
+    MINIMIZE = -1
+    MAXIMIZE = 1
 
-    def __init__(self, id=None, name=None, disabled=False, direction=1,
-                 weight=None, thresholds=None):
+    def __init__(self, id=None, name=None, disabled=False,
+                 direction=MAXIMIZE, weight=None, thresholds=None):
         self.id = id
         self.name = name
         self.disabled = disabled
@@ -82,7 +74,9 @@ class criterion:
             return "%s" % self.id
 
     def to_xmcda(self):
-        xmcda = ElementTree.Element('criterion', id=self.id)
+        xmcda = ElementTree.Element('criterion')
+        if self.id is not None:
+            xmcda.set('id', self.id)
         if self.name is not None:
             xmcda.set('name', self.name)
 
@@ -112,44 +106,37 @@ class criterion:
 
         return xmcda
 
-    def from_xmcda(self, xmcda=None, xmcda_critval=None):
-        if xmcda is not None:
-            if xmcda.tag == 'criterion':
-                crit = xmcda
-            else:
-                crit = xmcda.find('.//criterion')
-            c_id = crit.get('id')
-            if c_id is not None:
-                self.id = c_id
-            name = crit.get('name')
-            if name is not None:
-                self.name = name
-            active = crit.find('.//active')
-            if active is not None:
-                if active.text == 'false':
-                    self.disabled = True
-                else:
-                    self.disabled = False
-            pdir = crit.find('.//scale/quantitative/preferenceDirection')
-            if pdir is not None:
-                if pdir.text == 'max':
-                    self.direction = 1
-                elif pdir.text == 'min':
-                    self.direction = -1
-                else:
-                    raise TypeError('criterion::invalid preferenceDirection')
-            value = crit.find('.//criterionValue/value')
-            if value is not None:
-                self.weight = unmarshal(value.getchildren()[0])
+    def from_xmcda(self, xmcda):
+        if xmcda.tag != 'criterion':
+            raise TypeError('criterion::invalid tag')
 
-        if xmcda_critval is not None:
-            if xmcda_critval.tag == 'criterionValue':
-                critval = xmcda_critval
+        c_id = crit.get('id')
+        if c_id is not None:
+            self.id = c_id
+
+        name = crit.get('name')
+        if name is not None:
+            self.name = name
+
+        active = crit.find('.//active')
+        if active is not None:
+            if active.text == 'false':
+                self.disabled = True
             else:
-                critval = xmcda_critval.find('.//criterionValue')
-            value = critval.find('.//value')
-            if value is not None:
-                self.weight = unmarshal(value.getchildren()[0])
+                self.disabled = False
+
+        pdir = crit.find('.//scale/quantitative/preferenceDirection')
+        if pdir is not None:
+            if pdir.text == 'max':
+                self.direction = 1
+            elif pdir.text == 'min':
+                self.direction = -1
+            else:
+                raise TypeError('criterion::invalid preferenceDirection')
+
+        value = crit.find('.//criterionValue/value')
+        if value is not None:
+            self.weight = unmarshal(value.getchildren()[0])
 
 class criteria_values(list):
 
@@ -199,10 +186,8 @@ class alternatives(list):
         return (root, root2)
 
     def from_xmcda(self, xmcda):
-        if xmcda.tag == 'alternatives':
-            alternatives = xmcda
-        else:
-            alternatives = xmcda.find('.//alternatives')
+        if xmcda.tag != 'alternatives':
+            raise TypeError('alternatives::invalid tag')
 
         tag_list = alternatives.getiterator('alternative')
         for tag in tag_list:
@@ -265,10 +250,8 @@ class alternative:
         return (xmcda, xmcda2)
 
     def from_xmcda(self, xmcda):
-        if xmcda.tag == 'alternative':
-            alternative = xmcda
-        else:
-            alternative = xmcda.find('.//alternative')
+        if xmcda.tag != 'alternative':
+            raise TypeError('alternative::invalid tag')
 
         self.id = alternative.get('id')
         name = alternative.get('name')
@@ -290,7 +273,6 @@ class performance_table(list):
                 alt_perfs = altp
                 break
 
-        # FIXME: to remove
         if alt_perfs is None:
             raise KeyError("Alternative %s not found" % alternative_id)
 
@@ -314,10 +296,8 @@ class performance_table(list):
         return root
 
     def from_xmcda(self, xmcda):
-        if xmcda.tag == 'performanceTable':
-            pt = xmcda
-        else:
-            pt = xmcda.find('.//performanceTable')
+        if xmcda.tag != 'performanceTable':
+            raise TypeError('performanceTable::invalid tag')
 
         tag_list = pt.getiterator('alternativePerformances')
         for tag in tag_list:
@@ -353,10 +333,8 @@ class alternative_performances():
         return xmcda
 
     def from_xmcda(self, xmcda):
-        if xmcda.tag == 'alternativePerformances':
-            altp = xmcda
-        else:
-            altp = xmcda.find('.//alternativePerformances')
+        if xmcda.tag != 'alternativePerformances':
+            raise TypeError('alternativePerformances::invalid tag')
 
         altid = altp.find('.//alternativeID')
         self.alternative_id = altid.text
@@ -415,10 +393,9 @@ class constant():
         return xmcda
 
     def from_xmcda(self, xmcda):
-        if xmcda.tag == 'constant':
-            constant = xmcda
-        else:
-            constant = xmcda.find('.//constant')
+        if xmcda.tag != 'constant':
+            raise TypeError('constant::invalid tag')
+
         self.id = constant.get('id')
         self.value = unmarshal(constant.getchildren()[0])
 
@@ -450,10 +427,8 @@ class thresholds(list):
         return root
 
     def from_xmcda(self, xmcda):
-        if xmcda.tag == 'thresholds':
-            thresholds = xmcda
-        else:
-            thresholds = xmcda.find('.//thresholds')
+        if xmcda.tag != 'thresholds':
+            raise TypeError('thresholds::invalid tag')
 
         tag_list = thresholds.getiterator('threshold')
         for tag in tag_list:
@@ -479,10 +454,9 @@ class threshold():
         return xmcda
 
     def from_xmcda(self, xmcda):
-        if xmcda.tag == 'threshold':
-            threshold = xmcda
-        else:
-            threshold = xmcda.find('.//threshold')
+        if xmcda.tag != 'threshold':
+            raise TypeError('threshold::invalid tag')
+
         self.id = threshold.get('id')
         self.name = threshold.get('name')
         values = threshold.getchildren()[0]
@@ -506,6 +480,9 @@ class categories(list):
         return root
 
     def from_xmcda(self, xmcda):
+        if xmcda.tag != 'categories':
+            raise TypeError('categories::invalid tag')
+
         tag_list = xmcda.getiterator('category')
         for tag in tag_list:
             c = category()
@@ -537,6 +514,9 @@ class category():
         return xmcda
 
     def from_xmcda(self, xmcda):
+        if xmcda.tag != 'category':
+            raise TypeError('category::invalid tag')
+
         self.id = xmcda.get('id')
         self.name = xmcda.get('name')
         active = xmcda.find('.//active')
@@ -609,6 +589,9 @@ class alternatives_affectations(list):
         return root
 
     def from_xmcda(self, xmcda):
+        if xmcda.tag != 'alternatives_affectations':
+            raise TypeError('alternatives_affectations::invalid tag')
+
         tag_list = xmcda.getiterator('alternativeAffectation')
         for tag in tag_list:
             aa = alternative_affectation()
@@ -633,19 +616,10 @@ class alternative_affectation():
         return xmcda
 
     def from_xmcda(self, xmcda):
+        if xmcda.tag != 'alternative_affectation':
+            raise TypeError('alternative_affectation::invalid tag')
+
         altid = xmcda.find('alternativeID')
         self.alternative_id = altid.text 
         catid = xmcda.find('categoryID')
         self.category_id = catid.text
-
-class threshold_old(alternative):
-    pass
-
-class profile(alternative):
-
-    def __init__(self, id=None, name=None, performances=None,
-                 indifference=None, preference=None, veto=None):
-        alternative.__init__(self, id, name, performances)
-        self.indifference = indifference
-        self.preference = preference
-        self.veto = veto
