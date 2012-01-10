@@ -8,23 +8,7 @@ from tools.generate_random import generate_random_criteria_values
 from tools.utils import get_best_alternative_performances
 from tools.utils import get_worst_alternative_performances
 
-def mutations_weights(g_weights, best_weights, r_weights, s_weights):
-    pass
-
-def mutation(model, best, r, s):
-    pass
-
-def mutations(models, best, r, s):
-    ba = get_best_alternative_performances(best.pt, best.criteria)
-    wa = get_worst_alternative_performances(best.pt, best.criteria)
-
-    new_models = []
-    for m in models:
-        nm = mutation(model, best, r, s)
-        new_models.append(nm)
-    return new_models
-
-def crossover(models, cr):
+def get_crossover_indices(models, cr):
     n = len(models)
     l = random.randint(0, n-1)
 
@@ -37,9 +21,77 @@ def crossover(models, cr):
             j = i-1
             break
 
-    return (l, j)
+    return (l, l+j)
 
-def selection():
+def mutation_weights(mc, g, best, h, s):
+    cvals = criteria_values()
+    for w in g:
+        id = w.criterion_id
+        val = w.value
+        bval = best(id).value
+        hval = h(id).value
+        sval = s(id).value
+
+        nval = val + mc*(bval-val) + mc*(hval-sval)
+
+        cvals.append(criterion_value(id, nval))
+
+    return cvals
+
+def d_add(a, b):
+    return dict( (n, a.get(n, 0)+b.get(n, 0)) for n in set(a)|set(b) )
+
+def d_substract(a, b):
+    return dict( (n, a.get(n, 0)-b.get(n, 0)) for n in set(a)|set(b) )
+
+def mutation_profiles(mc, g, b, h, s):
+    gnew = []
+    for i, profile in enumerate(g):
+        alt_id = profile.alternative_id
+        diff1 = d_substract(b[i].performances, g[i].performances)
+        diff2 = d_substract(h[i].performances, s[i].performances)
+        delta = d_add(diff1, diff2)
+        mdelta = dict((key, value*mc) for key, value in delta.iteritems())
+        gnew_perfs = d_add(g[i].performances, mdelta)
+
+        # Check there are no problem with computed values
+        # FIXME: take criteria dir into account and max/min values
+        for c, v in gnew_perfs.iteritems():
+            if g[i].performances[c] < 0:
+                gnew_perfs[c] = random.uniform(0, 1)
+
+            if g[i].performances[c] > 1:
+                gnew_perfs[c] = random.uniform(0, 1)
+
+            if i > 0 and v < g[i-1].performances[c]:
+                gnew_perfs[c] = random.uniform(g[i-1].performances[c], 1)
+
+        gnew.append(alternative_performances(alt_id, gnew_perfs))
+
+    print g
+    print gnew
+    return gnew
+
+def mutation(mc, g, best, h, s, ba, wa):
+    # First mutation of the weights
+    cvals = mutation_weights(mc, g.cv, best.cv, h.cv, s.cv)
+    # Then mutation of the profiles
+    profiles = mutation_profiles(mc, g.profiles, best.profiles, \
+                            h.profiles, s.profiles)
+    # Finally mutation of lambda
+    g.cv = cvals
+    g.profiles = profiles
+    return g
+
+def mutations(models, mc, j, l, best, ba, wa):
+    muted_models = []
+    for i, g in enumerate(models[j:l]):
+        [ h, s ] = get_random_models(models)
+        gm = mutation(mc, g, best, h, s, ba, wa)
+        muted_models.append(gm)
+    return muted_models
+
+def selection(models, muted_models):
     pass
 
 def compute_ca(model_af, dm_af):
@@ -59,10 +111,10 @@ def compute_auc_k(model, k):
 def fitness(model, aa):
     return compute_ca(model, aa)
 
-def compute_models_fitness(models, aa):
+def compute_models_fitness(models, pt, aa):
     models_fitness = {}
     for m in models:
-        p = m.pessimist()
+        p = m.pessimist(pt)
         f = fitness(p, aa)
         models_fitness[m] = f
 
@@ -83,7 +135,7 @@ def get_random_models(models):
 
 def init_one(c, pt, nprofiles):
     """ Generate a random ELECTRE TRI model"""
-    
+
     # Initialize lambda value
     lbda = random.uniform(0.6, 0.95)
 
@@ -121,14 +173,14 @@ def init_one(c, pt, nprofiles):
         worst_perf = worst(crit.id)
         best_perf = best(crit.id)
         rval = [ random.uniform(worst_perf, best_perf) \
-                    for i in range(nprofiles) ] 
+                    for i in range(nprofiles) ]
         rval.sort()
         for i in range(nprofiles):
             id = "b%d" % (i+1)
             bp = bpt(id)
             bp.performances[crit.id] = rval[i]
 
-    random_model = electre_tri(c, cvals, pt, bpt, lbda)
+    random_model = electre_tri(c, cvals, bpt, lbda)
 
     return random_model
 
@@ -141,18 +193,22 @@ def initialization(n, c, pt, cats):
         models.append(model)
     return models
 
-def differential_evolution(sample, mc, cr, c, a, aa, pt, cats):
+def differential_evolution(ngen, pop, mc, cr, c, a, aa, pt, cats):
     """ Learn an ELECTRE TRI model """
-    models = initialization(sample, c, pt, cats)
-    models_fitness = compute_models_fitness(models, aa)
+    models = initialization(pop, c, pt, cats)
+    models_fitness = compute_models_fitness(models, pt, aa)
 
-    best_model = get_best_model(models_fitness)
-    print(best_model.pessimist())
-    [ h_model, s_model ] = get_random_models(models)
-    print(h_model, s_model)
+    # Get worst and best possible alternative
+    ba = get_best_alternative_performances(pt, c)
+    wa = get_worst_alternative_performances(pt, c)
 
-    crossover(models, cr)
-    mutations(models, best_model, h_model, s_model)
+    for i in range(ngen):
+        # First get crossover indices
+        l, j = get_crossover_indices(models, cr)
+
+        # Then perform the mutation
+        best = get_best_model(models_fitness)
+        mutations(models, mc, l, j, best, wa, ba)
 
 if __name__ == "__main__":
     from tools.generate_random import generate_random_alternatives
@@ -163,19 +219,19 @@ if __name__ == "__main__":
     from mcda.electre_tri import electre_tri
 
     # Create an original arbitrary model
-    a = generate_random_alternatives(100)
-    c = generate_random_criteria(3)
+    a = generate_random_alternatives(10)
+    c = generate_random_criteria(10)
     cv = generate_random_criteria_values(c, 4567)
     pt = generate_random_performance_table(a, c, 1234)
 
-    b = generate_random_alternatives(2)
+    b = generate_random_alternatives(3)
     bpt = generate_random_performance_table(b, c, 0123)
-    cats = generate_random_categories(3) 
+    cats = generate_random_categories(4)
 
     lbda = 0.6
 
-    model = electre_tri(c, cv, pt, bpt, lbda)
-    af = model.pessimist()
+    model = electre_tri(c, cv, bpt, lbda)
+    af = model.pessimist(pt)
     print(af)
 
-    differential_evolution(100, 0.6, 0.6, c, a, af, pt, cats)
+    differential_evolution(1, 100, 0.6, 0.6, c, a, af, pt, cats)
