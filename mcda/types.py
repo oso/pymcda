@@ -162,6 +162,9 @@ class criterion_value():
         self.criterion_id = criterion_id
         self.value = value
 
+    def __repr__(self):
+        return "%s: %s" % (self.criterion_id, self.value)
+
     def to_xmcda(self):
         xmcda = ElementTree.Element('criterionValue')
         if self.id is not None:
