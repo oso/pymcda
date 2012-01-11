@@ -33,8 +33,10 @@ def mutation_weights(mc, g, best, h, s):
         sval = s(id).value
 
         nval = val + mc*(bval-val) + mc*(hval-sval)
+        if nval < 0:
+            nval = random.uniform(0, val)
 
-        cvals.append(criterion_value(id, nval))
+        cvals.append(criterion_value(criterion_id=id, value=nval))
 
     return cvals
 
@@ -68,9 +70,16 @@ def mutation_profiles(mc, g, b, h, s):
 
         gnew.append(alternative_performances(alt_id, gnew_perfs))
 
-    print g
-    print gnew
     return gnew
+
+def mutation_lambda(mc, g_lbda, best_lbda, h_lbda, s_lbda):
+    new_lbda = g_lbda + mc*(best_lbda-g_lbda) + mc*(h_lbda-g_lbda)
+    if new_lbda < 0.5:
+        new_lbda = random.uniform(0.5, g_lbda)
+    elif new_lbda > 1:
+        new_lbda = random.uniform(g_lbda, 1)
+
+    return new_lbda
 
 def mutation(mc, g, best, h, s, ba, wa):
     # First mutation of the weights
@@ -79,20 +88,32 @@ def mutation(mc, g, best, h, s, ba, wa):
     profiles = mutation_profiles(mc, g.profiles, best.profiles, \
                             h.profiles, s.profiles)
     # Finally mutation of lambda
-    g.cv = cvals
-    g.profiles = profiles
-    return g
+    lbda = mutation_lambda(mc, g.lbda, best.lbda, h.lbda, s.lbda)
 
-def mutations(models, mc, j, l, best, ba, wa):
+    new_model = electre_tri(g.criteria, cvals, profiles, lbda)
+    return new_model
+
+def mutations(models, mc, l, j, best, ba, wa):
     muted_models = []
-    for i, g in enumerate(models[j:l]):
+    for i, g in enumerate(models[l:j]):
         [ h, s ] = get_random_models(models)
         gm = mutation(mc, g, best, h, s, ba, wa)
         muted_models.append(gm)
     return muted_models
 
-def selection(models, muted_models):
-    pass
+def selection(models, muted_models, pt, aa):
+    nmodels = len(models)
+
+    selected_models = []
+    for i in range(nmodels):
+        muted_fitness = fitness(muted_models[i], pt, aa)
+        fit = fitness(models[i], pt, aa)
+        if muted_fitness > fit:
+            selected_models.append(muted_models[i])
+        else:
+            selected_models.append(models[i])
+
+    return selected_models
 
 def compute_ca(model_af, dm_af):
     """ Compute the ration of alternatives correctly assigned """
@@ -108,14 +129,13 @@ def compute_auc_k(model, k):
     score than an alternative from a worse group """
     pass
 
-def fitness(model, aa):
-    return compute_ca(model, aa)
+def fitness(model, pt, aa):
+    return compute_ca(model.pessimist(pt), aa)
 
 def compute_models_fitness(models, pt, aa):
     models_fitness = {}
     for m in models:
-        p = m.pessimist(pt)
-        f = fitness(p, aa)
+        f = fitness(m, pt, aa)
         models_fitness[m] = f
 
     return models_fitness
@@ -126,9 +146,8 @@ def get_best_model(models_fitness):
         if best is None or f > best:
             best = f
             model = m
-            print(f)
 
-    return model
+    return best, model
 
 def get_random_models(models):
     return random.sample(models, 2)
@@ -196,19 +215,32 @@ def initialization(n, c, pt, cats):
 def differential_evolution(ngen, pop, mc, cr, c, a, aa, pt, cats):
     """ Learn an ELECTRE TRI model """
     models = initialization(pop, c, pt, cats)
-    models_fitness = compute_models_fitness(models, pt, aa)
 
     # Get worst and best possible alternative
     ba = get_best_alternative_performances(pt, c)
     wa = get_worst_alternative_performances(pt, c)
 
     for i in range(ngen):
+        models_fitness = compute_models_fitness(models, pt, aa)
+        fit_best, best = get_best_model(models_fitness)
+        print("%d: fitness: %g" % (i, fit_best))
+        if fit_best == 1:
+            return best
+
         # First get crossover indices
         l, j = get_crossover_indices(models, cr)
 
         # Then perform the mutation
-        best = get_best_model(models_fitness)
-        mutations(models, mc, l, j, best, wa, ba)
+        muted_models = mutations(models, mc, l, j, best, wa, ba)
+
+        # Finally the selection
+        selected_models = selection(muted_models, models[l:j], pt, aa)
+
+        models[l:j] = selected_models
+
+    fit_best, best = get_best_model(models_fitness)
+    print("fitness: %g" % fit_best)
+    return best
 
 if __name__ == "__main__":
     from tools.generate_random import generate_random_alternatives
@@ -232,6 +264,12 @@ if __name__ == "__main__":
 
     model = electre_tri(c, cv, bpt, lbda)
     af = model.pessimist(pt)
-    print(af)
 
-    differential_evolution(1, 100, 0.6, 0.6, c, a, af, pt, cats)
+    de_model = differential_evolution(1000, 100, 0.4, 0.6, c, a, af, pt, cats)
+    de_af = de_model.pessimist(pt)
+
+    print(af)
+    print(de_af)
+
+    print model.cv
+    print de_model.cv
