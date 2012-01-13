@@ -46,7 +46,7 @@ def d_add(a, b):
 def d_substract(a, b):
     return dict( (n, a.get(n, 0)-b.get(n, 0)) for n in set(a)|set(b) )
 
-def mutation_profiles(mc, g, b, h, s):
+def mutation_profiles(mc, crit, g, b, h, s, ba, wa):
     gnew = []
     for i, profile in enumerate(g):
         alt_id = profile.alternative_id
@@ -59,11 +59,21 @@ def mutation_profiles(mc, g, b, h, s):
         # Check there are no problem with computed values
         # FIXME: take criteria dir into account and max/min values
         for c, v in gnew_perfs.iteritems():
-            if g[i].performances[c] < 0:
-                gnew_perfs[c] = random.uniform(0, 1)
+            if gnew_perfs[c] < wa.performances[c]:
+                gnew_perfs[c] = random.uniform(wa.performances[c],
+                                               g[i].performances[c])
 
-            if g[i].performances[c] > 1:
-                gnew_perfs[c] = random.uniform(0, 1)
+            if gnew_perfs[c] > ba.performances[c]:
+                gnew_perfs[c] = random.uniform(g[i].performances[c],
+                                               ba.performances[c])
+
+            if i > 0:
+                if crit(c).direction == 1 and gnew_perfs[c] < g[i-1].performances[c]:
+                    gnew_perfs[c] = random.uniform(g[i-1].performances[c],
+                                                   ba.performances[c])
+                elif crit(c).direction == -1 and gnew_perfs[c] > g[i-1].performances[c]:
+                    gnew_perfs[c] = random.uniform(ba.performances[c],
+                                                   g[i-1].performances[c])
 
             if i > 0 and v < g[i-1].performances[c]:
                 gnew_perfs[c] = random.uniform(g[i-1].performances[c], 1)
@@ -85,8 +95,9 @@ def mutation(mc, g, best, h, s, ba, wa):
     # First mutation of the weights
     cvals = mutation_weights(mc, g.cv, best.cv, h.cv, s.cv)
     # Then mutation of the profiles
-    profiles = mutation_profiles(mc, g.profiles, best.profiles, \
-                            h.profiles, s.profiles)
+    profiles = mutation_profiles(mc, g.criteria, g.profiles, \
+                                 best.profiles, h.profiles, s.profiles, \
+                                 ba, wa)
     # Finally mutation of lambda
     lbda = mutation_lambda(mc, g.lbda, best.lbda, h.lbda, s.lbda)
 
@@ -265,7 +276,7 @@ if __name__ == "__main__":
     model = electre_tri(c, cv, bpt, lbda)
     af = model.pessimist(pt)
 
-    de_model = differential_evolution(1000, 100, 0.4, 0.6, c, a, af, pt, cats)
+    de_model = differential_evolution(10000, 100, 0.6, 0.6, c, a, af, pt, cats)
     de_af = de_model.pessimist(pt)
 
     print(af)
