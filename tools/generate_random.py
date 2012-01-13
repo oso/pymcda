@@ -64,6 +64,30 @@ def generate_random_categories(number):
 
     return cats
 
+def generate_random_categories_profiles(alts, crits, seed=None):
+    if seed is not None:
+        random.seed(seed)
+
+    crit_random = {}
+    n = len(alts)
+    pt = performance_table()
+    for c in crits:
+        rdom = []
+        for i in range(n):
+            rdom.append(random.random())
+        rdom.sort()
+
+        crit_random[c.id] = rdom
+
+    for i, a in enumerate(alts):
+        perfs = {}
+        for c in crits:
+            perfs[c.id] = crit_random[c.id][i]
+        ap = alternative_performances(a.id, perfs)
+        pt.append(ap)
+
+    return pt
+
 if __name__ == "__main__":
     alts = generate_random_alternatives(10)
     print(alts)
@@ -75,3 +99,5 @@ if __name__ == "__main__":
     print(pt)
     cats = generate_random_categories(3)
     print(cats)
+    bpt = generate_random_categories_profiles(alts, crits)
+    print(bpt)
