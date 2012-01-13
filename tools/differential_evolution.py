@@ -259,6 +259,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
     from tools.generate_random import generate_random_categories
+    from tools.generate_random import generate_random_categories_profiles
     from mcda.electre_tri import electre_tri
 
     # Create an original arbitrary model
@@ -268,7 +269,7 @@ if __name__ == "__main__":
     pt = generate_random_performance_table(a, c, 1234)
 
     b = generate_random_alternatives(3)
-    bpt = generate_random_performance_table(b, c, 0123)
+    bpt = generate_random_categories_profiles(b, c, 0123)
     cats = generate_random_categories(4)
 
     lbda = 0.6
