@@ -23,7 +23,10 @@ def get_crossover_indices(models, cr):
 
     return (l, l+j)
 
-def mutation_weights(mc, g, best, h, s):
+def mutation(mc, g, best, h, s):
+    return g + mc*(best-g) + mc*(h-s)
+
+def crossover_weights(cr, mc, g, best, h, s):
     cvals = criteria_values()
     for w in g:
         id = w.criterion_id
@@ -32,85 +35,94 @@ def mutation_weights(mc, g, best, h, s):
         hval = h(id).value
         sval = s(id).value
 
-        nval = val + mc*(bval-val) + mc*(hval-sval)
-        if nval < 0:
-            nval = random.uniform(0, val)
+        if random.random() < cr:
+            nval = mutation(mc, val, bval, hval, sval)
+            if nval < 0:
+                nval = random.uniform(0, val)
+        else:
+            nval = val
 
         cvals.append(criterion_value(criterion_id=id, value=nval))
 
     return cvals
 
-def d_add(a, b):
-    return dict( (n, a.get(n, 0)+b.get(n, 0)) for n in set(a)|set(b) )
-
-def d_substract(a, b):
-    return dict( (n, a.get(n, 0)-b.get(n, 0)) for n in set(a)|set(b) )
-
-def mutation_profiles(mc, crit, g, b, h, s, ba, wa):
+def crossover_profiles(cr, mc, crit, g, b, h, s, ba, wa):
     gnew = []
     for i, profile in enumerate(g):
-        alt_id = profile.alternative_id
-        diff1 = d_substract(b[i].performances, g[i].performances)
-        diff2 = d_substract(h[i].performances, s[i].performances)
-        delta = d_add(diff1, diff2)
-        mdelta = dict((key, value*mc) for key, value in delta.iteritems())
-        gnew_perfs = d_add(g[i].performances, mdelta)
+        alt_id = g[i].alternative_id
+        perfs = g[i].performances
+        bperfs = b[i].performances
+        hperfs = h[i].performances
+        sperfs = s[i].performances
+        gnew_perfs = {}
+        for c in crit:
+            if random.random() < cr:
+                g_cr = mutation(mc, perfs[c.id], bperfs[c.id], hperfs[c.id],
+                                sperfs[c.id])
+            else:
+                g_cr = perfs[c.id]
 
-        # Check there are no problem with computed values
-        # FIXME: take criteria dir into account and max/min values
-        for c, v in gnew_perfs.iteritems():
-            if gnew_perfs[c] < wa.performances[c]:
-                gnew_perfs[c] = random.uniform(wa.performances[c],
-                                               g[i].performances[c])
-
-            if gnew_perfs[c] > ba.performances[c]:
-                gnew_perfs[c] = random.uniform(g[i].performances[c],
-                                               ba.performances[c])
+            if c.direction == 1:
+                if g_cr < wa.performances[c.id]:
+                    g_cr = random.uniform(wa.performances[c.id],
+                                          g[i].performances[c.id])
+                elif g_cr > ba.performances[c.id]:
+                    g_cr = random.uniform(g[i].performances[c.id],
+                                          ba.performances[c.id])
+            elif c.direction == -1:
+                if g_cr > wa.performances[c.id]:
+                    g_cr = random.uniform(g[i].performances[c.id],
+                                          wa.performances[c.id])
+                elif g_cr < ba.performances[c.id]:
+                    g_cr = random.uniform(ba.performances[c.id],
+                                          g[i].performances[c.id])
 
             if i > 0:
-                if crit(c).direction == 1 and gnew_perfs[c] < g[i-1].performances[c]:
-                    gnew_perfs[c] = random.uniform(g[i-1].performances[c],
-                                                   ba.performances[c])
-                elif crit(c).direction == -1 and gnew_perfs[c] > g[i-1].performances[c]:
-                    gnew_perfs[c] = random.uniform(ba.performances[c],
-                                                   g[i-1].performances[c])
+                if c.direction == 1 and g_cr < g[i-1].performances[c.id]:
+                    g_cr = random.uniform(g[i-1].performances[c.id],
+                                          ba.performances[c.id])
+                elif c.direction == -1 and g_cr > g[i-1].performances[c.id]:
+                    g_cr = random.uniform(ba.performances[c.id],
+                                          g[i-1].performances[c.id])
 
-            if i > 0 and v < g[i-1].performances[c]:
-                gnew_perfs[c] = random.uniform(g[i-1].performances[c], 1)
+            gnew_perfs[c.id] = g_cr
 
         gnew.append(alternative_performances(alt_id, gnew_perfs))
 
     return gnew
 
-def mutation_lambda(mc, g_lbda, best_lbda, h_lbda, s_lbda):
-    new_lbda = g_lbda + mc*(best_lbda-g_lbda) + mc*(h_lbda-g_lbda)
-    if new_lbda < 0.5:
-        new_lbda = random.uniform(0.5, g_lbda)
-    elif new_lbda > 1:
-        new_lbda = random.uniform(g_lbda, 1)
+def crossover_lambda(cr, mc, g_lbda, best_lbda, h_lbda, s_lbda):
+    if random.random() < cr:
+        new_lbda = g_lbda + mc*(best_lbda-g_lbda) + mc*(h_lbda-g_lbda)
+        new_lbda = mutation(mc, g_lbda, best_lbda,  h_lbda, s_lbda)
+        if new_lbda < 0.5:
+            new_lbda = random.uniform(0.5, g_lbda)
+        elif new_lbda > 1:
+            new_lbda = random.uniform(g_lbda, 1)
+    else:
+        new_lbda = g_lbda
 
     return new_lbda
 
-def mutation(mc, g, best, h, s, ba, wa):
-    # First mutation of the weights
-    cvals = mutation_weights(mc, g.cv, best.cv, h.cv, s.cv)
-    # Then mutation of the profiles
-    profiles = mutation_profiles(mc, g.criteria, g.profiles, \
-                                 best.profiles, h.profiles, s.profiles, \
-                                 ba, wa)
-    # Finally mutation of lambda
-    lbda = mutation_lambda(mc, g.lbda, best.lbda, h.lbda, s.lbda)
+def crossover(cr, mc, g, best, h, s, ba, wa):
+    # First crossover of the weights
+    cvals = crossover_weights(cr, mc, g.cv, best.cv, h.cv, s.cv)
+    # Then crossover of the profiles
+    profiles = crossover_profiles(cr, mc, g.criteria, g.profiles, \
+                                  best.profiles, h.profiles, s.profiles, \
+                                  ba, wa)
+    # Finally crossover of lambda
+    lbda = crossover_lambda(cr, mc, g.lbda, best.lbda, h.lbda, s.lbda)
 
-    new_model = electre_tri(g.criteria, cvals, profiles, lbda)
-    return new_model
+    return electre_tri(g.criteria, cvals, profiles, lbda)
 
-def mutations(models, mc, l, j, best, ba, wa):
-    muted_models = []
-    for i, g in enumerate(models[l:j]):
+def crossovers(models, cr, mc, best, ba, wa):
+    cross_models = []
+    for i, g in enumerate(models):
         [ h, s ] = get_random_models(models)
-        gm = mutation(mc, g, best, h, s, ba, wa)
-        muted_models.append(gm)
-    return muted_models
+        gm = crossover(cr, mc, g, best, h, s, ba, wa)
+        cross_models.append(gm)
+    return cross_models
 
 def selection(models, muted_models, pt, aa):
     nmodels = len(models)
@@ -118,7 +130,11 @@ def selection(models, muted_models, pt, aa):
     selected_models = []
     for i in range(nmodels):
         muted_fitness = fitness(muted_models[i], pt, aa)
+#        print muted_models[i].profiles
+#        print muted_models[i].cv
+#        print muted_models[i].lbda
         fit = fitness(models[i], pt, aa)
+#        print max(muted_fitness, fit)
         if muted_fitness > fit:
             selected_models.append(muted_models[i])
         else:
@@ -235,19 +251,17 @@ def differential_evolution(ngen, pop, mc, cr, c, a, aa, pt, cats):
         models_fitness = compute_models_fitness(models, pt, aa)
         fit_best, best = get_best_model(models_fitness)
         print("%d: fitness: %g" % (i, fit_best))
+        print best
         if fit_best == 1:
             return best
 
-        # First get crossover indices
-        l, j = get_crossover_indices(models, cr)
+        # Perform the crossover (include mutation)
+        cross_models = crossovers(models, cr, mc, best, wa, ba)
 
-        # Then perform the mutation
-        muted_models = mutations(models, mc, l, j, best, wa, ba)
+        # Perform the selection
+        selected_models = selection(cross_models, models, pt, aa)
 
-        # Finally the selection
-        selected_models = selection(muted_models, models[l:j], pt, aa)
-
-        models[l:j] = selected_models
+        models = selected_models
 
     fit_best, best = get_best_model(models_fitness)
     print("fitness: %g" % fit_best)
@@ -263,21 +277,21 @@ if __name__ == "__main__":
     from mcda.electre_tri import electre_tri
 
     # Create an original arbitrary model
-    a = generate_random_alternatives(10)
-    c = generate_random_criteria(10)
+    a = generate_random_alternatives(100)
+    c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 4567)
     pt = generate_random_performance_table(a, c, 1234)
 
-    b = generate_random_alternatives(3)
+    b = generate_random_alternatives(2)
     bpt = generate_random_categories_profiles(b, c, 0123)
-    cats = generate_random_categories(4)
+    cats = generate_random_categories(3)
 
-    lbda = 0.6
+    lbda = 0.75
 
     model = electre_tri(c, cv, bpt, lbda)
     af = model.pessimist(pt)
 
-    de_model = differential_evolution(10000, 100, 0.6, 0.6, c, a, af, pt, cats)
+    de_model = differential_evolution(1000, 100, 0.6, 0.6, c, a, af, pt, cats)
     de_af = de_model.pessimist(pt)
 
     print(af)
