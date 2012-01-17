@@ -23,6 +23,14 @@ def get_crossover_indices(models, cr):
 
     return (l, l+j)
 
+def normalize_weights_values(cvals):
+    total = 0
+    for cval in cvals:
+        total += cval.value
+
+    for cval in cvals:
+        cval.value /= total
+
 def mutation(mc, g, best, h, s):
     return g + mc*(best-g) + mc*(h-s)
 
@@ -107,10 +115,13 @@ def crossover_lambda(cr, mc, g_lbda, best_lbda, h_lbda, s_lbda):
 def crossover(cr, mc, g, best, h, s, ba, wa):
     # First crossover of the weights
     cvals = crossover_weights(cr, mc, g.cv, best.cv, h.cv, s.cv)
+    normalize_weights_values(cvals)
+
     # Then crossover of the profiles
     profiles = crossover_profiles(cr, mc, g.criteria, g.profiles, \
                                   best.profiles, h.profiles, s.profiles, \
                                   ba, wa)
+
     # Finally crossover of lambda
     lbda = crossover_lambda(cr, mc, g.lbda, best.lbda, h.lbda, s.lbda)
 
@@ -293,6 +304,9 @@ def differential_evolution(ngen, pop, mc, cr, c, a, aa, pt, cats):
         fit_best, best = get_best_model(models_fitness)
         print("%d: fitness: %g" % (i, fit_best))
         print best
+        print best.profiles
+        print best.cv
+        print best.lbda
         if fit_best == 1:
             return best
 
@@ -305,7 +319,7 @@ def differential_evolution(ngen, pop, mc, cr, c, a, aa, pt, cats):
         models = selected_models
 
     fit_best, best = get_best_model(models_fitness)
-    print("fitness: %g" % fit_best)
+    print("fitness: %g" % (fit_best))
     return best
 
 if __name__ == "__main__":
@@ -318,21 +332,24 @@ if __name__ == "__main__":
     from mcda.electre_tri import electre_tri
 
     # Create an original arbitrary model
-    a = generate_random_alternatives(100)
+    a = generate_random_alternatives(200)
     c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 4567)
+    normalize_weights_values(cv)
     pt = generate_random_performance_table(a, c, 1234)
 
-    b = generate_random_alternatives(1)
+    b = generate_random_alternatives(1, prefix='b')
     bpt = generate_random_categories_profiles(b, c, 0123)
     cats = generate_random_categories(2)
 
     lbda = 0.75
+    print bpt
+    print cv
 
     model = electre_tri(c, cv, bpt, lbda)
     af = model.pessimist(pt)
 
-    de_model = differential_evolution(200, 200, 0.6, 0.6, c, a, af, pt, cats)
+    de_model = differential_evolution(200, 200, 0.3, 0.2, c, a, af, pt, cats)
     de_af = de_model.pessimist(pt)
 
     print(af)
