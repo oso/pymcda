@@ -77,7 +77,7 @@ class electre_tri:
             den = float(v-p)
             return num/den
 
-    def __credibility(self, x, y, clist, cv, profile_rank):
+    def credibility(self, x, y, clist, cv, profile_rank):
         concordance = self.__concordance(x, y, clist, cv, profile_rank)
 
         sigma = concordance
@@ -94,8 +94,8 @@ class electre_tri:
         return sigma
 
     def __outrank(self, action_perfs, criteria, cv, profile, profile_rank, lbda):
-        s_ab = self.__credibility(action_perfs, profile, criteria, cv, profile_rank)
-        s_ba = self.__credibility(profile, action_perfs, criteria, cv, profile_rank)
+        s_ab = self.credibility(action_perfs, profile, criteria, cv, profile_rank)
+        s_ba = self.credibility(profile, action_perfs, criteria, cv, profile_rank)
 
         if s_ab >= lbda:
             if s_ba >= lbda:

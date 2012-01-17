@@ -151,13 +151,54 @@ def compute_ca(model_af, dm_af):
             ok += 1
     return ok/total
 
-def compute_auc_k(model, k):
+def compute_auc_k(model, pt, ais, ajs, k):
+    auck = float(0)
+    profile = model.profiles[k-1]
+    for ai in ais:
+        sxi = model.credibility(pt(ai), profile, model.criteria, model.cv,
+                                k)
+        for aj in ajs:
+            sxj = model.credibility(pt(aj), profile, model.criteria,
+                                    model.cv, k)
+            if sxi > sxj:
+                auck += 1
+            elif sxi == sxj:
+                auck += 0.5
+
+    n1 = len(ais)
+    n2 = len(ajs)
+
+    return auck/(n1*n2)
+
+def compute_auc(model, pt, aa):
     """ Compute the probability that an alternative of a group has a higher
     score than an alternative from a worse group """
-    pass
+
+    # Arrange alternative by category
+    ncategories = len(model.profiles)+1
+    cat_alt = {}
+    for i in range(1,ncategories+1):
+        cat_alt[i] = []
+
+    for af in aa:
+        cat_alt[af.category_id].append(af.alternative_id)
+
+    # Compute auck
+    auc = 0
+    for k in range(1,ncategories):
+        ai = [ cat_alt[i][j] for i in range(1, k+1) \
+                             for j in range(len(cat_alt[i])) ]
+        aj = [ cat_alt[i][j] for i in range(k+1, ncategories+1) \
+                             for j in range(len(cat_alt[i])) ]
+        auc += compute_auc_k(model,pt, ai, aj, k)
+
+    return auc/(ncategories-1)
 
 def fitness(model, pt, aa):
-    return compute_ca(model.pessimist(pt), aa)
+    ca = compute_ca(model.pessimist(pt), aa)
+    return ca
+    auc = compute_auc(model, pt, aa)
+    return 0.5*ca+0.5*auc
 
 def compute_models_fitness(models, pt, aa):
     models_fitness = {}
@@ -282,16 +323,16 @@ if __name__ == "__main__":
     cv = generate_random_criteria_values(c, 4567)
     pt = generate_random_performance_table(a, c, 1234)
 
-    b = generate_random_alternatives(2)
+    b = generate_random_alternatives(1)
     bpt = generate_random_categories_profiles(b, c, 0123)
-    cats = generate_random_categories(3)
+    cats = generate_random_categories(2)
 
     lbda = 0.75
 
     model = electre_tri(c, cv, bpt, lbda)
     af = model.pessimist(pt)
 
-    de_model = differential_evolution(1000, 100, 0.6, 0.6, c, a, af, pt, cats)
+    de_model = differential_evolution(200, 200, 0.6, 0.6, c, a, af, pt, cats)
     de_af = de_model.pessimist(pt)
 
     print(af)
