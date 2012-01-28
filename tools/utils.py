@@ -68,3 +68,11 @@ def get_ordered_profile_ids(categories, categories_profiles):
         profile_ids.append(profiles[pr])
 
     return profile_ids
+
+def normalize_criteria_weights(criteria_values):
+    total = float()
+    for cv in criteria_values:
+        total += cv.value
+
+    for cv in criteria_values:
+        cv.value /= total
