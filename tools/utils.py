@@ -5,7 +5,7 @@ def get_max_alternative_performance(pt, crit):
     for ap in pt:
         perf = ap(crit.id)
         if val == None or perf > val:
-            val = perf 
+            val = perf
 
     return val
 
@@ -14,7 +14,7 @@ def get_min_alternative_performance(pt, crit):
     for ap in pt:
         perf = ap(crit.id)
         if val == None or perf < val:
-            val = perf 
+            val = perf
 
     return val
 
