@@ -2,11 +2,21 @@ from mcda.types import alternative_affectation, alternatives_affectations
 
 class electre_tri:
 
-    def __init__(self, criteria, cv, profiles, lbda):
+    def __init__(self, criteria=None, cv=None, profiles=None, lbda=None):
         self.criteria = criteria
         self.cv = cv
         self.profiles = profiles
         self.lbda = lbda
+
+    def __check_input_params(self):
+        if self.criteria is None:
+            raise KeyError('No criteria specified')
+        elif self.cv is None:
+            raise KeyError('No criteria values specified')
+        elif self.profiles is None:
+            raise KeyError('No profiles specified')
+        elif self.lbda is None:
+            raise KeyError('No cut threshold specified')
 
     def __get_threshold_by_profile(self, c, threshold_id, profile_rank):
         if c.thresholds is None:
@@ -78,6 +88,7 @@ class electre_tri:
             return num/den
 
     def credibility(self, x, y, clist, cv, profile_rank):
+        self.__check_input_params()
         concordance = self.__concordance(x, y, clist, cv, profile_rank)
 
         sigma = concordance
@@ -109,6 +120,7 @@ class electre_tri:
                 return "R"
 
     def pessimist(self, pt):
+        self.__check_input_params()
         profiles = self.profiles[:]
         profiles.reverse()
         nprofiles = len(profiles)+1
@@ -128,6 +140,7 @@ class electre_tri:
         return affectations
 
     def optimist(self, pt):
+        self.__check_input_params()
         profiles = self.profiles
         affectations = alternatives_affectations([])
         for action_perfs in pt:
