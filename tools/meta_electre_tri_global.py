@@ -93,15 +93,25 @@ class meta_electre_tri_global():
         for model_b in models_b:
             pt_b = model_b.profiles
             for c_id in c_ids:
+                new_perfs = []
                 for profile in profiles:
+                    new_perfs.append(random.random())
+
+                new_perfs.sort()
+                for i, profile in enumerate(profiles):
                     a_p = pt_a(profile.id)
-                    b_p = pt_b(profile.id)
-                    a_p_c = a_p.performances[c_id]
-                    b_p_c = b_p.performances[c_id]
-                    #print a_p, b_p, c_id
-                    a_p.performances[c_id] = b_p_c
-                    b_p.performances[c_id] = a_p_c
-                    #print a_p, b_p
+                    a_p.performances[c_id] = new_perfs[i]
+
+# Invert with another model
+#                for profile in profiles:
+#                    a_p = pt_a(profile.id)
+#                    b_p = pt_b(profile.id)
+#                    a_p_c = a_p.performances[c_id]
+#                    b_p_c = b_p.performances[c_id]
+#                    #print a_p, b_p, c_id
+#                    a_p.performances[c_id] = b_p_c
+#                    b_p.performances[c_id] = a_p_c
+#                    #print a_p, b_p
 
     def loop_one(self, k):
         models_fitness = {}
