@@ -35,10 +35,10 @@ class lp_elecre_tri_weights():
 
         # Initialize variables
         self.w = self.lp.var(xrange(n), 'w', bounds=(0, 1))
-        self.x = self.lp.var(xrange(m), 'x')
-        self.y = self.lp.var(xrange(m), 'y')
+        self.x = self.lp.var(xrange(m), 'x', bounds=(None, None))
+        self.y = self.lp.var(xrange(m), 'y', bounds=(None, None))
         self.lbda = self.lp.var(bounds=(0.5, 1))
-        self.alpha = self.lp.var()
+        self.alpha = self.lp.var(bounds=(None, None))
 
         for i, a in enumerate(self.alternatives):
             a_perfs = self.pt(a.id)
@@ -92,7 +92,7 @@ class lp_elecre_tri_weights():
     def solve(self):
         self.lp.solve()
 
-        print(self.lp.reportKKT())
+        #print(self.lp.reportKKT())
         obj = self.lp.vobj()
 
         cvs = criteria_values()
@@ -150,10 +150,9 @@ if __name__ == "__main__":
     total = len(a)
     nok = 0
     for alt in a:
-        if aa(alt) <> aa_learned(alt):
+        if aa(alt.id) <> aa_learned(alt.id):
             print("Pessimits affectation of %s mismatch (%d <> %d)" %
-                  (str(key), affectations(key),
-                  expected_affectations(key)))
+                  (str(alt.id), aa(alt.id), aa_learned(key)))
             nok += 1
 
     print("Good affectations: %3g %%" % (float(total-nok)/total*100))
