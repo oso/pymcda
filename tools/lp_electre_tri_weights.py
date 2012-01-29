@@ -92,6 +92,9 @@ class lp_elecre_tri_weights():
     def solve(self):
         self.lp.solve()
 
+        print(self.lp.reportKKT())
+        obj = self.lp.vobj()
+
         cvs = criteria_values()
         for j, c in enumerate(self.criteria):
             cv = criterion_value()
@@ -101,7 +104,7 @@ class lp_elecre_tri_weights():
 
         lbda = float(self.lbda.primal)
 
-        return cvs, lbda
+        return obj, cvs, lbda
 
 if __name__ == "__main__":
     from tools.generate_random import generate_random_alternatives
@@ -120,9 +123,10 @@ if __name__ == "__main__":
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
 
-    b = generate_random_alternatives(1, 'b')
-    bpt = generate_random_categories_profiles(b, c, 0123)
-    cat = generate_random_categories(2)
+    b = generate_random_alternatives(2, 'b')
+    bpt = generate_random_categories_profiles(b, c, 2345)
+    print bpt
+    cat = generate_random_categories(3)
 
     lbda = 0.75
 
@@ -130,16 +134,18 @@ if __name__ == "__main__":
     aa = model.pessimist(pt)
 
     print(cv)
-    print(aa)
+    print(lbda)
+    #print(aa)
 
     lp_weights = lp_elecre_tri_weights(a, c, cv, aa, pt, cat, b, bpt)
-    cv_learned, lbda_learned = lp_weights.solve()
+    obj, cv_learned, lbda_learned = lp_weights.solve()
     model.cv = cv_learned
     model.lbda = lbda_learned
     aa_learned = model.pessimist(pt)
 
     print(cv_learned)
-    print(aa_learned)
+    print(lbda_learned)
+    #print(aa_learned)
 
     total = len(a)
     nok = 0
