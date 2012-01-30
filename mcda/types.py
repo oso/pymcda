@@ -280,6 +280,14 @@ class performance_table(list):
             altp.from_xmcda(tag)
             self.append(altp)
 
+    def display(self, header=True, criterion_ids=None):
+        if criterion_ids is None:
+            criterion_ids = self[0].performances.keys()
+
+        self[0].display(header, criterion_ids)
+        for ap in self[1:]:
+            ap.display(False, criterion_ids)
+
 class alternative_performances():
 
     def __init__(self, alternative_id=None, performances=None):
@@ -320,6 +328,20 @@ class alternative_performances():
             value = tag.find('.//value')
             crit_val = unmarshal(value.getchildren()[0])
             self.performances[crit_id] = crit_val
+
+    def display(self, header=True, criterion_ids=None):
+        if criterion_ids is None:
+            criterion_ids = self.performances.keys()
+
+        if header is True:
+            for c in criterion_ids:
+                print("\t%.7s" % c),
+            print('')
+
+        print("%.7s" % self.alternative_id),
+        for c in criterion_ids:
+            print("\t%.6s" % self.performances[c]),
+        print('')
 
 class points(list):
 
