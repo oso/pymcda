@@ -522,6 +522,12 @@ class category():
         self.disabled = disabled
         self.rank = rank
 
+    def __repr__(self):
+        if self.name is not None:
+            return "%s" % self.name
+        else:
+            return "%s" % self.id
+
     def to_xmcda(self):
         xmcda = ElementTree.Element('category', self.id)
         if self.name is not None:
