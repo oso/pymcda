@@ -131,7 +131,6 @@ if __name__ == "__main__":
 
     b = generate_random_alternatives(2, 'b')
     bpt = generate_random_categories_profiles(b, c, 2345)
-    print bpt
     cat = generate_random_categories(3)
 
     lbda = 0.75
@@ -139,8 +138,9 @@ if __name__ == "__main__":
     model = electre_tri(c, cv, bpt, lbda)
     aa = model.pessimist(pt)
 
-    print(cv)
-    print(lbda)
+    bpt.display()
+    cv.display()
+    print("lambda\t%.7s" % lbda)
     #print(aa)
 
     lp_weights = lp_elecre_tri_weights(a, c, cv, aa, pt, cat, b, bpt)
@@ -155,8 +155,8 @@ if __name__ == "__main__":
     model.lbda = lbda_learned
     aa_learned = model.pessimist(pt)
 
-    print(cv_learned)
-    print(lbda_learned)
+    cv_learned.display()
+    print("lambda\t%.7s" % lbda_learned)
     #print(aa_learned)
 
     total = len(a)
