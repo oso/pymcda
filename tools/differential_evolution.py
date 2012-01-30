@@ -112,7 +112,7 @@ def crossover_lambda(cr, mc, g_lbda, best_lbda, h_lbda, s_lbda):
 
     return new_lbda
 
-def crossover(cr, mc, g, best, h, s, ba, wa):
+def crossover(cr, mc, g, best, h, s, ba, wa, cats):
     # First crossover of the weights
     cvals = crossover_weights(cr, mc, g.cv, best.cv, h.cv, s.cv)
     normalize_weights_values(cvals)
@@ -125,13 +125,13 @@ def crossover(cr, mc, g, best, h, s, ba, wa):
     # Finally crossover of lambda
     lbda = crossover_lambda(cr, mc, g.lbda, best.lbda, h.lbda, s.lbda)
 
-    return electre_tri(g.criteria, cvals, profiles, lbda)
+    return electre_tri(g.criteria, cvals, profiles, lbda, cats)
 
-def crossovers(models, cr, mc, best, ba, wa):
+def crossovers(models, cr, mc, best, ba, wa, cats):
     cross_models = []
     for i, g in enumerate(models):
         [ h, s ] = get_random_models(models)
-        gm = crossover(cr, mc, g, best, h, s, ba, wa)
+        gm = crossover(cr, mc, g, best, h, s, ba, wa, cats)
         cross_models.append(gm)
     return cross_models
 
@@ -231,7 +231,7 @@ def get_best_model(models_fitness):
 def get_random_models(models):
     return random.sample(models, 2)
 
-def init_one(c, pt, nprofiles):
+def init_one(c, pt, nprofiles, cats):
     """ Generate a random ELECTRE TRI model"""
 
     # Initialize lambda value
@@ -278,7 +278,7 @@ def init_one(c, pt, nprofiles):
             bp = bpt(id)
             bp.performances[crit.id] = rval[i]
 
-    random_model = electre_tri(c, cvals, bpt, lbda)
+    random_model = electre_tri(c, cvals, bpt, lbda, cats)
 
     return random_model
 
@@ -287,7 +287,7 @@ def initialization(n, c, pt, cats):
     nprofiles = len(cats)-1
     models = []
     for i in range(n):
-        model = init_one(c, pt, nprofiles)
+        model = init_one(c, pt, nprofiles, cats)
         models.append(model)
     return models
 
@@ -311,7 +311,7 @@ def differential_evolution(ngen, pop, mc, cr, c, a, aa, pt, cats):
             return best
 
         # Perform the crossover (include mutation)
-        cross_models = crossovers(models, cr, mc, best, wa, ba)
+        cross_models = crossovers(models, cr, mc, best, wa, ba, cats)
 
         # Perform the selection
         selected_models = selection(cross_models, models, pt, aa)
@@ -346,7 +346,7 @@ if __name__ == "__main__":
     print bpt
     print cv
 
-    model = electre_tri(c, cv, bpt, lbda)
+    model = electre_tri(c, cv, bpt, lbda, cats)
     af = model.pessimist(pt)
 
     de_model = differential_evolution(200, 200, 0.3, 0.2, c, a, af, pt, cats)

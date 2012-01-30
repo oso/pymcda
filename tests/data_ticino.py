@@ -6,6 +6,7 @@ from mcda.types import alternative, alternatives
 from mcda.types import alternative_performances, performance_table
 from mcda.types import threshold, thresholds, constant
 from mcda.types import alternative_affectation, alternatives_affectations
+from mcda.types import category, categories
 
 # Criteria
 prix = criterion('prix', 'prix', False, -1, 25)
@@ -85,21 +86,27 @@ competition.thresholds = thresholds([q_competition, p_competition, v_competition
 # Lambda
 lbda = 0.75
 
+# Categories
+cat1 = category('cat1', rank=1)
+cat2 = category('cat2', rank=2)
+cat3 = category('cat3', rank=3)
+cats = categories([cat1, cat2, cat3])
+
 # Alternatives affectations
-aap1 = alternative_affectation('a1', 2)
-aap2 = alternative_affectation('a2', 1)
-aap3 = alternative_affectation('a3', 2)
-aap4 = alternative_affectation('a4', 3)
-aap5 = alternative_affectation('a5', 1)
-aap6 = alternative_affectation('a6', 2)
-aap7 = alternative_affectation('a7', 2)
+aap1 = alternative_affectation('a1', 'cat2')
+aap2 = alternative_affectation('a2', 'cat1')
+aap3 = alternative_affectation('a3', 'cat2')
+aap4 = alternative_affectation('a4', 'cat3')
+aap5 = alternative_affectation('a5', 'cat1')
+aap6 = alternative_affectation('a6', 'cat2')
+aap7 = alternative_affectation('a7', 'cat2')
 aap = alternatives_affectations([aap1, aap2, aap3, aap4, aap5, aap6, aap7])
 
-aao1 = alternative_affectation('a1', 2)
-aao2 = alternative_affectation('a2', 3)
-aao3 = alternative_affectation('a3', 2)
-aao4 = alternative_affectation('a4', 3)
-aao5 = alternative_affectation('a5', 2)
-aao6 = alternative_affectation('a6', 2)
-aao7 = alternative_affectation('a7', 2)
+aao1 = alternative_affectation('a1', 'cat2')
+aao2 = alternative_affectation('a2', 'cat3')
+aao3 = alternative_affectation('a3', 'cat2')
+aao4 = alternative_affectation('a4', 'cat3')
+aao5 = alternative_affectation('a5', 'cat2')
+aao6 = alternative_affectation('a6', 'cat2')
+aao7 = alternative_affectation('a7', 'cat2')
 aao = alternatives_affectations([aao1, aao2, aao3, aao4, aao5, aao6, aao7])

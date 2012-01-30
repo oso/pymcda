@@ -2,11 +2,13 @@ from mcda.types import alternative_affectation, alternatives_affectations
 
 class electre_tri:
 
-    def __init__(self, criteria=None, cv=None, profiles=None, lbda=None):
+    def __init__(self, criteria=None, cv=None, profiles=None, lbda=None,
+                 cats=None):
         self.criteria = criteria
         self.cv = cv
         self.profiles = profiles
         self.lbda = lbda
+        self.categories = cats
 
     def __check_input_params(self):
         if self.criteria is None:
@@ -123,18 +125,18 @@ class electre_tri:
         self.__check_input_params()
         profiles = self.profiles[:]
         profiles.reverse()
-        nprofiles = len(profiles)+1
         affectations = alternatives_affectations([])
         for action_perfs in pt:
-            category = nprofiles
+            cat_rank = len(profiles)
             for i, profile in enumerate(profiles):
                 outr = self.__outrank(action_perfs, self.criteria, self.cv,
                                       profile, i+1, self.lbda)
                 if outr != "S" and outr != "I":
-                    category -= 1
+                    cat_rank -= 1
 
+            cat_id = self.categories[cat_rank].id
             alternative_id = action_perfs.alternative_id
-            alt_affect = alternative_affectation(alternative_id, category)
+            alt_affect = alternative_affectation(alternative_id, cat_id)
             affectations.append(alt_affect)
 
         return affectations
@@ -144,15 +146,16 @@ class electre_tri:
         profiles = self.profiles
         affectations = alternatives_affectations([])
         for action_perfs in pt:
-            category = 1
+            cat_rank = 0
             for i, profile in enumerate(profiles):
                 outr = self.__outrank(action_perfs, self.criteria, self.cv,
                                       profile, i+1, self.lbda)
                 if outr != "-":
-                    category += 1
+                    cat_rank += 1
 
+            cat_id = self.categories[cat_rank].id
             alternative_id = action_perfs.alternative_id
-            alt_affect = alternative_affectation(alternative_id, category)
+            alt_affect = alternative_affectation(alternative_id, cat_id)
             affectations.append(alt_affect)
 
         return affectations
