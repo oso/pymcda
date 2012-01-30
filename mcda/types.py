@@ -173,7 +173,7 @@ class criteria_values(list):
         print('%.6s' % name),
         for cid in criterion_ids:
             cv = self(cid)
-            print("\t%-6.3g" % cv.value),
+            print("\t%-6.3f" % cv.value),
         print('')
 
 class criterion_value():
@@ -362,7 +362,7 @@ class alternative_performances():
 
         print("%.7s" % self.alternative_id),
         for c in criterion_ids:
-            print("\t%-6.3g" % self.performances[c]),
+            print("\t%-6.3f" % self.performances[c]),
         print('')
 
 class points(list):
