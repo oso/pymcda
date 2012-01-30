@@ -53,6 +53,12 @@ class criteria(list):
             c.from_xmcda(tag)
             self.append(c)
 
+    def get_ids(self):
+        ids = []
+        for c in self:
+            ids.append(c.id)
+        return ids
+
 class criterion:
 
     MINIMIZE = -1
@@ -154,14 +160,20 @@ class criteria_values(list):
             xmcda.append(cv)
         return xmcda
 
-    def display(self):
-        cv_ids = []
-        for cv in self:
-            print("\t%.6s" % cv.criterion_id),
+    def display(self, header=True, criterion_ids=None, name='w'):
+        if criterion_ids is None:
+            for cv in self:
+                criterion_ids.append(cv.id)
 
-        print('\nw'),
-        for cv in self:
-            print("\t%.6s" % cv.value),
+        if header is True:
+            for cid in criterion_ids:
+                print("\t%.6s" % cid),
+            print('')
+
+        print('%.6s' % name),
+        for cid in criterion_ids:
+            cv = self(cid)
+            print("\t%-6.3g" % cv.value),
         print('')
 
 class criterion_value():
@@ -350,7 +362,7 @@ class alternative_performances():
 
         print("%.7s" % self.alternative_id),
         for c in criterion_ids:
-            print("\t%.6s" % self.performances[c]),
+            print("\t%-6.3g" % self.performances[c]),
         print('')
 
 class points(list):
@@ -479,6 +491,12 @@ class categories(list):
                 return c 
         return None
 
+    def get_ids(self):
+        cids = []
+        for cat in self:
+            cids.append(cat.id)
+        return cids
+
     def to_xmcda(self):
         root = ElementTree.Element('categories')
         for c in self:
@@ -595,6 +613,11 @@ class alternatives_affectations(list):
             root.append(xmcda)
         return root
 
+    def display(self, header=True, criterion_ids=None):
+        self[0].display(header)
+        for aa in self[1:]:
+            aa.display(False)
+
     def from_xmcda(self, xmcda):
         if xmcda.tag != 'alternatives_affectations':
             raise TypeError('alternatives_affectations::invalid tag')
@@ -613,6 +636,12 @@ class alternative_affectation():
 
     def __repr__(self):
         return "%s: %s" % (self.alternative_id, self.category_id)
+
+    def display(self, header=True):
+        if header is True:
+            print('\tcateg.\n')
+
+        print("%-6s\t%-6s" % (self.alternative_id, self.category_id))
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('alternativeAffectation')
