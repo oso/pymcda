@@ -27,6 +27,7 @@ class meta_electre_tri_global():
     def init_one(self):
         model = electre_tri()
         model.criteria = self.criteria
+        model.categories = self.categories
 
         nprofiles = len(self.categories)-1
         self.b = generate_random_alternatives(nprofiles, 'b') # FIXME
@@ -92,26 +93,27 @@ class meta_electre_tri_global():
         models_b = random.sample(self.models, k)
         for model_b in models_b:
             pt_b = model_b.profiles
-            for c_id in c_ids:
-#                new_perfs = []
-#                for profile in profiles:
-#                    new_perfs.append(random.random())
-#
-#                new_perfs.sort()
-#                for i, profile in enumerate(profiles):
-#                    a_p = pt_a(profile.id)
-#                    a_p.performances[c_id] = new_perfs[i]
 
-# Invert with another model
+            for c_id in c_ids:
+                new_perfs = []
                 for profile in profiles:
+                    new_perfs.append(random.random())
+
+                new_perfs.sort()
+                for i, profile in enumerate(profiles):
                     a_p = pt_a(profile.id)
-                    b_p = pt_b(profile.id)
-                    a_p_c = a_p.performances[c_id]
-                    b_p_c = b_p.performances[c_id]
-                    #print a_p, b_p, c_id
-                    a_p.performances[c_id] = b_p_c
-                    b_p.performances[c_id] = a_p_c
-                    #print a_p, b_p
+                    a_p.performances[c_id] = new_perfs[i]
+
+## Invert with another model
+#                for profile in profiles:
+#                    a_p = pt_a(profile.id)
+#                    b_p = pt_b(profile.id)
+#                    a_p_c = a_p.performances[c_id]
+#                    b_p_c = b_p.performances[c_id]
+#                    #print a_p, b_p, c_id
+#                    a_p.performances[c_id] = b_p_c
+#                    b_p.performances[c_id] = a_p_c
+#                    #print a_p, b_p
 
     def loop_one(self, k):
         models_fitness = {}
@@ -155,6 +157,7 @@ class meta_electre_tri_global():
         return m
 
 if __name__ == "__main__":
+    import time
     from tools.generate_random import generate_random_alternatives
     from tools.generate_random import generate_random_criteria
     from tools.generate_random import generate_random_criteria_values
@@ -177,28 +180,38 @@ if __name__ == "__main__":
 
     lbda = 0.75
 
-    model = electre_tri(c, cv, bpt, lbda)
+    model = electre_tri(c, cv, bpt, lbda, cat)
     aa = model.pessimist(pt)
 
-    print(bpt)
-    print(cv)
-    print(lbda)
-    print(aa)
+    print('Original model')
+    print('==============')
+    cids = c.get_ids()
+    bpt.display(criterion_ids=cids)
+    cv.display(criterion_ids=cids)
+    print("lambda\t%.7s" % lbda)
+    #print(aa)
 
     meta_global = meta_electre_tri_global(a, c, cv, aa, pt, cat)
-    m = meta_global.solve(10, 100, 2)
+
+    t1 = time.time()
+    m = meta_global.solve(100, 10, 2)
+    t2 = time.time()
+    print("Computation time: %g secs" % (t2-t1))
 
     aa_learned = m.pessimist(pt)
-    print(m.profiles)
-    print(m.cv)
-    print(m.lbda)
-    print(aa_learned)
+
+    print('Learned model')
+    print('=============')
+    m.profiles.display(criterion_ids=cids)
+    m.cv.display(criterion_ids=cids)
+    print("lambda\t%.7s" % m.lbda)
+    #print(aa_learned)
 
     total = len(a)
     nok = 0
     for alt in a:
         if aa(alt.id) <> aa_learned(alt.id):
-            print("Pessimits affectation of %s mismatch (%d <> %d)" %
+            print("Pessimits affectation of %s mismatch (%s <> %s)" %
                   (str(alt.id), aa(alt.id), aa_learned(alt.id)))
             nok += 1
 
