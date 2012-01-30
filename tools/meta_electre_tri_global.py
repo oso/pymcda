@@ -45,6 +45,7 @@ class meta_electre_tri_global():
 
     def compute_fitness(self, aa):
         #print(aa)
+        #print(self.aa)
         total = len(self.alternatives)
         ok = float(0)
         for alt in self.alternatives:
@@ -54,8 +55,8 @@ class meta_electre_tri_global():
         return ok/total
 
     def compute_dictatorial_affectations(self, model):
-        nprofiles = len(model.profiles)
-        ncategories = nprofiles+1
+        categories = model.categories
+        ncategories = len(categories)
         ptb = model.profiles
         profiles = self.b[:]
         profiles.reverse()
@@ -64,14 +65,14 @@ class meta_electre_tri_global():
         for criterion in model.criteria:
             aa = alternatives_affectations()
             for alt in self.alternatives:
-                i = ncategories
+                i = ncategories-1
                 for profile in profiles:
                     gj_b = ptb(profile.id, criterion.id)
                     gj_a = self.pt(alt.id, criterion.id)
                     if gj_a >= gj_b:
                         break;
                     i -= 1
-                af = alternative_affectation(alt.id, i)
+                af = alternative_affectation(alt.id, categories[i].id)
                 aa.append(af)
 
             fitness = self.compute_fitness(aa)
