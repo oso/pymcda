@@ -5,7 +5,7 @@ def get_max_alternative_performance(pt, crit):
     for ap in pt:
         perf = ap(crit.id)
         if val == None or perf > val:
-            val = perf 
+            val = perf
 
     return val
 
@@ -14,7 +14,7 @@ def get_min_alternative_performance(pt, crit):
     for ap in pt:
         perf = ap(crit.id)
         if val == None or perf < val:
-            val = perf 
+            val = perf
 
     return val
 
@@ -43,3 +43,36 @@ def get_best_alternative_performances(pt, crits):
         ba.performances[c.id] = val
 
     return ba
+
+def get_ordered_profile_ids(categories, categories_profiles):
+    cat_rank = {}
+    for c in categories:
+        cat_rank[c.id] = c.rank
+
+    profiles = {}
+    for cp in categories_profiles:
+        upper_category_id = cp.value.upper
+        lower_category_id = cp.value.lower
+        if upper_category_id:
+            upper_category_rank = cat_rank[upper_category_id]
+            profiles[upper_category_rank] = cp.alternative_id
+        if lower_category_id:
+            lower_category_rank = cat_rank[lower_category_id]
+            profiles[lower_category_id-1] = cp.alternative_id
+
+    profiles_rank = profiles.keys()
+    profiles_rank.sort()
+
+    profile_ids = []
+    for pr in profiles_ranks:
+        profile_ids.append(profiles[pr])
+
+    return profile_ids
+
+def normalize_criteria_weights(criteria_values):
+    total = float()
+    for cv in criteria_values:
+        total += cv.value
+
+    for cv in criteria_values:
+        cv.value /= total
