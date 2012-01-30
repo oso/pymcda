@@ -23,9 +23,10 @@ class lp_elecre_tri_weights():
         self.categories = cat
         self.profiles = b
         self.bpt = bpt
-        self.epsilon = 0
+        self.epsilon = 0.0000
+        self.delta = 0.0001
         self.lp = pymprog.model('lp_elecre_tri_weights')
-#        self.lp.verb=True
+        #self.lp.verb=True
         self.generate_constraints()
         self.add_objective()
 
@@ -35,16 +36,15 @@ class lp_elecre_tri_weights():
 
         # Initialize variables
         self.w = self.lp.var(xrange(n), 'w', bounds=(0, 1))
-        self.x = self.lp.var(xrange(m), 'x', bounds=(None, None))
-        self.y = self.lp.var(xrange(m), 'y', bounds=(None, None))
+        self.x = self.lp.var(xrange(m), 'x', bounds=(-1, 1))
+        self.y = self.lp.var(xrange(m), 'y', bounds=(-1, 1))
         self.lbda = self.lp.var(name='lambda', bounds=(0.5, 1))
-        self.alpha = self.lp.var(name='alpha', bounds=(None, None))
+        self.alpha = self.lp.var(name='alpha', bounds=(-1, 1))
 
         for i, a in enumerate(self.alternatives):
             a_perfs = self.pt(a.id)
-            cat_rank = self.alternative_affectations(a.id)
-#            print cat_id
-#            cat = self.categories(cat_id)
+            cat_id = self.alternative_affectations(a.id)
+            cat_rank = self.categories(cat_id).rank
 
             # sum(w_j(a_i,b_h-1) - x_i = lbda
             if cat_rank > 1:
@@ -72,12 +72,15 @@ class lp_elecre_tri_weights():
                         j_outrank.append(j)
 
                 self.lp.st(sum(self.w[j] for j in j_outrank) + self.y[i] \
-                           == self.lbda)
+                           == self.lbda - self.delta)
 
             # alpha <= x_i
             # alpha <= y_i
             self.lp.st(self.x[i] >= self.alpha)
             self.lp.st(self.y[i] >= self.alpha)
+
+        for j in range(n):
+            self.lp.st(self.w[j] <= 0.5)
 
         # sum w_j = 1
         self.lp.st(sum(self.w[j] for j in range(n)) == 1)
@@ -86,8 +89,8 @@ class lp_elecre_tri_weights():
         m = len(self.alternatives)
 
         self.lp.max(self.alpha \
-                    + self.epsilon*sum([self.x[i] + self.y[i] \
-                    for i in range(m)]))
+                    + self.epsilon*sum([self.x[i] for i in range(m)])   \
+                    + self.epsilon*sum([self.y[i] for i in range(m)]))
 
     def solve(self):
         self.lp.solve()
@@ -120,10 +123,11 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_categories
     from tools.generate_random import generate_random_categories_profiles
     from tools.utils import normalize_criteria_weights
+    from tools.utils import add_errors_in_affectations
     from mcda.electre_tri import electre_tri
 
     # Original Electre Tri model
-    a = generate_random_alternatives(1000)
+    a = generate_random_alternatives(2000)
     c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
@@ -135,11 +139,15 @@ if __name__ == "__main__":
 
     lbda = 0.75
 
-    model = electre_tri(c, cv, bpt, lbda)
+    model = electre_tri(c, cv, bpt, lbda, cat)
     aa = model.pessimist(pt)
+    add_errors_in_affectations(aa, cat.get_ids(), 0.000)
 
-    bpt.display()
-    cv.display()
+    print('Original model')
+    print('==============')
+    cids = c.get_ids()
+    bpt.display(criterion_ids=cids)
+    cv.display(criterion_ids=cids)
     print("lambda\t%.7s" % lbda)
     #print(aa)
 
@@ -148,14 +156,17 @@ if __name__ == "__main__":
     t1 = time.time()
     obj, cv_learned, lbda_learned = lp_weights.solve()
     t2 = time.time()
-
     print("Computation time: %g secs" % (t2-t1))
+    print("Objective: %s" % obj)
 
     model.cv = cv_learned
     model.lbda = lbda_learned
     aa_learned = model.pessimist(pt)
 
-    cv_learned.display()
+    print('Learned model')
+    print('=============')
+    cv.display(criterion_ids=cids, name='w')
+    cv_learned.display(header=False, criterion_ids=cids, name='w_learned')
     print("lambda\t%.7s" % lbda_learned)
     #print(aa_learned)
 
@@ -163,8 +174,8 @@ if __name__ == "__main__":
     nok = 0
     for alt in a:
         if aa(alt.id) <> aa_learned(alt.id):
-            print("Pessimistic affectation of %s mismatch (%d <> %d)" %
-                  (str(alt.id), aa(alt.id), aa_learned(key)))
+            print("Pessimistic affectation of %s mismatch (%s <> %s)" %
+                  (str(alt.id), aa(alt.id), aa_learned(alt.id)))
             nok += 1
 
     print("Good affectations: %3g %%" % (float(total-nok)/total*100))
