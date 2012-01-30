@@ -25,7 +25,7 @@ class lp_elecre_tri_weights():
         self.bpt = bpt
         self.epsilon = 0
         self.lp = pymprog.model('lp_elecre_tri_weights')
-        self.lp.solvopt(verbosity=2)
+#        self.lp.verb=True
         self.generate_constraints()
         self.add_objective()
 
@@ -37,8 +37,8 @@ class lp_elecre_tri_weights():
         self.w = self.lp.var(xrange(n), 'w', bounds=(0, 1))
         self.x = self.lp.var(xrange(m), 'x', bounds=(None, None))
         self.y = self.lp.var(xrange(m), 'y', bounds=(None, None))
-        self.lbda = self.lp.var(bounds=(0.5, 1))
-        self.alpha = self.lp.var(bounds=(None, None))
+        self.lbda = self.lp.var(name='lambda', bounds=(0.5, 1))
+        self.alpha = self.lp.var(name='alpha', bounds=(None, None))
 
         for i, a in enumerate(self.alternatives):
             a_perfs = self.pt(a.id)
@@ -92,6 +92,11 @@ class lp_elecre_tri_weights():
     def solve(self):
         self.lp.solve()
 
+        status = self.lp.status()
+        if status != 'opt':
+            print("Solver status: %s" % self.lp.status())
+            #FIXME: raise error
+
         #print(self.lp.reportKKT())
         obj = self.lp.vobj()
 
@@ -107,6 +112,7 @@ class lp_elecre_tri_weights():
         return obj, cvs, lbda
 
 if __name__ == "__main__":
+    import time
     from tools.generate_random import generate_random_alternatives
     from tools.generate_random import generate_random_criteria
     from tools.generate_random import generate_random_criteria_values
@@ -138,7 +144,13 @@ if __name__ == "__main__":
     #print(aa)
 
     lp_weights = lp_elecre_tri_weights(a, c, cv, aa, pt, cat, b, bpt)
+
+    t1 = time.time()
     obj, cv_learned, lbda_learned = lp_weights.solve()
+    t2 = time.time()
+
+    print("Computation time: %g secs" % (t2-t1))
+
     model.cv = cv_learned
     model.lbda = lbda_learned
     aa_learned = model.pessimist(pt)
@@ -151,7 +163,7 @@ if __name__ == "__main__":
     nok = 0
     for alt in a:
         if aa(alt.id) <> aa_learned(alt.id):
-            print("Pessimits affectation of %s mismatch (%d <> %d)" %
+            print("Pessimistic affectation of %s mismatch (%d <> %d)" %
                   (str(alt.id), aa(alt.id), aa_learned(key)))
             nok += 1
 
