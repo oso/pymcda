@@ -1,3 +1,4 @@
+import random
 from mcda.types import alternative_performances
 
 def get_max_alternative_performance(pt, crit):
@@ -76,3 +77,15 @@ def normalize_criteria_weights(criteria_values):
 
     for cv in criteria_values:
         cv.value /= total
+
+def add_errors_in_affectations(alternatives_affectations, category_ids,
+                               errors_pc):
+    n = int(len(alternatives_affectations)*errors_pc)
+    aa = random.sample(alternatives_affectations, n)
+
+    for a in aa:
+        new_cat = cat = None
+        while new_cat == cat:
+            cat = a.category_id
+            newcat = random.sample(category_ids, 1)[0]
+            a.category_id = newcat
