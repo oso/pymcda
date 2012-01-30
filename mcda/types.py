@@ -154,6 +154,16 @@ class criteria_values(list):
             xmcda.append(cv)
         return xmcda
 
+    def display(self):
+        cv_ids = []
+        for cv in self:
+            print("\t%.6s" % cv.criterion_id),
+
+        print('\nw'),
+        for cv in self:
+            print("\t%.6s" % cv.value),
+        print('')
+
 class criterion_value():
 
     def __init__(self, id=None, name=None, criterion_id=None, value=None):
