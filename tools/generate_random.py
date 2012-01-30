@@ -32,7 +32,7 @@ def generate_random_criteria_values(crits, seed=None):
     for c in crits:
         cval = criterion_value()
         cval.criterion_id = c.id
-        cval.value = random.random()
+        cval.value = round(random.random(), 3)
         cvals.append(cval)
 
     return cvals
@@ -45,7 +45,7 @@ def generate_random_performance_table(alts, crits, seed=None):
     for a in alts:
         perfs = {}
         for c in crits:
-            perfs[c.id] = random.random()
+            perfs[c.id] = round(random.random(), 3)
         ap = alternative_performances(a.id, perfs)
         pt.append(ap)
 
@@ -71,7 +71,7 @@ def generate_random_categories_profiles(alts, crits, seed=None):
     for c in crits:
         rdom = []
         for i in range(n):
-            rdom.append(random.random())
+            rdom.append(round(random.random(), 3))
         rdom.sort()
 
         crit_random[c.id] = rdom
