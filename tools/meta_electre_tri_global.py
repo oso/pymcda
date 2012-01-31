@@ -49,7 +49,7 @@ class meta_electre_tri_global():
         nprofiles = len(self.categories)-1
 
         total = len(self.alternatives)
-        profile_bad_affectation = [ 0 for i in range(nprofiles) ]
+        profile_bad_af = [ float(0) for i in range(nprofiles) ]
         ok = float(0)
         for alt in self.alternatives:
             cat_a = self.aa(alt.id)
@@ -58,37 +58,48 @@ class meta_electre_tri_global():
             cat_rank_b = self.categories(cat_b).rank
             if cat_rank_b > cat_rank_a:
                 for i in range(cat_rank_a, cat_rank_b):
-                    profile_bad_affectation[i-1] += 1
+                    profile_bad_af[i-1] += 1
             elif cat_rank_a > cat_rank_b:
                 for i in range(cat_rank_b, cat_rank_a):
-                    profile_bad_affectation[i-1] += 1
+                    profile_bad_af[i-1] += 1
             else:
                 ok += 1
 
-        return ok/total
+        profile_bad_af[:] = [x/total for x in profile_bad_af]
 
-    def compute_dictatorial_affectations(self, model):
+        return ok/total, profile_bad_af
+
+    def compute_dictatorial_affectation(self, model, cid):
         categories = model.categories
         ncategories = len(categories)
         ptb = model.profiles
         profiles = self.b[:]
         profiles.reverse()
 
+        aa = alternatives_affectations()
+        for alt in self.alternatives:
+            i = ncategories-1
+            for profile in profiles:
+                gj_b = ptb(profile.id, cid)
+                gj_a = self.pt(alt.id, cid)
+                if gj_a >= gj_b:
+                    break;
+                i -= 1
+            af = alternative_affectation(alt.id, categories[i].id)
+            aa.append(af)
+
+        return aa
+
+    def compute_dictatorial_fitness(self, model):
+        categories = model.categories
+        ncategories = len(categories)
+        profiles = self.b[:]
+        profiles.reverse()
+
         criteria_fitness = {}
         for criterion in model.criteria:
-            aa = alternatives_affectations()
-            for alt in self.alternatives:
-                i = ncategories-1
-                for profile in profiles:
-                    gj_b = ptb(profile.id, criterion.id)
-                    gj_a = self.pt(alt.id, criterion.id)
-                    if gj_a >= gj_b:
-                        break;
-                    i -= 1
-                af = alternative_affectation(alt.id, categories[i].id)
-                aa.append(af)
-
-            fitness = self.compute_fitness(aa)
+            aa = self.compute_dictatorial_affectation(model, criterion.id)
+            fitness, profile_bad_af = self.compute_fitness(aa)
             criteria_fitness[criterion.id] = fitness
 
         return criteria_fitness
@@ -100,7 +111,9 @@ class meta_electre_tri_global():
         #print c_ids
         return c_ids[0:k]
 
-    def update_profile(self, model, c_ids, criteria_fitness):
+    def update_profiles(self, model, criteria_fitness, k):
+        c_ids = self.find_k_worst_criteria(criteria_fitness, k)
+
         profiles = self.b
         k = len(c_ids)
         pt_a = model.profiles
@@ -135,11 +148,6 @@ class meta_electre_tri_global():
     def loop_one(self, k):
         models_fitness = {}
         for model in self.models:
-            criteria_fitness = self.compute_dictatorial_affectations(model)
-            c_id = self.find_k_worst_criteria(criteria_fitness, k)
-
-            self.update_profile(model, c_id, criteria_fitness)
-
             lpw = lp_elecre_tri_weights(self.alternatives, self.criteria,
                                         self.criteria_vals, self.aa,
                                         self.pt, self.categories, self.b,
@@ -149,14 +157,16 @@ class meta_electre_tri_global():
             #print("Objective value: %d" % sol[0])
 
             model.cv = sol[1]
-            #print model.cv
             model.lbda = sol[2]
 
             aa = model.pessimist(self.pt)
-            fitness = self.compute_fitness(aa)
+            fitness, profile_bad_af = self.compute_fitness(aa)
             models_fitness[model] = fitness
             if fitness == 1:
                 break
+
+            criteria_fitness = self.compute_dictatorial_fitness(model)
+            self.update_profiles(model, criteria_fitness, k)
 
         return models_fitness
 
@@ -169,7 +179,8 @@ class meta_electre_tri_global():
         for i in range(n):
             models_fitness = self.loop_one(k)
             m = max(models_fitness, key = lambda a: models_fitness.get(a))
-            print(models_fitness[m])
+            print(models_fitness[m]),
+        print('')
 
         return m
 
