@@ -46,10 +46,23 @@ class meta_electre_tri_global():
     def compute_fitness(self, aa):
         #print(aa)
         #print(self.aa)
+        nprofiles = len(self.categories)-1
+
         total = len(self.alternatives)
+        profile_bad_affectation = [ 0 for i in range(nprofiles) ]
         ok = float(0)
         for alt in self.alternatives:
-            if self.aa(alt.id) == aa(alt.id):
+            cat_a = self.aa(alt.id)
+            cat_b = aa(alt.id)
+            cat_rank_a = self.categories(cat_a).rank
+            cat_rank_b = self.categories(cat_b).rank
+            if cat_rank_b > cat_rank_a:
+                for i in range(cat_rank_a, cat_rank_b):
+                    profile_bad_affectation[i-1] += 1
+            elif cat_rank_a > cat_rank_b:
+                for i in range(cat_rank_b, cat_rank_a):
+                    profile_bad_affectation[i-1] += 1
+            else:
                 ok += 1
 
         return ok/total
@@ -87,7 +100,7 @@ class meta_electre_tri_global():
         #print c_ids
         return c_ids[0:k]
 
-    def update_profile(self, model, c_ids):
+    def update_profile(self, model, c_ids, criteria_fitness):
         profiles = self.b
         k = len(c_ids)
         pt_a = model.profiles
@@ -96,6 +109,9 @@ class meta_electre_tri_global():
             pt_b = model_b.profiles
 
             for c_id in c_ids:
+                if random.random() < criteria_fitness[c_id]:
+                    continue
+
                 new_perfs = []
                 for profile in profiles:
                     new_perfs.append(random.random())
@@ -122,7 +138,7 @@ class meta_electre_tri_global():
             criteria_fitness = self.compute_dictatorial_affectations(model)
             c_id = self.find_k_worst_criteria(criteria_fitness, k)
 
-            self.update_profile(model, c_id)
+            self.update_profile(model, c_id, criteria_fitness)
 
             lpw = lp_elecre_tri_weights(self.alternatives, self.criteria,
                                         self.criteria_vals, self.aa,
@@ -195,7 +211,7 @@ if __name__ == "__main__":
     meta_global = meta_electre_tri_global(a, c, cv, aa, pt, cat)
 
     t1 = time.time()
-    m = meta_global.solve(100, 10, 2)
+    m = meta_global.solve(100, 10, 5)
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
 
