@@ -138,13 +138,16 @@ if __name__ == "__main__":
     cat = generate_random_categories(3)
 
     lbda = 0.75
+    errors = 0.000
 
     model = electre_tri(c, cv, bpt, lbda, cat)
     aa = model.pessimist(pt)
-    add_errors_in_affectations(aa, cat.get_ids(), 0.000)
+    add_errors_in_affectations(aa, cat.get_ids(), errors)
 
     print('Original model')
     print('==============')
+    print("Number of alternatives: %d" % len(a))
+    print("Errors in alternatives affectations: %g%%" % (errors*100))
     cids = c.get_ids()
     bpt.display(criterion_ids=cids)
     cv.display(criterion_ids=cids)
@@ -156,8 +159,6 @@ if __name__ == "__main__":
     t1 = time.time()
     obj, cv_learned, lbda_learned = lp_weights.solve()
     t2 = time.time()
-    print("Computation time: %g secs" % (t2-t1))
-    print("Objective: %s" % obj)
 
     model.cv = cv_learned
     model.lbda = lbda_learned
@@ -165,6 +166,8 @@ if __name__ == "__main__":
 
     print('Learned model')
     print('=============')
+    print("Computation time: %g secs" % (t2-t1))
+    print("Objective: %s" % obj)
     cv.display(criterion_ids=cids, name='w')
     cv_learned.display(header=False, criterion_ids=cids, name='w_learned')
     print("lambda\t%.7s" % lbda_learned)
