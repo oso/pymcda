@@ -89,3 +89,25 @@ def add_errors_in_affectations(alternatives_affectations, category_ids,
             cat = a.category_id
             newcat = random.sample(category_ids, 1)[0]
             a.category_id = newcat
+
+def display_affectations_and_pt(alternatives, criteria,
+                                alternatives_affectations,
+                                performance_table):
+
+    for i, aas in enumerate(alternatives_affectations):
+        print("\taa%d" % i),
+    print('\t|'),
+    for i, c in enumerate(criteria):
+        print("\t%-6s" % c.id),
+    print('')
+
+    for a in alternatives:
+        print("%6s" % a.id),
+        for aas in alternatives_affectations:
+            print("\t%-6s" % aas(a.id)),
+        print('\t|'),
+
+        for c in criteria:
+            for pt in performance_table:
+                print("\t%-6.3f" % pt(a.id, c.id)),
+        print('')
