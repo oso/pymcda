@@ -14,7 +14,8 @@ class lp_elecre_tri_weights():
     #   - cat: categories
     #   - b: ordered categories profiles
     #   - bpt: profiles performance
-    def __init__(self, a, c, cv, aa, pt, cat, b, bpt):
+    def __init__(self, a, c, cv, aa, pt, cat, b, bpt, epsilon=0.0001,
+                 delta=0.0001):
         self.alternatives = a
         self.criteria = c
         self.criteria_vals = cv
@@ -23,10 +24,10 @@ class lp_elecre_tri_weights():
         self.categories = cat
         self.profiles = b
         self.bpt = bpt
-        self.epsilon = 0.0000
-        self.delta = 0.0001
+        self.epsilon = epsilon
+        self.delta = delta
         self.lp = pymprog.model('lp_elecre_tri_weights')
-        #self.lp.verb=True
+        self.lp.verb=True
         self.generate_constraints()
         self.add_objective()
 
@@ -124,6 +125,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_categories_profiles
     from tools.utils import normalize_criteria_weights
     from tools.utils import add_errors_in_affectations
+    from tools.utils import display_affectations_and_pt
     from mcda.electre_tri import electre_tri
 
     # Original Electre Tri model
@@ -139,6 +141,8 @@ if __name__ == "__main__":
 
     lbda = 0.75
     errors = 0.000
+    epsilon = 0.0001
+    delta = 0.0001
 
     model = electre_tri(c, cv, bpt, lbda, cat)
     aa = model.pessimist(pt)
@@ -152,9 +156,12 @@ if __name__ == "__main__":
     bpt.display(criterion_ids=cids)
     cv.display(criterion_ids=cids)
     print("lambda\t%.7s" % lbda)
+    print("delta: %g" % delta)
+    print("epsilon: %g" % epsilon)
     #print(aa)
 
-    lp_weights = lp_elecre_tri_weights(a, c, cv, aa, pt, cat, b, bpt)
+    lp_weights = lp_elecre_tri_weights(a, c, cv, aa, pt, cat, b, bpt,
+                                       epsilon, delta)
 
     t1 = time.time()
     obj, cv_learned, lbda_learned = lp_weights.solve()
@@ -175,11 +182,16 @@ if __name__ == "__main__":
 
     total = len(a)
     nok = 0
+    anok = []
     for alt in a:
         if aa(alt.id) <> aa_learned(alt.id):
-            print("Pessimistic affectation of %s mismatch (%s <> %s)" %
-                  (str(alt.id), aa(alt.id), aa_learned(alt.id)))
+            anok.append(alt)
+#            print("Pessimistic affectation of %s mismatch (%s <> %s)" %
+#                  (str(alt.id), aa(alt.id), aa_learned(alt.id)))
             nok += 1
 
     print("Good affectations: %3g %%" % (float(total-nok)/total*100))
     print("Bad affectations : %3g %%" % (float(nok)/total*100))
+
+    print("Alternatives wrongly assigned:")
+    display_affectations_and_pt(anok, c, [aa, aa_learned], [pt])
