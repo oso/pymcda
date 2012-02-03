@@ -1,7 +1,15 @@
 import sys
 sys.path.insert(0, "..")
-import pymprog
 from mcda.types import criterion_value, criteria_values
+
+solver = 'glpk'
+
+if solver == 'glpk':
+    import pymprog
+elif solver == 'scip':
+    from zibopt import scip
+else:
+    raise NameError('Invalid solver selected')
 
 class lp_elecre_tri_weights():
 
@@ -26,12 +34,97 @@ class lp_elecre_tri_weights():
         self.bpt = bpt
         self.epsilon = epsilon
         self.delta = delta
-        self.lp = pymprog.model('lp_elecre_tri_weights')
-        self.lp.verb=True
-        self.generate_constraints()
-        self.add_objective()
+        if solver == 'glpk':
+            self.lp = pymprog.model('lp_elecre_tri_weights')
+            self.lp.verb=True
+            self.add_constraints_glpk()
+            self.add_objective_glpk()
+        elif sover == 'scip':
+            self.solver = scip.solver(quiet=False)
+            self.add_constraints_scip()
+            self.add_objective_scip()
 
-    def generate_constraints(self):
+    def add_constraints_scip(self):
+        m = len(self.alternatives)
+        n = len(self.criteria)
+
+        self.w = dict((j.id, {}) for j in self.criteria)
+        for j in self.criteria:
+            self.w[j.id] = self.solver.variable(lower=0, upper=1)
+
+        self.x = dict((i.id, {}) for i in self.alternatives)
+        for i in self.alternatives:
+            self.x[i.id] = self.solver.variable(lower=-1, upper=1)
+            self.y[i.id] = self.solver.variable(lower=-1, upper=1)
+
+        self.lbda = self.solver.variable(lower=0.5, upper=1)
+        self.alpha = self.solver.variable()
+
+        for a in self.alternatives:
+            a_perfs = self.pt(a.id)
+            cat_id = self.alternative_affectations(a.id)
+            cat_rank = self.categories(cat_id).rank
+
+            # sum(w_j(a_i,b_h-1) - x_i = lbda
+            if cat_rank > 1:
+                lower_profile = self.profiles[cat_rank-2]
+                b_perfs = self.bpt(lower_profile.id)
+
+                c_outrank = []
+                for c in self.criteria:
+                    if a_perfs(c.id) >= b_perfs(c.id):
+                        c_outrank.append(c)
+
+                self.solver += sum(self.w[c.id] for c in c_outrank) \
+                               - self.x[a.id] == self.lbda
+
+            # sum(w_j(a_i,b_h) + y_i = lbda
+            if cat_rank < len(self.categories):
+                upper_profile = self.profiles[cat_rank-1]
+                b_perfs = self.bpt(upper_profile.id)
+
+                c_outrank = []
+                for c in self.criteria:
+                    if a_perfs(c.id) >= b_perfs(c.id):
+                        c_outrank.append(c)
+
+                self.solver += sum(self.w[c.id] for c in c_outrank) \
+                               + self.y[a.id] == self.lbda - self.delta
+
+            # alpha <= x_i
+            # alpha <= y_i
+            self.solver += self.x[a.id] >= self.alpha
+            self.solver += self.y[a.id] >= self.alpha
+
+        # w_j <= 0.5*sum(w_j)
+        for c in self.criteria:
+            self.solver += self.w[c.id] <= 0.5
+
+        # sum w_j = 1
+        self.solver += sum(self.w[c.id] for c in self.criteria) == 1
+
+    def add_objective_scip(self):
+        self.obj = self.alpha \
+                    + self.epsilon*sum([self.x[i] for i in range(m)]) \
+                    + self.epsilon*sum([self.y[i] for i in range(m)])
+
+    def solve_scip(self):
+        solution = self.solver.maximize(objective=obj)
+
+        obj = solution.objective
+
+        cvs = criteria_values()
+        for c in self.criteria:
+            cv = criterion_value()
+            cv.criterion_id = c.id
+            cv.value = solution[self.w[c.id]]
+            cvs.append(cv)
+
+        lbda = solution[self.lbda]
+
+        return obj, cvs, lbda
+
+    def add_constraints_glpk(self):
         m = len(self.alternatives)
         n = len(self.criteria)
 
@@ -40,7 +133,7 @@ class lp_elecre_tri_weights():
         self.x = self.lp.var(xrange(m), 'x', bounds=(-1, 1))
         self.y = self.lp.var(xrange(m), 'y', bounds=(-1, 1))
         self.lbda = self.lp.var(name='lambda', bounds=(0.5, 1))
-        self.alpha = self.lp.var(name='alpha', bounds=(-1, 1))
+        self.alpha = self.lp.var(name='alpha')
 
         for i, a in enumerate(self.alternatives):
             a_perfs = self.pt(a.id)
@@ -86,14 +179,14 @@ class lp_elecre_tri_weights():
         # sum w_j = 1
         self.lp.st(sum(self.w[j] for j in range(n)) == 1)
 
-    def add_objective(self):
+    def add_objective_glpk(self):
         m = len(self.alternatives)
 
         self.lp.max(self.alpha \
                     + self.epsilon*sum([self.x[i] for i in range(m)])   \
                     + self.epsilon*sum([self.y[i] for i in range(m)]))
 
-    def solve(self):
+    def solve_glpk(self):
         self.lp.solve()
 
         status = self.lp.status()
@@ -114,6 +207,16 @@ class lp_elecre_tri_weights():
         lbda = float(self.lbda.primal)
 
         return obj, cvs, lbda
+
+    def solve(self):
+        if solver == 'glpk':
+            sol = self.solve_glpk()
+        elif solver == 'scip':
+            sol = self.solve_scip()
+        else:
+            raise NameError('Invalid solver selected')
+
+        return sol
 
 if __name__ == "__main__":
     import time
