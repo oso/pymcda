@@ -1,3 +1,4 @@
+from __future__ import division
 import sys
 sys.path.insert(0, "..")
 import random
@@ -6,6 +7,8 @@ from mcda.types import alternative_affectation, alternatives_affectations
 from tools.lp_electre_tri_weights import lp_elecre_tri_weights
 from tools.generate_random import generate_random_categories_profiles
 from tools.generate_random import generate_random_alternatives
+from tools.utils import get_worst_alternative_performances
+from tools.utils import get_best_alternative_performances
 
 class meta_electre_tri_global():
 
@@ -23,6 +26,27 @@ class meta_electre_tri_global():
         self.aa = aa
         self.pt = pt
         self.categories = cat
+        self.b0 = get_worst_alternative_performances(pt, c)
+        self.bp = get_best_alternative_performances(pt, c)
+        self.n_intervals = 3
+
+    def compute_fitness(self, model, aa):
+        c_perfs = {c.id:list() for c in model.criteria}
+        for i, p in enumerate(model.profiles):
+            perfs = p.performances
+            for c in model.criteria:
+                c_perfs[c.id].append(perfs[c.id])
+
+        total = len(self.alternatives)
+        nok = 0
+        for a in self.alternatives:
+            af = aa(a.id)
+            ok = 0
+            if af == self.aa(a.id):
+                ok = 1
+                nok += 1
+
+        return nok/total
 
     def init_one(self):
         model = electre_tri()
@@ -43,108 +67,6 @@ class meta_electre_tri_global():
 
         return models
 
-    def compute_fitness(self, aa):
-        #print(aa)
-        #print(self.aa)
-        nprofiles = len(self.categories)-1
-
-        total = len(self.alternatives)
-        profile_bad_af = [ float(0) for i in range(nprofiles) ]
-        ok = float(0)
-        for alt in self.alternatives:
-            cat_a = self.aa(alt.id)
-            cat_b = aa(alt.id)
-            cat_rank_a = self.categories(cat_a).rank
-            cat_rank_b = self.categories(cat_b).rank
-            if cat_rank_b > cat_rank_a:
-                for i in range(cat_rank_a, cat_rank_b):
-                    profile_bad_af[i-1] += 1
-            elif cat_rank_a > cat_rank_b:
-                for i in range(cat_rank_b, cat_rank_a):
-                    profile_bad_af[i-1] += 1
-            else:
-                ok += 1
-
-        profile_bad_af[:] = [x/total for x in profile_bad_af]
-
-        return ok/total, profile_bad_af
-
-    def compute_dictatorial_affectation(self, model, cid):
-        categories = model.categories
-        ncategories = len(categories)
-        ptb = model.profiles
-        profiles = self.b[:]
-        profiles.reverse()
-
-        aa = alternatives_affectations()
-        for alt in self.alternatives:
-            i = ncategories-1
-            for profile in profiles:
-                gj_b = ptb(profile.id, cid)
-                gj_a = self.pt(alt.id, cid)
-                if gj_a >= gj_b:
-                    break;
-                i -= 1
-            af = alternative_affectation(alt.id, categories[i].id)
-            aa.append(af)
-
-        return aa
-
-    def compute_dictatorial_fitness(self, model):
-        categories = model.categories
-        ncategories = len(categories)
-        profiles = self.b[:]
-        profiles.reverse()
-
-        criteria_fitness = {}
-        for criterion in model.criteria:
-            aa = self.compute_dictatorial_affectation(model, criterion.id)
-            fitness, profile_bad_af = self.compute_fitness(aa)
-            criteria_fitness[criterion.id] = fitness
-
-        return criteria_fitness
-
-    def find_k_worst_criteria(self, criteria_fitness, k):
-        #print criteria_fitness
-        c_ids = criteria_fitness.keys()
-        c_ids.sort(key = criteria_fitness.__getitem__)
-        #print c_ids
-        return c_ids[0:k]
-
-    def update_profiles(self, model, criteria_fitness, k):
-        c_ids = self.find_k_worst_criteria(criteria_fitness, k)
-
-        profiles = self.b
-        k = len(c_ids)
-        pt_a = model.profiles
-        models_b = random.sample(self.models, k)
-        for model_b in models_b:
-            pt_b = model_b.profiles
-
-            for c_id in c_ids:
-                if random.random() < criteria_fitness[c_id]:
-                    continue
-
-                new_perfs = []
-                for profile in profiles:
-                    new_perfs.append(random.random())
-
-                new_perfs.sort()
-                for i, profile in enumerate(profiles):
-                    a_p = pt_a(profile.id)
-                    a_p.performances[c_id] = new_perfs[i]
-
-## Invert with another model
-#                for profile in profiles:
-#                    a_p = pt_a(profile.id)
-#                    b_p = pt_b(profile.id)
-#                    a_p_c = a_p.performances[c_id]
-#                    b_p_c = b_p.performances[c_id]
-#                    #print a_p, b_p, c_id
-#                    a_p.performances[c_id] = b_p_c
-#                    b_p.performances[c_id] = a_p_c
-#                    #print a_p, b_p
-
     def loop_one(self, k):
         models_fitness = {}
         for model in self.models:
@@ -160,13 +82,8 @@ class meta_electre_tri_global():
             model.lbda = sol[2]
 
             aa = model.pessimist(self.pt)
-            fitness, profile_bad_af = self.compute_fitness(aa)
+            fitness = self.compute_fitness(model, aa)
             models_fitness[model] = fitness
-            if fitness == 1:
-                break
-
-            criteria_fitness = self.compute_dictatorial_fitness(model)
-            self.update_profiles(model, criteria_fitness, k)
 
         return models_fitness
 
@@ -193,10 +110,11 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_categories
     from tools.generate_random import generate_random_categories_profiles
     from tools.utils import normalize_criteria_weights
+    from tools.utils import display_affectations_and_pt
     from mcda.electre_tri import electre_tri
 
     # Original Electre Tri model
-    a = generate_random_alternatives(100)
+    a = generate_random_alternatives(10)
     c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
@@ -245,3 +163,6 @@ if __name__ == "__main__":
 
     print("Good affectations: %3g %%" % (float(total-nok)/total*100))
     print("Bad affectations : %3g %%" % (float(nok)/total*100))
+
+    print("Alternatives and affectations")
+    display_affectations_and_pt(a, c, [aa, aa_learned], [pt])
