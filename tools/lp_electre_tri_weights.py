@@ -3,6 +3,7 @@ sys.path.insert(0, "..")
 from mcda.types import criterion_value, criteria_values
 
 solver = 'glpk'
+verbose = False
 
 if solver == 'glpk':
     import pymprog
@@ -36,7 +37,7 @@ class lp_elecre_tri_weights():
         self.delta = delta
         if solver == 'glpk':
             self.lp = pymprog.model('lp_elecre_tri_weights')
-            self.lp.verb=True
+            self.lp.verb=verbose
             self.add_constraints_glpk()
             self.add_objective_glpk()
         elif sover == 'scip':
@@ -54,11 +55,11 @@ class lp_elecre_tri_weights():
 
         self.x = dict((i.id, {}) for i in self.alternatives)
         for i in self.alternatives:
-            self.x[i.id] = self.solver.variable(lower=-1, upper=1)
-            self.y[i.id] = self.solver.variable(lower=-1, upper=1)
+            self.x[i.id] = self.solver.variable(lower=-2, upper=2)
+            self.y[i.id] = self.solver.variable(lower=-2, upper=2)
 
         self.lbda = self.solver.variable(lower=0.5, upper=1)
-        self.alpha = self.solver.variable()
+        self.alpha = self.solver.variable(lower=-2, upper=2)
 
         for a in self.alternatives:
             a_perfs = self.pt(a.id)
@@ -130,10 +131,10 @@ class lp_elecre_tri_weights():
 
         # Initialize variables
         self.w = self.lp.var(xrange(n), 'w', bounds=(0, 1))
-        self.x = self.lp.var(xrange(m), 'x', bounds=(-1, 1))
-        self.y = self.lp.var(xrange(m), 'y', bounds=(-1, 1))
+        self.x = self.lp.var(xrange(m), 'x', bounds=(-2, 2))
+        self.y = self.lp.var(xrange(m), 'y', bounds=(-2, 2))
         self.lbda = self.lp.var(name='lambda', bounds=(0.5, 1))
-        self.alpha = self.lp.var(name='alpha')
+        self.alpha = self.lp.var(name='alpha', bounds=(-2, 2))
 
         for i, a in enumerate(self.alternatives):
             a_perfs = self.pt(a.id)
