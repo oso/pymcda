@@ -13,11 +13,13 @@ class electre_tri:
     def __check_input_params(self):
         if self.criteria is None:
             raise KeyError('No criteria specified')
-        elif self.cv is None:
+        if self.cv is None:
             raise KeyError('No criteria values specified')
-        elif self.profiles is None:
+        if self.profiles is None:
             raise KeyError('No profiles specified')
-        elif self.lbda is None:
+        if self.lbda is None:
+            raise KeyError('No cut threshold specified')
+        if self.categories is None:
             raise KeyError('No cut threshold specified')
 
     def __get_threshold_by_profile(self, c, threshold_id, profile_rank):
