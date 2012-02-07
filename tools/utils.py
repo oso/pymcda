@@ -98,7 +98,7 @@ def display_affectations_and_pt(alternatives, criteria,
         print("\taa%d" % i),
     print('\t|'),
     for i, c in enumerate(criteria):
-        print("\t%-6s" % c.id),
+        print("%-7s" % c.id),
     print('')
 
     for a in alternatives:
@@ -109,5 +109,5 @@ def display_affectations_and_pt(alternatives, criteria,
 
         for c in criteria:
             for pt in performance_table:
-                print("\t%-6.3f" % pt(a.id, c.id)),
+                print("%-6.5f" % pt(a.id, c.id)),
         print('')
