@@ -36,6 +36,23 @@ class meta_electre_tri_global():
             perfs = p.performances
             for c in model.criteria:
                 c_perfs[c.id].append(perfs[c.id])
+        for c in model.criteria:
+            c_perfs[c.id].insert(0, self.b0.performances[c.id])
+            c_perfs[c.id].append(self.bp.performances[c.id])
+
+        # Constructs the intervals
+        for c in model.criteria:
+            perfs = c_perfs[c.id]
+            for h in range(1, len(model.profiles)+1):
+                perf_profile = perfs[h];
+                perf_profile_inf = perfs[h-1]
+                perf_profile_sup = perfs[h+1]
+                print perf_profile
+                print perf_profile_inf
+                print perf_profile_sup
+#                c_perfs_interval_min[h][c.id] = []
+#                c_perfs_interval_plus[h][c.id] = []
+        raise
 
         total = len(self.alternatives)
         nok = 0
@@ -45,6 +62,11 @@ class meta_electre_tri_global():
             if af == self.aa(a.id):
                 ok = 1
                 nok += 1
+
+            perfs = self.pt(a.id)
+            for c in model.criteria:
+                for i in range(len(model.profiles)):
+                    pass
 
         return nok/total
 
