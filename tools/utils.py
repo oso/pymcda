@@ -20,7 +20,7 @@ def get_min_alternative_performance(pt, crit):
     return val
 
 def get_worst_alternative_performances(pt, crits):
-    wa = alternative_performances('w', {})
+    wa = alternative_performances('worst', {})
 
     for c in crits:
         if c.direction == 1:
@@ -33,7 +33,7 @@ def get_worst_alternative_performances(pt, crits):
     return wa
 
 def get_best_alternative_performances(pt, crits):
-    ba = alternative_performances('b', {})
+    ba = alternative_performances('best', {})
 
     for c in crits:
         if c.direction == 1:
