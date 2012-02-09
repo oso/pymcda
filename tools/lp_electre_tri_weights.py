@@ -125,6 +125,8 @@ class lp_elecre_tri_weights():
             self.lp.objective.set_linear('y'+a.id, self.epsilon)
 
     def solve_cplex(self):
+        self.lp.solve()
+
         obj = self.lp.solution.get_values("s"+str(i))
 
         cvs = criteria_values()
