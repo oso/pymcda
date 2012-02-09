@@ -1,8 +1,9 @@
+from __future__ import division
 import sys
 sys.path.insert(0, "..")
 from mcda.types import criterion_value, criteria_values
 
-solver = 'glpk'
+solver = 'cplex'
 verbose = False
 
 if solver == 'glpk':
@@ -79,13 +80,20 @@ class lp_elecre_tri_weights():
                 constraints.add(names=['cinf'+a.id])
                 for c in self.criteria:
                     if a_perfs(c.id) >= b_perfs(c.id):
-                        constraints.set_coefficients('cinf'+a.id, 'w'+c.id,
-                                                     1)
+                        k = 1
+                    else:
+                        k = 0
+                    constraints.set_coefficients('cinf'+a.id, 'w'+c.id, k)
 
                 constraints.set_coefficients('cinf'+a.id, 'x'+a.id, -1)
                 constraints.set_coefficients('cinf'+a.id, 'lambda', -1)
                 constraints.set_rhs('cinf'+a.id, 0)
                 constraints.set_senses('cinf'+a.id, 'E')
+            else:
+                constraints.add(names=['nil'+a.id])
+                constraints.set_coefficients('nil'+a.id, 'x'+a.id, 1)
+                constraints.set_rhs('nil'+a.id, 0)
+                constraints.set_senses('nil'+a.id, 'E')
 
             # sum(w_j(a_i,b_h) + y_i = lbda - delta
             if cat_rank < len(self.categories):
@@ -95,19 +103,38 @@ class lp_elecre_tri_weights():
                 constraints.add(names=['csup'+a.id])
                 for c in self.criteria:
                     if a_perfs(c.id) >= b_perfs(c.id):
-                        constraints.set_coefficients('csup'+a.id, 'w'+c.id,
-                                                     1)
+                        k = 1
+                    else:
+                        k = 0
+                    constraints.set_coefficients('csup'+a.id, 'w'+c.id, k)
 
                 constraints.set_coefficients('csup'+a.id, 'y'+a.id, 1)
                 constraints.set_coefficients('csup'+a.id, 'lambda', -1)
-                constraints.set_rhs('cinf'+a.id, -self.delta)
-                constraints.set_senses('cinf'+a.id, 'E')
+                constraints.set_rhs('csup'+a.id, -self.delta)
+                constraints.set_senses('csup'+a.id, 'E')
+            else:
+                constraints.add(names=['nil'+a.id])
+                constraints.set_coefficients('nil'+a.id, 'y'+a.id, 1)
+                constraints.set_rhs('nil'+a.id, 0)
+                constraints.set_senses('nil'+a.id, 'E')
+
+            # alpha <= x_i
+            # alpha <= y_i
+            constraints.add(names=['xmax'+a.id, 'ymax'+a.id])
+            constraints.set_coefficients('xmax'+a.id, 'x'+a.id, 1)
+            constraints.set_coefficients('ymax'+a.id, 'y'+a.id, 1)
+            constraints.set_coefficients('xmax'+a.id, 'alpha', -1)
+            constraints.set_coefficients('ymax'+a.id, 'alpha', -1)
+            constraints.set_rhs('xmax'+a.id, 0)
+            constraints.set_rhs('ymax'+a.id, 0)
+            constraints.set_senses('xmax'+a.id, 'L')
+            constraints.set_senses('ymax'+a.id, 'L')
 
         # w_j <= 0.5*sum(w_j)
         for c in self.criteria:
             constraints.add(names=['wmax'+c.id])
-            constraints.set_coefficients('wmax'+c.id, w+c.id, 1)
-            constraints.set_rhs('wmax'+c.id, 1)
+            constraints.set_coefficients('wmax'+c.id, 'w'+c.id, 1)
+            constraints.set_rhs('wmax'+c.id, 0.5)
             constraints.set_senses('wmax'+c.id, 'L')
 
         # sum w_j = 1
@@ -118,8 +145,8 @@ class lp_elecre_tri_weights():
         constraints.set_senses('wsum', 'E')
 
     def add_objective_cplex(self):
-        self.lp.objective.set_sense(lp.objective.sense.maximize)
-        self.lp.objective.set_linear('alpha', 1)
+        self.lp.objective.set_sense(self.lp.objective.sense.maximize)
+#        self.lp.objective.set_linear('alpha', 1)
         for a in self.alternatives:
             self.lp.objective.set_linear('x'+a.id, self.epsilon)
             self.lp.objective.set_linear('y'+a.id, self.epsilon)
@@ -127,7 +154,7 @@ class lp_elecre_tri_weights():
     def solve_cplex(self):
         self.lp.solve()
 
-        obj = self.lp.solution.get_values("s"+str(i))
+        obj = self.lp.solution.get_objective_value()
 
         cvs = criteria_values()
         for c in self.criteria:
@@ -137,6 +164,8 @@ class lp_elecre_tri_weights():
             cvs.append(cv)
 
         lbda = self.lp.solution.get_values("lambda")
+
+        return obj, cvs, lbda
 
     def add_variables_scip(self):
         self.w = dict((j.id, {}) for j in self.criteria)
@@ -333,7 +362,7 @@ if __name__ == "__main__":
     from mcda.electre_tri import electre_tri
 
     # Original Electre Tri model
-    a = generate_random_alternatives(2000)
+    a = generate_random_alternatives(10000)
     c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
