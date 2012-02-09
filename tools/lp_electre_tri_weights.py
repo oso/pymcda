@@ -198,6 +198,8 @@ class lp_elecre_tri_weights():
 
                 self.lp += sum(self.w[c.id] for c in c_outrank) \
                                - self.x[a.id] == self.lbda
+            else:
+                self.lp += self.x[a.id] == 0
 
             # sum(w_j(a_i,b_h) + y_i = lbda - delta
             if cat_rank < len(self.categories):
@@ -211,6 +213,8 @@ class lp_elecre_tri_weights():
 
                 self.lp += sum(self.w[c.id] for c in c_outrank) \
                                + self.y[a.id] == self.lbda - self.delta
+            else:
+                self.lp += self.y[a.id] == 0
 
             # alpha <= x_i
             # alpha <= y_i
@@ -280,6 +284,8 @@ class lp_elecre_tri_weights():
 
                 self.lp.st(sum(self.w[j] for j in j_outrank) - self.x[i] \
                            == self.lbda)
+            else:
+                self.lp.st(self.x[i] == 0)
 
             # sum(w_j(a_i,b_h) + y_i = lbda - delta
             if cat_rank < len(self.categories):
@@ -294,6 +300,8 @@ class lp_elecre_tri_weights():
 
                 self.lp.st(sum(self.w[j] for j in j_outrank) + self.y[i] \
                            == self.lbda - self.delta)
+            else:
+                self.lp.st(self.y[i] == 0)
 
             # alpha <= x_i
             # alpha <= y_i
@@ -361,8 +369,9 @@ if __name__ == "__main__":
     from tools.utils import display_affectations_and_pt
     from mcda.electre_tri import electre_tri
 
+    print 'Solver used:', solver
     # Original Electre Tri model
-    a = generate_random_alternatives(10000)
+    a = generate_random_alternatives(2000)
     c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
@@ -410,7 +419,8 @@ if __name__ == "__main__":
     print("Objective: %s" % obj)
     cv.display(criterion_ids=cids, name='w')
     cv_learned.display(header=False, criterion_ids=cids, name='w_learned')
-    print("lambda\t%.7s" % lbda_learned)
+    print("lambda\t%.7s" % lbda)
+    print("lambda_learned\t%.7s" % lbda_learned)
     #print(aa_learned)
 
     total = len(a)
