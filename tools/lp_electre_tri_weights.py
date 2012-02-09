@@ -9,6 +9,8 @@ if solver == 'glpk':
     import pymprog
 elif solver == 'scip':
     from zibopt import scip
+elif solver == 'cplex':
+    import cplex
 else:
     raise NameError('Invalid solver selected')
 
@@ -38,17 +40,105 @@ class lp_elecre_tri_weights():
         if solver == 'glpk':
             self.lp = pymprog.model('lp_elecre_tri_weights')
             self.lp.verb=verbose
+            self.add_variables_glpk()
             self.add_constraints_glpk()
             self.add_objective_glpk()
-        elif sover == 'scip':
+        elif solver == 'scip':
             self.solver = scip.solver(quiet=False)
+            self.add_variables_scip()
             self.add_constraints_scip()
             self.add_objective_scip()
+        elif solver == 'cplex':
+            self.model = cplex.Cplex()
+            self.add_variables_cplex()
+            self.add_constraints_cplex()
+            self.add_objective_cplex()
 
-    def add_constraints_scip(self):
+    def add_variables_cplex(self):
+        self.model.variables.add(names=['w'+c.id for c in self.criteria])
+        self.model.variables.add(names=['x'+a.id
+                                        for a in self.alternatives])
+        self.model.variables.add(names=['y'+a.id
+                                        for a in self.alternatives])
+        self.model.variables.add(names=['lambda'])
+        self.model.variables.add(names=['alpha'])
+
+    def add_constraints_cplex(self):
         m = len(self.alternatives)
         n = len(self.criteria)
+        constraints = self.model.linear_constraints
 
+        for a in self.alternatives:
+            a_perfs = self.pt(a.id)
+            cat_id = self.alternative_affectations(a.id)
+            cat_rank = self.categories(cat_id).rank
+
+            # sum(w_j(a_i,b_h-1) - x_i = lbda
+            if cat_rank > 1:
+                lower_profile = self.profiles[cat_rank-2]
+                b_perfs = self.bpt(lower_profile.id)
+
+                constraints.add(names=['cinf'+a.id])
+                for c in self.criteria:
+                    if a_perfs(c.id) >= b_perfs(c.id):
+                        constraints.set_coefficients('cinf'+a.id, 'w'+c.id,
+                                                     1)
+
+                constraints.set_coefficients('cinf'+a.id, 'x'+a.id, -1)
+                constraints.set_coefficients('cinf'+a.id, 'lambda', -1)
+                constraints.set_rhs('cinf'+a.id, 0)
+                constraints.set_senses('cinf'+a.id, 'E')
+
+            # sum(w_j(a_i,b_h) + y_i = lbda
+            if cat_rank < len(self.categories):
+                upper_profile = self.profiles[cat_rank-1]
+                b_perfs = self.bpt(upper_profile.id)
+
+                constraints.add(names=['csup'+a.id])
+                for c in self.criteria:
+                    if a_perfs(c.id) >= b_perfs(c.id):
+                        constraints.set_coefficients('csup'+a.id, 'w'+c.id,
+                                                     1)
+
+                constraints.set_coefficients('csup'+a.id, 'y'+a.id, 1)
+                constraints.set_coefficients('csup'+a.id, 'lambda', -1)
+                constraints.set_rhs('cinf'+a.id, 0)
+                constraints.set_senses('cinf'+a.id, 'E')
+
+        # w_j <= 0.5*sum(w_j)
+        for c in self.criteria:
+            constraints.add(names=['wmax'+c.id])
+            constraints.set_coefficients('wmax'+c.id, w+c.id, 1)
+            constraints.set_rhs('wmax'+c.id, 1)
+            constraints.set_senses('wmax'+c.id, 'L')
+
+        # sum w_j = 1
+        constraints.add(names=['wsum'])
+        for c in self.criteria:
+            constraints.set_coefficients('wsum', 'w'+c.id, 1)
+        constraints.set_rhs('wsum', 1)
+        constraints.set_senses('wsum', 'E')
+
+    def add_objective_cplex(self):
+        self.model.objective.set_sense(model.objective.sense.maximize)
+        self.model.objective.set_linear('alpha', 1)
+        for a in self.alternatives:
+            self.model.objective.set_linear('x'+a.id, self.epsilon)
+            self.model.objective.set_linear('y'+a.id, self.epsilon)
+
+    def solve_cplex(self):
+        obj = self.model.solution.get_values("s"+str(i))
+
+        cvs = criteria_values()
+        for c in self.criteria:
+            cv = criterion_value()
+            cv.criterion_id = c.id
+            cv.value = self.model.solution.get_values('w'+c.id)
+            cvs.append(cv)
+
+        lbda = self.model.solution.get_values("lambda")
+
+    def add_variables_scip(self):
         self.w = dict((j.id, {}) for j in self.criteria)
         for j in self.criteria:
             self.w[j.id] = self.solver.variable(lower=0, upper=1)
@@ -61,6 +151,7 @@ class lp_elecre_tri_weights():
         self.lbda = self.solver.variable(lower=0.5, upper=1)
         self.alpha = self.solver.variable(lower=-2, upper=2)
 
+    def add_constraints_scip(self):
         for a in self.alternatives:
             a_perfs = self.pt(a.id)
             cat_id = self.alternative_affectations(a.id)
@@ -105,6 +196,9 @@ class lp_elecre_tri_weights():
         self.solver += sum(self.w[c.id] for c in self.criteria) == 1
 
     def add_objective_scip(self):
+        m = len(self.alternatives)
+        n = len(self.criteria)
+
         self.obj = self.alpha \
                     + self.epsilon*sum([self.x[i] for i in range(m)]) \
                     + self.epsilon*sum([self.y[i] for i in range(m)])
@@ -125,7 +219,7 @@ class lp_elecre_tri_weights():
 
         return obj, cvs, lbda
 
-    def add_constraints_glpk(self):
+    def add_variables_glpk(self):
         m = len(self.alternatives)
         n = len(self.criteria)
 
@@ -135,6 +229,9 @@ class lp_elecre_tri_weights():
         self.y = self.lp.var(xrange(m), 'y', bounds=(-2, 2))
         self.lbda = self.lp.var(name='lambda', bounds=(0.5, 1))
         self.alpha = self.lp.var(name='alpha', bounds=(-2, 2))
+
+    def add_constraints_glpk(self):
+        n = len(self.criteria)
 
         for i, a in enumerate(self.alternatives):
             a_perfs = self.pt(a.id)
@@ -174,6 +271,7 @@ class lp_elecre_tri_weights():
             self.lp.st(self.x[i] >= self.alpha)
             self.lp.st(self.y[i] >= self.alpha)
 
+        # w_j <= 0.5*sum(w_j)
         for j in range(n):
             self.lp.st(self.w[j] <= 0.5)
 
@@ -214,6 +312,8 @@ class lp_elecre_tri_weights():
             sol = self.solve_glpk()
         elif solver == 'scip':
             sol = self.solve_scip()
+        elif solver == 'cplex':
+            sol = self.solve_cplex()
         else:
             raise NameError('Invalid solver selected')
 
