@@ -3,7 +3,7 @@ import sys
 sys.path.insert(0, "..")
 from mcda.types import criterion_value, criteria_values
 
-solver = 'cplex'
+solver = 'glpk'
 verbose = False
 
 if solver == 'glpk':
@@ -238,6 +238,8 @@ class lp_elecre_tri_weights():
 
     def solve_scip(self):
         solution = self.lp.maximize(objective=obj)
+        if solution is None:
+            raise RuntimeError("No solution found")
 
         obj = solution.objective
 
@@ -327,8 +329,7 @@ class lp_elecre_tri_weights():
 
         status = self.lp.status()
         if status != 'opt':
-            print("Solver status: %s" % self.lp.status())
-            #FIXME: raise error
+            raise RuntimeError("Solver status: %s" % self.lp.status())
 
         #print(self.lp.reportKKT())
         obj = self.lp.vobj()
