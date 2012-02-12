@@ -119,7 +119,7 @@ class meta_electre_tri_global():
         histo_l, histo_r = self.compute_histograms(model, aa, current,
                                                    above, below)
 
-        print histo_l, histo_r
+#        print histo_l, histo_r
 
         for c in self.criteria:
             m = min(histo_l[c.id])
@@ -135,15 +135,22 @@ class meta_electre_tri_global():
                 interval = (current[c.id]-below[c.id])/self.n_intervals
                 r = random.randint(0, sum_l)
                 for i in range(self.n_intervals):
-                    histo_l[c.id][i]
+                    r -= histo_l[c.id][i]
+                    if r < 0:
+                        break;
+                model.profiles[p_id].performances[c.id] -= (i+1)*interval
             elif sum_l < sum_r:
                 interval = (above[c.id]-current[c.id])/self.n_intervals
                 r = random.randint(0, sum_r)
-                print r
+                for i in range(self.n_intervals):
+                    r -= histo_r[c.id][i]
+                    if r < 0:
+                        break;
+                model.profiles[p_id].performances[c.id] += (i+1)*interval
             else:
                 pass
 
-        print histo_l, histo_r
+#        print histo_l, histo_r
 
 #        for c_id, h in histograms.iteritems():
 #            m = max(h)
