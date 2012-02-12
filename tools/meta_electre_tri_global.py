@@ -32,42 +32,27 @@ class meta_electre_tri_global():
         self.bp = get_best_alternative_performances(pt, c)
         self.n_intervals = 3
 
-    def get_interval(self, perf, intervals):
-        i = 0;
-        while i < len(intervals) and perf > intervals[i]:
-            i += 1
-        return i
-
-    def update_one_profile(self, model, aa, p_id):
-        current = model.profiles[p_id].performances
-
-        if p_id == 0:
-            below = self.b0.performances
-        else:
-            below = model.profiles[p_id-1].performances
-
-        if p_id == len(model.profiles)-1:
-            above = self.bp.performances
-        else:
-            above = model.profiles[p_id+1].performances
-
+    def compute_histograms(self, model, aa, current, above, below):
         above_intervals = {}
         below_intervals = {}
         for c in model.criteria:
             below_interval = (current[c.id]-below[c.id])/self.n_intervals
             above_interval = (above[c.id]-current[c.id])/self.n_intervals
 
-            below_intervals[c.id] = [ below[c.id] + i*below_interval
+            below_intervals[c.id] = [ current[c.id] - i*below_interval
                                       for i in range(1, self.n_intervals) ]
             above_intervals[c.id] = [ current[c.id] + i*above_interval
                                       for i in range(1, self.n_intervals) ]
 
-        histograms = { c.id: [ 0 for i in range(2*self.n_intervals)]
+        histo_l = { c.id: [ 0 for i in range(self.n_intervals)]
+                       for c in model.criteria }
+        histo_r = { c.id: [ 0 for i in range(self.n_intervals)]
                        for c in model.criteria }
         for ap, c in product(self.pt, model.criteria):
             aperf = ap.performances[c.id]
             pperf = current[c.id]
-            histogram = histograms[c.id]
+            histo_l_c = histo_l[c.id]
+            histo_r_c = histo_r[c.id]
 
             if aperf > above[c.id]:
                 print 'above', aperf, above[c.id]
@@ -83,35 +68,97 @@ class meta_electre_tri_global():
             rank_ori = self.categories(af_ori).rank
 
             if aperf > pperf:
-                 i = self.get_interval(aperf, above_intervals[c.id])
-                 i = i + self.n_intervals
-                 if rank > rank_ori:    #Profile too low
-                    histogram[i] += 1
-                 elif rank == rank_ori:
-                    histogram[i] -= 1
+                i = 0
+                if rank < rank_ori: # Profile too low
+                    histo_r_c[i] += 1
+                    while i < len(above_intervals[c.id]):
+                        if aperf < above_intervals[c.id][i]:
+                            break;
+                        i += 1
+                        histo_r_c[i] += 1
+                elif rank == rank_ori:
+                    histo_r_c[i] -= 1
+                    while i < len(above_intervals[c.id]):
+                        if aperf < above_intervals[c.id][i]:
+                            break;
+                        i += 1
+                        histo_r_c[i] -= 1
 
             elif aperf < pperf:
-                 i = self.get_interval(aperf, below_intervals[c.id])
-                 if rank < rank_ori:    #Profile too high
-                    histogram[i] += 1
-                 elif rank == rank_ori:
-                    histogram[i] -= 1
+                i = 0
+                if rank > rank_ori: #Profile too high
+                    histo_l_c[i] += 1
+                    while i < len(below_intervals[c.id]):
+                        if aperf > below_intervals[c.id][i]:
+                            break;
+                        i += 1
+                        histo_l_c[i] += 1
+                elif rank == rank_ori:
+                    histo_l_c[i] -= 1
+                    while i < len(below_intervals[c.id]):
+                        if aperf > below_intervals[c.id][i]:
+                            break;
+                        i += 1
+                        histo_l_c[i] -= 1
 
-#        print histograms
-        for c_id, h in histograms.iteritems():
-            m = max(h)
-            if m > 0:
-                i = h.index(m)
-                print "*", m, i
-                if i == 0:
-                    current[c_id] = below[c_id]
-                elif i == 2*self.n_intervals-1:
-                    current[c_id] = above[c_id]
-                elif i < self.n_intervals:
-                    current[c_id] = below_intervals[c_id][i-1]
-                else:
-                    i -= self.n_intervals
-                    current[c_id] = above_intervals[c_id][i-1]
+        return histo_l, histo_r
+
+    def update_one_profile(self, model, aa, p_id):
+        current = model.profiles[p_id].performances
+
+        if p_id == 0:
+            below = self.b0.performances
+        else:
+            below = model.profiles[p_id-1].performances
+
+        if p_id == len(model.profiles)-1:
+            above = self.bp.performances
+        else:
+            above = model.profiles[p_id+1].performances
+
+        histo_l, histo_r = self.compute_histograms(model, aa, current,
+                                                   above, below)
+
+        print histo_l, histo_r
+
+        for c in self.criteria:
+            m = min(histo_l[c.id])
+            if m < 0:
+                histo_l[c.id] = [i+abs(m) for i in histo_l[c.id]]
+            m = min(histo_r[c.id])
+            if m < 0:
+                histo_r[c.id] = [i+abs(m) for i in histo_r[c.id]]
+
+            sum_r = sum(histo_l[c.id])
+            sum_l = sum(histo_r[c.id])
+            if sum_l > sum_r:
+                interval = (current[c.id]-below[c.id])/self.n_intervals
+                r = random.randint(0, sum_l)
+                for i in range(self.n_intervals):
+                    histo_l[c.id][i]
+            elif sum_l < sum_r:
+                interval = (above[c.id]-current[c.id])/self.n_intervals
+                r = random.randint(0, sum_r)
+                print r
+            else:
+                pass
+
+        print histo_l, histo_r
+
+#        for c_id, h in histograms.iteritems():
+#            m = max(h)
+#            if m > 0:
+#                i = h.index(m)
+#                print "*", m, i
+#                if i == 0:
+#                    current[c_id] = below[c_id]
+#                elif i == 2*self.n_intervals-1:
+#                    current[c_id] = above[c_id]
+#                elif i < self.n_intervals:
+#                    current[c_id] = below_intervals[c_id][i-1]
+#                else:
+#                    i -= self.n_intervals
+#                    current[c_id] = above_intervals[c_id][i-1]
 
 #            print ap.alternative_id, c.id
 
