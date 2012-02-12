@@ -56,18 +56,19 @@ class lp_elecre_tri_weights():
             self.add_objective_cplex()
 
     def add_variables_cplex(self):
+        infinity = cplex.infinity
         self.lp.variables.add(names=['w'+c.id for c in self.criteria],
-                              lb=[self.infinity for c in self.criteria],
-                              ub=[self.infinity for c in self.criteria])
+                              lb=[infinity for c in self.criteria],
+                              ub=[infinity for c in self.criteria])
         self.lp.variables.add(names=['x'+a.id for a in self.alternatives],
-                              lb=[self.infinity for a in self.alternatives],
-                              ub=[self.infinity for a in self.alternatives])
+                              lb=[-infinity for a in self.alternatives],
+                              ub=[infinity for a in self.alternatives])
         self.lp.variables.add(names=['y'+a.id for a in self.alternatives],
-                              lb=[self.infinity for a in self.alternatives],
-                              ub=[self.infinity for a in self.alternatives])
+                              lb=[-infinity for a in self.alternatives],
+                              ub=[infinity for a in self.alternatives])
         self.lp.variables.add(names=['lambda'], lb = [0.5], ub = [0.5])
-        self.lp.variables.add(names=['alpha'], lp=[self.infinity],
-                              ub=[self.infinity])
+        self.lp.variables.add(names=['alpha'], lp=[-infinity],
+                              ub=[infinity])
 
     def add_constraints_cplex(self):
         m = len(self.alternatives)
