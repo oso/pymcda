@@ -445,5 +445,6 @@ if __name__ == "__main__":
     print("Good affectations: %3g %%" % (float(total-nok)/total*100))
     print("Bad affectations : %3g %%" % (float(nok)/total*100))
 
-    print("Alternatives wrongly assigned:")
-    display_affectations_and_pt(anok, c, [aa, aa_learned], [pt])
+    if len(anok) > 0:
+        print("Alternatives wrongly assigned:")
+        display_affectations_and_pt(anok, c, [aa, aa_learned], [pt])
