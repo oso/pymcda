@@ -2,6 +2,7 @@ from __future__ import division
 import sys
 sys.path.insert(0, "..")
 import random
+import logging
 from itertools import product
 
 from mcda.electre_tri import electre_tri
@@ -11,6 +12,17 @@ from tools.generate_random import generate_random_categories_profiles
 from tools.generate_random import generate_random_alternatives
 from tools.utils import get_worst_alternative_performances
 from tools.utils import get_best_alternative_performances
+
+logger = logging.getLogger('meta')
+hdlr = logging.StreamHandler()
+logger.addHandler(hdlr)
+logger.setLevel(logging.INFO)
+
+def info(*args):
+    logger.info(','.join(map(str, args)))
+
+def debug(*args):
+    logger.debug(','.join(map(str, args)))
 
 class meta_electre_tri_global():
 
@@ -30,19 +42,26 @@ class meta_electre_tri_global():
         self.categories = cat
         self.b0 = get_worst_alternative_performances(pt, c)
         self.bp = get_best_alternative_performances(pt, c)
-        self.n_intervals = 3
+        self.n_intervals = 4
 
     def compute_histograms(self, model, aa, current, above, below):
         above_intervals = {}
         below_intervals = {}
-        for c in model.criteria:
-            below_interval = (current[c.id]-below[c.id])/self.n_intervals
-            above_interval = (above[c.id]-current[c.id])/self.n_intervals
 
-            below_intervals[c.id] = [ current[c.id] - i*below_interval
-                                      for i in range(1, self.n_intervals) ]
-            above_intervals[c.id] = [ current[c.id] + i*above_interval
-                                      for i in range(1, self.n_intervals) ]
+        for c in model.criteria:
+            below_size = current[c.id]-below[c.id]
+            above_size = above[c.id]-current[c.id]
+
+            below_intervals[c.id] = [ current[c.id] -
+                                      self.intervals_size[i]*below_size
+                                      for i in range(self.n_intervals-1) ]
+            above_intervals[c.id] = [ current[c.id] +
+                                      self.intervals_size[i]*above_size
+                                      for i in range(self.n_intervals-1) ]
+
+        debug('current', current)
+        debug('below', below_intervals)
+        debug('above', above_intervals)
 
         histo_l = { c.id: [ 0 for i in range(self.n_intervals)]
                        for c in model.criteria }
@@ -55,10 +74,8 @@ class meta_electre_tri_global():
             histo_r_c = histo_r[c.id]
 
             if aperf > above[c.id]:
-                print 'above', aperf, above[c.id]
                 continue
             if aperf < below[c.id]:
-                print 'below', aperf, below[c.id]
                 continue
 
             af = aa(ap.alternative_id)
@@ -68,40 +85,38 @@ class meta_electre_tri_global():
             rank_ori = self.categories(af_ori).rank
 
             if aperf > pperf:
-                i = 0
+                i = len(above_intervals[c.id])
                 if rank > rank_ori: # Profile too low
                     histo_r_c[i] += 1
-                    while i < len(above_intervals[c.id]):
-                        if aperf < above_intervals[c.id][i]:
-                            break;
-                        i += 1
+                    while i > 0:
+                        i -= 1
+                        if aperf > above_intervals[c.id][i]:
+                            break
                         histo_r_c[i] += 1
                 elif rank == rank_ori:
-                    pass
-#                    histo_r_c[i] -= 1
-#                    while i < len(above_intervals[c.id]):
-#                        if aperf < above_intervals[c.id][i]:
-#                            break;
-#                        i += 1
-#                        histo_r_c[i] -= 1
+                    histo_r_c[i] -= 1
+                    while i > 0:
+                        i-= 1
+                        if aperf >  above_intervals[c.id][i]:
+                            break
+                        histo_r_c[i] -= 1
 
             elif aperf < pperf:
-                i = 0
+                i = len(below_intervals[c.id])
                 if rank < rank_ori: #Profile too high
                     histo_l_c[i] += 1
-                    while i < len(below_intervals[c.id]):
-                        if aperf > below_intervals[c.id][i]:
-                            break;
-                        i += 1
+                    while i > 0:
+                        i -= 1
+                        if aperf < below_intervals[c.id][i]:
+                            break
                         histo_l_c[i] += 1
                 elif rank == rank_ori:
-                    pass
-#                    histo_l_c[i] -= 1
-#                    while i < len(below_intervals[c.id]):
-#                        if aperf > below_intervals[c.id][i]:
-#                            break;
-#                        i += 1
-#                        histo_l_c[i] -= 1
+                    histo_l_c[i] -= 1
+                    while i > 0:
+                        i -= 1
+                        if aperf < below_intervals[c.id][i]:
+                            break
+                        histo_l_c[i] -= 1
 
         return histo_l, histo_r
 
@@ -121,66 +136,29 @@ class meta_electre_tri_global():
         histo_l, histo_r = self.compute_histograms(model, aa, current,
                                                    above, below)
 
-        print current, histo_l, histo_r
+        debug(current, histo_l, histo_r)
 
         for c in self.criteria:
-            m = min(histo_l[c.id])
-            if m < 0:
-                histo_l[c.id] = [i+abs(m) for i in histo_l[c.id]]
-            m = min(histo_r[c.id])
-            if m < 0:
-                histo_r[c.id] = [i+abs(m) for i in histo_r[c.id]]
+            ml = max(histo_l[c.id])
+            mr = max(histo_r[c.id])
 
-            sum_r = sum(histo_r[c.id])
-            sum_l = sum(histo_l[c.id])
-            print sum_r, sum_l
-            if sum_l > sum_r:
-                print 'Move to the left'
-                interval = (current[c.id]-below[c.id])/self.n_intervals
-                r = random.randint(0, sum_l)
-                for i in range(self.n_intervals):
-                    r -= histo_l[c.id][i]
-                    if r < 0:
-                        break;
-                print "old", model.profiles[p_id].performances[c.id]
-                model.profiles[p_id].performances[c.id] -= (i+1)*interval
-                print "new", model.profiles[p_id].performances[c.id]
-            elif sum_l < sum_r:
-                print 'Move to the right'
-                interval = (above[c.id]-current[c.id])/self.n_intervals
-                print interval
-                r = random.randint(0, sum_r)
-                for i in range(self.n_intervals):
-                    r -= histo_r[c.id][i]
-                    if r < 0:
-                        break;
-                print "old", model.profiles[p_id].performances[c.id]
-                model.profiles[p_id].performances[c.id] += (i+1)*interval
-                print "new", model.profiles[p_id].performances[c.id]
+            if ml > mr:
+                below_size = current[c.id]-below[c.id]
+                i = histo_l[c.id].index(ml)
+                current[c.id] -= self.intervals_size[i]*below_size
+            elif ml < mr:
+                above_size = above[c.id]-current[c.id]
+                i = histo_r[c.id].index(mr)
+                current[c.id] += self.intervals_size[i]*above_size
             else:
-                pass
-
-#        for c_id, h in histograms.iteritems():
-#            m = max(h)
-#            if m > 0:
-#                i = h.index(m)
-#                print "*", m, i
-#                if i == 0:
-#                    current[c_id] = below[c_id]
-#                elif i == 2*self.n_intervals-1:
-#                    current[c_id] = above[c_id]
-#                elif i < self.n_intervals:
-#                    current[c_id] = below_intervals[c_id][i-1]
-#                else:
-#                    i -= self.n_intervals
-#                    current[c_id] = above_intervals[c_id][i-1]
-
-#            print ap.alternative_id, c.id
-
-#        interval = (current-below)/self.n_intervals
-#        below_intervals = [ below + i*interval
-#                            for i in range(1, self.n_intervals) ]
-#        below_intervals.insert(0, 
+                debug(ml, mr)
+                print ml, mr
+                if ml >= 0:
+                    above_size = above[c.id]-current[c.id]
+                    below_size = current[c.id]-below[c.id]
+                    up = current[c.id] + self.intervals_size[0]*above_size
+                    down = current[c.id] - self.intervals_size[0]*below_size
+                    current[c.id] = random.uniform(down, up)
 
     def update_profiles(self, model, aa):
         c_perfs = {c.id:list() for c in model.criteria}
@@ -196,19 +174,6 @@ class meta_electre_tri_global():
             self.update_one_profile(model, aa, i);
 
     def compute_fitness(self, model, aa):
-#        # Constructs the intervals
-#        for c in model.criteria:
-#            perfs = c_perfs[c.id]
-#            for h in range(1, len(model.profiles)+1):
-#                perf_profile = perfs[h];
-#                perf_profile_inf = perfs[h-1]
-#                perf_profile_sup = perfs[h+1]
-#                print perf_profile
-#                print perf_profile_inf
-#                print perf_profile_sup
-#                c_perfs_interval_min[h][c.id] = []
-#                c_perfs_interval_plus[h][c.id] = []
-
         total = len(self.alternatives)
         nok = 0
         for a in self.alternatives:
@@ -255,12 +220,16 @@ class meta_electre_tri_global():
 
             #print("Objective value: %d" % sol[0])
 
+#            model.cv = cv
+#            model.lbda = lbda
             model.cv = sol[1]
             model.lbda = sol[2]
 
             aa = model.pessimist(self.pt)
             fitness = self.compute_fitness(model, aa)
             models_fitness[model] = fitness
+            if fitness == 1:
+                return models_fitness
 
             self.update_profiles(model, aa)
 
@@ -271,11 +240,18 @@ class meta_electre_tri_global():
     #   - m: number of model to generate
     #   - k: k worst criteria to exchange
     def solve(self, n, m, k):
+        isize = [ 3 ** i for i in range(self.n_intervals) ]
+        self.intervals_size = [ i/sum(isize) for i in isize ]
+
         self.models = self.initialization(m)
         for i in range(n):
             models_fitness = self.loop_one(k)
             m = max(models_fitness, key = lambda a: models_fitness.get(a))
-            print(models_fitness[m]),
+            info("Iteration %d: fitness = %f" % (i, models_fitness[m]))
+            model.profiles.display(criterion_ids=m.criteria.get_ids())
+            m.profiles.display(False, criterion_ids=m.criteria.get_ids())
+            if models_fitness[m] == 1:
+                break;
         print('')
 
         return m
@@ -294,7 +270,7 @@ if __name__ == "__main__":
 
     # Original Electre Tri model
     a = generate_random_alternatives(100)
-    c = generate_random_criteria(1)
+    c = generate_random_criteria(9)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
@@ -319,7 +295,7 @@ if __name__ == "__main__":
     meta_global = meta_electre_tri_global(a, c, cv, aa, pt, cat)
 
     t1 = time.time()
-    m = meta_global.solve(1, 10, 5)
+    m = meta_global.solve(5, 100, 5)
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
 
@@ -328,20 +304,23 @@ if __name__ == "__main__":
     print('Learned model')
     print('=============')
     m.profiles.display(criterion_ids=cids)
-    m.cv.display(criterion_ids=cids)
+    m.cv.display(criterion_ids=cids, name='w_learned')
     print("lambda\t%.7s" % m.lbda)
     #print(aa_learned)
 
     total = len(a)
     nok = 0
+    anok = []
     for alt in a:
         if aa(alt.id) <> aa_learned(alt.id):
-            print("Pessimits affectation of %s mismatch (%s <> %s)" %
-                  (str(alt.id), aa(alt.id), aa_learned(alt.id)))
+            anok.append(alt)
+#            print("Pessimits affectation of %s mismatch (%s <> %s)" %
+#                  (str(alt.id), aa(alt.id), aa_learned(alt.id)))
             nok += 1
 
     print("Good affectations: %3g %%" % (float(total-nok)/total*100))
     print("Bad affectations : %3g %%" % (float(nok)/total*100))
 
-    print("Alternatives and affectations")
-    display_affectations_and_pt(a, c, [aa, aa_learned], [pt])
+    if len(anok) > 0:
+        print("Alternatives and affectations")
+        display_affectations_and_pt(anok, c, [aa, aa_learned], [pt])
