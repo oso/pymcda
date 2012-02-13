@@ -138,12 +138,12 @@ class lp_elecre_tri_weights():
             constraints.set_senses('xmax'+a.id, 'L')
             constraints.set_senses('ymax'+a.id, 'L')
 
-        # w_j <= 0.5*sum(w_j)
-        for c in self.criteria:
-            constraints.add(names=['wmax'+c.id])
-            constraints.set_coefficients('wmax'+c.id, 'w'+c.id, 1)
-            constraints.set_rhs('wmax'+c.id, 0.5)
-            constraints.set_senses('wmax'+c.id, 'L')
+#        # w_j <= 0.5*sum(w_j)
+#        for c in self.criteria:
+#            constraints.add(names=['wmax'+c.id])
+#            constraints.set_coefficients('wmax'+c.id, 'w'+c.id, 1)
+#            constraints.set_rhs('wmax'+c.id, 0.5)
+#            constraints.set_senses('wmax'+c.id, 'L')
 
         # sum w_j = 1
         constraints.add(names=['wsum'])
@@ -229,9 +229,9 @@ class lp_elecre_tri_weights():
             self.lp += self.x[a.id] >= self.alpha
             self.lp += self.y[a.id] >= self.alpha
 
-        # w_j <= 0.5*sum(w_j)
-        for c in self.criteria:
-            self.lp += self.w[c.id] <= 0.5
+#        # w_j <= 0.5*sum(w_j)
+#        for c in self.criteria:
+#            self.lp += self.w[c.id] <= 0.5
 
         # sum w_j = 1
         self.lp += sum(self.w[c.id] for c in self.criteria) == 1
@@ -318,9 +318,9 @@ class lp_elecre_tri_weights():
             self.lp.st(self.x[i] >= self.alpha)
             self.lp.st(self.y[i] >= self.alpha)
 
-        # w_j <= 0.5*sum(w_j)
-        for j in range(n):
-            self.lp.st(self.w[j] <= 0.5)
+#        # w_j <= 0.5*sum(w_j)
+#        for j in range(n):
+#            self.lp.st(self.w[j] <= 0.5)
 
         # sum w_j = 1
         self.lp.st(sum(self.w[j] for j in range(n)) == 1)
