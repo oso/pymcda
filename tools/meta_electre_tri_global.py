@@ -69,7 +69,7 @@ class meta_electre_tri_global():
 
             if aperf > pperf:
                 i = 0
-                if rank < rank_ori: # Profile too low
+                if rank > rank_ori: # Profile too low
                     histo_r_c[i] += 1
                     while i < len(above_intervals[c.id]):
                         if aperf < above_intervals[c.id][i]:
@@ -77,16 +77,17 @@ class meta_electre_tri_global():
                         i += 1
                         histo_r_c[i] += 1
                 elif rank == rank_ori:
-                    histo_r_c[i] -= 1
-                    while i < len(above_intervals[c.id]):
-                        if aperf < above_intervals[c.id][i]:
-                            break;
-                        i += 1
-                        histo_r_c[i] -= 1
+                    pass
+#                    histo_r_c[i] -= 1
+#                    while i < len(above_intervals[c.id]):
+#                        if aperf < above_intervals[c.id][i]:
+#                            break;
+#                        i += 1
+#                        histo_r_c[i] -= 1
 
             elif aperf < pperf:
                 i = 0
-                if rank > rank_ori: #Profile too high
+                if rank < rank_ori: #Profile too high
                     histo_l_c[i] += 1
                     while i < len(below_intervals[c.id]):
                         if aperf > below_intervals[c.id][i]:
@@ -94,12 +95,13 @@ class meta_electre_tri_global():
                         i += 1
                         histo_l_c[i] += 1
                 elif rank == rank_ori:
-                    histo_l_c[i] -= 1
-                    while i < len(below_intervals[c.id]):
-                        if aperf > below_intervals[c.id][i]:
-                            break;
-                        i += 1
-                        histo_l_c[i] -= 1
+                    pass
+#                    histo_l_c[i] -= 1
+#                    while i < len(below_intervals[c.id]):
+#                        if aperf > below_intervals[c.id][i]:
+#                            break;
+#                        i += 1
+#                        histo_l_c[i] -= 1
 
         return histo_l, histo_r
 
@@ -119,7 +121,7 @@ class meta_electre_tri_global():
         histo_l, histo_r = self.compute_histograms(model, aa, current,
                                                    above, below)
 
-#        print histo_l, histo_r
+        print current, histo_l, histo_r
 
         for c in self.criteria:
             m = min(histo_l[c.id])
@@ -129,28 +131,34 @@ class meta_electre_tri_global():
             if m < 0:
                 histo_r[c.id] = [i+abs(m) for i in histo_r[c.id]]
 
-            sum_r = sum(histo_l[c.id])
-            sum_l = sum(histo_r[c.id])
+            sum_r = sum(histo_r[c.id])
+            sum_l = sum(histo_l[c.id])
+            print sum_r, sum_l
             if sum_l > sum_r:
+                print 'Move to the left'
                 interval = (current[c.id]-below[c.id])/self.n_intervals
                 r = random.randint(0, sum_l)
                 for i in range(self.n_intervals):
                     r -= histo_l[c.id][i]
                     if r < 0:
                         break;
+                print "old", model.profiles[p_id].performances[c.id]
                 model.profiles[p_id].performances[c.id] -= (i+1)*interval
+                print "new", model.profiles[p_id].performances[c.id]
             elif sum_l < sum_r:
+                print 'Move to the right'
                 interval = (above[c.id]-current[c.id])/self.n_intervals
+                print interval
                 r = random.randint(0, sum_r)
                 for i in range(self.n_intervals):
                     r -= histo_r[c.id][i]
                     if r < 0:
                         break;
+                print "old", model.profiles[p_id].performances[c.id]
                 model.profiles[p_id].performances[c.id] += (i+1)*interval
+                print "new", model.profiles[p_id].performances[c.id]
             else:
                 pass
-
-#        print histo_l, histo_r
 
 #        for c_id, h in histograms.iteritems():
 #            m = max(h)
@@ -286,7 +294,7 @@ if __name__ == "__main__":
 
     # Original Electre Tri model
     a = generate_random_alternatives(100)
-    c = generate_random_criteria(5)
+    c = generate_random_criteria(1)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
@@ -311,7 +319,7 @@ if __name__ == "__main__":
     meta_global = meta_electre_tri_global(a, c, cv, aa, pt, cat)
 
     t1 = time.time()
-    m = meta_global.solve(10, 100, 5)
+    m = meta_global.solve(1, 10, 5)
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
 
