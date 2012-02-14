@@ -7,7 +7,7 @@ from itertools import product
 
 from mcda.electre_tri import electre_tri
 from mcda.types import alternative_affectation, alternatives_affectations
-from tools.lp_electre_tri_weights import lp_elecre_tri_weights
+from tools.lp_electre_tri_weights import lp_electre_tri_weights
 from tools.generate_random import generate_random_categories_profiles
 from tools.generate_random import generate_random_alternatives
 from tools.utils import get_worst_alternative_performances
@@ -151,8 +151,6 @@ class meta_electre_tri_global():
                 i = histo_r[c.id].index(mr)
                 current[c.id] += self.intervals_size[i]*above_size
             else:
-                debug(ml, mr)
-                print ml, mr
                 if ml >= 0:
                     above_size = above[c.id]-current[c.id]
                     below_size = current[c.id]-below[c.id]
@@ -212,10 +210,10 @@ class meta_electre_tri_global():
     def loop_one(self, k):
         models_fitness = {}
         for model in self.models:
-            lpw = lp_elecre_tri_weights(self.alternatives, self.criteria,
-                                        self.criteria_vals, self.aa,
-                                        self.pt, self.categories, self.b,
-                                        model.profiles)
+            lpw = lp_electre_tri_weights(self.alternatives, self.criteria,
+                                         self.criteria_vals, self.aa,
+                                         self.pt, self.categories, self.b,
+                                         model.profiles)
             sol = lpw.solve()
 
             #print("Objective value: %d" % sol[0])
@@ -247,9 +245,11 @@ class meta_electre_tri_global():
         for i in range(n):
             models_fitness = self.loop_one(k)
             m = max(models_fitness, key = lambda a: models_fitness.get(a))
-            info("Iteration %d: fitness = %f" % (i, models_fitness[m]))
+            info("Iteration %d: best fitness = %f" % (i, models_fitness[m]))
             model.profiles.display(criterion_ids=m.criteria.get_ids())
-            m.profiles.display(False, criterion_ids=m.criteria.get_ids())
+            m.profiles.display(False, criterion_ids=m.criteria.get_ids(),
+                               append='_learned')
+            print models_fitness
             if models_fitness[m] == 1:
                 break;
         print('')
@@ -270,7 +270,7 @@ if __name__ == "__main__":
 
     # Original Electre Tri model
     a = generate_random_alternatives(100)
-    c = generate_random_criteria(9)
+    c = generate_random_criteria(3)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
@@ -295,7 +295,7 @@ if __name__ == "__main__":
     meta_global = meta_electre_tri_global(a, c, cv, aa, pt, cat)
 
     t1 = time.time()
-    m = meta_global.solve(5, 100, 5)
+    m = meta_global.solve(100, 10, 5)
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
 
@@ -303,8 +303,10 @@ if __name__ == "__main__":
 
     print('Learned model')
     print('=============')
-    m.profiles.display(criterion_ids=cids)
-    m.cv.display(criterion_ids=cids, name='w_learned')
+    model.profiles.display(criterion_ids=cids)
+    m.profiles.display(header=False, criterion_ids=cids, append='_learned')
+    model.cv.display(criterion_ids=cids, name='w')
+    m.cv.display(header=False, criterion_ids=cids, name='w_learned')
     print("lambda\t%.7s" % m.lbda)
     #print(aa_learned)
 
