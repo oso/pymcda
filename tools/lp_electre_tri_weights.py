@@ -3,7 +3,7 @@ import sys
 sys.path.insert(0, "..")
 from mcda.types import criterion_value, criteria_values
 
-solver = 'glpk'
+solver = 'cplex'
 verbose = False
 
 if solver == 'glpk':
@@ -15,7 +15,7 @@ elif solver == 'cplex':
 else:
     raise NameError('Invalid solver selected')
 
-class lp_elecre_tri_weights():
+class lp_electre_tri_weights():
 
     # Input params:
     #   - a: learning alternatives
@@ -58,17 +58,17 @@ class lp_elecre_tri_weights():
     def add_variables_cplex(self):
         infinity = cplex.infinity
         self.lp.variables.add(names=['w'+c.id for c in self.criteria],
-                              lb=[infinity for c in self.criteria],
-                              ub=[infinity for c in self.criteria])
+                              lb=[0 for c in self.criteria],
+                              ub=[1 for c in self.criteria])
         self.lp.variables.add(names=['x'+a.id for a in self.alternatives],
-                              lb=[-infinity for a in self.alternatives],
-                              ub=[infinity for a in self.alternatives])
+                              lb=[-2 for a in self.alternatives],
+                              ub=[2 for a in self.alternatives])
         self.lp.variables.add(names=['y'+a.id for a in self.alternatives],
-                              lb=[-infinity for a in self.alternatives],
-                              ub=[infinity for a in self.alternatives])
+                              lb=[-2 for a in self.alternatives],
+                              ub=[2 for a in self.alternatives])
         self.lp.variables.add(names=['lambda'], lb = [0.5], ub = [0.5])
-        self.lp.variables.add(names=['alpha'], lp=[-infinity],
-                              ub=[infinity])
+        self.lp.variables.add(names=['alpha'], lb=[-2],
+                              ub=[2])
 
     def add_constraints_cplex(self):
         m = len(self.alternatives)
