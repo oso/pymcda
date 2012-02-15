@@ -3,7 +3,7 @@ import sys
 sys.path.insert(0, "..")
 from mcda.types import criterion_value, criteria_values
 
-solver = 'cplex'
+solver = 'glpk'
 verbose = False
 
 if solver == 'glpk':
@@ -45,12 +45,17 @@ class lp_electre_tri_weights():
             self.add_constraints_glpk()
             self.add_objective_glpk()
         elif solver == 'scip':
-            self.lp = scip.solver(quiet=False)
+            self.lp = scip.solver(quiet=not verbose)
             self.add_variables_scip()
             self.add_constraints_scip()
             self.add_objective_scip()
         elif solver == 'cplex':
             self.lp = cplex.Cplex()
+            if verbose is False:
+                self.lp.set_log_stream(None)
+                self.lp.set_results_stream(None)
+#                self.lp.set_warning_stream(None)
+#                self.lp.set_error_stream(None)
             self.add_variables_cplex()
             self.add_constraints_cplex()
             self.add_objective_cplex()
@@ -66,7 +71,7 @@ class lp_electre_tri_weights():
         self.lp.variables.add(names=['y'+a.id for a in self.alternatives],
                               lb=[-2 for a in self.alternatives],
                               ub=[2 for a in self.alternatives])
-        self.lp.variables.add(names=['lambda'], lb = [0.5], ub = [0.5])
+        self.lp.variables.add(names=['lambda'], lb = [0.5], ub = [1])
         self.lp.variables.add(names=['alpha'], lb=[-2],
                               ub=[2])
 
@@ -135,8 +140,8 @@ class lp_electre_tri_weights():
             constraints.set_coefficients('ymax'+a.id, 'alpha', -1)
             constraints.set_rhs('xmax'+a.id, 0)
             constraints.set_rhs('ymax'+a.id, 0)
-            constraints.set_senses('xmax'+a.id, 'L')
-            constraints.set_senses('ymax'+a.id, 'L')
+            constraints.set_senses('xmax'+a.id, 'G')
+            constraints.set_senses('ymax'+a.id, 'G')
 
 #        # w_j <= 0.5*sum(w_j)
 #        for c in self.criteria:
@@ -154,7 +159,7 @@ class lp_electre_tri_weights():
 
     def add_objective_cplex(self):
         self.lp.objective.set_sense(self.lp.objective.sense.maximize)
-#        self.lp.objective.set_linear('alpha', 1)
+        self.lp.objective.set_linear('alpha', 1)
         for a in self.alternatives:
             self.lp.objective.set_linear('x'+a.id, self.epsilon)
             self.lp.objective.set_linear('y'+a.id, self.epsilon)
@@ -181,6 +186,7 @@ class lp_electre_tri_weights():
             self.w[j.id] = self.lp.variable(lower=0, upper=1)
 
         self.x = dict((i.id, {}) for i in self.alternatives)
+        self.y = dict((i.id, {}) for i in self.alternatives)
         for i in self.alternatives:
             self.x[i.id] = self.lp.variable(lower=-2, upper=2)
             self.y[i.id] = self.lp.variable(lower=-2, upper=2)
@@ -241,11 +247,11 @@ class lp_electre_tri_weights():
         n = len(self.criteria)
 
         self.obj = self.alpha \
-                    + self.epsilon*sum([self.x[i] for i in range(m)]) \
-                    + self.epsilon*sum([self.y[i] for i in range(m)])
+             + self.epsilon*sum([self.x[i.id] for i in self.alternatives]) \
+             + self.epsilon*sum([self.y[i.id] for i in self.alternatives])
 
     def solve_scip(self):
-        solution = self.lp.maximize(objective=obj)
+        solution = self.lp.maximize(objective=self.obj)
         if solution is None:
             raise RuntimeError("No solution found")
 
@@ -367,6 +373,7 @@ class lp_electre_tri_weights():
 
 if __name__ == "__main__":
     import time
+    import random
     from tools.generate_random import generate_random_alternatives
     from tools.generate_random import generate_random_criteria
     from tools.generate_random import generate_random_criteria_values
@@ -378,21 +385,22 @@ if __name__ == "__main__":
     from tools.utils import display_affectations_and_pt
     from mcda.electre_tri import electre_tri
 
-    print 'Solver used:', solver
+    print("Solver used: %s" % solver)
     # Original Electre Tri model
-    a = generate_random_alternatives(2000)
+    a = generate_random_alternatives(60)
     c = generate_random_criteria(5)
-    cv = generate_random_criteria_values(c, 4567)
+    cv = generate_random_criteria_values(c, 890)
     normalize_criteria_weights(cv)
-    pt = generate_random_performance_table(a, c, 1234)
+    pt = generate_random_performance_table(a, c)
 
-    b = generate_random_alternatives(2, 'b')
-    bpt = generate_random_categories_profiles(b, c, 2345)
-    cat = generate_random_categories(3)
+    b = generate_random_alternatives(1, 'b')
+    bpt = generate_random_categories_profiles(b, c)
+    cat = generate_random_categories(2)
 
-    lbda = 0.75
+    lbda = random.uniform(0.5, 1)
+#    lbda = 0.75
     errors = 0.000
-    epsilon = 0.0001
+    epsilon = 0.001
     delta = 0.0001
 
     model = electre_tri(c, cv, bpt, lbda, cat)
@@ -411,8 +419,8 @@ if __name__ == "__main__":
     print("epsilon: %g" % epsilon)
     #print(aa)
 
-    lp_weights = lp_elecre_tri_weights(a, c, cv, aa, pt, cat, b, bpt,
-                                       epsilon, delta)
+    lp_weights = lp_electre_tri_weights(a, c, cv, aa, pt, cat, b, bpt,
+                                        epsilon, delta)
 
     t1 = time.time()
     obj, cv_learned, lbda_learned = lp_weights.solve()
@@ -436,7 +444,7 @@ if __name__ == "__main__":
     nok = 0
     anok = []
     for alt in a:
-        if aa(alt.id) <> aa_learned(alt.id):
+        if aa(alt.id) != aa_learned(alt.id):
             anok.append(alt)
 #            print("Pessimistic affectation of %s mismatch (%s <> %s)" %
 #                  (str(alt.id), aa(alt.id), aa_learned(alt.id)))
