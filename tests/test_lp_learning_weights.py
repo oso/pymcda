@@ -1,3 +1,4 @@
+from __future__ import division
 import sys
 sys.path.insert(0, "..")
 import unittest
@@ -13,34 +14,70 @@ from tools.generate_random import generate_random_criteria_values
 from tools.generate_random import generate_random_performance_table
 from tools.generate_random import generate_random_categories
 from tools.generate_random import generate_random_categories_profiles
+from tools.utils import normalize_criteria_weights
 
-seeds = [ 1234 ]
+seeds = [ 123, 456, 789, 12, 345, 678, 901, 234, 567, 890 ]
 
 class lp_electre_tri_weights_tests(unittest.TestCase):
 
-    def test001_variable_number_alternatives(self):
-        n_alts = [ i*10 for i in range(10) ]
-        n_crit = [ i for i in range(2,7) ]
-        objective = { nc: {na: dict() for na in n_alts} for nc in n_crit }
-        print objective[6]
-        raise
+    def test001_variable_number_alternatives_and_criteria(self):
+        n_alts = [ i*10 for i in range(1, 11) ]
+        n_crit = [ i for i in range(2,11) ]
+
+        objectives = { nc: {na: dict() for na in n_alts} for nc in n_crit }
+        times = { nc: {na: dict() for na in n_alts} for nc in n_crit }
+        errors = { nc: {na: dict() for na in n_alts} for nc in n_crit }
         for nc, na, seed in product(n_crit, n_alts, seeds):
-            random.seed(seed)
             a = generate_random_alternatives(na)
             c = generate_random_criteria(nc)
+            cv = generate_random_criteria_values(c, seed)
+            normalize_criteria_weights(cv)
             pt = generate_random_performance_table(a, c)
-            cv = generate_random_criteria_values(c)
-            b = generate_random_alternatives(2, 'b')
-            bpt = generate_random_categories_profiles(b, c, 2345)
-            cat = generate_random_categories(3)
+
+            b = generate_random_alternatives(1, 'b')
+            bpt = generate_random_categories_profiles(b, c)
+            cat = generate_random_categories(2)
+
             lbda = random.uniform(0.5, 1)
 
             model = electre_tri(c, cv, bpt, lbda, cat)
             aa = model.pessimist(pt)
 
+            t1 = time.time()
             lp_weights = lp_electre_tri_weights(a, c, cv, aa, pt, cat,
                                                 b, bpt, 0.0001, 0.0001)
             obj, cv_learned, lbda_learned = lp_weights.solve()
+            t2 = time.time()
+
+            objectives[nc][na][seed] = obj
+            times[nc][na][seed] = t2-t1
+
+            model.cv = cv_learned
+            model.lbda = lbda_learned
+            aa_learned = model.pessimist(pt)
+
+            total = len(a)
+            nok = 0
+            for alt in a:
+                if aa(alt.id) != aa_learned(alt.id):
+                    nok += 1
+
+            errors[nc][na][seed] = nok/total
+
+            print("%d\t%d\t%s\t%-6.5f\t%-6.5f\t%-6.5f" % (nc, na, seed,
+                  obj, t2-t1, nok/total))
+
+
+        print('Summary')
+        print('========')
+        print("nseeds: %d" % len(seeds))
+        print('nc\tna\tobj\ttime\terrors')
+        for nc, na in product(n_crit, n_alts):
+            obj = sum(objectives[nc][na].values())/len(seeds)
+            tim = sum(times[nc][na].values())/len(seeds)
+            err = sum(errors[nc][na].values())/len(seeds)
+            print("%d\t%d\t%-6.5f\t%-6.5f\t%-6.5f" % (nc, na, obj, tim,
+                  err))
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
