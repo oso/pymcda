@@ -24,31 +24,27 @@ def info(*args):
 def debug(*args):
     logger.debug(','.join(map(str, args)))
 
-class meta_electre_tri_global():
+class heuristic_profiles():
 
-    # Input params:
-    #   - a: learning alternatives
-    #   - c: criteria
-    #   - cvals: criteria values
-    #   - aa: alternative affectations
-    #   - pt : alternative performance table
-    #   - cat: categories
-    def __init__(self, a, c, cvals, aa, pt, cat):
+    def __init__(self, model, a, c, pt, aa, b0, bp):
+        self.m = model
         self.alternatives = a
         self.criteria = c
-        self.criteria_vals = cvals
-        self.aa = aa
         self.pt = pt
-        self.categories = cat
-        self.b0 = get_worst_alternative_performances(pt, c)
-        self.bp = get_best_alternative_performances(pt, c)
-        self.n_intervals = 4
+        self.aa = aa
+        self.b0 = b0
+        self.bp = bp
 
-    def compute_histograms(self, model, aa, current, above, below):
+        self.n_intervals = 3
+
+        isize = [ 3 ** i for i in range(self.n_intervals) ]
+        self.intervals_size = [ i/sum(isize) for i in isize ]
+
+    def compute_histograms(self, aa, current, above, below):
         above_intervals = {}
         below_intervals = {}
 
-        for c in model.criteria:
+        for c in self.m.criteria:
             below_size = current[c.id]-below[c.id]
             above_size = above[c.id]-current[c.id]
 
@@ -64,10 +60,10 @@ class meta_electre_tri_global():
         debug('above', above_intervals)
 
         histo_l = { c.id: [ 0 for i in range(self.n_intervals)]
-                       for c in model.criteria }
+                       for c in self.m.criteria }
         histo_r = { c.id: [ 0 for i in range(self.n_intervals)]
-                       for c in model.criteria }
-        for ap, c in product(self.pt, model.criteria):
+                       for c in self.m.criteria }
+        for ap, c in product(self.pt, self.m.criteria):
             aperf = ap.performances[c.id]
             pperf = current[c.id]
             histo_l_c = histo_l[c.id]
@@ -81,8 +77,8 @@ class meta_electre_tri_global():
             af = aa(ap.alternative_id)
             af_ori = self.aa(ap.alternative_id)
 
-            rank = self.categories(af).rank
-            rank_ori = self.categories(af_ori).rank
+            rank = self.m.categories(af).rank
+            rank_ori = self.m.categories(af_ori).rank
 
             if aperf > pperf:
                 i = len(above_intervals[c.id])
@@ -120,21 +116,21 @@ class meta_electre_tri_global():
 
         return histo_l, histo_r
 
-    def update_one_profile(self, model, aa, p_id):
-        current = model.profiles[p_id].performances
+    def update_one_profile(self, aa, p_id):
+        current = self.m.profiles[p_id].performances
 
         if p_id == 0:
             below = self.b0.performances
         else:
-            below = model.profiles[p_id-1].performances
+            below = self.m.profiles[p_id-1].performances
 
-        if p_id == len(model.profiles)-1:
+        if p_id == len(self.m.profiles)-1:
             above = self.bp.performances
         else:
-            above = model.profiles[p_id+1].performances
+            above = self.m.profiles[p_id+1].performances
 
-        histo_l, histo_r = self.compute_histograms(model, aa, current,
-                                                   above, below)
+        histo_l, histo_r = self.compute_histograms(aa, current, above,
+                                                   below)
 
         debug(current, histo_l, histo_r)
 
@@ -158,18 +154,37 @@ class meta_electre_tri_global():
                     down = current[c.id] - self.intervals_size[0]*below_size
                     current[c.id] = random.uniform(down, up)
 
-    def update_profiles(self, model, aa):
-        c_perfs = {c.id:list() for c in model.criteria}
-        for i, p in enumerate(model.profiles):
+    def optimize(self):
+        c_perfs = {c.id:list() for c in self.m.criteria}
+        for i, p in enumerate(self.m.profiles):
             perfs = p.performances
-            for c in model.criteria:
+            for c in self.m.criteria:
                 c_perfs[c.id].append(perfs[c.id])
-        for c in model.criteria:
+        for c in self.m.criteria:
             c_perfs[c.id].insert(0, self.b0.performances[c.id])
             c_perfs[c.id].append(self.bp.performances[c.id])
 
-        for i in range(len(model.profiles)):
-            self.update_one_profile(model, aa, i);
+        for i in range(len(self.m.profiles)):
+            self.update_one_profile(self.aa, i);
+
+class meta_electre_tri_global():
+
+    # Input params:
+    #   - a: learning alternatives
+    #   - c: criteria
+    #   - cvals: criteria values
+    #   - aa: alternative affectations
+    #   - pt : alternative performance table
+    #   - cat: categories
+    def __init__(self, a, c, cvals, aa, pt, cat):
+        self.alternatives = a
+        self.criteria = c
+        self.criteria_vals = cvals
+        self.aa = aa
+        self.pt = pt
+        self.categories = cat
+        self.b0 = get_worst_alternative_performances(pt, c)
+        self.bp = get_best_alternative_performances(pt, c)
 
     def compute_fitness(self, model, aa):
         total = len(self.alternatives)
@@ -207,7 +222,7 @@ class meta_electre_tri_global():
 
         return models
 
-    def loop_one(self, k):
+    def loop_one(self):
         models_fitness = {}
         for model in self.models:
             lpw = lp_electre_tri_weights(self.alternatives, self.criteria,
@@ -223,27 +238,30 @@ class meta_electre_tri_global():
             model.cv = sol[1]
             model.lbda = sol[2]
 
+            model.cv.display(criterion_ids=model.criteria.get_ids())
+
             aa = model.pessimist(self.pt)
             fitness = self.compute_fitness(model, aa)
             models_fitness[model] = fitness
             if fitness == 1:
                 return models_fitness
 
-            self.update_profiles(model, aa)
+            heuristic = heuristic_profiles(model, self.alternatives,
+                                           self.criteria, self.pt, aa,
+                                           self.b0, self.bp)
+            heuristic.optimize()
+
+#            self.update_profiles(model, aa)
 
         return models_fitness
 
     # Input params:
     #   - n: number of loop to do
     #   - m: number of model to generate
-    #   - k: k worst criteria to exchange
-    def solve(self, n, m, k):
-        isize = [ 3 ** i for i in range(self.n_intervals) ]
-        self.intervals_size = [ i/sum(isize) for i in isize ]
-
+    def solve(self, n, m):
         self.models = self.initialization(m)
         for i in range(n):
-            models_fitness = self.loop_one(k)
+            models_fitness = self.loop_one()
             m = max(models_fitness, key = lambda a: models_fitness.get(a))
             info("Iteration %d: best fitness = %f" % (i, models_fitness[m]))
             model.profiles.display(criterion_ids=m.criteria.get_ids())
@@ -270,7 +288,7 @@ if __name__ == "__main__":
 
     # Original Electre Tri model
     a = generate_random_alternatives(100)
-    c = generate_random_criteria(3)
+    c = generate_random_criteria(9)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
@@ -295,7 +313,7 @@ if __name__ == "__main__":
     meta_global = meta_electre_tri_global(a, c, cv, aa, pt, cat)
 
     t1 = time.time()
-    m = meta_global.solve(100, 10, 5)
+    m = meta_global.solve(100, 10)
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
 
