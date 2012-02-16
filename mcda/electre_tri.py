@@ -117,22 +117,15 @@ class electre_tri:
         s_ab = self.credibility(action_perfs, profile, criteria, cv, profile_rank)
         s_ba = self.credibility(profile, action_perfs, criteria, cv, profile_rank)
 
-        print "%10g - %10g" % (s_ab, lbda),
         if eq(s_ab, lbda) or s_ab > lbda:
-            print 'ge',
             if s_ba >= lbda:
-                print 'I'
                 return "I"
             else:
-                print 'S'
                 return "S"
         else:
-            print 'lt',
             if s_ba >= lbda:
-                print '-'
                 return "-"
             else:
-                print 'R'
                 return "R"
 
     def pessimist(self, pt):
