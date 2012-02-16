@@ -1,4 +1,9 @@
+from __future__ import division
+import math
 from mcda.types import alternative_affectation, alternatives_affectations
+
+def eq(a, b, eps=10e-10):
+    return abs(a-b) <= eps
 
 class electre_tri:
 
@@ -112,15 +117,22 @@ class electre_tri:
         s_ab = self.credibility(action_perfs, profile, criteria, cv, profile_rank)
         s_ba = self.credibility(profile, action_perfs, criteria, cv, profile_rank)
 
-        if s_ab >= lbda:
+        print "%10g - %10g" % (s_ab, lbda),
+        if eq(s_ab, lbda) or s_ab > lbda:
+            print 'ge',
             if s_ba >= lbda:
+                print 'I'
                 return "I"
             else:
+                print 'S'
                 return "S"
         else:
+            print 'lt',
             if s_ba >= lbda:
+                print '-'
                 return "-"
             else:
+                print 'R'
                 return "R"
 
     def pessimist(self, pt):
