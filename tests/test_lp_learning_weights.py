@@ -20,9 +20,9 @@ seeds = [ 123, 456, 789, 12, 345, 678, 901, 234, 567, 890 ]
 
 class lp_electre_tri_weights_tests(unittest.TestCase):
 
-    def test001_variable_number_alternatives_and_criteria(self):
-        n_alts = [ i*10 for i in range(1, 11) ]
-        n_crit = [ i for i in range(2,11) ]
+    def variable_number_alternatives_and_criteria(self, ncat):
+        n_alts = [ i*100 for i in range(1, 11) ]
+        n_crit = [ i for i in range(2,21) ]
 
         objectives = { nc: {na: dict() for na in n_alts} for nc in n_crit }
         times = { nc: {na: dict() for na in n_alts} for nc in n_crit }
@@ -34,9 +34,9 @@ class lp_electre_tri_weights_tests(unittest.TestCase):
             normalize_criteria_weights(cv)
             pt = generate_random_performance_table(a, c)
 
-            b = generate_random_alternatives(1, 'b')
+            b = generate_random_alternatives(ncat-1, 'b')
             bpt = generate_random_categories_profiles(b, c)
-            cat = generate_random_categories(2)
+            cat = generate_random_categories(ncat)
 
             lbda = random.uniform(0.5, 1)
 
@@ -78,6 +78,15 @@ class lp_electre_tri_weights_tests(unittest.TestCase):
             err = sum(errors[nc][na].values())/len(seeds)
             print("%d\t%d\t%-6.5f\t%-6.5f\t%-6.5f" % (nc, na, obj, tim,
                   err))
+
+    def test001_two_categories(self):
+        self.variable_number_alternatives_and_criteria(2)
+
+    def test002_three_categories(self):
+        self.variable_number_alternatives_and_criteria(3)
+
+    def test003_four_categories(self):
+        self.variable_number_alternatives_and_criteria(4)
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
