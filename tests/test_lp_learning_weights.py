@@ -21,8 +21,10 @@ seeds = [ 123, 456, 789, 12, 345, 678, 901, 234, 567, 890 ]
 class lp_electre_tri_weights_tests(unittest.TestCase):
 
     def variable_number_alternatives_and_criteria(self, ncat):
-        n_alts = [ i*100 for i in range(1, 11) ]
+        n_alts = [ i*1000 for i in range(1, 11) ]
         n_crit = [ i for i in range(2,21) ]
+
+        print('\nnc\tna\tseed\tobj\terrors\ttime')
 
         objectives = { nc: {na: dict() for na in n_alts} for nc in n_crit }
         times = { nc: {na: dict() for na in n_alts} for nc in n_crit }
@@ -65,19 +67,19 @@ class lp_electre_tri_weights_tests(unittest.TestCase):
             errors[nc][na][seed] = nok/total
 
             print("%d\t%d\t%s\t%-6.5f\t%-6.5f\t%-6.5f" % (nc, na, seed,
-                  obj, t2-t1, nok/total))
+                  obj, nok/total, t2-t1))
 
 
         print('Summary')
         print('========')
         print("nseeds: %d" % len(seeds))
-        print('nc\tna\tobj\ttime\terrors')
+        print('nc\tna\tobj\terrors\ttime')
         for nc, na in product(n_crit, n_alts):
             obj = sum(objectives[nc][na].values())/len(seeds)
             tim = sum(times[nc][na].values())/len(seeds)
             err = sum(errors[nc][na].values())/len(seeds)
-            print("%d\t%d\t%-6.5f\t%-6.5f\t%-6.5f" % (nc, na, obj, tim,
-                  err))
+            print("%d\t%d\t%-6.5f\t%-6.5f\t%-6.5f" % (nc, na, obj, err,
+                  tim))
 
     def test001_two_categories(self):
         self.variable_number_alternatives_and_criteria(2)
