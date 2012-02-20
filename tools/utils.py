@@ -1,3 +1,4 @@
+from __future__ import division
 import random
 from mcda.types import alternative_performances
 
@@ -111,3 +112,13 @@ def display_affectations_and_pt(alternatives, criteria,
             for pt in performance_table:
                 print("%-6.5f" % pt(a.id, c.id)),
         print('')
+
+def get_pc_of_wrong_assignment(aa, aa2):
+        total = len(aa)
+        nok = 0
+        for a in aa:
+            af = aa2(a.alternative_id)
+            if af != a.category_id:
+                nok += 1
+
+        return nok/total
