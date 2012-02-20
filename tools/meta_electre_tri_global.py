@@ -35,10 +35,7 @@ class heuristic_profiles():
         self.b0 = b0
         self.bp = bp
 
-        self.n_intervals = 3
-
-        isize = [ 3 ** i for i in range(self.n_intervals) ]
-        self.intervals_size = [ i/sum(isize) for i in isize ]
+        self.n_intervals = 5
 
     def compute_histograms(self, aa, current, above, below):
         above_intervals = {}
@@ -138,11 +135,11 @@ class heuristic_profiles():
             ml = max(histo_l[c.id])
             mr = max(histo_r[c.id])
 
-            if ml > mr:
+            if ml > mr and ml > 0:
                 below_size = current[c.id]-below[c.id]
                 i = histo_l[c.id].index(ml)
                 current[c.id] -= self.intervals_size[i]*below_size
-            elif ml < mr:
+            elif ml < mr and mr > 0:
                 above_size = above[c.id]-current[c.id]
                 i = histo_r[c.id].index(mr)
                 current[c.id] += self.intervals_size[i]*above_size
@@ -154,7 +151,11 @@ class heuristic_profiles():
                     down = current[c.id] - self.intervals_size[0]*below_size
                     current[c.id] = random.uniform(down, up)
 
-    def optimize(self):
+    def optimize(self, aa):
+        k = random.randint(1,10)
+        isize = [ k ** i for i in range(self.n_intervals) ]
+        self.intervals_size = [ i/sum(isize) for i in isize ]
+
         c_perfs = {c.id:list() for c in self.m.criteria}
         for i, p in enumerate(self.m.profiles):
             perfs = p.performances
@@ -165,7 +166,7 @@ class heuristic_profiles():
             c_perfs[c.id].append(self.bp.performances[c.id])
 
         for i in range(len(self.m.profiles)):
-            self.update_one_profile(self.aa, i);
+            self.update_one_profile(aa, i);
 
 class meta_electre_tri_global():
 
@@ -247,9 +248,9 @@ class meta_electre_tri_global():
                 return models_fitness
 
             heuristic = heuristic_profiles(model, self.alternatives,
-                                           self.criteria, self.pt, aa,
+                                           self.criteria, self.pt, self.aa,
                                            self.b0, self.bp)
-            heuristic.optimize()
+            heuristic.optimize(aa)
 
 #            self.update_profiles(model, aa)
 
