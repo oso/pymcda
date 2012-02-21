@@ -56,15 +56,21 @@ class heuristic_profiles():
         debug('below', below_intervals)
         debug('above', above_intervals)
 
-        histo_l = { c.id: [ 0 for i in range(self.n_intervals)]
-                       for c in self.m.criteria }
-        histo_r = { c.id: [ 0 for i in range(self.n_intervals)]
-                       for c in self.m.criteria }
+        h_good_l = { c.id: [ 0 for i in range(self.n_intervals)]
+                     for c in self.m.criteria }
+        h_good_r = { c.id: [ 0 for i in range(self.n_intervals)]
+                     for c in self.m.criteria }
+        h_bad_l = { c.id: [ 0 for i in range(self.n_intervals)]
+                    for c in self.m.criteria }
+        h_bad_r = { c.id: [ 0 for i in range(self.n_intervals)]
+                    for c in self.m.criteria }
         for ap, c in product(self.pt, self.m.criteria):
             aperf = ap.performances[c.id]
             pperf = current[c.id]
-            histo_l_c = histo_l[c.id]
-            histo_r_c = histo_r[c.id]
+            h_bad_l_c = h_bad_l[c.id]
+            h_bad_r_c = h_bad_r[c.id]
+            h_good_l_c = h_good_l[c.id]
+            h_good_r_c = h_good_r[c.id]
 
             if aperf > above[c.id]:
                 continue
@@ -80,38 +86,38 @@ class heuristic_profiles():
             if aperf > pperf:
                 i = len(above_intervals[c.id])
                 if rank > rank_ori: # Profile too low
-                    histo_r_c[i] += 1
+                    h_bad_r_c[i] += 1
                     while i > 0:
                         i -= 1
                         if aperf > above_intervals[c.id][i]:
                             break
-                        histo_r_c[i] += 1
+                        h_bad_r_c[i] += 1
                 elif rank == rank_ori:
-                    histo_r_c[i] -= 1
+                    h_good_r_c[i] -= 1
                     while i > 0:
-                        i-= 1
+                        i -= 1
                         if aperf >  above_intervals[c.id][i]:
                             break
-                        histo_r_c[i] -= 1
+                        h_good_r_c[i] += 1
 
             elif aperf < pperf:
                 i = len(below_intervals[c.id])
                 if rank < rank_ori: #Profile too high
-                    histo_l_c[i] += 1
+                    h_bad_l_c[i] += 1
                     while i > 0:
                         i -= 1
                         if aperf < below_intervals[c.id][i]:
                             break
-                        histo_l_c[i] += 1
+                        h_bad_l_c[i] += 1
                 elif rank == rank_ori:
-                    histo_l_c[i] -= 1
+                    h_good_l_c[i] -= 1
                     while i > 0:
                         i -= 1
                         if aperf < below_intervals[c.id][i]:
                             break
-                        histo_l_c[i] -= 1
+                        h_good_l_c[i] += 1
 
-        return histo_l, histo_r
+        return h_bad_l, h_bad_r, h_good_l, h_good_r
 
     def update_one_profile(self, aa, p_id):
         current = self.m.profiles[p_id].performances
@@ -126,22 +132,33 @@ class heuristic_profiles():
         else:
             above = self.m.profiles[p_id+1].performances
 
-        histo_l, histo_r = self.compute_histograms(aa, current, above,
-                                                   below)
+        histograms = self.compute_histograms(aa, current, above, below)
+        h_bad_l, h_bad_r, h_good_l, h_good_r = histograms
 
-        debug(current, histo_l, histo_r)
+#        histo_r = dict((n, h_bad_r.get(n, 0)-h_good_r.get(n, 0))
+#                       for n in set(h_bad_r)|set(h_good_r))
+
+        debug(current, h_bad_l, h_bad_r)
+        debug(current, h_good_l, h_good_r)
 
         for c in self.criteria:
-            ml = max(histo_l[c.id])
-            mr = max(histo_r[c.id])
+            h_bad_l_c = h_bad_l[c.id]
+            h_bad_r_c = h_bad_r[c.id]
+            h_good_l_c = h_good_l[c.id]
+            h_good_r_c = h_good_r[c.id]
+            histo_l = [x - y for x, y in zip(h_bad_l_c, h_good_l_c)]
+            histo_r = [x - y for x, y in zip(h_bad_r_c, h_good_r_c)]
+
+            ml = max(histo_l)
+            mr = max(histo_r)
 
             if ml > mr and ml > 0:
                 below_size = current[c.id]-below[c.id]
-                i = histo_l[c.id].index(ml)
+                i = histo_l.index(ml)
                 current[c.id] -= self.intervals_size[i]*below_size
             elif ml < mr and mr > 0:
                 above_size = above[c.id]-current[c.id]
-                i = histo_r[c.id].index(mr)
+                i = histo_r.index(mr)
                 current[c.id] += self.intervals_size[i]*above_size
             else:
                 if ml >= 0:
@@ -226,18 +243,18 @@ class meta_electre_tri_global():
     def loop_one(self):
         models_fitness = {}
         for model in self.models:
-            lpw = lp_electre_tri_weights(self.alternatives, self.criteria,
-                                         self.criteria_vals, self.aa,
-                                         self.pt, self.categories, self.b,
-                                         model.profiles)
-            sol = lpw.solve()
+#            lpw = lp_electre_tri_weights(self.alternatives, self.criteria,
+#                                         self.criteria_vals, self.aa,
+#                                         self.pt, self.categories, self.b,
+#                                         model.profiles)
+#            sol = lpw.solve()
 
             #print("Objective value: %d" % sol[0])
 
-#            model.cv = cv
-#            model.lbda = lbda
-            model.cv = sol[1]
-            model.lbda = sol[2]
+            model.cv = cv
+            model.lbda = lbda
+#            model.cv = sol[1]
+#            model.lbda = sol[2]
 
             model.cv.display(criterion_ids=model.criteria.get_ids())
 
@@ -251,8 +268,6 @@ class meta_electre_tri_global():
                                            self.criteria, self.pt, self.aa,
                                            self.b0, self.bp)
             heuristic.optimize(aa)
-
-#            self.update_profiles(model, aa)
 
         return models_fitness
 
@@ -289,14 +304,14 @@ if __name__ == "__main__":
 
     # Original Electre Tri model
     a = generate_random_alternatives(100)
-    c = generate_random_criteria(9)
+    c = generate_random_criteria(1)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
 
-    b = generate_random_alternatives(1, 'b')
+    b = generate_random_alternatives(2, 'b')
     bpt = generate_random_categories_profiles(b, c, 2345)
-    cat = generate_random_categories(2)
+    cat = generate_random_categories(3)
 
     lbda = 0.75
 
@@ -314,7 +329,7 @@ if __name__ == "__main__":
     meta_global = meta_electre_tri_global(a, c, cv, aa, pt, cat)
 
     t1 = time.time()
-    m = meta_global.solve(100, 10)
+    m = meta_global.solve(10, 1)
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
 
