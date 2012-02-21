@@ -93,7 +93,7 @@ class heuristic_profiles():
                             break
                         h_bad_r_c[i] += 1
                 elif rank == rank_ori:
-                    h_good_r_c[i] -= 1
+                    h_good_r_c[i] += 1
                     while i > 0:
                         i -= 1
                         if aperf >  above_intervals[c.id][i]:
@@ -110,7 +110,7 @@ class heuristic_profiles():
                             break
                         h_bad_l_c[i] += 1
                 elif rank == rank_ori:
-                    h_good_l_c[i] -= 1
+                    h_good_l_c[i] += 1
                     while i > 0:
                         i -= 1
                         if aperf < below_intervals[c.id][i]:
@@ -134,9 +134,6 @@ class heuristic_profiles():
 
         histograms = self.compute_histograms(aa, current, above, below)
         h_bad_l, h_bad_r, h_good_l, h_good_r = histograms
-
-#        histo_r = dict((n, h_bad_r.get(n, 0)-h_good_r.get(n, 0))
-#                       for n in set(h_bad_r)|set(h_good_r))
 
         debug(current, h_bad_l, h_bad_r)
         debug(current, h_good_l, h_good_r)
@@ -256,7 +253,7 @@ class meta_electre_tri_global():
 #            model.cv = sol[1]
 #            model.lbda = sol[2]
 
-            model.cv.display(criterion_ids=model.criteria.get_ids())
+#            model.cv.display(criterion_ids=model.criteria.get_ids())
 
             aa = model.pessimist(self.pt)
             fitness = self.compute_fitness(model, aa)
@@ -304,14 +301,14 @@ if __name__ == "__main__":
 
     # Original Electre Tri model
     a = generate_random_alternatives(100)
-    c = generate_random_criteria(1)
+    c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
 
-    b = generate_random_alternatives(2, 'b')
+    b = generate_random_alternatives(1, 'b')
     bpt = generate_random_categories_profiles(b, c, 2345)
-    cat = generate_random_categories(3)
+    cat = generate_random_categories(2)
 
     lbda = 0.75
 
@@ -329,7 +326,7 @@ if __name__ == "__main__":
     meta_global = meta_electre_tri_global(a, c, cv, aa, pt, cat)
 
     t1 = time.time()
-    m = meta_global.solve(10, 1)
+    m = meta_global.solve(100, 1)
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
 
