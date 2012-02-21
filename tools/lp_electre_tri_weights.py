@@ -3,7 +3,7 @@ import sys
 sys.path.insert(0, "..")
 from mcda.types import criterion_value, criteria_values
 
-solver = 'glpk'
+solver = 'cplex'
 verbose = False
 
 if solver == 'glpk':

@@ -119,6 +119,15 @@ class heuristic_profiles():
 
         return h_bad_l, h_bad_r, h_good_l, h_good_r
 
+    def compute_histo_proba(self, h_bad, h_good):
+        histo = []
+        for x, y in zip(h_bad, h_good):
+            if x+y > 0:
+                histo.append(x / (x + y))
+            else:
+                histo.append(0)
+        return histo
+
     def update_one_profile(self, aa, p_id):
         current = self.m.profiles[p_id].performances
 
@@ -145,59 +154,22 @@ class heuristic_profiles():
             h_good_l_c = h_good_l[c.id]
             h_good_r_c = h_good_r[c.id]
 
-            rdom = random.random()
-
-            histo_l = []
-            for x, y in zip(h_bad_l_c, h_good_l_c):
-                if x+y > 0:
-                    histo_l.append(x / (x + y))
-                else:
-                    histo_l.append(0)
-
-            histo_r = []
-            for x, y in zip(h_bad_r_c, h_good_r_c):
-                if x+y > 0:
-                    histo_r.append(x / (x + y))
-                else:
-                    histo_r.append(0)
-
-            print histo_l, histo_r
-
             if sum(h_bad_l_c) > sum(h_bad_r_c):
-                print c.id, 'left'
+                histo_l = self.compute_histo_proba(h_bad_l_c, h_good_l_c)
                 ml = max(histo_l)
-                if rdom > ml:
+                if random.random() > ml:
                     continue
                 i = histo_l.index(ml)
                 below_size = current[c.id]-below[c.id]
                 current[c.id] -= self.intervals_size[i]*below_size
             elif sum(h_bad_l_c) < sum(h_bad_r_c):
-                print c.id, 'right'
+                histo_r = self.compute_histo_proba(h_bad_r_c, h_good_r_c)
                 mr = max(histo_r)
-                if rdom > mr:
+                if random.random() > mr:
                     continue
                 i = histo_r.index(mr)
                 above_size = above[c.id]-current[c.id]
                 current[c.id] += self.intervals_size[i]*above_size
-            else:
-                print c.id, 'middle'
-
-
-#            if ml > mr and ml > 0:
-#                below_size = current[c.id]-below[c.id]
-#                i = histo_l.index(ml)
-#                current[c.id] -= self.intervals_size[i]*below_size
-#            elif ml < mr and mr > 0:
-#                above_size = above[c.id]-current[c.id]
-#                i = histo_r.index(mr)
-#                current[c.id] += self.intervals_size[i]*above_size
-#            else:
-#                if ml >= 0:
-#                    above_size = above[c.id]-current[c.id]
-#                    below_size = current[c.id]-below[c.id]
-#                    up = current[c.id] + self.intervals_size[0]*above_size
-#                    down = current[c.id] - self.intervals_size[0]*below_size
-#                    current[c.id] = random.uniform(down, up)
 
     def optimize(self, aa):
         k = random.randint(1,10)
@@ -360,7 +332,7 @@ if __name__ == "__main__":
     meta_global = meta_electre_tri_global(a, c, cv, aa, pt, cat)
 
     t1 = time.time()
-    m = meta_global.solve(100, 10)
+    m = meta_global.solve(100, 1)
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
 
