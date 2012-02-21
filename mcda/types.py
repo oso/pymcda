@@ -308,7 +308,7 @@ class performance_table(list):
 
         self[0].display(header, criterion_ids, append)
         for ap in self[1:]:
-            ap.display(False, criterion_ids)
+            ap.display(False, criterion_ids, append)
 
 class alternative_performances():
 
