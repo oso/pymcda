@@ -143,7 +143,7 @@ class heuristic_profiles():
 
         histograms = self.compute_histograms(aa, current, above, below)
         h_bad_l, h_bad_r, h_good_l, h_good_r = histograms
-        print h_bad_l, h_bad_r
+#        print h_bad_l, h_bad_r
 
         debug(current, h_bad_l, h_bad_r)
         debug(current, h_good_l, h_good_r)
@@ -170,6 +170,34 @@ class heuristic_profiles():
                 i = histo_r.index(mr)
                 above_size = above[c.id]-current[c.id]
                 current[c.id] += self.intervals_size[i]*above_size
+            else:
+                histo_l = self.compute_histo_proba(h_bad_l_c, h_good_l_c)
+                histo_r = self.compute_histo_proba(h_bad_r_c, h_good_r_c)
+                ml = max(histo_l)
+                mr = max(histo_r)
+
+                rdom = random.random()
+                if ml > mr and rdom < ml:
+                    i = histo_l.index(ml)
+                    below_size = current[c.id]-below[c.id]
+                    current[c.id] -= self.intervals_size[i]*below_size
+                elif ml < mr and rdom < mr:
+                    i = histo_r.index(mr)
+                    above_size = above[c.id]-current[c.id]
+                    current[c.id] += self.intervals_size[i]*above_size
+                elif mr == ml and rdom < 0.5:
+                    rdom = random.random()
+                    if random.random() > ml:
+                        continue
+                    i = histo_l.index(ml)
+                    below_size = current[c.id]-below[c.id]
+                    current[c.id] -= self.intervals_size[i]*below_size
+                elif mr == ml and rdom > 0.5:
+                    if random.random() > mr:
+                        continue
+                    i = histo_r.index(mr)
+                    above_size = above[c.id]-current[c.id]
+                    current[c.id] += self.intervals_size[i]*above_size
 
     def optimize(self, aa):
         k = random.randint(1,10)
