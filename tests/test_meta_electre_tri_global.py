@@ -20,7 +20,6 @@ from tools.generate_random import generate_random_categories_profiles
 from tools.utils import normalize_criteria_weights
 
 seeds = [ 123, 456, 789, 12, 345, 678, 901, 234, 567, 890 ]
-seeds = [ 901 ]
 
 class heuristic_profiles_tests(unittest.TestCase):
 
@@ -69,13 +68,7 @@ class heuristic_profiles_tests(unittest.TestCase):
 
         return fitness
 
-    def test001_two_categories(self):
-        n_alts = [ 500 ]
-        n_crit = [ 3, 5, 10 ]
-        n_cat = [ 2, 3, 4, 5 ]
-        nloop = 1000
-        nmodel = 1
-
+    def run_one_set_of_tests(self, n_alts, n_crit, n_cat, nloop, nmodel):
         fitness = { nc: { na: { ncat: { seed: [ 1 for i in range(nloop) ]
                                         for seed in seeds }
                                 for ncat in n_cat }
@@ -107,12 +100,23 @@ class heuristic_profiles_tests(unittest.TestCase):
             print("%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f\t%-6.5f\t%-6.5f" % (na,
                   nc, ncat, len(seeds), loop, nmodel, favg, fmin, fmax))
 
+    def test001_small_test(self):
+        n_alts = [ 500 ]
+        n_crit = [ 5 ]
+        n_cat = [ 2 ]
+        nloop = 100
+        nmodel = 1
 
-#    def test002_three_categories(self):
-#        self.variable_number_alternatives_and_criteria(3)
-#
-#    def test003_four_categories(self):
-#        self.variable_number_alternatives_and_criteria(4)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel)
+
+    def test002_variable_crit_and_cat(self):
+        n_alts = [ 500 ]
+        n_crit = [ 3, 5, 10 ]
+        n_cat = [ 2, 3, 4, 5 ]
+        nloop = 1000
+        nmodel = 1
+
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel)
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
