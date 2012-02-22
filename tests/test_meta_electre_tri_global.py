@@ -20,7 +20,7 @@ from tools.generate_random import generate_random_categories_profiles
 from tools.utils import normalize_criteria_weights
 
 seeds = [ 123, 456, 789, 12, 345, 678, 901, 234, 567, 890 ]
-#seeds = [ 901 ]
+seeds = [ 901 ]
 
 class heuristic_profiles_tests(unittest.TestCase):
 
@@ -42,7 +42,7 @@ class heuristic_profiles_tests(unittest.TestCase):
         model = electre_tri(c, cv, bpt, lbda, cat)
         aa = model.pessimist(pt)
 
-        model.profiles.display()
+#        model.profiles.display()
 
         b0 = get_worst_alternative_performances(pt, c)
         bp = get_best_alternative_performances(pt, c)
@@ -54,8 +54,10 @@ class heuristic_profiles_tests(unittest.TestCase):
                 aa2 = model.pessimist(pt)
                 wrong = get_pc_of_wrong_assignment(aa, aa2)
                 fitness.append(1-wrong)
+                if wrong == 0:
+                    break
                 heur.optimize(aa2)
-                model.profiles.display(header=None)
+#                model.profiles.display(header=None)
 
             aa_learned = model.pessimist(pt)
 
@@ -68,27 +70,34 @@ class heuristic_profiles_tests(unittest.TestCase):
         return fitness
 
     def test001_two_categories(self):
-        n_alts = [ 100 ]
-        n_crit = [ 5 ]
-        nloop = 100
-        ncat = 2
+        n_alts = [ 500 ]
+        n_crit = [ 3, 5, 10 ]
+        n_cat = [ 2, 3, 4, 5 ]
+        nloop = 1000
         nmodel = 1
 
-        fitness = { nc: {na: dict() for na in n_alts} for nc in n_crit }
+        fitness = { nc: { na: { ncat: { seed: [ 1 for i in range(nloop) ]
+                                        for seed in seeds }
+                                for ncat in n_cat }
+                          for na in n_alts }
+                    for nc in n_crit }
 
-        for na, nc, seed in product(n_alts, n_crit, seeds):
+        print('\nna\tnc\tncat\tseed\tnloop\tnmodels\tf_end')
+        for na, nc, ncat, seed in product(n_alts, n_crit, n_cat, seeds):
             f = self.run_heuristic(na, nc, ncat, seed, nloop, nmodel)
-            fitness[nc][na][seed] = f
+            fitness[nc][na][ncat][seed][0:len(f)] = f
+            print("%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f" % (na, nc, ncat, seed,
+                  nloop, nmodel, f[-1]))
 
         print('Summary (two categories)')
         print('========================')
         print("nseeds: %d" % len(seeds))
-        print('na\tnc\tncat\tloop\tnmodels\tnseeds\tf_avg\tf_min\tf_max')
+        print('na\tnc\tncat\tnseeds\tloop\tnmodels\tf_avg\tf_min\tf_max')
         for nc, na, loop in product(n_crit, n_alts, range(nloop)):
             favg = fmax = 0
             fmin = 1
-            for seed in fitness[nc][na]:
-                f = fitness[nc][na][seed]
+            for seed in fitness[nc][na][ncat]:
+                f = fitness[nc][na][ncat][seed]
                 favg += f[loop]
                 if f[loop] < fmin:
                     fmin = f[loop]
@@ -96,7 +105,7 @@ class heuristic_profiles_tests(unittest.TestCase):
                     fmax = f[loop]
             favg /= len(seeds)
             print("%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f\t%-6.5f\t%-6.5f" % (na,
-                  nc, ncat, loop, nmodel, len(seeds), favg, fmin, fmax))
+                  nc, ncat, len(seeds), loop, nmodel, favg, fmin, fmax))
 
 
 #    def test002_three_categories(self):
