@@ -82,11 +82,12 @@ class heuristic_profiles_tests(unittest.TestCase):
             print("%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f" % (na, nc, ncat, seed,
                   nloop, nmodel, f[-1]))
 
-        print('Summary (two categories)')
-        print('========================')
+        print('Summary')
+        print('=======')
         print("nseeds: %d" % len(seeds))
         print('na\tnc\tncat\tnseeds\tloop\tnmodels\tf_avg\tf_min\tf_max')
-        for nc, na, loop in product(n_crit, n_alts, range(nloop)):
+        for na, nc, ncat, loop in product(n_alts, n_crit, n_cat,
+                                          range(nloop)):
             favg = fmax = 0
             fmin = 1
             for seed in fitness[nc][na][ncat]:
