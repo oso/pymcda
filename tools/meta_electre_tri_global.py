@@ -258,7 +258,7 @@ class meta_electre_tri_global():
 
         nprofiles = len(self.categories)-1
         self.b = generate_random_alternatives(nprofiles, 'b') # FIXME
-        bpt = generate_random_categories_profiles(b, self.criteria)
+        bpt = generate_random_categories_profiles(self.b, self.criteria)
         model.profiles = bpt
         return model
 
@@ -281,8 +281,8 @@ class meta_electre_tri_global():
 
             #print("Objective value: %d" % sol[0])
 
-            model.cv = cv
-            model.lbda = lbda
+            model.cv = sol[1]
+            model.lbda = sol[2]
 
             aa = model.pessimist(self.pt)
             fitness = self.compute_fitness(model, aa)
