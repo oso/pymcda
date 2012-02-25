@@ -143,7 +143,6 @@ class heuristic_profiles():
 
         histograms = self.compute_histograms(aa, current, above, below)
         h_bad_l, h_bad_r, h_good_l, h_good_r = histograms
-#        print h_bad_l, h_bad_r
 
         debug(current, h_bad_l, h_bad_r)
         debug(current, h_good_l, h_good_r)
@@ -274,20 +273,16 @@ class meta_electre_tri_global():
     def loop_one(self):
         models_fitness = {}
         for model in self.models:
-#            lpw = lp_electre_tri_weights(self.alternatives, self.criteria,
-#                                         self.criteria_vals, self.aa,
-#                                         self.pt, self.categories, self.b,
-#                                         model.profiles)
-#            sol = lpw.solve()
+            lpw = lp_electre_tri_weights(self.alternatives, self.criteria,
+                                         self.criteria_vals, self.aa,
+                                         self.pt, self.categories, self.b,
+                                         model.profiles)
+            sol = lpw.solve()
 
             #print("Objective value: %d" % sol[0])
 
             model.cv = cv
             model.lbda = lbda
-#            model.cv = sol[1]
-#            model.lbda = sol[2]
-
-#            model.cv.display(criterion_ids=model.criteria.get_ids())
 
             aa = model.pessimist(self.pt)
             fitness = self.compute_fitness(model, aa)
@@ -311,10 +306,6 @@ class meta_electre_tri_global():
             models_fitness = self.loop_one()
             m = max(models_fitness, key = lambda a: models_fitness.get(a))
             info("Iteration %d: best fitness = %f" % (i, models_fitness[m]))
-            model.profiles.display(criterion_ids=m.criteria.get_ids())
-            m.profiles.display(False, criterion_ids=m.criteria.get_ids(),
-                               append='_learned')
-            print models_fitness
             if models_fitness[m] == 1:
                 break;
         print('')
