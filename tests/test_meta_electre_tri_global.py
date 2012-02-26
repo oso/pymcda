@@ -8,6 +8,7 @@ from itertools import product
 
 from mcda.electre_tri import electre_tri
 from tools.meta_electre_tri_global import heuristic_profiles
+from tools.meta_electre_tri_global import meta_electre_tri_global
 from tools.utils import get_best_alternative_performances
 from tools.utils import get_worst_alternative_performances
 from tools.utils import get_pc_of_wrong_assignment
@@ -101,25 +102,115 @@ class heuristic_profiles_tests(unittest.TestCase):
             print("%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f\t%-6.5f\t%-6.5f" % (na,
                   nc, ncat, len(seeds), loop, nmodel, favg, fmin, fmax))
 
-    def test001_small_test(self):
-        n_alts = [ 500 ]
+#    def test001_small_test(self):
+#        n_alts = [ 500 ]
+#        n_crit = [ 5 ]
+#        n_cat = [ 2 ]
+#        nloop = 100
+#        nmodel = 1
+#
+#        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel)
+#
+#    def test002_variable_crit_and_cat(self):
+#        n_alts = [ 500 ]
+#        n_crit = [ 3, 5, 10 ]
+#        n_cat = [ 2, 3, 4, 5 ]
+#        nloop = 1000
+#        nmodel = 1
+#
+#        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel)
+
+    def test003_variable_alternatives(self):
+        #n_alts = [ 100, 500, 1000 ]
+        n_alts = [ 5000 ]
         n_crit = [ 5 ]
-        n_cat = [ 2 ]
-        nloop = 100
+        n_cat = [ 3 ]
+        nloop = 1000
         nmodel = 1
 
         self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel)
 
-    def test002_variable_crit_and_cat(self):
+class metaheuristic_tests(unittest.TestCase):
+
+    def run_metaheuristic(self, na, nc, ncat, seed, nloop, nmodel):
+        fitness = []
+
+        a = generate_random_alternatives(na)
+        c = generate_random_criteria(nc)
+        cv = generate_random_criteria_values(c, seed)
+        normalize_criteria_weights(cv)
+        pt = generate_random_performance_table(a, c)
+
+        b = generate_random_alternatives(ncat-1, 'b')
+        bpt = generate_random_categories_profiles(b, c)
+        cat = generate_random_categories(ncat)
+
+        lbda = random.uniform(0.5, 1)
+
+        model = electre_tri(c, cv, bpt, lbda, cat)
+        aa = model.pessimist(pt)
+
+        t1 = time.time()
+        meta = meta_electre_tri_global(a, c, cv, aa, pt, cat)
+        model_learned = meta.solve(nloop, nmodel)
+        t2 = time.time()
+
+        aa_learned = model_learned.pessimist(pt)
+        total = len(a)
+        nok = 0
+        for alt in a:
+            if aa(alt.id) != aa_learned(alt.id):
+                nok += 1
+
+        return fitness, time
+
+    def run_one_set_of_tests(self, n_alts, n_crit, n_cat, nloop, nmodel):
+        fitness = { nc: { na: { ncat: { seed: 0 for seed in seeds }
+                                for ncat in n_cat }
+                          for na in n_alts }
+                    for nc in n_crit }
+        times = { nc: { na: { ncat: { seed: 0 for seed in seeds }
+                                for ncat in n_cat }
+                          for na in n_alts }
+                    for nc in n_crit }
+
+        print('\nna\tnc\tncat\tseed\tnloop\tnmodels\tf_end')
+        for na, nc, ncat, seed in product(n_alts, n_crit, n_cat, seeds):
+            f, t = self.run_metaheuristic(na, nc, ncat, seed, nloop, nmodel)
+            fitness[nc][na][ncat][seed] = f
+            time[nc][na][ncat][seed] = t
+            print("%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f" % (na, nc, ncat, seed,
+                  nloop, nmodel, f[-1]))
+
+        print('Summary')
+        print('=======')
+        print("nseeds: %d" % len(seeds))
+        print('na\tnc\tncat\tnseeds\tloop\tnmodels\tf_avg\tt_avg')
+        for na, nc, ncat, loop in product(n_alts, n_crit, n_cat,
+                                          range(nloop)):
+            favg = 0
+            tavg = 0
+            for seed in fitness[nc][na][ncat]:
+                f = fitness[nc][na][ncat][seed]
+                t = time[nc][na][ncat][seed]
+                favg += f
+                tavg += t
+            favg /= len(seeds)
+            tavg /= len(seeds)
+            print("%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f\t%-6.5f" % (na,
+                  nc, ncat, len(seeds), loop, nmodel, favg, tavg))
+
+    def test001_small_test(self):
         n_alts = [ 500 ]
-        n_crit = [ 3, 5, 10 ]
-        n_cat = [ 2, 3, 4, 5 ]
-        nloop = 1000
+        n_crit = [ 5 ]
+        n_cat = [ 3 ]
+        nloop = 10000
         nmodel = 1
 
         self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel)
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
-    suite = loader.loadTestsFromTestCase(heuristic_profiles_tests)
+#    suite = loader.loadTestsFromTestCase(heuristic_profiles_tests)
+    suite = loader.loadTestsFromTestCase(metaheuristic_tests)
     unittest.TextTestRunner(verbosity=2).run(suite)
