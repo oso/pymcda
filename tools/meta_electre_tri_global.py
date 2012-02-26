@@ -270,9 +270,9 @@ class meta_electre_tri_global():
 
         return models
 
-    def loop_one(self):
+    def loop_lp(self, models):
         models_fitness = {}
-        for model in self.models:
+        for model in models:
             lpw = lp_electre_tri_weights(self.alternatives, self.criteria,
                                          self.criteria_vals, self.aa,
                                          self.pt, self.categories, self.b,
@@ -284,16 +284,27 @@ class meta_electre_tri_global():
             model.cv = sol[1]
             model.lbda = sol[2]
 
-            aa = model.pessimist(self.pt)
-            fitness = self.compute_fitness(model, aa)
-            models_fitness[model] = fitness
-            if fitness == 1:
-                return models_fitness
-
+    def loop_heuristic(self, models, n):
+        models_fitness = {}
+        for i, model in enumerate(models):
             heuristic = heuristic_profiles(model, self.alternatives,
                                            self.criteria, self.pt, self.aa,
                                            self.b0, self.bp)
-            heuristic.optimize(aa)
+            for j in range(n):
+                aa = model.pessimist(self.pt)
+                fitness = self.compute_fitness(model, aa)
+                models_fitness[model] = fitness
+                if fitness == 1:
+                    break
+
+                info("Model %d, iter %d, fitness = %f" % (i, j, fitness))
+
+                heuristic.optimize(aa)
+
+            aa = model.pessimist(self.pt)
+            fitness = self.compute_fitness(model, aa)
+
+            info("Model %d, best fitness = %f" % (i, fitness))
 
         return models_fitness
 
@@ -301,15 +312,12 @@ class meta_electre_tri_global():
     #   - n: number of loop to do
     #   - m: number of model to generate
     def solve(self, n, m):
-        self.models = self.initialization(m)
-        for i in range(n):
-            models_fitness = self.loop_one()
-            m = max(models_fitness, key = lambda a: models_fitness.get(a))
-            info("Iteration %d: best fitness = %f" % (i, models_fitness[m]))
-            if models_fitness[m] == 1:
-                break;
-        print('')
-
+        models = self.initialization(m)
+        for i in range(10):
+            self.loop_lp(models)
+            models_fitness = self.loop_heuristic(models, n)
+        print models_fitness
+        m = max(models_fitness, key = lambda a: models_fitness.get(a))
         return m
 
 if __name__ == "__main__":
@@ -325,15 +333,15 @@ if __name__ == "__main__":
     from mcda.electre_tri import electre_tri
 
     # Original Electre Tri model
-    a = generate_random_alternatives(1000)
+    a = generate_random_alternatives(500)
     c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
 
-    b = generate_random_alternatives(1, 'b')
+    b = generate_random_alternatives(2, 'b')
     bpt = generate_random_categories_profiles(b, c, 2345)
-    cat = generate_random_categories(2)
+    cat = generate_random_categories(3)
 
     lbda = 0.75
 
@@ -351,7 +359,7 @@ if __name__ == "__main__":
     meta_global = meta_electre_tri_global(a, c, cv, aa, pt, cat)
 
     t1 = time.time()
-    m = meta_global.solve(100, 1)
+    m = meta_global.solve(50, 10)
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
 
