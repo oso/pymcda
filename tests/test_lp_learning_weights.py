@@ -90,6 +90,9 @@ class lp_electre_tri_weights_tests(unittest.TestCase):
     def test003_four_categories(self):
         self.variable_number_alternatives_and_criteria(4)
 
+    def test004_five_categories(self):
+        self.variable_number_alternatives_and_criteria(5)
+
 if __name__ == "__main__":
     loader = unittest.TestLoader()
     suite = loader.loadTestsFromTestCase(lp_electre_tri_weights_tests)
