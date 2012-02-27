@@ -132,7 +132,7 @@ class heuristic_profiles_tests(unittest.TestCase):
 
 class metaheuristic_tests(unittest.TestCase):
 
-    def run_metaheuristic(self, na, nc, ncat, seed, nloop, nmodel):
+    def run_metaheuristic(self, na, nc, ncat, seed, nloop, nloop2, nmodel):
         fitness = []
 
         a = generate_random_alternatives(na)
@@ -152,7 +152,7 @@ class metaheuristic_tests(unittest.TestCase):
 
         t1 = time.time()
         meta = meta_electre_tri_global(a, c, cv, aa, pt, cat)
-        model_learned = meta.solve(nloop, nmodel)
+        model_learned = meta.solve(nmodel, nloop, nloop2)
         t2 = time.time()
 
         aa_learned = model_learned.pessimist(pt)
@@ -164,7 +164,8 @@ class metaheuristic_tests(unittest.TestCase):
 
         return fitness, time
 
-    def run_one_set_of_tests(self, n_alts, n_crit, n_cat, nloop, nmodel):
+    def run_one_set_of_tests(self, n_alts, n_crit, n_cat, nloop, nloop2,
+                             nmodel):
         fitness = { nc: { na: { ncat: { seed: 0 for seed in seeds }
                                 for ncat in n_cat }
                           for na in n_alts }
@@ -174,40 +175,43 @@ class metaheuristic_tests(unittest.TestCase):
                           for na in n_alts }
                     for nc in n_crit }
 
-        print('\nna\tnc\tncat\tseed\tnloop\tnmodels\tf_end')
+        print('\nna\tnc\tncat\tseed\tnloop\tnloop2\tnmodels\tf_end')
         for na, nc, ncat, seed in product(n_alts, n_crit, n_cat, seeds):
-            f, t = self.run_metaheuristic(na, nc, ncat, seed, nloop, nmodel)
+            f, t = self.run_metaheuristic(na, nc, ncat, seed, nloop, nloop2,
+                                          nmodel)
             fitness[nc][na][ncat][seed] = f
             time[nc][na][ncat][seed] = t
-            print("%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f" % (na, nc, ncat, seed,
-                  nloop, nmodel, f[-1]))
+            print("%d\t%d\t%d\t%d\t%d\t%d\%d\t%-6.5f" % (na, nc, ncat, seed,
+                  nloop, nloop2, nmodel, f[-1]))
 
-        print('Summary')
-        print('=======')
-        print("nseeds: %d" % len(seeds))
-        print('na\tnc\tncat\tnseeds\tloop\tnmodels\tf_avg\tt_avg')
-        for na, nc, ncat, loop in product(n_alts, n_crit, n_cat,
-                                          range(nloop)):
-            favg = 0
-            tavg = 0
-            for seed in fitness[nc][na][ncat]:
-                f = fitness[nc][na][ncat][seed]
-                t = time[nc][na][ncat][seed]
-                favg += f
-                tavg += t
-            favg /= len(seeds)
-            tavg /= len(seeds)
-            print("%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f\t%-6.5f" % (na,
-                  nc, ncat, len(seeds), loop, nmodel, favg, tavg))
+#        print('Summary')
+#        print('=======')
+#        print("nseeds: %d" % len(seeds))
+#        print('na\tnc\tncat\tnseeds\tloop\tnmodels\tf_avg\tt_avg')
+#        for na, nc, ncat, loop in product(n_alts, n_crit, n_cat,
+#                                          range(nloop)):
+#            favg = 0
+#            tavg = 0
+#            for seed in fitness[nc][na][ncat]:
+#                f = fitness[nc][na][ncat][seed]
+#                t = time[nc][na][ncat][seed]
+#                favg += f
+#                tavg += t
+#            favg /= len(seeds)
+#            tavg /= len(seeds)
+#            print("%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f\t%-6.5f" % (na,
+#                  nc, ncat, len(seeds), loop, nmodel, favg, tavg))
 
     def test001_small_test(self):
-        n_alts = [ 500 ]
-        n_crit = [ 5 ]
+        n_alts = [ 100, 200, 300, 400, 500 ]
+        n_crit = [ 3, 5 ]
         n_cat = [ 3 ]
-        nloop = 10000
-        nmodel = 1
+        nloop = 10
+        nloop2 = 500
+        nmodel = 10
 
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nloop2,
+                                  nmodel)
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
