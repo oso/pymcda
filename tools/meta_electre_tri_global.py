@@ -309,14 +309,16 @@ class meta_electre_tri_global():
         return models_fitness
 
     # Input params:
-    #   - n: number of loop to do
-    #   - m: number of model to generate
-    def solve(self, n, m):
+    #   - m: number of model to use
+    #   - nl: number of loop to do for linear program
+    #   - nh: number of loop to do for heuristic
+    def solve(self, m, nl, nh):
         models = self.initialization(m)
-        for i in range(10):
+        for i in range(nl):
             self.loop_lp(models)
-            models_fitness = self.loop_heuristic(models, n)
-        print models_fitness
+            models_fitness = self.loop_heuristic(models, nh)
+            print models_fitness
+            m = max(models_fitness, key = lambda a: models_fitness.get(a))
         m = max(models_fitness, key = lambda a: models_fitness.get(a))
         return m
 
@@ -359,7 +361,7 @@ if __name__ == "__main__":
     meta_global = meta_electre_tri_global(a, c, cv, aa, pt, cat)
 
     t1 = time.time()
-    m = meta_global.solve(50, 10)
+    m = meta_global.solve(10, 50, 20)
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
 
@@ -380,8 +382,6 @@ if __name__ == "__main__":
     for alt in a:
         if aa(alt.id) <> aa_learned(alt.id):
             anok.append(alt)
-#            print("Pessimits affectation of %s mismatch (%s <> %s)" %
-#                  (str(alt.id), aa(alt.id), aa_learned(alt.id)))
             nok += 1
 
     print("Good affectations: %3g %%" % (float(total-nok)/total*100))
