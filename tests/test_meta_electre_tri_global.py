@@ -133,8 +133,6 @@ class heuristic_profiles_tests(unittest.TestCase):
 class metaheuristic_tests(unittest.TestCase):
 
     def run_metaheuristic(self, na, nc, ncat, seed, nloop, nloop2, nmodel):
-        fitness = []
-
         a = generate_random_alternatives(na)
         c = generate_random_criteria(nc)
         cv = generate_random_criteria_values(c, seed)
@@ -162,6 +160,8 @@ class metaheuristic_tests(unittest.TestCase):
             if aa(alt.id) != aa_learned(alt.id):
                 nok += 1
 
+        fitness = (total-nok)/total
+
         return fitness, time
 
     def run_one_set_of_tests(self, n_alts, n_crit, n_cat, nloop, nloop2,
@@ -180,9 +180,9 @@ class metaheuristic_tests(unittest.TestCase):
             f, t = self.run_metaheuristic(na, nc, ncat, seed, nloop, nloop2,
                                           nmodel)
             fitness[nc][na][ncat][seed] = f
-            time[nc][na][ncat][seed] = t
+            times[nc][na][ncat][seed] = t
             print("%d\t%d\t%d\t%d\t%d\t%d\%d\t%-6.5f" % (na, nc, ncat, seed,
-                  nloop, nloop2, nmodel, f[-1]))
+                  nloop, nloop2, nmodel, f))
 
 #        print('Summary')
 #        print('=======')
@@ -204,7 +204,7 @@ class metaheuristic_tests(unittest.TestCase):
 
     def test001_small_test(self):
         n_alts = [ 100, 200, 300, 400, 500 ]
-        n_crit = [ 3, 5 ]
+        n_crit = [ 3, 5, 10 ]
         n_cat = [ 3 ]
         nloop = 10
         nloop2 = 500
