@@ -161,8 +161,9 @@ class metaheuristic_tests(unittest.TestCase):
                 nok += 1
 
         fitness = (total-nok)/total
+        t = t2-t1
 
-        return fitness, time
+        return fitness, t
 
     def run_one_set_of_tests(self, n_alts, n_crit, n_cat, nloop, nloop2,
                              nmodel):
@@ -181,37 +182,47 @@ class metaheuristic_tests(unittest.TestCase):
                                           nmodel)
             fitness[nc][na][ncat][seed] = f
             times[nc][na][ncat][seed] = t
-            print("%d\t%d\t%d\t%d\t%d\t%d\%d\t%-6.5f" % (na, nc, ncat, seed,
-                  nloop, nloop2, nmodel, f))
+            print("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f" % (na, nc, ncat,
+                  seed, nloop, nloop2, nmodel, f))
 
-#        print('Summary')
-#        print('=======')
-#        print("nseeds: %d" % len(seeds))
-#        print('na\tnc\tncat\tnseeds\tloop\tnmodels\tf_avg\tt_avg')
-#        for na, nc, ncat, loop in product(n_alts, n_crit, n_cat,
-#                                          range(nloop)):
-#            favg = 0
-#            tavg = 0
-#            for seed in fitness[nc][na][ncat]:
-#                f = fitness[nc][na][ncat][seed]
-#                t = time[nc][na][ncat][seed]
-#                favg += f
-#                tavg += t
-#            favg /= len(seeds)
-#            tavg /= len(seeds)
-#            print("%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f\t%-6.5f" % (na,
-#                  nc, ncat, len(seeds), loop, nmodel, favg, tavg))
+        print('Summary')
+        print('=======')
+        print("nseeds: %d" % len(seeds))
+        print('na\tnc\tncat\tnseeds\tnloop\tnloop2\tnmodels\tf_avg\tt_avg')
+        for na, nc, ncat in product(n_alts, n_crit, n_cat):
+            favg = 0
+            tavg = 0
+            for seed in fitness[nc][na][ncat]:
+                f = fitness[nc][na][ncat][seed]
+                t = times[nc][na][ncat][seed]
+                favg += f
+                tavg += t
+            favg /= len(seeds)
+            tavg /= len(seeds)
+            print("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f\t%-6.5f" % (na,
+                  nc, ncat, len(seeds), nloop, nloop2, nmodel, favg, tavg))
 
     def test001_small_test(self):
-        n_alts = [ 100, 200, 300, 400, 500 ]
+        n_alts = [ 25, 50, 75, 100, 125, 150 ]
         n_crit = [ 3, 5, 10 ]
         n_cat = [ 3 ]
         nloop = 10
-        nloop2 = 500
-        nmodel = 10
+        nloop2 = 50
+        nmodel = 5
 
         self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nloop2,
                                   nmodel)
+
+#    def test002_big_test(self):
+#        n_alts = [ 200, 300, 400 ]
+#        n_crit = [ 3, 5, 10 ]
+#        n_cat = [ 3 ]
+#        nloop = 10
+#        nloop2 = 100
+#        nmodel = 5
+#
+#        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nloop2,
+#                                  nmodel)
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
