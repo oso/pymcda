@@ -15,20 +15,25 @@ from tools.generate_random import generate_random_performance_table
 from tools.generate_random import generate_random_categories
 from tools.generate_random import generate_random_categories_profiles
 from tools.utils import normalize_criteria_weights
+from tools.utils import add_errors_in_affectations
 
 seeds = [ 123, 456, 789, 12, 345, 678, 901, 234, 567, 890 ]
 
 class lp_electre_tri_weights_tests(unittest.TestCase):
 
-    def variable_number_alternatives_and_criteria(self, ncat):
+    def variable_number_alternatives_and_criteria(self, ncat, er=0):
         n_alts = [ i*1000 for i in range(1, 11) ]
         n_crit = [ i for i in range(2,21) ]
+        n_alts = [ i*100 for i in range(1, 11) ]
+        n_crit = [ 5 ]
 
         print('\nnc\tna\tseed\tobj\terrors\ttime')
 
         objectives = { nc: {na: dict() for na in n_alts} for nc in n_crit }
         times = { nc: {na: dict() for na in n_alts} for nc in n_crit }
         errors = { nc: {na: dict() for na in n_alts} for nc in n_crit }
+        errors_min = { nc: {na: dict() for na in n_alts} for nc in n_crit }
+        errors_max = { nc: {na: dict() for na in n_alts} for nc in n_crit }
         for nc, na, seed in product(n_crit, n_alts, seeds):
             a = generate_random_alternatives(na)
             c = generate_random_criteria(nc)
@@ -44,10 +49,13 @@ class lp_electre_tri_weights_tests(unittest.TestCase):
 
             model = electre_tri(c, cv, bpt, lbda, cat)
             aa = model.pessimist(pt)
+            aa_errors = model.pessimist(pt)
+
+            add_errors_in_affectations(aa_errors, cat.get_ids(), er)
 
             t1 = time.time()
-            lp_weights = lp_electre_tri_weights(a, c, cv, aa, pt, cat,
-                                                b, bpt, 0.0001, 0.0001)
+            lp_weights = lp_electre_tri_weights(a, c, cv, aa_errors, pt,
+                                                cat, b, bpt, 0.0001, 0.0001)
             obj, cv_learned, lbda_learned = lp_weights.solve()
             t2 = time.time()
 
@@ -64,34 +72,39 @@ class lp_electre_tri_weights_tests(unittest.TestCase):
                 if aa(alt.id) != aa_learned(alt.id):
                     nok += 1
 
+            e = nok/total
             errors[nc][na][seed] = nok/total
 
-            print("%d\t%d\t%s\t%-6.5f\t%-6.5f\t%-6.5f" % (nc, na, seed,
-                  obj, nok/total, t2-t1))
-
+            print("%d\t%d\t%s\t%-6.4f\t%-6.5f\t%-6.5f" % (nc, na, seed, obj,
+                  e, t2-t1))
 
         print('Summary')
         print('========')
         print("nseeds: %d" % len(seeds))
-        print('nc\tna\tobj\terrors\ttime')
+        print('nc\tna\tobj\terr_avg\terr_min\terr_max\ttime')
         for nc, na in product(n_crit, n_alts):
             obj = sum(objectives[nc][na].values())/len(seeds)
             tim = sum(times[nc][na].values())/len(seeds)
             err = sum(errors[nc][na].values())/len(seeds)
-            print("%d\t%d\t%-6.5f\t%-6.5f\t%-6.5f" % (nc, na, obj, err,
-                  tim))
+            err_min = min(errors[nc][na].values())
+            err_max = max(errors[nc][na].values())
+            print("%d\t%d\t%-6.4f\t%-6.5f\t%-6.5f\t%-6.5f\t%-6.5f" % (nc,
+                  na, obj, err, err_min, err_max, tim))
 
-    def test001_two_categories(self):
-        self.variable_number_alternatives_and_criteria(2)
+#    def test001_two_categories(self):
+#        self.variable_number_alternatives_and_criteria(2)
+#
+#    def test002_three_categories(self):
+#        self.variable_number_alternatives_and_criteria(3)
+#
+#    def test003_four_categories(self):
+#        self.variable_number_alternatives_and_criteria(4)
+#
+#    def test004_five_categories(self):
+#        self.variable_number_alternatives_and_criteria(5)
 
-    def test002_three_categories(self):
-        self.variable_number_alternatives_and_criteria(3)
-
-    def test003_four_categories(self):
-        self.variable_number_alternatives_and_criteria(4)
-
-    def test004_five_categories(self):
-        self.variable_number_alternatives_and_criteria(5)
+    def test005_three_categories_with_errors(self):
+        self.variable_number_alternatives_and_criteria(3, 0.1)
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
