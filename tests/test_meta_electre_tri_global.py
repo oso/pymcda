@@ -188,19 +188,19 @@ class metaheuristic_tests(unittest.TestCase):
         print('Summary')
         print('=======')
         print("nseeds: %d" % len(seeds))
-        print('na\tnc\tncat\tnseeds\tnloop\tnloop2\tnmodels\tf_avg\tt_avg')
+        print('na\tnc\tncat\tnseeds\tnloop\tnloop2\tnmodels\t' \
+              'f_avg\tf_min\tf_max\tt_avg\tt_min\tt_max')
         for na, nc, ncat in product(n_alts, n_crit, n_cat):
-            favg = 0
-            tavg = 0
-            for seed in fitness[nc][na][ncat]:
-                f = fitness[nc][na][ncat][seed]
-                t = times[nc][na][ncat][seed]
-                favg += f
-                tavg += t
-            favg /= len(seeds)
-            tavg /= len(seeds)
-            print("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f\t%-6.5f" % (na,
-                  nc, ncat, len(seeds), nloop, nloop2, nmodel, favg, tavg))
+            f_avg = sum(fitness[nc][na][ncat].values())/len(seeds)
+            f_min = min(fitness[nc][na][ncat].values())
+            f_max = max(fitness[nc][na][ncat].values())
+            t_avg = sum(times[nc][na][ncat].values())/len(seeds)
+            t_min = min(times[nc][na][ncat].values())
+            t_max = max(times[nc][na][ncat].values())
+            print("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f\t%-6.5f\t%-6.5f" \
+                  "\t%-6.5f\t%-6.5f\t%-6.5f" % (na, nc, ncat, len(seeds),
+                  nloop, nloop2, nmodel,
+                  f_avg, f_min, f_max, t_avg, t_min, t_max))
 
     def test001_small_test(self):
         n_alts = [ 25, 50, 75, 100, 125, 150 ]
@@ -213,16 +213,16 @@ class metaheuristic_tests(unittest.TestCase):
         self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nloop2,
                                   nmodel)
 
-#    def test002_big_test(self):
-#        n_alts = [ 200, 300, 400 ]
-#        n_crit = [ 3, 5, 10 ]
-#        n_cat = [ 3 ]
-#        nloop = 10
-#        nloop2 = 100
-#        nmodel = 5
-#
-#        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nloop2,
-#                                  nmodel)
+    def test002_big_test(self):
+        n_alts = [ 100, 200, 300, 400, 500 ]
+        n_crit = [ 3, 5, 10 ]
+        n_cat = [ 3 ]
+        nloop = 10
+        nloop2 = 100
+        nmodel = 10
+
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nloop2,
+                                  nmodel)
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
