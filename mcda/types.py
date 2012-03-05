@@ -1,4 +1,5 @@
 from xml.etree import ElementTree
+from copy import deepcopy
 
 type2tag = {
     int: 'integer',
@@ -28,6 +29,9 @@ class criteria(list):
                 return crit
 
         raise KeyError("Criterion %s not found" % criterion_id)
+
+    def copy(self):
+        return deepcopy(self)
 
     def has_criterion(self, criterion_id):
         for crit in self:
@@ -78,6 +82,9 @@ class criterion:
             return "%s" % self.name
         else:
             return "%s" % self.id
+
+    def copy(self):
+        return deepcopy(self)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('criterion')
@@ -153,6 +160,9 @@ class criteria_values(list):
 
         raise KeyError("Criterion value %s not found" % criterion_id)
 
+    def copy(self):
+        return deepcopy(self)
+
     def to_xmcda(self):
         xmcda = ElementTree.Element('criteriaValues')
         for cval in self:
@@ -187,6 +197,9 @@ class criterion_value():
     def __repr__(self):
         return "%s: %s" % (self.criterion_id, self.value)
 
+    def copy(self):
+        return deepcopy(self)
+
     def to_xmcda(self):
         xmcda = ElementTree.Element('criterionValue')
         if self.id is not None:
@@ -200,6 +213,9 @@ class criterion_value():
         return xmcda
 
 class alternatives(list):
+
+    def copy(self):
+        return deepcopy(self)
 
     def to_xmcda(self):
         root = ElementTree.Element('alternatives')
@@ -232,6 +248,9 @@ class alternative:
             return "%s" % self.name
         else:
             return "%s" % self.id
+
+    def copy(self):
+        return deepcopy(self)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('alternative', id=self.id)
@@ -278,6 +297,9 @@ class performance_table(list):
         else:
             return alt_perfs(criterion_id)
 
+    def copy(self):
+        return deepcopy(self)
+
     def has_alternative(self, alternative):
         for altp in self:
             if altp.alternative_id == alternative.id:
@@ -321,6 +343,9 @@ class alternative_performances():
 
     def __repr__(self):
         return "%s: %s" % (self.alternative_id, self.performances)
+
+    def copy(self):
+        return deepcopy(self)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('alternativePerformances')
@@ -375,6 +400,9 @@ class points(list):
 
         return p
 
+    def copy(self):
+        return deepcopy(self)
+
     def to_xmcda(self):
         root = ElementTree.Element('points')
         for p in self:
@@ -389,6 +417,9 @@ class point():
         self.abscissa = abscissa
         self.ordinate = ordinate
 
+    def copy(self):
+        return deepcopy(self)
+
     def to_xmcda(self):
         xmcda = ElementTree.Element('point')
         abscissa = ElementTree.SubElement('abscissa')
@@ -402,6 +433,9 @@ class constant():
     def __init__(self, id, value):
         self.id = id
         self.value = value
+
+    def copy(self):
+        return deepcopy(self)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('constant')
@@ -430,6 +464,9 @@ class thresholds(list):
             raise KeyError("Threshold %s not found" % id)
 
         return threshold
+
+    def copy(self):
+        return deepcopy(self)
 
     def has_threshold(self, threshold_id):
         for t in self:
@@ -462,6 +499,9 @@ class threshold():
         self.name = name
         self.values = values
 
+    def copy(self):
+        return deepcopy(self)
+
     def to_xmcda(self):
         xmcda = ElementTree.Element('threshold', id=self.id)
         if self.name is not None:
@@ -490,6 +530,9 @@ class categories(list):
             if c.id == id:
                 return c 
         return None
+
+    def copy(self):
+        return deepcopy(self)
 
     def get_ids(self):
         cids = []
@@ -527,6 +570,9 @@ class category():
             return "%s" % self.name
         else:
             return "%s" % self.id
+
+    def copy(self):
+        return deepcopy(self)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('category', self.id)
@@ -566,6 +612,9 @@ class limits():
         self.lower = lower
         self.upper  = upper
 
+    def copy(self):
+        return deepcopy(self)
+
     def to_xmcda(self):
         xmcda = ElementTree.Element('limits')
 
@@ -590,11 +639,17 @@ class categories_profiles(list):
             root.append(xmcda)
         return root
 
+    def copy(self):
+        return deepcopy(self)
+
 class category_profile():
 
     def __init__(self, alternative_id, value):
         self.alternative_id = alternative_id
         self.value = value
+
+    def copy(self):
+        return deepcopy(self)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('categoryProfile')
@@ -611,6 +666,9 @@ class alternatives_affectations(list):
             if a.alternative_id == id:
                 return a.category_id
         return None
+
+    def copy(self):
+        return deepcopy(self)
 
     def to_xmcda(self):
         root = ElementTree.Element('alternativesAffectations')
@@ -642,6 +700,9 @@ class alternative_affectation():
 
     def __repr__(self):
         return "%s: %s" % (self.alternative_id, self.category_id)
+
+    def copy(self):
+        return deepcopy(self)
 
     def display(self, header=True):
         if header is True:
