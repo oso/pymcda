@@ -153,7 +153,7 @@ class heuristic_profiles():
             h_good_l_c = h_good_l[c.id]
             h_good_r_c = h_good_r[c.id]
 
-            if sum(h_bad_l_c) > sum(h_bad_r_c):
+            if h_bad_l_c[-1] > h_bad_r_c[-1]:
                 histo_l = self.compute_histo_proba(h_bad_l_c, h_good_l_c)
                 ml = max(histo_l)
                 if random.random() > ml:
@@ -161,7 +161,7 @@ class heuristic_profiles():
                 i = histo_l.index(ml)
                 below_size = current[c.id]-below[c.id]
                 current[c.id] -= self.intervals_size[i]*below_size
-            elif sum(h_bad_l_c) < sum(h_bad_r_c):
+            elif h_bad_l_c[-1] < h_bad_r_c[-1]:
                 histo_r = self.compute_histo_proba(h_bad_r_c, h_good_r_c)
                 mr = max(histo_r)
                 if random.random() > mr:
