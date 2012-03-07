@@ -290,16 +290,23 @@ class meta_electre_tri_global():
             heuristic = heuristic_profiles(model, self.alternatives,
                                            self.criteria, self.pt, self.aa,
                                            self.b0, self.bp)
+            best_fitness = 0
             for j in range(n):
                 aa = model.pessimist(self.pt)
                 fitness = self.compute_fitness(model, aa)
-                models_fitness[model] = fitness
-                if fitness == 1:
-                    break
 
                 info("Model %d, iter %d, fitness = %f" % (i, j, fitness))
 
+                if fitness > best_fitness:
+                    best_fitness = fitness
+                    best_profiles = model.profiles.copy()
+                    if fitness == 1:
+                        break
+
                 heuristic.optimize(aa)
+
+            models_fitness[model] = best_fitness
+            model.profiles = best_profiles
 
             aa = model.pessimist(self.pt)
             fitness = self.compute_fitness(model, aa)
