@@ -234,6 +234,8 @@ class meta_electre_tri_global():
         self.b0 = get_worst_alternative_performances(pt, c)
         self.bp = get_best_alternative_performances(pt, c)
 
+        self.stop_after_one_sol_found = True
+
     def compute_fitness(self, model, aa):
         total = len(self.alternatives)
         nok = 0
@@ -325,7 +327,12 @@ class meta_electre_tri_global():
             self.loop_lp(models)
             models_fitness = self.loop_heuristic(models, nh)
             print models_fitness
-            m = max(models_fitness, key = lambda a: models_fitness.get(a))
+            if self.stop_after_one_sol_found is True:
+                m = max(models_fitness,
+                        key = lambda a: models_fitness.get(a))
+                if m == 1:
+                    return m
+
         m = max(models_fitness, key = lambda a: models_fitness.get(a))
         return m
 
