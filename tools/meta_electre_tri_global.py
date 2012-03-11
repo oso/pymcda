@@ -10,6 +10,7 @@ from mcda.types import alternative_affectation, alternatives_affectations
 from tools.lp_electre_tri_weights import lp_electre_tri_weights
 from tools.generate_random import generate_random_categories_profiles
 from tools.generate_random import generate_random_alternatives
+from tools.generate_random import generate_random_criteria_values
 from tools.utils import get_worst_alternative_performances
 from tools.utils import get_best_alternative_performances
 
@@ -35,12 +36,21 @@ class heuristic_profiles():
         self.b0 = b0
         self.bp = bp
 
+        self.aa_dict = self.convert_aa_to_dict(aa)
+
         self.n_intervals = 5
 
+    def convert_aa_to_dict(self, aa):
+        affectations = {}
+        for af in aa:
+             affectations[af.alternative_id] = af.category_id
+        return affectations
+
     def compute_histograms(self, aa, current, above, below):
+        aa_dict = self.convert_aa_to_dict(aa)
+
         above_intervals = {}
         below_intervals = {}
-
         for c in self.m.criteria:
             below_size = current[c.id]-below[c.id]
             above_size = above[c.id]-current[c.id]
@@ -77,8 +87,8 @@ class heuristic_profiles():
             if aperf < below[c.id]:
                 continue
 
-            af = aa(ap.alternative_id)
-            af_ori = self.aa(ap.alternative_id)
+            af = aa_dict[ap.alternative_id]
+            af_ori = self.aa_dict[ap.alternative_id]
 
             rank = self.m.categories(af).rank
             rank_ori = self.m.categories(af_ori).rank
@@ -262,6 +272,8 @@ class meta_electre_tri_global():
         self.b = generate_random_alternatives(nprofiles, 'b') # FIXME
         bpt = generate_random_categories_profiles(self.b, self.criteria)
         model.profiles = bpt
+        model.cv = generate_random_criteria_values(self.criteria)
+        model.lbda = random.uniform(0.5, 1)
         return model
 
     def initialization(self, n):
@@ -292,23 +304,16 @@ class meta_electre_tri_global():
             heuristic = heuristic_profiles(model, self.alternatives,
                                            self.criteria, self.pt, self.aa,
                                            self.b0, self.bp)
-            best_fitness = 0
             for j in range(n):
                 aa = model.pessimist(self.pt)
                 fitness = self.compute_fitness(model, aa)
 
                 info("Model %d, iter %d, fitness = %f" % (i, j, fitness))
-
-                if fitness > best_fitness:
-                    best_fitness = fitness
-                    best_profiles = model.profiles.copy()
-                    if fitness == 1:
-                        break
+                models_fitness[model] = fitness
+                if fitness == 1:
+                    break
 
                 heuristic.optimize(aa)
-
-            models_fitness[model] = best_fitness
-            model.profiles = best_profiles
 
             aa = model.pessimist(self.pt)
             fitness = self.compute_fitness(model, aa)
@@ -323,15 +328,25 @@ class meta_electre_tri_global():
     #   - nh: number of loop to do for heuristic
     def solve(self, m, nl, nh):
         models = self.initialization(m)
+        models_fitness = { model: 0 for model in models }
         for i in range(nl):
+
+            models_fitness = sorted(models_fitness.iteritems(),
+                                    key = lambda (k,v): (v,k),
+                                    reverse = True)
+
+            print models_fitness
+
+            if self.stop_after_one_sol_found is True \
+               and models_fitness[0][1] == 1:
+                return models_fitness[0][0]
+
+#            for model, fitness in models_fitness[int(m/2):]:
+#                models.remove(model)
+#                models.append(self.init_one())
+#
             self.loop_lp(models)
             models_fitness = self.loop_heuristic(models, nh)
-            print models_fitness
-            if self.stop_after_one_sol_found is True:
-                m = max(models_fitness,
-                        key = lambda a: models_fitness.get(a))
-                if m == 1:
-                    return m
 
         m = max(models_fitness, key = lambda a: models_fitness.get(a))
         return m
