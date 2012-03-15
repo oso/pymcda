@@ -3,7 +3,7 @@ import sys
 sys.path.insert(0, "..")
 from mcda.types import criterion_value, criteria_values
 
-solver = 'cplex'
+solver = 'glpk'
 verbose = False
 
 if solver == 'glpk':
@@ -26,8 +26,7 @@ class lp_electre_tri_weights():
     #   - cat: categories
     #   - b: ordered categories profiles
     #   - bpt: profiles performance
-    def __init__(self, a, c, cv, aa, pt, cat, b, bpt, epsilon=0.0001,
-                 delta=0.0001):
+    def __init__(self, a, c, cv, aa, pt, cat, b, bpt, delta=0.0001):
         self.alternatives = a
         self.criteria = c
         self.criteria_vals = cv
@@ -36,7 +35,6 @@ class lp_electre_tri_weights():
         self.categories = cat
         self.profiles = b
         self.bpt = bpt
-        self.epsilon = epsilon
         self.delta = delta
         if solver == 'glpk':
             self.lp = pymprog.model('lp_elecre_tri_weights')
@@ -66,14 +64,18 @@ class lp_electre_tri_weights():
                               lb=[0 for c in self.criteria],
                               ub=[1 for c in self.criteria])
         self.lp.variables.add(names=['x'+a.id for a in self.alternatives],
-                              lb=[-2 for a in self.alternatives],
-                              ub=[2 for a in self.alternatives])
+                              lb=[0 for a in self.alternatives],
+                              ub=[1 for a in self.alternatives])
         self.lp.variables.add(names=['y'+a.id for a in self.alternatives],
-                              lb=[-2 for a in self.alternatives],
-                              ub=[2 for a in self.alternatives])
+                              lb=[0 for a in self.alternatives],
+                              ub=[1 for a in self.alternatives])
+        self.lp.variables.add(names=['xp'+a.id for a in self.alternatives],
+                              lb=[0 for a in self.alternatives],
+                              ub=[1 for a in self.alternatives])
+        self.lp.variables.add(names=['yp'+a.id for a in self.alternatives],
+                              lb=[0 for a in self.alternatives],
+                              ub=[1 for a in self.alternatives])
         self.lp.variables.add(names=['lambda'], lb = [0.5], ub = [1])
-        self.lp.variables.add(names=['alpha'], lb=[-2],
-                              ub=[2])
 
     def add_constraints_cplex(self):
         m = len(self.alternatives)
@@ -85,7 +87,7 @@ class lp_electre_tri_weights():
             cat_id = self.alternative_affectations(a.id)
             cat_rank = self.categories(cat_id).rank
 
-            # sum(w_j(a_i,b_h-1) - x_i = lbda
+            # sum(w_j(a_i,b_h-1) - x_i + x'_i = lbda
             if cat_rank > 1:
                 lower_profile = self.profiles[cat_rank-2]
                 b_perfs = self.bpt(lower_profile.id)
@@ -99,16 +101,18 @@ class lp_electre_tri_weights():
                     constraints.set_coefficients('cinf'+a.id, 'w'+c.id, k)
 
                 constraints.set_coefficients('cinf'+a.id, 'x'+a.id, -1)
+                constraints.set_coefficients('cinf'+a.id, 'xp'+a.id, 1)
                 constraints.set_coefficients('cinf'+a.id, 'lambda', -1)
                 constraints.set_rhs('cinf'+a.id, 0)
                 constraints.set_senses('cinf'+a.id, 'E')
             else:
                 constraints.add(names=['nil'+a.id])
                 constraints.set_coefficients('nil'+a.id, 'x'+a.id, 1)
+                constraints.set_coefficients('nil'+a.id, 'xp'+a.id, 1)
                 constraints.set_rhs('nil'+a.id, 0)
                 constraints.set_senses('nil'+a.id, 'E')
 
-            # sum(w_j(a_i,b_h) + y_i = lbda - delta
+            # sum(w_j(a_i,b_h) + y_i - y'_i = lbda - delta
             if cat_rank < len(self.categories):
                 upper_profile = self.profiles[cat_rank-1]
                 b_perfs = self.bpt(upper_profile.id)
@@ -122,33 +126,16 @@ class lp_electre_tri_weights():
                     constraints.set_coefficients('csup'+a.id, 'w'+c.id, k)
 
                 constraints.set_coefficients('csup'+a.id, 'y'+a.id, 1)
+                constraints.set_coefficients('csup'+a.id, 'yp'+a.id, -1)
                 constraints.set_coefficients('csup'+a.id, 'lambda', -1)
                 constraints.set_rhs('csup'+a.id, -self.delta)
                 constraints.set_senses('csup'+a.id, 'E')
             else:
                 constraints.add(names=['nil'+a.id])
                 constraints.set_coefficients('nil'+a.id, 'y'+a.id, 1)
+                constraints.set_coefficients('nil'+a.id, 'yp'+a.id, 1)
                 constraints.set_rhs('nil'+a.id, 0)
                 constraints.set_senses('nil'+a.id, 'E')
-
-            # alpha <= x_i
-            # alpha <= y_i
-            constraints.add(names=['xmax'+a.id, 'ymax'+a.id])
-            constraints.set_coefficients('xmax'+a.id, 'x'+a.id, 1)
-            constraints.set_coefficients('ymax'+a.id, 'y'+a.id, 1)
-            constraints.set_coefficients('xmax'+a.id, 'alpha', -1)
-            constraints.set_coefficients('ymax'+a.id, 'alpha', -1)
-            constraints.set_rhs('xmax'+a.id, 0)
-            constraints.set_rhs('ymax'+a.id, 0)
-            constraints.set_senses('xmax'+a.id, 'G')
-            constraints.set_senses('ymax'+a.id, 'G')
-
-#        # w_j <= 0.5*sum(w_j)
-#        for c in self.criteria:
-#            constraints.add(names=['wmax'+c.id])
-#            constraints.set_coefficients('wmax'+c.id, 'w'+c.id, 1)
-#            constraints.set_rhs('wmax'+c.id, 0.5)
-#            constraints.set_senses('wmax'+c.id, 'L')
 
         # sum w_j = 1
         constraints.add(names=['wsum'])
@@ -158,11 +145,10 @@ class lp_electre_tri_weights():
         constraints.set_senses('wsum', 'E')
 
     def add_objective_cplex(self):
-        self.lp.objective.set_sense(self.lp.objective.sense.maximize)
-        self.lp.objective.set_linear('alpha', 1)
+        self.lp.objective.set_sense(self.lp.objective.sense.minimize)
         for a in self.alternatives:
-            self.lp.objective.set_linear('x'+a.id, self.epsilon)
-            self.lp.objective.set_linear('y'+a.id, self.epsilon)
+            self.lp.objective.set_linear('xp'+a.id, 1)
+            self.lp.objective.set_linear('yp'+a.id, 1)
 
     def solve_cplex(self):
         self.lp.solve()
@@ -187,12 +173,15 @@ class lp_electre_tri_weights():
 
         self.x = dict((i.id, {}) for i in self.alternatives)
         self.y = dict((i.id, {}) for i in self.alternatives)
+        self.xp = dict((i.id, {}) for i in self.alternatives)
+        self.yp = dict((i.id, {}) for i in self.alternatives)
         for i in self.alternatives:
-            self.x[i.id] = self.lp.variable(lower=-2, upper=2)
-            self.y[i.id] = self.lp.variable(lower=-2, upper=2)
+            self.x[i.id] = self.lp.variable(lower=0, upper=1)
+            self.y[i.id] = self.lp.variable(lower=0, upper=1)
+            self.xp[i.id] = self.lp.variable(lower=0, upper=1)
+            self.yp[i.id] = self.lp.variable(lower=0, upper=1)
 
         self.lbda = self.lp.variable(lower=0.5, upper=1)
-        self.alpha = self.lp.variable(lower=-2, upper=2)
 
     def add_constraints_scip(self):
         for a in self.alternatives:
@@ -200,7 +189,7 @@ class lp_electre_tri_weights():
             cat_id = self.alternative_affectations(a.id)
             cat_rank = self.categories(cat_id).rank
 
-            # sum(w_j(a_i,b_h-1) - x_i = lbda
+            # sum(w_j(a_i,b_h-1) - x_i + x'_i = lbda
             if cat_rank > 1:
                 lower_profile = self.profiles[cat_rank-2]
                 b_perfs = self.bpt(lower_profile.id)
@@ -211,11 +200,12 @@ class lp_electre_tri_weights():
                         c_outrank.append(c)
 
                 self.lp += sum(self.w[c.id] for c in c_outrank) \
-                               - self.x[a.id] == self.lbda
+                               - self.x[a.id] + self.xp[a.id] == self.lbda
             else:
                 self.lp += self.x[a.id] == 0
+                self.lp += self.xp[a.id] == 0
 
-            # sum(w_j(a_i,b_h) + y_i = lbda - delta
+            # sum(w_j(a_i,b_h) + y_i - y'_i = lbda - delta
             if cat_rank < len(self.categories):
                 upper_profile = self.profiles[cat_rank-1]
                 b_perfs = self.bpt(upper_profile.id)
@@ -226,18 +216,11 @@ class lp_electre_tri_weights():
                         c_outrank.append(c)
 
                 self.lp += sum(self.w[c.id] for c in c_outrank) \
-                               + self.y[a.id] == self.lbda - self.delta
+                               + self.y[a.id] - self.yp[a.id] == self.lbda \
+                               - self.delta
             else:
                 self.lp += self.y[a.id] == 0
-
-            # alpha <= x_i
-            # alpha <= y_i
-            self.lp += self.x[a.id] >= self.alpha
-            self.lp += self.y[a.id] >= self.alpha
-
-#        # w_j <= 0.5*sum(w_j)
-#        for c in self.criteria:
-#            self.lp += self.w[c.id] <= 0.5
+                self.lp += self.yp[a.id] == 0
 
         # sum w_j = 1
         self.lp += sum(self.w[c.id] for c in self.criteria) == 1
@@ -246,12 +229,11 @@ class lp_electre_tri_weights():
         m = len(self.alternatives)
         n = len(self.criteria)
 
-        self.obj = self.alpha \
-             + self.epsilon*sum([self.x[i.id] for i in self.alternatives]) \
-             + self.epsilon*sum([self.y[i.id] for i in self.alternatives])
+        self.obj = sum([self.xp[i.id] for i in self.alternatives]) \
+                   + sum([self.yp[i.id] for i in self.alternatives])
 
     def solve_scip(self):
-        solution = self.lp.maximize(objective=self.obj)
+        solution = self.lp.minimize(objective=self.obj)
         if solution is None:
             raise RuntimeError("No solution found")
 
@@ -274,10 +256,11 @@ class lp_electre_tri_weights():
 
         # Initialize variables
         self.w = self.lp.var(xrange(n), 'w', bounds=(0, 1))
-        self.x = self.lp.var(xrange(m), 'x', bounds=(-2, 2))
-        self.y = self.lp.var(xrange(m), 'y', bounds=(-2, 2))
+        self.x = self.lp.var(xrange(m), 'x', bounds=(0, 1))
+        self.y = self.lp.var(xrange(m), 'y', bounds=(0, 1))
+        self.xp = self.lp.var(xrange(m), 'xp', bounds=(0, 1))
+        self.yp = self.lp.var(xrange(m), 'yp', bounds=(0, 1))
         self.lbda = self.lp.var(name='lambda', bounds=(0.5, 1))
-        self.alpha = self.lp.var(name='alpha', bounds=(-2, 2))
 
     def add_constraints_glpk(self):
         n = len(self.criteria)
@@ -287,7 +270,7 @@ class lp_electre_tri_weights():
             cat_id = self.alternative_affectations(a.id)
             cat_rank = self.categories(cat_id).rank
 
-            # sum(w_j(a_i,b_h-1) - x_i = lbda
+            # sum(w_j(a_i,b_h-1) - x_i + x'_i = lbda
             if cat_rank > 1:
                 lower_profile = self.profiles[cat_rank-2]
                 b_perfs = self.bpt(lower_profile.id)
@@ -299,11 +282,12 @@ class lp_electre_tri_weights():
                         j_outrank.append(j)
 
                 self.lp.st(sum(self.w[j] for j in j_outrank) - self.x[i] \
-                           == self.lbda)
+                           + self.xp[i] == self.lbda)
             else:
                 self.lp.st(self.x[i] == 0)
+                self.lp.st(self.xp[i] == 0)
 
-            # sum(w_j(a_i,b_h) + y_i = lbda - delta
+            # sum(w_j(a_i,b_h) + y_i - y'_i = lbda - delta
             if cat_rank < len(self.categories):
                 upper_profile = self.profiles[cat_rank-1]
                 b_perfs = self.bpt(upper_profile.id)
@@ -315,18 +299,10 @@ class lp_electre_tri_weights():
                         j_outrank.append(j)
 
                 self.lp.st(sum(self.w[j] for j in j_outrank) + self.y[i] \
-                           == self.lbda - self.delta)
+                           - self.yp[i] == self.lbda - self.delta)
             else:
                 self.lp.st(self.y[i] == 0)
-
-            # alpha <= x_i
-            # alpha <= y_i
-            self.lp.st(self.x[i] >= self.alpha)
-            self.lp.st(self.y[i] >= self.alpha)
-
-#        # w_j <= 0.5*sum(w_j)
-#        for j in range(n):
-#            self.lp.st(self.w[j] <= 0.5)
+                self.lp.st(self.yp[i] == 0)
 
         # sum w_j = 1
         self.lp.st(sum(self.w[j] for j in range(n)) == 1)
@@ -334,9 +310,8 @@ class lp_electre_tri_weights():
     def add_objective_glpk(self):
         m = len(self.alternatives)
 
-        self.lp.max(self.alpha \
-                    + self.epsilon*sum([self.x[i] for i in range(m)])   \
-                    + self.epsilon*sum([self.y[i] for i in range(m)]))
+        self.lp.min(sum([self.xp[i] for i in range(m)])   \
+                    + sum([self.yp[i] for i in range(m)]))
 
     def solve_glpk(self):
         self.lp.solve()
@@ -387,7 +362,7 @@ if __name__ == "__main__":
 
     print("Solver used: %s" % solver)
     # Original Electre Tri model
-    a = generate_random_alternatives(60)
+    a = generate_random_alternatives(600)
     c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 890)
     normalize_criteria_weights(cv)
@@ -399,8 +374,7 @@ if __name__ == "__main__":
 
     lbda = random.uniform(0.5, 1)
 #    lbda = 0.75
-    errors = 0.000
-    epsilon = 0.001
+    errors = 0.1
     delta = 0.0001
 
     model = electre_tri(c, cv, bpt, lbda, cat)
@@ -416,11 +390,10 @@ if __name__ == "__main__":
     cv.display(criterion_ids=cids)
     print("lambda\t%.7s" % lbda)
     print("delta: %g" % delta)
-    print("epsilon: %g" % epsilon)
     #print(aa)
 
     lp_weights = lp_electre_tri_weights(a, c, cv, aa, pt, cat, b, bpt,
-                                        epsilon, delta)
+                                        delta)
 
     t1 = time.time()
     obj, cv_learned, lbda_learned = lp_weights.solve()
