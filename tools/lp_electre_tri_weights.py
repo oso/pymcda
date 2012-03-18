@@ -70,20 +70,24 @@ class lp_electre_tri_weights():
         cat_ranks = { c.id: c.rank for c in self.categories }
         assignments = { a.alternative_id: cat_ranks[a.category_id] \
                        for a in self.alternative_affectations }
+        pt = { a.alternative_id: a.performances \
+               for a in self.pt }
+        bpt = { a.alternative_id: a.performances \
+                for a in self.bpt }
 
         self.c_xi = dict()
         self.c_yi = dict()
         for a in self.alternatives:
-            a_perfs = self.pt(a.id)
+            a_perfs = pt[a.id]
             cat_rank = assignments[a.id]
 
             if cat_rank > 1:
                 lower_profile = self.profiles[cat_rank-2]
-                b_perfs = self.bpt(lower_profile.id)
+                b_perfs = bpt[lower_profile.id]
 
                 dj = str()
                 for c in self.criteria:
-                    if a_perfs(c.id) >= b_perfs(c.id):
+                    if a_perfs[c.id] >= b_perfs[c.id]:
                         dj += '1'
                     else:
                         dj += '0'
@@ -95,11 +99,11 @@ class lp_electre_tri_weights():
 
             if cat_rank < len(self.categories):
                 upper_profile = self.profiles[cat_rank-1]
-                b_perfs = self.bpt(upper_profile.id)
+                b_perfs = bpt[upper_profile.id]
 
                 dj = str()
                 for c in self.criteria:
-                    if a_perfs(c.id) >= b_perfs(c.id):
+                    if a_perfs[c.id] >= b_perfs[c.id]:
                         dj += '1'
                     else:
                         dj += '0'
@@ -473,7 +477,7 @@ if __name__ == "__main__":
 
     print("Solver used: %s" % solver)
     # Original Electre Tri model
-    a = generate_random_alternatives(5000)
+    a = generate_random_alternatives(15000)
     c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 890)
     normalize_criteria_weights(cv)
@@ -527,11 +531,11 @@ if __name__ == "__main__":
     total = len(a)
     nok = 0
     anok = []
+    a_assign = {alt.alternative_id: alt.category_id for alt in aa}
+    a_assign2 = {alt.alternative_id: alt.category_id for alt in aa_learned}
     for alt in a:
-        if aa(alt.id) != aa_learned(alt.id):
+        if a_assign[alt.id] != a_assign2[alt.id]:
             anok.append(alt)
-#            print("Pessimistic affectation of %s mismatch (%s <> %s)" %
-#                  (str(alt.id), aa(alt.id), aa_learned(alt.id)))
             nok += 1
 
     print("Good affectations: %3g %%" % (float(total-nok)/total*100))
