@@ -1,9 +1,10 @@
 from __future__ import division
 import sys
+import pickle
 sys.path.insert(0, "..")
 from mcda.types import criterion_value, criteria_values
 
-solver = 'glpk'
+solver = 'cplex'
 verbose = False
 
 if solver == 'glpk':
@@ -54,12 +55,121 @@ class lp_electre_tri_weights():
                 self.lp.set_results_stream(None)
 #                self.lp.set_warning_stream(None)
 #                self.lp.set_error_stream(None)
-            self.add_variables_cplex()
-            self.add_constraints_cplex()
-            self.add_objective_cplex()
+#            self.add_variables_cplex()
+#            self.add_constraints_cplex()
+#            self.add_objective_cplex()
+            self.compute_constraints()
+            self.add_variables_cplex2()
+            self.add_constraints_cplex2()
+            self.add_objective_cplex2()
+
+    def compute_constraints(self):
+        m = len(self.alternatives)
+        n = len(self.criteria)
+
+        cat_ranks = { c.id: c.rank for c in self.categories }
+        assignments = { a.alternative_id: cat_ranks[a.category_id] \
+                       for a in self.alternative_affectations }
+
+        self.c_xi = dict()
+        self.c_yi = dict()
+        for a in self.alternatives:
+            a_perfs = self.pt(a.id)
+            cat_rank = assignments[a.id]
+
+            if cat_rank > 1:
+                lower_profile = self.profiles[cat_rank-2]
+                b_perfs = self.bpt(lower_profile.id)
+
+                dj = str()
+                for c in self.criteria:
+                    if a_perfs(c.id) >= b_perfs(c.id):
+                        dj += '1'
+                    else:
+                        dj += '0'
+
+                if self.c_xi.has_key(dj) is False:
+                    self.c_xi[dj] = 1
+                else:
+                    self.c_xi[dj] += 1
+
+            if cat_rank < len(self.categories):
+                upper_profile = self.profiles[cat_rank-1]
+                b_perfs = self.bpt(upper_profile.id)
+
+                dj = str()
+                for c in self.criteria:
+                    if a_perfs(c.id) >= b_perfs(c.id):
+                        dj += '1'
+                    else:
+                        dj += '0'
+
+                if self.c_yi.has_key(dj) is False:
+                    self.c_yi[dj] = 1
+                else:
+                    self.c_yi[dj] += 1
+
+    def add_variables_cplex2(self):
+        self.lp.variables.add(names=['w'+c.id for c in self.criteria],
+                              lb=[0 for c in self.criteria],
+                              ub=[1 for c in self.criteria])
+        self.lp.variables.add(names=['x'+dj for dj in self.c_xi],
+                              lb = [0 for dj in self.c_xi],
+                              ub = [1 for dj in self.c_xi])
+        self.lp.variables.add(names=['y'+dj for dj in self.c_yi],
+                              lb = [0 for dj in self.c_yi],
+                              ub = [1 for dj in self.c_yi])
+        self.lp.variables.add(names=['xp'+dj for dj in self.c_xi],
+                              lb = [0 for dj in self.c_xi],
+                              ub = [1 for dj in self.c_xi])
+        self.lp.variables.add(names=['yp'+dj for dj in self.c_yi],
+                              lb = [0 for dj in self.c_yi],
+                              ub = [1 for dj in self.c_yi])
+        self.lp.variables.add(names=['lambda'], lb = [0.5], ub = [1])
+
+    def add_constraints_cplex2(self):
+        constraints = self.lp.linear_constraints
+        w_vars = ['w'+c.id for c in self.criteria]
+        for dj in self.c_xi:
+            coef = map(float, list(dj))
+            constraints.add(names=['cinf'+dj],
+                            lin_expr =
+                                [
+                                 [w_vars + ['x'+dj, 'xp'+dj, 'lambda'],
+                                  coef + [-1.0, 1.0, -1.0]],
+                                ],
+                            senses = ["E"],
+                            rhs = [0],
+                           )
+
+        for dj in self.c_yi:
+            coef = map(float, list(dj))
+            constraints.add(names=['csup'+dj],
+                            lin_expr =
+                                [
+                                 [w_vars + ['y'+dj, 'yp'+dj, 'lambda'],
+                                  coef + [1.0, -1.0, -1.0]],
+                                ],
+                            senses = ["E"],
+                            rhs = [-self.delta],
+                           )
+
+        constraints.add(names=['wsum'],
+                        lin_expr = [[w_vars,
+                                    [1.0 for i in range(len(w_vars))]],
+                                   ],
+                        senses = ["E"],
+                        rhs = [1]
+                        )
+
+    def add_objective_cplex2(self):
+        self.lp.objective.set_sense(self.lp.objective.sense.minimize)
+        for dj, coef in self.c_xi.iteritems():
+            self.lp.objective.set_linear('xp'+dj, coef)
+        for dj, coef in self.c_yi.iteritems():
+            self.lp.objective.set_linear('yp'+dj, coef)
 
     def add_variables_cplex(self):
-        infinity = cplex.infinity
         self.lp.variables.add(names=['w'+c.id for c in self.criteria],
                               lb=[0 for c in self.criteria],
                               ub=[1 for c in self.criteria])
@@ -82,6 +192,7 @@ class lp_electre_tri_weights():
         n = len(self.criteria)
         constraints = self.lp.linear_constraints
 
+        m = 0
         for a in self.alternatives:
             a_perfs = self.pt(a.id)
             cat_id = self.alternative_affectations(a.id)
@@ -362,7 +473,7 @@ if __name__ == "__main__":
 
     print("Solver used: %s" % solver)
     # Original Electre Tri model
-    a = generate_random_alternatives(600)
+    a = generate_random_alternatives(5000)
     c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 890)
     normalize_criteria_weights(cv)
@@ -374,7 +485,7 @@ if __name__ == "__main__":
 
     lbda = random.uniform(0.5, 1)
 #    lbda = 0.75
-    errors = 0.1
+    errors = 0.0
     delta = 0.0001
 
     model = electre_tri(c, cv, bpt, lbda, cat)
