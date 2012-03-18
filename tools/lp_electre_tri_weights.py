@@ -507,12 +507,13 @@ if __name__ == "__main__":
     print("delta: %g" % delta)
     #print(aa)
 
+    t1 = time.time()
     lp_weights = lp_electre_tri_weights(a, c, cv, aa, pt, cat, b, bpt,
                                         delta)
 
-    t1 = time.time()
-    obj, cv_learned, lbda_learned = lp_weights.solve()
     t2 = time.time()
+    obj, cv_learned, lbda_learned = lp_weights.solve()
+    t3 = time.time()
 
     model.cv = cv_learned
     model.lbda = lbda_learned
@@ -520,7 +521,9 @@ if __name__ == "__main__":
 
     print('Learned model')
     print('=============')
-    print("Computation time: %g secs" % (t2-t1))
+    print("Total computation time: %g secs" % (t3-t1))
+    print("Constraints encoding time: %g secs" % (t2-t1))
+    print("Solving time: %g secs" % (t3-t2))
     print("Objective: %s" % obj)
     cv.display(criterion_ids=cids, name='w')
     cv_learned.display(header=False, criterion_ids=cids, name='w_learned')
