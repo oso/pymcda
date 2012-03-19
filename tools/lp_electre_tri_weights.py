@@ -140,6 +140,8 @@ class lp_electre_tri_weights():
         w_vars = ['w'+c.id for c in self.criteria]
         for dj in self.c_xi:
             coef = map(float, list(dj))
+
+            # sum(w_j(a_i,b_h-1) - x_i + x'_i = lbda
             constraints.add(names=['cinf'+dj],
                             lin_expr =
                                 [
@@ -152,6 +154,8 @@ class lp_electre_tri_weights():
 
         for dj in self.c_yi:
             coef = map(float, list(dj))
+
+            # sum(w_j(a_i,b_h) + y_i - y'_i = lbda - delta
             constraints.add(names=['csup'+dj],
                             lin_expr =
                                 [
@@ -162,6 +166,7 @@ class lp_electre_tri_weights():
                             rhs = [-self.delta],
                            )
 
+        # sum w_j = 1
         constraints.add(names=['wsum'],
                         lin_expr = [[w_vars,
                                     [1.0 for i in range(len(w_vars))]],
@@ -200,20 +205,27 @@ class lp_electre_tri_weights():
         n = len(self.criteria)
         constraints = self.lp.linear_constraints
 
+        cat_ranks = { c.id: c.rank for c in self.categories }
+        assignments = { a.alternative_id: cat_ranks[a.category_id] \
+                       for a in self.alternative_affectations }
+        pt = { a.alternative_id: a.performances \
+               for a in self.pt }
+        bpt = { a.alternative_id: a.performances \
+                for a in self.bpt }
+
         m = 0
         for a in self.alternatives:
-            a_perfs = self.pt(a.id)
-            cat_id = self.alternative_affectations(a.id)
-            cat_rank = self.categories(cat_id).rank
+            a_perfs = pt[a.id]
+            cat_rank = assignments[a.id]
 
             # sum(w_j(a_i,b_h-1) - x_i + x'_i = lbda
             if cat_rank > 1:
                 lower_profile = self.profiles[cat_rank-2]
-                b_perfs = self.bpt(lower_profile.id)
+                b_perfs = bpt[lower_profile.id]
 
                 constraints.add(names=['cinf'+a.id])
                 for c in self.criteria:
-                    if a_perfs(c.id) >= b_perfs(c.id):
+                    if a_perfs[c.id] >= b_perfs[c.id]:
                         k = 1
                     else:
                         k = 0
@@ -234,11 +246,11 @@ class lp_electre_tri_weights():
             # sum(w_j(a_i,b_h) + y_i - y'_i = lbda - delta
             if cat_rank < len(self.categories):
                 upper_profile = self.profiles[cat_rank-1]
-                b_perfs = self.bpt(upper_profile.id)
+                b_perfs = bpt[upper_profile.id]
 
                 constraints.add(names=['csup'+a.id])
                 for c in self.criteria:
-                    if a_perfs(c.id) >= b_perfs(c.id):
+                    if a_perfs[c.id] >= b_perfs[c.id]:
                         k = 1
                     else:
                         k = 0
@@ -303,19 +315,26 @@ class lp_electre_tri_weights():
         self.lbda = self.lp.variable(lower=0.5, upper=1)
 
     def add_constraints_scip(self):
+        cat_ranks = { c.id: c.rank for c in self.categories }
+        assignments = { a.alternative_id: cat_ranks[a.category_id] \
+                       for a in self.alternative_affectations }
+        pt = { a.alternative_id: a.performances \
+               for a in self.pt }
+        bpt = { a.alternative_id: a.performances \
+                for a in self.bpt }
+
         for a in self.alternatives:
-            a_perfs = self.pt(a.id)
-            cat_id = self.alternative_affectations(a.id)
-            cat_rank = self.categories(cat_id).rank
+            a_perfs = pt[a.id]
+            cat_rank = assignments[a.id]
 
             # sum(w_j(a_i,b_h-1) - x_i + x'_i = lbda
             if cat_rank > 1:
                 lower_profile = self.profiles[cat_rank-2]
-                b_perfs = self.bpt(lower_profile.id)
+                b_perfs = bpt(lower_profile.id)
 
                 c_outrank = []
                 for c in self.criteria:
-                    if a_perfs(c.id) >= b_perfs(c.id):
+                    if a_perfs[c.id] >= b_perfs[c.id]:
                         c_outrank.append(c)
 
                 self.lp += sum(self.w[c.id] for c in c_outrank) \
@@ -327,11 +346,11 @@ class lp_electre_tri_weights():
             # sum(w_j(a_i,b_h) + y_i - y'_i = lbda - delta
             if cat_rank < len(self.categories):
                 upper_profile = self.profiles[cat_rank-1]
-                b_perfs = self.bpt(upper_profile.id)
+                b_perfs = bpt[upper_profile.id]
 
                 c_outrank = []
                 for c in self.criteria:
-                    if a_perfs(c.id) >= b_perfs(c.id):
+                    if a_perfs[c.id] >= b_perfs[c.id]:
                         c_outrank.append(c)
 
                 self.lp += sum(self.w[c.id] for c in c_outrank) \
@@ -423,20 +442,27 @@ class lp_electre_tri_weights():
     def add_constraints_glpk(self):
         n = len(self.criteria)
 
+        cat_ranks = { c.id: c.rank for c in self.categories }
+        assignments = { a.alternative_id: cat_ranks[a.category_id] \
+                       for a in self.alternative_affectations }
+        pt = { a.alternative_id: a.performances \
+               for a in self.pt }
+        bpt = { a.alternative_id: a.performances \
+                for a in self.bpt }
+
         for i, a in enumerate(self.alternatives):
-            a_perfs = self.pt(a.id)
-            cat_id = self.alternative_affectations(a.id)
-            cat_rank = self.categories(cat_id).rank
+            a_perfs = pt[a.id]
+            cat_rank = assignments[a.id]
 
             # sum(w_j(a_i,b_h-1) - x_i + x'_i = lbda
             if cat_rank > 1:
                 lower_profile = self.profiles[cat_rank-2]
-                b_perfs = self.bpt(lower_profile.id)
+                b_perfs = bpt[lower_profile.id]
 
                 j_outrank = []
                 for j, c in enumerate(self.criteria):
                     c_id = c.id
-                    if a_perfs(c_id) >= b_perfs(c_id):
+                    if a_perfs[c_id] >= b_perfs[c_id]:
                         j_outrank.append(j)
 
                 self.lp.st(sum(self.w[j] for j in j_outrank) - self.x[i] \
@@ -448,12 +474,12 @@ class lp_electre_tri_weights():
             # sum(w_j(a_i,b_h) + y_i - y'_i = lbda - delta
             if cat_rank < len(self.categories):
                 upper_profile = self.profiles[cat_rank-1]
-                b_perfs = self.bpt(upper_profile.id)
+                b_perfs = bpt[upper_profile.id]
 
                 j_outrank = []
                 for j, c in enumerate(self.criteria):
                     c_id = c.id
-                    if a_perfs(c_id) >= b_perfs(c_id):
+                    if a_perfs[c_id] >= b_perfs[c_id]:
                         j_outrank.append(j)
 
                 self.lp.st(sum(self.w[j] for j in j_outrank) + self.y[i] \
