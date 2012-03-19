@@ -40,9 +40,13 @@ class lp_electre_tri_weights():
         if solver == 'glpk':
             self.lp = pymprog.model('lp_elecre_tri_weights')
             self.lp.verb=verbose
-            self.add_variables_glpk()
-            self.add_constraints_glpk()
-            self.add_objective_glpk()
+#            self.add_variables_glpk()
+#            self.add_constraints_glpk()
+#            self.add_objective_glpk()
+            self.compute_constraints()
+            self.add_variables_glpk2()
+            self.add_constraints_glpk2()
+            self.add_objective_glpk2()
         elif solver == 'scip':
             self.lp = scip.solver(quiet=not verbose)
             self.add_variables_scip()
@@ -364,6 +368,45 @@ class lp_electre_tri_weights():
         lbda = solution[self.lbda]
 
         return obj, cvs, lbda
+
+    def add_variables_glpk2(self):
+        m1 = len(self.c_xi)
+        m2 = len(self.c_yi)
+        n = len(self.criteria)
+
+        self.w = self.lp.var(xrange(n), 'w', bounds=(0, 1))
+        self.lbda = self.lp.var(name='lambda', bounds=(0.5, 1))
+        self.x = self.lp.var(xrange(m1), 'x', bounds=(0, 1))
+        self.y = self.lp.var(xrange(m2), 'y', bounds=(0, 1))
+        self.xp = self.lp.var(xrange(m1), 'xp', bounds=(0, 1))
+        self.yp = self.lp.var(xrange(m2), 'yp', bounds=(0, 1))
+
+    def add_constraints_glpk2(self):
+        n = len(self.criteria)
+
+        for i, dj in enumerate(self.c_xi):
+            coef = map(float, list(dj))
+
+            # sum(w_j(a_i,b_h-1) - x_i + x'_i = lbda
+            self.lp.st(sum(coef[j]*self.w[j] for j in range(n)) \
+                       - self.x[i] + self.xp[i] == self.lbda)
+
+        for i, dj in enumerate(self.c_yi):
+            coef = map(float, list(dj))
+
+            # sum(w_j(a_i,b_h) + y_i - y'_i = lbda - delta
+            self.lp.st(sum(coef[j]*self.w[j] for j in range(n)) \
+                       + self.y[i] - self.yp[i] == self.lbda - self.delta)
+
+        # sum w_j = 1
+        self.lp.st(sum(self.w[j] for j in range(n)) == 1)
+
+    def add_objective_glpk2(self):
+        m = len(self.alternatives)
+        self.lp.min(sum([k*self.xp[i]
+                         for i, k in enumerate(self.c_xi.values())])
+                    + sum([k*self.yp[i]
+                          for i, k in enumerate(self.c_yi.values())]))
 
     def add_variables_glpk(self):
         m = len(self.alternatives)
