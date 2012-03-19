@@ -37,21 +37,24 @@ class lp_electre_tri_weights():
         self.profiles = b
         self.bpt = bpt
         self.delta = delta
+        self.compute_constraints()
         if solver == 'glpk':
             self.lp = pymprog.model('lp_elecre_tri_weights')
             self.lp.verb=verbose
 #            self.add_variables_glpk()
 #            self.add_constraints_glpk()
 #            self.add_objective_glpk()
-            self.compute_constraints()
             self.add_variables_glpk2()
             self.add_constraints_glpk2()
             self.add_objective_glpk2()
         elif solver == 'scip':
             self.lp = scip.solver(quiet=not verbose)
-            self.add_variables_scip()
-            self.add_constraints_scip()
-            self.add_objective_scip()
+#            self.add_variables_scip()
+#            self.add_constraints_scip()
+#            self.add_objective_scip()
+            self.add_variables_scip2()
+            self.add_constraints_scip2()
+            self.add_objective_scip2()
         elif solver == 'cplex':
             self.lp = cplex.Cplex()
             if verbose is False:
@@ -62,7 +65,6 @@ class lp_electre_tri_weights():
 #            self.add_variables_cplex()
 #            self.add_constraints_cplex()
 #            self.add_objective_cplex()
-            self.compute_constraints()
             self.add_variables_cplex2()
             self.add_constraints_cplex2()
             self.add_objective_cplex2()
@@ -96,7 +98,7 @@ class lp_electre_tri_weights():
                     else:
                         dj += '0'
 
-                if self.c_xi.has_key(dj) is False:
+                if not dj in self.c_xi:
                     self.c_xi[dj] = 1
                 else:
                     self.c_xi[dj] += 1
@@ -112,7 +114,7 @@ class lp_electre_tri_weights():
                     else:
                         dj += '0'
 
-                if self.c_yi.has_key(dj) is False:
+                if not dj in self.c_yi:
                     self.c_yi[dj] = 1
                 else:
                     self.c_yi[dj] += 1
@@ -183,22 +185,30 @@ class lp_electre_tri_weights():
             self.lp.objective.set_linear('yp'+dj, coef)
 
     def add_variables_cplex(self):
-        self.lp.variables.add(names=['w'+c.id for c in self.criteria],
-                              lb=[0 for c in self.criteria],
-                              ub=[1 for c in self.criteria])
-        self.lp.variables.add(names=['x'+a.id for a in self.alternatives],
-                              lb=[0 for a in self.alternatives],
-                              ub=[1 for a in self.alternatives])
-        self.lp.variables.add(names=['y'+a.id for a in self.alternatives],
-                              lb=[0 for a in self.alternatives],
-                              ub=[1 for a in self.alternatives])
-        self.lp.variables.add(names=['xp'+a.id for a in self.alternatives],
-                              lb=[0 for a in self.alternatives],
-                              ub=[1 for a in self.alternatives])
-        self.lp.variables.add(names=['yp'+a.id for a in self.alternatives],
-                              lb=[0 for a in self.alternatives],
-                              ub=[1 for a in self.alternatives])
-        self.lp.variables.add(names=['lambda'], lb = [0.5], ub = [1])
+        m1 = len(self.c_xi)
+        m2 = len(self.c_yi)
+        variables = self.lp.variables
+
+        variables.add(names=['w'+c.id for c in self.criteria],
+                      lb=[0 for c in self.criteria],
+                      ub=[1 for c in self.criteria])
+
+        if m1 > 0:
+            variables.add(names=['x'+a.id for a in self.alternatives],
+                          lb=[0 for a in self.alternatives],
+                          ub=[1 for a in self.alternatives])
+            variables.add(names=['xp'+a.id for a in self.alternatives],
+                          lb=[0 for a in self.alternatives],
+                          ub=[1 for a in self.alternatives])
+        if m2 > 0:
+            variables.add(names=['y'+a.id for a in self.alternatives],
+                          lb=[0 for a in self.alternatives],
+                          ub=[1 for a in self.alternatives])
+            variables.add(names=['yp'+a.id for a in self.alternatives],
+                          lb=[0 for a in self.alternatives],
+                          ub=[1 for a in self.alternatives])
+
+        variables.add(names=['lambda'], lb = [0.5], ub = [1])
 
     def add_constraints_cplex(self):
         m = len(self.alternatives)
@@ -297,6 +307,59 @@ class lp_electre_tri_weights():
 
         return obj, cvs, lbda
 
+    def add_variables_scip2(self):
+        m1 = len(self.c_xi)
+        m2 = len(self.c_yi)
+
+        self.w = dict((c.id, {}) for c in self.criteria)
+        for c in self.criteria:
+            self.w[c.id] = self.lp.variable(lower=0, upper=1)
+
+        if m1 > 0:
+            self.x = dict((dj, {}) for dj in self.c_xi)
+            self.xp = dict((dj, {}) for dj in self.c_xi)
+            for dj in self.c_xi:
+                self.x[dj] = self.lp.variable(lower=0, upper=1)
+                self.xp[dj] = self.lp.variable(lower=0, upper=1)
+
+        if m1 > 0:
+            self.y = dict((dj, {}) for dj in self.c_yi)
+            self.yp = dict((dj, {}) for dj in self.c_yi)
+            for dj in self.c_yi:
+                self.y[dj] = self.lp.variable(lower=0, upper=1)
+                self.yp[dj] = self.lp.variable(lower=0, upper=1)
+
+        self.lbda = self.lp.variable(lower=0.5, upper=1)
+
+    def add_constraints_scip2(self):
+        n = len(self.criteria)
+
+        for i, dj in enumerate(self.c_xi):
+            coef = list(map(float, list(dj)))
+
+            # sum(w_j(a_i,b_h-1) - x_i + x'_i = lbda
+            self.lp += sum(coef[j]*self.w[c.id] \
+                           for j, c in enumerate(self.criteria)) \
+                           - self.x[dj] + self.xp[dj] == self.lbda
+
+        for i, dj in enumerate(self.c_yi):
+            coef = list(map(float, list(dj)))
+
+            # sum(w_j(a_i,b_h) + y_i - y'_i = lbda - delta
+            self.lp += sum(coef[j]*self.w[c.id] \
+                           for j, c in enumerate(self.criteria)) \
+                           + self.y[dj] - self.yp[dj] == self.lbda \
+                                                         - self.delta
+
+        # sum w_j = 1
+        self.lp += sum(self.w[c.id] for c in self.criteria) == 1
+
+    def add_objective_scip2(self):
+        self.obj = sum([self.xp[dj]*coef \
+                       for dj, coef in self.c_xi.items()]) \
+                   + sum([self.yp[dj]*coef \
+                         for dj, coef in self.c_yi.items()])
+
     def add_variables_scip(self):
         self.w = dict((j.id, {}) for j in self.criteria)
         for j in self.criteria:
@@ -364,9 +427,6 @@ class lp_electre_tri_weights():
         self.lp += sum(self.w[c.id] for c in self.criteria) == 1
 
     def add_objective_scip(self):
-        m = len(self.alternatives)
-        n = len(self.criteria)
-
         self.obj = sum([self.xp[i.id] for i in self.alternatives]) \
                    + sum([self.yp[i.id] for i in self.alternatives])
 
@@ -395,10 +455,12 @@ class lp_electre_tri_weights():
 
         self.w = self.lp.var(xrange(n), 'w', bounds=(0, 1))
         self.lbda = self.lp.var(name='lambda', bounds=(0.5, 1))
-        self.x = self.lp.var(xrange(m1), 'x', bounds=(0, 1))
-        self.y = self.lp.var(xrange(m2), 'y', bounds=(0, 1))
-        self.xp = self.lp.var(xrange(m1), 'xp', bounds=(0, 1))
-        self.yp = self.lp.var(xrange(m2), 'yp', bounds=(0, 1))
+        if m1 > 0:
+            self.x = self.lp.var(xrange(m1), 'x', bounds=(0, 1))
+            self.xp = self.lp.var(xrange(m1), 'xp', bounds=(0, 1))
+        if m2 > 0:
+            self.y = self.lp.var(xrange(m2), 'y', bounds=(0, 1))
+            self.yp = self.lp.var(xrange(m2), 'yp', bounds=(0, 1))
 
     def add_constraints_glpk2(self):
         n = len(self.criteria)
@@ -552,9 +614,9 @@ if __name__ == "__main__":
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c)
 
-    b = generate_random_alternatives(1, 'b')
+    b = generate_random_alternatives(2, 'b')
     bpt = generate_random_categories_profiles(b, c)
-    cat = generate_random_categories(2)
+    cat = generate_random_categories(3)
 
     lbda = random.uniform(0.5, 1)
 #    lbda = 0.75
