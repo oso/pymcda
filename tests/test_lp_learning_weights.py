@@ -25,10 +25,13 @@ def variable_number_alternatives_and_criteria(ncat, er=0):
     n_alts = [ i*1000 for i in range(1, 11) ]
     n_crit = [ 5 ]
 
-    print('\nnc\tna\terr\tseed\tobj\terrors\ttime')
+    print('\nnc\tna\tncat\terr\tseed\tobj\terrors\tt_total\tt_const' \
+          '\tt_solve')
 
     objectives = { nc: {na: dict() for na in n_alts} for nc in n_crit }
-    times = { nc: {na: dict() for na in n_alts} for nc in n_crit }
+    times_total = { nc: {na: dict() for na in n_alts} for nc in n_crit }
+    times_const = { nc: {na: dict() for na in n_alts} for nc in n_crit }
+    times_solve = { nc: {na: dict() for na in n_alts} for nc in n_crit }
     errors = { nc: {na: dict() for na in n_alts} for nc in n_crit }
     errors_min = { nc: {na: dict() for na in n_alts} for nc in n_crit }
     errors_max = { nc: {na: dict() for na in n_alts} for nc in n_crit }
@@ -54,11 +57,14 @@ def variable_number_alternatives_and_criteria(ncat, er=0):
         t1 = time.time()
         lp_weights = lp_electre_tri_weights(a, c, cv, aa_errors, pt,
                                             cat, b, bpt, 0.0001)
-        obj, cv_learned, lbda_learned = lp_weights.solve()
         t2 = time.time()
+        obj, cv_learned, lbda_learned = lp_weights.solve()
+        t3 = time.time()
 
         objectives[nc][na][seed] = obj
-        times[nc][na][seed] = t2-t1
+        times_total[nc][na][seed] = t3-t1
+        times_const[nc][na][seed] = t2-t1
+        times_solve[nc][na][seed] = t3-t2
 
         model.cv = cv_learned
         model.lbda = lbda_learned
@@ -76,21 +82,26 @@ def variable_number_alternatives_and_criteria(ncat, er=0):
         e = nok/total
         errors[nc][na][seed] = nok/total
 
-        print("%d\t%d\t%d\t%-6.4f\t%s\t%-6.4f\t%-6.5f\t%-6.5f" % (nc, na,
-              ncat, er, seed, obj, e, t2-t1))
+        print("%d\t%d\t%d\t%-6.4f\t%s\t%-6.4f\t%-6.5f\t%-6.5f\t%-6.5f" \
+              "\t%-6.5f" % (nc, na, ncat, er, seed, obj, e, t3-t1, t2-t1,
+              t3-t2))
 
     print('Summary')
     print('========')
     print("nseeds: %d" % len(seeds))
-    print('nc\tna\tncat\terr\tobj\terr_avg\terr_min\terr_max\ttime')
+    print('nc\tna\tncat\terr\tobj\terr_avg\terr_min\terr_max\tt_total' \
+          '\tt_cons\t t_solve')
     for nc, na in product(n_crit, n_alts):
         obj = sum(objectives[nc][na].values())/len(seeds)
-        tim = sum(times[nc][na].values())/len(seeds)
+        tim_tot = sum(times_total[nc][na].values())/len(seeds)
+        tim_con = sum(times_const[nc][na].values())/len(seeds)
+        tim_sol = sum(times_solve[nc][na].values())/len(seeds)
         err = sum(errors[nc][na].values())/len(seeds)
         err_min = min(errors[nc][na].values())
         err_max = max(errors[nc][na].values())
-        print("%d\t%d\t%d\t%-6.5f\t%-6.4f\t%-6.5f\t%-6.5f\t%-6.5f\t%-6.5f"
-              % (nc, na, ncat, er, obj, err, err_min, err_max, tim))
+        print("%d\t%d\t%d\t%-6.5f\t%-6.4f\t%-6.5f\t%-6.5f\t%-6.5f\t%-6.5f" \
+              "\t%-6.5f\t%-6.5f" % (nc, na, ncat, er, obj, err, err_min,
+              err_max, tim_tot, tim_con, tim_sol))
 
 class tests_lp_electre_tri_weights(unittest.TestCase):
 
@@ -134,5 +145,7 @@ class tests_lp_electre_tri_weights_with_errors(unittest.TestCase):
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
-    suite = loader.loadTestsFromTestCase(tests_lp_electre_tri_weights)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite1 = loader.loadTestsFromTestCase(tests_lp_electre_tri_weights)
+    suite2 = loader.loadTestsFromTestCase(tests_lp_electre_tri_weights_with_errors)
+    alltests = unittest.TestSuite([suite1, suite2])
+    unittest.TextTestRunner(verbosity=2).run(alltests)
