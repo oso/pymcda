@@ -90,7 +90,7 @@ def variable_number_alternatives_and_criteria(ncat, er=0):
     print('========')
     print("nseeds: %d" % len(seeds))
     print('nc\tna\tncat\terr\tobj\terr_avg\terr_min\terr_max\tt_total' \
-          '\tt_cons\t t_solve')
+          '\tt_cons\tt_solve')
     for nc, na in product(n_crit, n_alts):
         obj = sum(objectives[nc][na].values())/len(seeds)
         tim_tot = sum(times_total[nc][na].values())/len(seeds)
