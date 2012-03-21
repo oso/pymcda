@@ -77,14 +77,15 @@ class htable:
         l = self.get_middle(left, right)
         return [r[0] for r in l]
 
-random.seed(123)
+if __name__ == "__main__":
+    random.seed(123)
 
-data = { i: round(random.random(), 4) for i in range(1000) }
-h_table = htable(data, 1000)
-print h_table.get_left(0.4883)
-print h_table.get_left_keys(0.4883)
-print h_table.get_right(0.4881)
-print h_table.get_right_keys(0.4881)
-print h_table.get_middle(0.992, 0.9951)
-print h_table.get_middle_keys(0.992, 0.9951)
-print len(h_table.get_middle_keys(0.0001, 1))
+    data = { i: round(random.random(), 4) for i in range(1000) }
+    h_table = htable(data, 1000)
+    print h_table.get_left(0.4883)
+    print h_table.get_left_keys(0.4883)
+    print h_table.get_right(0.4881)
+    print h_table.get_right_keys(0.4881)
+    print h_table.get_middle(0.992, 0.9951)
+    print h_table.get_middle_keys(0.992, 0.9951)
+    print len(h_table.get_middle_keys(0.0001, 1))
