@@ -35,11 +35,21 @@ class sorted_performance_table():
         i = bisect.bisect_left(self.sorted_values[cid], val)
         return self.sorted_altid[cid][i:]
 
+    def get_middle(self, cid, val_l, val_r):
+        i = bisect.bisect_left(self.sorted_values[cid], val_l)
+        i2 = bisect.bisect(self.sorted_values[cid], val_r)
+        return self.sorted_altid[cid][i:i2]
+
     def get_below_len(self, cid, val):
         return bisect.bisect(self.sorted_values[cid], val)
 
     def get_above_len(self, cid, val):
         return self.n - bisect.bisect_left(self.sorted_values[cid], val)
+
+    def get_middle_len(self, cid, val_l, val_r):
+        i = bisect.bisect_left(self.sorted_values[cid], val_l)
+        i2 = bisect.bisect(self.sorted_values[cid], val_r)
+        return i2-i
 
 if __name__ == "__main__":
     from tools.generate_random import generate_random_alternatives
@@ -54,5 +64,7 @@ if __name__ == "__main__":
 
     print len(sorted_pt.get_below('c1', 0.1))
     print len(sorted_pt.get_above('c1', 0.1))
+    print len(sorted_pt.get_middle('c1', 0, 1))
     print sorted_pt.get_below_len('c1', 0.1)
     print sorted_pt.get_above_len('c1', 0.1)
+    print sorted_pt.get_middle_len('c1', 0, 1)
