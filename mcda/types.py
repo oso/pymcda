@@ -21,24 +21,35 @@ def unmarshal(xml):
     m = unmarshallers.get(xml.tag)
     return m(xml)
 
-class criteria(list):
+class criteria(dict):
 
-    def __call__(self, criterion_id):
-        for crit in self:
-            if crit.id == criterion_id:
-                return crit
+    def __init__(self, l=[]):
+        for i in l:
+            self[i.id] = i
 
-        raise KeyError("Criterion %s not found" % criterion_id)
+    def __iter__(self):
+        return self.itervalues()
+
+    def __call__(self, id):
+        return self[id]
 
     def copy(self):
         return deepcopy(self)
 
-    def has_criterion(self, criterion_id):
-        for crit in self:
-            if crit.id == criterion_id:
-                return True
+    def append(self, c):
+        self[c.id] = c
 
-        return False
+    def display(self, header=True, criterion_ids=None):
+        self[0].display(header)
+        for aa in self[1:]:
+            aa.display(False)
+
+    def copy(self):
+        return deepcopy(self)
+
+    # FIXME: useless (in already do the same)
+    def has_criterion(self, criterion_id):
+        return criterion_id in self
 
     def to_xmcda(self):
         root = ElementTree.Element('criteria')
@@ -528,7 +539,7 @@ class categories(list):
     def __call__(self, id):
         for c in self:
             if c.id == id:
-                return c 
+                return c
         return None
 
     def copy(self):
@@ -659,16 +670,28 @@ class category_profile():
         xmcda.append(value)
         return xmcda
 
-class alternatives_affectations(list):
+class alternatives_affectations(dict):
+
+    def __init__(self, l=[]):
+        for i in l:
+            self[i.alternative_id] = i
+
+    def __iter__(self):
+        return self.itervalues()
 
     def __call__(self, id):
-        for a in self:
-            if a.alternative_id == id:
-                return a.category_id
-        return None
+        return self[id].category_id
 
     def copy(self):
         return deepcopy(self)
+
+    def append(self, aa):
+        self[aa.alternative_id] = aa
+
+    def display(self, header=True, criterion_ids=None):
+        self[0].display(header)
+        for aa in self[1:]:
+            aa.display(False)
 
     def to_xmcda(self):
         root = ElementTree.Element('alternativesAffectations')
@@ -676,11 +699,6 @@ class alternatives_affectations(list):
             xmcda = aa.to_xmcda()
             root.append(xmcda)
         return root
-
-    def display(self, header=True, criterion_ids=None):
-        self[0].display(header)
-        for aa in self[1:]:
-            aa.display(False)
 
     def from_xmcda(self, xmcda):
         if xmcda.tag != 'alternatives_affectations':
