@@ -4,14 +4,28 @@ sys.path.insert(0, "..")
 
 class meta_electre_tri_profiles():
 
-    def __init__(self, model, pt_sorted, aa_ori):
+    def __init__(self, model, pt_sorted, cat, aa_ori):
         self.model = model
         self.pt_sorted = pt_sorted
         self.aa_ori = aa_ori
+        self.cat = cat
+        self.aa_by_cat = self.sort_alternative_by_category(aa_ori)
+
+    def sort_alternative_by_category(self, aa):
+        aa_by_cat = {}
+        for a in aa:
+            aid = a.alternative_id
+            cat = self.cat(a.category_id).rank
+            if cat in aa_by_cat:
+                aa_by_cat[cat].append(aid)
+            else:
+                aa_by_cat[cat] = [ aid ]
+        return aa_by_cat
+
+    def compute_histogram(self):
+        pass
 
     def optimize(self, aa):
-        for a in aa:
-            print a
         pass
 
 if __name__ == "__main__":
@@ -50,5 +64,5 @@ if __name__ == "__main__":
     print("lambda\t%.7s" % lbda)
 
     pt_sorted = sorted_performance_table(pt)
-    meta = meta_electre_tri_profiles(model, pt_sorted, aa)
+    meta = meta_electre_tri_profiles(model, pt_sorted, cat, aa)
     meta.optimize(aa)
