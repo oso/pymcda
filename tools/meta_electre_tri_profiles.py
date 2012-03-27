@@ -1,15 +1,20 @@
 from __future__ import division
 import sys
 sys.path.insert(0, "..")
+from tools.utils import get_worst_alternative_performances
+from tools.utils import get_best_alternative_performances
 
 class meta_electre_tri_profiles():
 
     def __init__(self, model, pt_sorted, cat, aa_ori):
         self.model = model
+        self.nprofiles = len(model.profiles)
         self.pt_sorted = pt_sorted
         self.aa_ori = aa_ori
         self.cat = cat
         self.aa_by_cat = self.sort_alternative_by_category(aa_ori)
+        self.b0 = get_worst_alternative_performances(pt, model.criteria)
+        self.bp = get_best_alternative_performances(pt, model.criteria)
 
     def sort_alternative_by_category(self, aa):
         aa_by_cat = {}
@@ -22,11 +27,30 @@ class meta_electre_tri_profiles():
                 aa_by_cat[cat] = [ aid ]
         return aa_by_cat
 
-    def compute_histogram(self):
+    def compute_histogram(self, profile, below, above):
         pass
 
+    def get_below_and_above_profiles(self, i):
+        profiles = self.model.profiles
+
+        if i == 0:
+            below = self.b0
+        else:
+            below = profiles[i-1]
+
+        if i == self.nprofiles-1:
+            above = self.bp
+        else:
+            above = profiles[i+1]
+
+        return below, above
+
+
     def optimize(self, aa):
-        pass
+        profiles = self.model.profiles
+        for i, profile in enumerate(profiles):
+            below, above = self.get_below_and_above_profiles(i)
+            self.compute_histogram(profile, below, above)
 
 if __name__ == "__main__":
     from tools.generate_random import generate_random_alternatives
@@ -41,7 +65,7 @@ if __name__ == "__main__":
     from mcda.electre_tri import electre_tri
 
 
-    a = generate_random_alternatives(500)
+    a = generate_random_alternatives(1000)
     c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
