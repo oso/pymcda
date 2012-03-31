@@ -40,31 +40,49 @@ class meta_electre_tri_profiles():
                 aa_by_cat[cat] = [ aid ]
         return aa_by_cat
 
-    def compute_histogram(self, c, p_num, profile, below, above):
-        alternatives = self.pt_sorted.get_middle(c.id, below, above)
+    def compute_above_histogram(self, c, p_num, profile, below, above):
+        h_above_ok = {}
+        h_above_nok = {}
         size = above-profile
         intervals = [ profile + self.interval_ratios[i]*size \
                       for i in range(self.nintervals) ]
         intervals = [ profile ] + intervals + [ above ]
+        ok = nok = 0
         for i in range(self.nintervals):
             alts = self.pt_sorted.get_middle(c.id, intervals[i],
                                             intervals[i+1])
             for a in alts:
                 if p_num+1 == self.cat[self.aa_ori(a)]:
                     ok += 1
-                else
+                else:
                     nok += 1
-                print a, p_num+1, self.cat[self.aa_ori(a)]
 
+            h_above_ok[i] = ok
+            h_above_nok[i] = nok
+
+        return h_above_ok, h_above_nok
+
+    def compute_below_histogram(self, c, p_num, profile, below, above):
+        h_below_ok = {}
+        h_below_nok = {}
         size = profile-below
         intervals = [ profile - self.interval_ratios[i]*size \
                       for i in range(self.nintervals) ]
         intervals = [ profile ] + intervals + [ below ]
+        ok = nok = 0
         for i in range(self.nintervals):
             alts = self.pt_sorted.get_middle(c.id, intervals[i+1],
                                             intervals[i])
             for a in alts:
-                print a, p_num, self.cat[self.aa_ori(a)]
+                if p_num+1 == self.cat[self.aa_ori(a)]:
+                    ok += 1
+                else:
+                    nok += 1
+
+            h_below_ok[i] = ok
+            h_below_nok[i] = nok
+
+        return h_below_ok, h_below_nok
 
     def compute_histograms(self, p_num, profile, below, above):
         criteria = self.model.criteria
@@ -72,8 +90,12 @@ class meta_electre_tri_profiles():
         a_perfs = above.performances
         b_perfs = below.performances
         for c in criteria:
-            self.compute_histogram(c, p_num, p_perfs[c.id], b_perfs[c.id],
-                                   a_perfs[c.id])
+            b_ok, b_nok = self.compute_below_histogram(c, p_num,
+                                p_perfs[c.id], b_perfs[c.id], a_perfs[c.id])
+            a_ok, a_nok = self.compute_above_histogram(c, p_num,
+                                p_perfs[c.id], b_perfs[c.id], a_perfs[c.id])
+
+            print a_ok, b_ok
 
     def get_below_and_above_profiles(self, i):
         profiles = self.model.profiles
