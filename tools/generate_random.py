@@ -24,7 +24,7 @@ def generate_random_criteria(number, prefix='c'):
 
     return crits
 
-def generate_random_criteria_values(crits, seed=None):
+def generate_random_criteria_values(crits, seed=None, k=3):
     if seed is not None:
         random.seed(seed)
 
@@ -32,7 +32,7 @@ def generate_random_criteria_values(crits, seed=None):
     for c in crits:
         cval = criterion_value()
         cval.criterion_id = c.id
-        cval.value = round(random.random(), 3)
+        cval.value = round(random.random(), k)
         cvals.append(cval)
 
     return cvals
@@ -61,7 +61,7 @@ def generate_random_categories(number, prefix='cat'):
 
     return cats
 
-def generate_random_categories_profiles(alts, crits, seed=None):
+def generate_random_categories_profiles(alts, crits, seed=None, k=3):
     if seed is not None:
         random.seed(seed)
 
@@ -71,7 +71,7 @@ def generate_random_categories_profiles(alts, crits, seed=None):
     for c in crits:
         rdom = []
         for i in range(n):
-            rdom.append(round(random.random(), 3))
+            rdom.append(round(random.random(), k))
         rdom.sort()
 
         crit_random[c.id] = rdom
