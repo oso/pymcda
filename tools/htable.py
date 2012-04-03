@@ -81,7 +81,7 @@ if __name__ == "__main__":
     random.seed(123)
 
     data = { i: round(random.random(), 4) for i in range(1000) }
-    h_table = htable(data, 1000)
+    h_table = htable(data, 100000)
     print h_table.get_left(0.4883)
     print h_table.get_left_keys(0.4883)
     print h_table.get_right(0.4881)
@@ -89,3 +89,18 @@ if __name__ == "__main__":
     print h_table.get_middle(0.992, 0.9951)
     print h_table.get_middle_keys(0.992, 0.9951)
     print len(h_table.get_middle_keys(0.0001, 1))
+
+    import time
+    t1 = time.time()
+    print h_table.get_middle(0.5, 0.6)
+    print time.time()-t1
+
+#    data2 = [ (i, round(random.random(), 4)) for i in range(1000) ]
+    data2 = [ (k, v) for k, v in data.items() ]
+    data2.sort(key=lambda r: r[1])
+    k = [r[1] for r in data2]
+    t1 = time.time()
+    i = bisect.bisect_left(k, 0.5)
+    i2 = bisect.bisect_left(k, 0.6)
+    print data2[i:i2+1]
+    print time.time()-t1
