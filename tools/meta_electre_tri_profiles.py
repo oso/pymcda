@@ -51,7 +51,7 @@ class meta_electre_tri_profiles():
                 aa_by_cat[cat] = [ aid ]
         return aa_by_cat
 
-    def compute_above_histogram(self, c, p_num, profile, above):
+    def compute_above_histogram(self, aa, cid, profile, above):
         h_above = {}
         size = above - profile
         intervals = [ profile + self.interval_ratios[i]*size \
@@ -59,10 +59,10 @@ class meta_electre_tri_profiles():
         intervals = [ profile ] + intervals + [ above ]
         ok = nok = 0
         for i in range(self.nintervals):
-            alts = self.pt_sorted.get_middle(c.id, intervals[i],
-                                            intervals[i+1])
+            alts = self.pt_sorted.get_middle(cid, intervals[i],
+                                             intervals[i+1])
             for a in alts:
-                if p_num+1 == self.cat[self.aa_ori(a)]:
+                if aa(a) == self.aa_ori(a):
                     ok += 1
                 else:
                     nok += 1
@@ -74,7 +74,7 @@ class meta_electre_tri_profiles():
 
         return h_above
 
-    def compute_below_histogram(self, c, p_num, profile, below):
+    def compute_below_histogram(self, aa, cid, profile, below):
         h_below = {}
         size = profile - below
         intervals = [ profile - self.interval_ratios[i]*size \
@@ -82,10 +82,10 @@ class meta_electre_tri_profiles():
         intervals = [ profile ] + intervals + [ below ]
         ok = nok = 0
         for i in range(self.nintervals):
-            alts = self.pt_sorted.get_middle(c.id, intervals[i+1],
-                                            intervals[i])
+            alts = self.pt_sorted.get_middle(cid, intervals[i+1],
+                                             intervals[i])
             for a in alts:
-                if p_num == self.cat[self.aa_ori(a)]:
+                if aa(a) == self.aa_ori(a):
                     ok += 1
                 else:
                     nok += 1
@@ -97,45 +97,44 @@ class meta_electre_tri_profiles():
 
         return h_below
 
-    def compute_histograms(self, p_num, profile, below, above):
+    def compute_histograms(self, aa, profile, below, above):
         criteria = self.model.criteria
         p_perfs = profile.performances
         a_perfs = above.performances
         b_perfs = below.performances
-        for c in criteria:
-            h_below = self.compute_below_histogram(c, p_num, p_perfs[c.id],
-                                                   b_perfs[c.id])
-            h_above = self.compute_above_histogram(c, p_num, p_perfs[c.id],
-                                                   a_perfs[c.id])
 
+        for c in self.model.criteria:
+            cid = c.id
+            h_below = self.compute_below_histogram(aa, cid, p_perfs[cid],
+                                                   b_perfs[cid])
+            h_above = self.compute_above_histogram(aa, cid, p_perfs[cid],
+                                                   a_perfs[cid])
 
-            print h_below
-            print h_above
             i_b = max(h_below, key=h_below.get)
             i_a = max(h_above, key=h_above.get)
             r = random.random()/2
 
             if h_below[i_b] > h_above[i_a]:
                 if r < h_below[i_b]:
-                    size = (p_perfs[c.id] - b_perfs[c.id])
-                    p_perfs[c.id] = p_perfs[c.id] \
+                    size = (p_perfs[cid] - b_perfs[cid])
+                    p_perfs[cid] = p_perfs[cid] \
                                     - self.interval_ratios[i_b] * size
             elif h_below[i_b] < h_above[i_a]:
                 if r < h_above[i_a]:
-                    size = (a_perfs[c.id] - p_perfs[c.id])
-                    p_perfs[c.id] = p_perfs[c.id] \
+                    size = (a_perfs[cid] - p_perfs[cid])
+                    p_perfs[cid] = p_perfs[cid] \
                                     + self.interval_ratios[i_a] * size
             elif r > 0.5:
                 r2 = random.random()
                 if r2 < h_below[i_b]:
-                    size = (p_perfs[c.id] - b_perfs[c.id])
-                    p_perfs[c.id] = p_perfs[c.id] \
+                    size = (p_perfs[cid] - b_perfs[cid])
+                    p_perfs[cid] = p_perfs[cid] \
                                     - self.interval_ratios[i_b] * size
             elif r < 0.5:
                 r2 = random.random()
-                if r2 < h_above[i_b]:
-                    size = (a_perfs[c.id] - p_perfs[c.id])
-                    p_perfs[c.id] = p_perfs[c.id] \
+                if r2 < h_above[i_a]:
+                    size = (a_perfs[cid] - p_perfs[cid])
+                    p_perfs[cid] = p_perfs[cid] \
                                     + self.interval_ratios[i_a] * size
 
     def get_below_and_above_profiles(self, i):
@@ -158,7 +157,7 @@ class meta_electre_tri_profiles():
         profiles = self.model.profiles
         for i, profile in enumerate(profiles):
             below, above = self.get_below_and_above_profiles(i)
-            self.compute_histograms(i+1, profile, below, above)
+            self.compute_histograms(aa, profile, below, above)
 
 if __name__ == "__main__":
     from tools.generate_random import generate_random_alternatives
@@ -173,8 +172,8 @@ if __name__ == "__main__":
     from mcda.electre_tri import electre_tri
 
 
-    a = generate_random_alternatives(1000)
-    c = generate_random_criteria(2)
+    a = generate_random_alternatives(500)
+    c = generate_random_criteria(10)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
@@ -209,7 +208,7 @@ if __name__ == "__main__":
         aa2 = model2.pessimist(pt)
         bpt2.display(criterion_ids=cids)
         f = compute_fitness(aa, aa2)
-        print f
+        print 'fitness', f
         if f == 1:
             break
         meta.optimize(aa2)
