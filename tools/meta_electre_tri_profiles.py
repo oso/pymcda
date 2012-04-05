@@ -23,7 +23,8 @@ class meta_electre_tri_profiles():
         self.nprofiles = len(model.profiles)
         self.pt_sorted = pt_sorted
         self.aa_ori = aa_ori
-        self.cat = self.categories_to_rank(cat)
+        self.cat = self.categories_rank(cat)
+        self.cat_ranked = self.rank_categories(cat)
         self.aa_by_cat = self.sort_alternative_by_category(aa_ori)
         self.b0 = get_worst_alternative_performances(pt, model.criteria)
         self.bp = get_best_alternative_performances(pt, model.criteria)
@@ -37,8 +38,12 @@ class meta_electre_tri_profiles():
         s = sum(intervals)
         return [ i/s for i in intervals ]
 
-    def categories_to_rank(self, cat):
+    def categories_rank(self, cat):
         return { c.id: c.rank for c in cat }
+
+    def rank_categories(self, cat):
+        c_rank = { c.id: c.rank for c in cat }
+        return sorted([ cat for (cat, rank) in c_rank.items() ])
 
     def sort_alternative_by_category(self, aa):
         aa_by_cat = {}
@@ -51,7 +56,7 @@ class meta_electre_tri_profiles():
                 aa_by_cat[cat] = [ aid ]
         return aa_by_cat
 
-    def compute_above_histogram(self, aa, cid, profile, above):
+    def compute_above_histogram(self, aa, cid, profile, above, cat):
         h_above = {}
         size = above - profile
         intervals = [ profile + self.interval_ratios[i]*size \
@@ -62,9 +67,9 @@ class meta_electre_tri_profiles():
             alts = self.pt_sorted.get_middle(cid, intervals[i],
                                              intervals[i+1])
             for a in alts:
-                if aa(a) == self.aa_ori(a):
+                if aa(a) == self.aa_ori(a) and aa(a) == cat:
                     ok += 1
-                else:
+                elif aa(a) != self.aa_ori(a) and self.cat[aa(a)] == self.cat[cat]:
                     nok += 1
 
             if (ok + nok) > 0:
@@ -74,7 +79,7 @@ class meta_electre_tri_profiles():
 
         return h_above
 
-    def compute_below_histogram(self, aa, cid, profile, below):
+    def compute_below_histogram(self, aa, cid, profile, below, cat):
         h_below = {}
         size = profile - below
         intervals = [ profile - self.interval_ratios[i]*size \
@@ -85,9 +90,9 @@ class meta_electre_tri_profiles():
             alts = self.pt_sorted.get_middle(cid, intervals[i+1],
                                              intervals[i])
             for a in alts:
-                if aa(a) == self.aa_ori(a):
+                if aa(a) == self.aa_ori(a) and aa(a) == cat:
                     ok += 1
-                else:
+                elif aa(a) != self.aa_ori(a) and self.cat[aa(a)] == self.cat[cat]:
                     nok += 1
 
             if (ok + nok) > 0:
@@ -97,7 +102,7 @@ class meta_electre_tri_profiles():
 
         return h_below
 
-    def compute_histograms(self, aa, profile, below, above):
+    def compute_histograms(self, aa, profile, below, above, cat_b, cat_a):
         criteria = self.model.criteria
         p_perfs = profile.performances
         a_perfs = above.performances
@@ -106,10 +111,11 @@ class meta_electre_tri_profiles():
         for c in self.model.criteria:
             cid = c.id
             h_below = self.compute_below_histogram(aa, cid, p_perfs[cid],
-                                                   b_perfs[cid])
+                                                   b_perfs[cid], cat_b)
             h_above = self.compute_above_histogram(aa, cid, p_perfs[cid],
-                                                   a_perfs[cid])
+                                                   a_perfs[cid], cat_a)
 
+            print h_below, h_above
             i_b = max(h_below, key=h_below.get)
             i_a = max(h_above, key=h_above.get)
             r = random.random()/2
@@ -152,12 +158,12 @@ class meta_electre_tri_profiles():
 
         return below, above
 
-
     def optimize(self, aa):
         profiles = self.model.profiles
         for i, profile in enumerate(profiles):
             below, above = self.get_below_and_above_profiles(i)
-            self.compute_histograms(aa, profile, below, above)
+            cat_b, cat_a = self.cat_ranked[i], self.cat_ranked[i+1]
+            self.compute_histograms(aa, profile, below, above, cat_b, cat_a)
 
 if __name__ == "__main__":
     from tools.generate_random import generate_random_alternatives
@@ -172,8 +178,9 @@ if __name__ == "__main__":
     from mcda.electre_tri import electre_tri
 
 
-    a = generate_random_alternatives(500)
-    c = generate_random_criteria(10)
+    a = generate_random_alternatives(10000)
+
+    c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
