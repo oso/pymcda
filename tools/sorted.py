@@ -27,6 +27,9 @@ class sorted_performance_table():
             self.sorted_values[cid] = [ r[0] for r in self.sorted_pt[cid] ]
             self.sorted_altid[cid] = [ r[1] for r in self.sorted_pt[cid] ]
 
+    def get_all(self, cid):
+        return self.sorted_altid[cid]
+
     def get_below(self, cid, val):
         i = bisect.bisect(self.sorted_values[cid], val)
         return self.sorted_altid[cid][:i]
@@ -68,3 +71,4 @@ if __name__ == "__main__":
     print sorted_pt.get_below_len('c1', 0.1)
     print sorted_pt.get_above_len('c1', 0.1)
     print sorted_pt.get_middle_len('c1', 0, 1)
+    print len(sorted_pt.get_all('c1'))
