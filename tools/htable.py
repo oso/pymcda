@@ -77,6 +77,18 @@ class htable:
         l = self.get_middle(left, right)
         return [r[0] for r in l]
 
+    def get_left_values(self, val):
+        l = self.get_left(val)
+        return [r[1] for r in l]
+
+    def get_right_values(self, val):
+        l = self.get_right(val)
+        return [r[1] for r in l]
+
+    def get_middle_values(self, left, right):
+        l = self.get_middle(left, right)
+        return [r[1] for r in l]
+
 if __name__ == "__main__":
     random.seed(123)
 
