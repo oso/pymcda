@@ -56,7 +56,7 @@ class meta_electre_tri_profiles():
                 aa_by_cat[cat] = [ aid ]
         return aa_by_cat
 
-    def compute_above_histogram(self, aa, cid, profile, above, cat):
+    def compute_above_histogram(self, aa, cid, profile, above, cat_b, cat_a):
         h_above = {}
         size = above - profile
         intervals = [ profile + self.interval_ratios[i]*size \
@@ -67,9 +67,9 @@ class meta_electre_tri_profiles():
             alts = self.pt_sorted.get_middle(cid, intervals[i],
                                              intervals[i+1])
             for a in alts:
-                if aa(a) == self.aa_ori(a) and aa(a) == cat:
+                if aa(a) == self.aa_ori(a) and self.aa_ori(a) == cat_a:
                     ok += 1
-                elif aa(a) != self.aa_ori(a) and self.cat[aa(a)] == self.cat[cat]:
+                elif aa(a) != self.aa_ori(a) and self.aa_ori(a) == cat_b:
                     nok += 1
 
             if (ok + nok) > 0:
@@ -79,7 +79,7 @@ class meta_electre_tri_profiles():
 
         return h_above
 
-    def compute_below_histogram(self, aa, cid, profile, below, cat):
+    def compute_below_histogram(self, aa, cid, profile, below, cat_b, cat_a):
         h_below = {}
         size = profile - below
         intervals = [ profile - self.interval_ratios[i]*size \
@@ -90,9 +90,9 @@ class meta_electre_tri_profiles():
             alts = self.pt_sorted.get_middle(cid, intervals[i+1],
                                              intervals[i])
             for a in alts:
-                if aa(a) == self.aa_ori(a) and aa(a) == cat:
+                if aa(a) == self.aa_ori(a) and self.aa_ori(a) == cat_b:
                     ok += 1
-                elif aa(a) != self.aa_ori(a) and self.cat[aa(a)] == self.cat[cat]:
+                elif aa(a) != self.aa_ori(a) and self.aa_ori(a) == cat_a:
                     nok += 1
 
             if (ok + nok) > 0:
@@ -111,11 +111,12 @@ class meta_electre_tri_profiles():
         for c in self.model.criteria:
             cid = c.id
             h_below = self.compute_below_histogram(aa, cid, p_perfs[cid],
-                                                   b_perfs[cid], cat_b)
+                                                   b_perfs[cid], cat_b,
+                                                   cat_a)
             h_above = self.compute_above_histogram(aa, cid, p_perfs[cid],
-                                                   a_perfs[cid], cat_a)
+                                                   a_perfs[cid], cat_b,
+                                                   cat_a)
 
-            print h_below, h_above
             i_b = max(h_below, key=h_below.get)
             i_a = max(h_above, key=h_above.get)
             r = random.random()/2
