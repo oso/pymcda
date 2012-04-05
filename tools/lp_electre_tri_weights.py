@@ -1,11 +1,15 @@
 from __future__ import division
+import os
 import sys
-import pickle
 sys.path.insert(0, "..")
 from mcda.types import criterion_value, criteria_values
 
-solver = 'cplex'
 verbose = False
+
+try:
+    solver = os.environ['SOLVER']
+except:
+    solver = 'cplex'
 
 if solver == 'glpk':
     import pymprog
