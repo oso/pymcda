@@ -181,7 +181,7 @@ if __name__ == "__main__":
 
     a = generate_random_alternatives(10000)
 
-    c = generate_random_criteria(5)
+    c = generate_random_criteria(7)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
@@ -200,7 +200,7 @@ if __name__ == "__main__":
     cids = c.get_ids()
     bpt.display(criterion_ids=cids)
     cv.display(criterion_ids=cids)
-    print("lambda\t%.7s" % lbda)
+    print("lambda: %.7s" % lbda)
 
     bpt2 = generate_random_categories_profiles(b, c, 0123)
     model2 = electre_tri(c, cv, bpt2, lbda, cat)
@@ -212,11 +212,34 @@ if __name__ == "__main__":
     meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa)
     meta.optimize(aa)
 
-    for i in range(500):
+    for i in range(1, 501):
         aa2 = model2.pessimist(pt)
-        bpt2.display(criterion_ids=cids)
+        meta.optimize(aa2)
+
         f = compute_fitness(aa, aa2)
-        print 'fitness', f
+        print('%d: fitness: %g' % (i, f))
+        bpt2.display(criterion_ids=cids)
         if f == 1:
             break
-        meta.optimize(aa2)
+
+    print('Learned model')
+    print('=============')
+    print("Number of iterations: %d" % i)
+    bpt2.display(criterion_ids=cids)
+    cv.display(criterion_ids=cids)
+    print("lambda: %.7s" % lbda)
+
+    total = len(a)
+    nok = 0
+    anok = []
+    for alt in a:
+        if aa(alt.id) != aa2(alt.id):
+            anok.append(alt)
+            nok += 1
+
+    print("Good affectations: %3g %%" % (float(total-nok)/total*100))
+    print("Bad affectations : %3g %%" % (float(nok)/total*100))
+
+    if len(anok) > 0:
+        print("Alternatives wrongly assigned:")
+        display_affectations_and_pt(anok, c, [aa, aa2], [pt])
