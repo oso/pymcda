@@ -35,13 +35,17 @@ class lp_electre_tri_weights():
         self.alternatives = a
         self.criteria = c
         self.criteria_vals = cv
-        self.alternative_affectations = aa
-        self.pt = pt
         self.categories = cat
         self.profiles = b
-        self.bpt = bpt
         self.delta = delta
-        self.compute_constraints()
+        self.cat_ranks = { c.id: c.rank for c in self.categories }
+        self.pt = { a.alternative_id: a.performances \
+                    for a in pt }
+        self.update_linear_program(aa, bpt)
+
+    def update_linear_program(self, aa, bpt):
+        self.compute_constraints(aa, bpt)
+
         if solver == 'glpk':
             self.lp = pymprog.model('lp_elecre_tri_weights')
             self.lp.verb=verbose
@@ -64,23 +68,22 @@ class lp_electre_tri_weights():
             self.add_constraints_cplex()
             self.add_objective_cplex()
 
-    def compute_constraints(self):
+    def compute_constraints(self, aa, bpt):
         m = len(self.alternatives)
         n = len(self.criteria)
 
-        cat_ranks = { c.id: c.rank for c in self.categories }
-        assignments = { a.alternative_id: cat_ranks[a.category_id] \
-                       for a in self.alternative_affectations }
-        pt = { a.alternative_id: a.performances \
-               for a in self.pt }
+        aa = { a.alternative_id: self.cat_ranks[a.category_id] \
+               for a in aa }
         bpt = { a.alternative_id: a.performances \
-                for a in self.bpt }
+                for a in bpt }
 
         self.c_xi = dict()
         self.c_yi = dict()
+        self.a_c_xi = dict()
+        self.a_c_yi = dict()
         for a in self.alternatives:
-            a_perfs = pt[a.id]
-            cat_rank = assignments[a.id]
+            a_perfs = self.pt[a.id]
+            cat_rank = aa[a.id]
 
             if cat_rank > 1:
                 lower_profile = self.profiles[cat_rank-2]
@@ -93,6 +96,18 @@ class lp_electre_tri_weights():
                     else:
                         dj += '0'
 
+                # Del old constraint
+                if a.id in self.a_c_xi:
+                    old = self.a_c_xi[a.id]
+                    if self.c_xi[old] == 1:
+                        del self.c_xi[old]
+                    else:
+                        self.c_xi[old] -= 1
+
+                # Save constraint
+                self.a_c_xi[a.id] = dj
+
+                # Add new constraint
                 if not dj in self.c_xi:
                     self.c_xi[dj] = 1
                 else:
@@ -109,6 +124,18 @@ class lp_electre_tri_weights():
                     else:
                         dj += '0'
 
+                # Del old constraint
+                if a.id in self.a_c_yi:
+                    old = self.a_c_yi[a.id]
+                    if self.c_yi[old] == 1:
+                        del self.c_yi[old]
+                    else:
+                        self.c_yi[old] -= 1
+
+                # Save constraint
+                self.a_c_yi[a.id] = dj
+
+                # Add new constraint
                 if not dj in self.c_yi:
                     self.c_yi[dj] = 1
                 else:
@@ -357,7 +384,7 @@ if __name__ == "__main__":
     print("Solver used: %s" % solver)
     # Original Electre Tri model
     a = generate_random_alternatives(15000)
-    c = generate_random_criteria(5)
+    c = generate_random_criteria(10)
     cv = generate_random_criteria_values(c, 890)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c)
@@ -389,7 +416,6 @@ if __name__ == "__main__":
     t1 = time.time()
     lp_weights = lp_electre_tri_weights(a, c, cv, aa, pt, cat, b, bpt,
                                         delta)
-
     t2 = time.time()
     obj, cv_learned, lbda_learned = lp_weights.solve()
     t3 = time.time()
