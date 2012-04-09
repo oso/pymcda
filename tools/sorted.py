@@ -2,6 +2,7 @@ from __future__ import division
 import sys
 sys.path.insert(0, "..")
 import bisect
+from mcda.types import alternative_performances
 
 class sorted_performance_table():
 
@@ -54,6 +55,18 @@ class sorted_performance_table():
         i2 = bisect.bisect(self.sorted_values[cid], val_r)
         return i2-i
 
+    def get_worst_ap(self):
+        a = alternative_performances('worst', {})
+        for cid in self.cids:
+            a.performances[cid] = self.sorted_values[cid][0]
+        return a
+
+    def get_best_ap(self):
+        a = alternative_performances('best', {})
+        for cid in self.cids:
+            a.performances[cid] = self.sorted_values[cid][-1]
+        return a
+
 if __name__ == "__main__":
     from tools.generate_random import generate_random_alternatives
     from tools.generate_random import generate_random_criteria
@@ -72,3 +85,5 @@ if __name__ == "__main__":
     print sorted_pt.get_above_len('c1', 0.1)
     print sorted_pt.get_middle_len('c1', 0, 1)
     print len(sorted_pt.get_all('c1'))
+    print sorted_pt.get_worst_ap()
+    print sorted_pt.get_best_ap()

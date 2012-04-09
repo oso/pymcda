@@ -3,8 +3,6 @@ import sys
 sys.path.insert(0, "..")
 import math
 import random
-from tools.utils import get_worst_alternative_performances
-from tools.utils import get_best_alternative_performances
 
 def compute_fitness(aa, aa_learned):
     ok = total = 0
@@ -26,8 +24,8 @@ class meta_electre_tri_profiles():
         self.cat = self.categories_rank(cat)
         self.cat_ranked = self.rank_categories(cat)
         self.aa_by_cat = self.sort_alternative_by_category(aa_ori)
-        self.b0 = get_worst_alternative_performances(pt, model.criteria)
-        self.bp = get_best_alternative_performances(pt, model.criteria)
+        self.b0 = pt_sorted.get_worst_ap()
+        self.bp = pt_sorted.get_best_ap()
         self.nintervals = 4
         self.interval_ratios = self.compute_interval_ratios(self.nintervals)
 
