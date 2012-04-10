@@ -98,7 +98,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
         n_alts = [ 10000 ]
         n_crit = [ 5, 7, 10 ]
         n_cat = [ 2 ]
-        nloop = 500
+        nloop = 1000
         nmodel = 1
 
         self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel)

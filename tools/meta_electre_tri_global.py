@@ -287,9 +287,8 @@ class meta_electre_tri_global():
     def loop_lp(self, models):
         models_fitness = {}
         for model in models:
-            lpw = lp_electre_tri_weights(self.alternatives, self.criteria,
-                                         self.criteria_vals, self.aa,
-                                         self.pt, self.categories, self.b,
+            lpw = lp_electre_tri_weights(self.criteria, self.aa,
+                                         self.pt, self.categories,
                                          model.profiles)
             sol = lpw.solve()
 

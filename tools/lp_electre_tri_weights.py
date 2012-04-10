@@ -23,20 +23,15 @@ else:
 class lp_electre_tri_weights():
 
     # Input params:
-    #   - a: learning alternatives
     #   - c: criteria
-    #   - cvals: criteria values
     #   - aa: alternative affectations
     #   - pt : alternative performance table
     #   - cat: categories
-    #   - b: ordered categories profiles
     #   - bpt: profiles performance
-    def __init__(self, a, c, cv, aa, pt, cat, b, bpt, delta=0.0001):
-        self.alternatives = a
+    def __init__(self, c, aa, pt, cat, bpt, delta=0.0001):
         self.criteria = c
-        self.criteria_vals = cv
         self.categories = cat
-        self.profiles = b
+        self.profiles = [ b.alternative_id for b in bpt ]
         self.delta = delta
         self.cat_ranks = { c.id: c.rank for c in self.categories }
         self.pt = { a.alternative_id: a.performances \
@@ -69,7 +64,7 @@ class lp_electre_tri_weights():
             self.add_objective_cplex()
 
     def compute_constraints(self, aa, bpt):
-        m = len(self.alternatives)
+        m = len(self.pt)
         n = len(self.criteria)
 
         aa = { a.alternative_id: self.cat_ranks[a.category_id] \
@@ -81,13 +76,13 @@ class lp_electre_tri_weights():
         self.c_yi = dict()
         self.a_c_xi = dict()
         self.a_c_yi = dict()
-        for a in self.alternatives:
-            a_perfs = self.pt[a.id]
-            cat_rank = aa[a.id]
+        for a_id in self.pt.keys():
+            a_perfs = self.pt[a_id]
+            cat_rank = aa[a_id]
 
             if cat_rank > 1:
                 lower_profile = self.profiles[cat_rank-2]
-                b_perfs = bpt[lower_profile.id]
+                b_perfs = bpt[lower_profile]
 
                 dj = str()
                 for c in self.criteria:
@@ -97,15 +92,15 @@ class lp_electre_tri_weights():
                         dj += '0'
 
                 # Del old constraint
-                if a.id in self.a_c_xi:
-                    old = self.a_c_xi[a.id]
+                if a_id in self.a_c_xi:
+                    old = self.a_c_xi[a_id]
                     if self.c_xi[old] == 1:
                         del self.c_xi[old]
                     else:
                         self.c_xi[old] -= 1
 
                 # Save constraint
-                self.a_c_xi[a.id] = dj
+                self.a_c_xi[a_id] = dj
 
                 # Add new constraint
                 if not dj in self.c_xi:
@@ -115,7 +110,7 @@ class lp_electre_tri_weights():
 
             if cat_rank < len(self.categories):
                 upper_profile = self.profiles[cat_rank-1]
-                b_perfs = bpt[upper_profile.id]
+                b_perfs = bpt[upper_profile]
 
                 dj = str()
                 for c in self.criteria:
@@ -125,15 +120,15 @@ class lp_electre_tri_weights():
                         dj += '0'
 
                 # Del old constraint
-                if a.id in self.a_c_yi:
-                    old = self.a_c_yi[a.id]
+                if a_id in self.a_c_yi:
+                    old = self.a_c_yi[a_id]
                     if self.c_yi[old] == 1:
                         del self.c_yi[old]
                     else:
                         self.c_yi[old] -= 1
 
                 # Save constraint
-                self.a_c_yi[a.id] = dj
+                self.a_c_yi[a_id] = dj
 
                 # Add new constraint
                 if not dj in self.c_yi:
@@ -328,7 +323,7 @@ class lp_electre_tri_weights():
         self.lp.st(sum(self.w[j] for j in range(n)) == 1)
 
     def add_objective_glpk(self):
-        m = len(self.alternatives)
+        m = len(self.pt)
         self.lp.min(sum([k*self.xp[i]
                          for i, k in enumerate(self.c_xi.values())])
                     + sum([k*self.yp[i]
@@ -414,8 +409,7 @@ if __name__ == "__main__":
     #print(aa)
 
     t1 = time.time()
-    lp_weights = lp_electre_tri_weights(a, c, cv, aa, pt, cat, b, bpt,
-                                        delta)
+    lp_weights = lp_electre_tri_weights(c, aa, pt, cat, bpt, delta)
     t2 = time.time()
     obj, cv_learned, lbda_learned = lp_weights.solve()
     t3 = time.time()

@@ -55,8 +55,8 @@ def variable_number_alternatives_and_criteria(ncat, er=0):
         add_errors_in_affectations(aa_errors, cat.get_ids(), er)
 
         t1 = time.time()
-        lp_weights = lp_electre_tri_weights(a, c, cv, aa_errors, pt,
-                                            cat, b, bpt, 0.0001)
+        lp_weights = lp_electre_tri_weights(c, aa_errors, pt, cat, bpt,
+                                            0.0001)
         t2 = time.time()
         obj, cv_learned, lbda_learned = lp_weights.solve()
         t3 = time.time()
