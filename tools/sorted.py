@@ -40,8 +40,12 @@ class sorted_performance_table():
         return self.sorted_altid[cid][i:]
 
     def get_middle(self, cid, val_l, val_r):
-        i = bisect.bisect_left(self.sorted_values[cid], val_l)
-        i2 = bisect.bisect(self.sorted_values[cid], val_r)
+        if val_l > val_r:
+            i = bisect.bisect_left(self.sorted_values[cid], val_r)
+            i2 = bisect.bisect(self.sorted_values[cid], val_l)
+        else:
+            i = bisect.bisect_left(self.sorted_values[cid], val_l)
+            i2 = bisect.bisect(self.sorted_values[cid], val_r)
         return self.sorted_altid[cid][i:i2]
 
     def get_below_len(self, cid, val):
@@ -51,8 +55,13 @@ class sorted_performance_table():
         return self.n - bisect.bisect_left(self.sorted_values[cid], val)
 
     def get_middle_len(self, cid, val_l, val_r):
-        i = bisect.bisect_left(self.sorted_values[cid], val_l)
-        i2 = bisect.bisect(self.sorted_values[cid], val_r)
+        if val_l > val_r:
+            i = bisect.bisect_left(self.sorted_values[cid], val_r)
+            i2 = bisect.bisect(self.sorted_values[cid], val_l)
+        else:
+            i = bisect.bisect_left(self.sorted_values[cid], val_l)
+            i2 = bisect.bisect(self.sorted_values[cid], val_r)
+
         return i2-i
 
     def get_worst_ap(self):
@@ -84,6 +93,7 @@ if __name__ == "__main__":
     print sorted_pt.get_below_len('c1', 0.1)
     print sorted_pt.get_above_len('c1', 0.1)
     print sorted_pt.get_middle_len('c1', 0, 1)
+    print sorted_pt.get_middle_len('c1', 1, 0)
     print len(sorted_pt.get_all('c1'))
     print sorted_pt.get_worst_ap()
     print sorted_pt.get_best_ap()
