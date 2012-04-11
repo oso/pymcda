@@ -34,7 +34,7 @@ class meta_electre_tri_global():
         self.pt = pt
         self.pt_sorted = sorted_performance_table(pt)
         self.model = self.init_random_model()
-        self.lp = lp_electre_tri_weights(c, aa, pt, cat, model.profiles)
+        self.lp = lp_electre_tri_weights(self.model, pt, aa, cat)
         self.meta = meta_electre_tri_profiles(self.model, self.pt_sorted,
                                               cat, aa)
 
@@ -53,9 +53,7 @@ class meta_electre_tri_global():
         return model
 
     def optimize(self):
-        obj, cv_learned, lbda_learned = self.lp.solve()
-        self.model.cv = cv_learned
-        self.model.lbda = lbda_learned
+        obj = self.lp.solve()
         return self.model
 
 if __name__ == "__main__":

@@ -289,12 +289,9 @@ class meta_electre_tri_global():
         for model in models:
             lpw = lp_electre_tri_weights(model, self.pt, self.aa,
                                          self.categories)
-            sol = lpw.solve()
+            obj = lpw.solve()
 
-            #print("Objective value: %d" % sol[0])
-
-            model.cv = sol[1]
-            model.lbda = sol[2]
+            #print("Objective value: %d" % obj)
 
     def loop_heuristic(self, models, n):
         models_fitness = {}

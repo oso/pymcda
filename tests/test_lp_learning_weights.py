@@ -58,7 +58,7 @@ def variable_number_alternatives_and_criteria(ncat, er=0):
         lp_weights = lp_electre_tri_weights(model, pt, aa_errors, cat,
                                             0.0001)
         t2 = time.time()
-        obj, cv_learned, lbda_learned = lp_weights.solve()
+        obj = lp_weights.solve()
         t3 = time.time()
 
         objectives[nc][na][seed] = obj
@@ -66,8 +66,6 @@ def variable_number_alternatives_and_criteria(ncat, er=0):
         times_const[nc][na][seed] = t2-t1
         times_solve[nc][na][seed] = t3-t2
 
-        model.cv = cv_learned
-        model.lbda = lbda_learned
         aa_learned = model.pessimist(pt)
 
         total = len(a)

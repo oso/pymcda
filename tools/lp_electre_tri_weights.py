@@ -207,9 +207,10 @@ class lp_electre_tri_weights():
             cv.value = self.lp.solution.get_values('w'+c.id)
             cvs.append(cv)
 
-        lbda = self.lp.solution.get_values("lambda")
+        self.model.cv = cvs
+        self.model.lbda = self.lp.solution.get_values("lambda")
 
-        return obj, cvs, lbda
+        return obj
 
     def add_variables_scip(self):
         m1 = len(self.c_xi)
@@ -278,9 +279,10 @@ class lp_electre_tri_weights():
             cv.value = solution[self.w[c.id]]
             cvs.append(cv)
 
-        lbda = solution[self.lbda]
+        self.model.cv = cvs
+        self.model.lbda = solution[self.lbda]
 
-        return obj, cvs, lbda
+        return obj
 
     def add_variables_glpk(self):
         m1 = len(self.c_xi)
@@ -340,9 +342,10 @@ class lp_electre_tri_weights():
             cv.value = float(self.w[j].primal)
             cvs.append(cv)
 
-        lbda = float(self.lbda.primal)
+        self.model.cv = cvs
+        self.model.lbda = float(self.lbda.primal)
 
-        return obj, cvs, lbda
+        return obj
 
     def solve(self):
         if solver == 'glpk':
@@ -405,11 +408,9 @@ if __name__ == "__main__":
     t1 = time.time()
     lp_weights = lp_electre_tri_weights(model, pt, aa, cat, delta)
     t2 = time.time()
-    obj, cv_learned, lbda_learned = lp_weights.solve()
+    obj = lp_weights.solve()
     t3 = time.time()
 
-    model.cv = cv_learned
-    model.lbda = lbda_learned
     aa_learned = model.pessimist(pt)
 
     print('Learned model')
@@ -419,9 +420,9 @@ if __name__ == "__main__":
     print("Solving time: %g secs" % (t3-t2))
     print("Objective: %s" % obj)
     cv.display(criterion_ids=cids, name='w')
-    cv_learned.display(header=False, criterion_ids=cids, name='w_learned')
+    model.cv.display(header=False, criterion_ids=cids, name='w_learned')
     print("lambda\t%.7s" % lbda)
-    print("lambda_learned\t%.7s" % lbda_learned)
+    print("lambda_learned\t%.7s" % model.lbda)
     #print(aa_learned)
 
     total = len(a)
