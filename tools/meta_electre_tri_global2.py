@@ -7,6 +7,7 @@ from itertools import product
 
 from mcda.electre_tri import electre_tri
 from mcda.types import alternative_affectation, alternatives_affectations
+from mcda.types import performance_table
 from tools.sorted import sorted_performance_table
 from tools.lp_electre_tri_weights import lp_electre_tri_weights
 from tools.meta_electre_tri_profiles import meta_electre_tri_profiles
@@ -32,9 +33,10 @@ class meta_electre_tri_global():
         self.criteria = c
         self.categories = cat
         self.pt = pt
+        self.pt_dict = {ap.alternative_id: ap for ap in self.pt}
         self.pt_sorted = sorted_performance_table(pt)
         self.model = self.init_random_model()
-        self.lp = lp_electre_tri_weights(self.model, pt, aa, cat)
+        self.lp = lp_electre_tri_weights(self.model, self.pt, aa, cat)
         self.meta = meta_electre_tri_profiles(self.model, self.pt_sorted,
                                               cat, aa)
 
@@ -54,6 +56,25 @@ class meta_electre_tri_global():
 
     def optimize(self):
         obj = self.lp.solve()
+        aa = self.model.pessimist(self.pt)
+
+        old_profiles = model.profiles.copy()
+        self.meta.optimize(aa)
+
+        a = list()
+        for i, profile in enumerate(model.profiles):
+            for c in self.criteria:
+                old = old_profiles[i].performances[c.id]
+                new = self.model.profiles[i].performances[c.id]
+
+                l = self.pt_sorted.get_middle(c.id, old, new)
+                a.extend(x for x in l if x not in a)
+
+        a_pt = performance_table([ self.pt_dict[x] for x in a])
+        aa_new = self.model.pessimist(a_pt)
+
+        aa.update(aa_new)
+
         return self.model
 
 if __name__ == "__main__":
