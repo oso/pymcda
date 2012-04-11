@@ -30,10 +30,10 @@ class lp_electre_tri_weights():
         self.cat_ranks = { c.id: c.rank for c in self.categories }
         self.pt = { a.alternative_id: a.performances \
                     for a in pt }
-        self.update_linear_program(aa, model.profiles)
+        self.update_linear_program(aa)
 
-    def update_linear_program(self, aa, bpt):
-        self.compute_constraints(aa, bpt)
+    def update_linear_program(self, aa):
+        self.compute_constraints(aa, self.model.profiles)
 
         if solver == 'glpk':
             self.lp = pymprog.model('lp_elecre_tri_weights')
