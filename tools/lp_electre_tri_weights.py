@@ -22,21 +22,15 @@ else:
 
 class lp_electre_tri_weights():
 
-    # Input params:
-    #   - c: criteria
-    #   - aa: alternative affectations
-    #   - pt : alternative performance table
-    #   - cat: categories
-    #   - bpt: profiles performance
-    def __init__(self, c, aa, pt, cat, bpt, delta=0.0001):
-        self.criteria = c
+    def __init__(self, model, pt, aa, cat, delta=0.0001):
+        self.model = model
         self.categories = cat
-        self.profiles = [ b.alternative_id for b in bpt ]
+        self.profiles = [ b.alternative_id for b in model.profiles ]
         self.delta = delta
         self.cat_ranks = { c.id: c.rank for c in self.categories }
         self.pt = { a.alternative_id: a.performances \
                     for a in pt }
-        self.update_linear_program(aa, bpt)
+        self.update_linear_program(aa, model.profiles)
 
     def update_linear_program(self, aa, bpt):
         self.compute_constraints(aa, bpt)
@@ -65,7 +59,7 @@ class lp_electre_tri_weights():
 
     def compute_constraints(self, aa, bpt):
         m = len(self.pt)
-        n = len(self.criteria)
+        n = len(self.model.criteria)
 
         aa = { a.alternative_id: self.cat_ranks[a.category_id] \
                for a in aa }
@@ -85,7 +79,7 @@ class lp_electre_tri_weights():
                 b_perfs = bpt[lower_profile]
 
                 dj = str()
-                for c in self.criteria:
+                for c in self.model.criteria:
                     if a_perfs[c.id] >= b_perfs[c.id]:
                         dj += '1'
                     else:
@@ -113,7 +107,7 @@ class lp_electre_tri_weights():
                 b_perfs = bpt[upper_profile]
 
                 dj = str()
-                for c in self.criteria:
+                for c in self.model.criteria:
                     if a_perfs[c.id] >= b_perfs[c.id]:
                         dj += '1'
                     else:
@@ -137,9 +131,9 @@ class lp_electre_tri_weights():
                     self.c_yi[dj] += 1
 
     def add_variables_cplex(self):
-        self.lp.variables.add(names=['w'+c.id for c in self.criteria],
-                              lb=[0 for c in self.criteria],
-                              ub=[1 for c in self.criteria])
+        self.lp.variables.add(names=['w'+c.id for c in self.model.criteria],
+                              lb=[0 for c in self.model.criteria],
+                              ub=[1 for c in self.model.criteria])
         self.lp.variables.add(names=['x'+dj for dj in self.c_xi],
                               lb = [0 for dj in self.c_xi],
                               ub = [1 for dj in self.c_xi])
@@ -156,7 +150,7 @@ class lp_electre_tri_weights():
 
     def add_constraints_cplex(self):
         constraints = self.lp.linear_constraints
-        w_vars = ['w'+c.id for c in self.criteria]
+        w_vars = ['w'+c.id for c in self.model.criteria]
         for dj in self.c_xi:
             coef = map(float, list(dj))
 
@@ -207,7 +201,7 @@ class lp_electre_tri_weights():
         obj = self.lp.solution.get_objective_value()
 
         cvs = criteria_values()
-        for c in self.criteria:
+        for c in self.model.criteria:
             cv = criterion_value()
             cv.criterion_id = c.id
             cv.value = self.lp.solution.get_values('w'+c.id)
@@ -221,8 +215,8 @@ class lp_electre_tri_weights():
         m1 = len(self.c_xi)
         m2 = len(self.c_yi)
 
-        self.w = dict((c.id, {}) for c in self.criteria)
-        for c in self.criteria:
+        self.w = dict((c.id, {}) for c in self.model.criteria)
+        for c in self.model.criteria:
             self.w[c.id] = self.lp.variable(lower=0, upper=1)
 
         if m1 > 0:
@@ -242,14 +236,14 @@ class lp_electre_tri_weights():
         self.lbda = self.lp.variable(lower=0.5, upper=1)
 
     def add_constraints_scip(self):
-        n = len(self.criteria)
+        n = len(self.model.criteria)
 
         for i, dj in enumerate(self.c_xi):
             coef = list(map(float, list(dj)))
 
             # sum(w_j(a_i,b_h-1) - x_i + x'_i = lbda
             self.lp += sum(coef[j]*self.w[c.id] \
-                           for j, c in enumerate(self.criteria)) \
+                           for j, c in enumerate(self.model.criteria)) \
                            - self.x[dj] + self.xp[dj] == self.lbda
 
         for i, dj in enumerate(self.c_yi):
@@ -257,12 +251,12 @@ class lp_electre_tri_weights():
 
             # sum(w_j(a_i,b_h) + y_i - y'_i = lbda - delta
             self.lp += sum(coef[j]*self.w[c.id] \
-                           for j, c in enumerate(self.criteria)) \
+                           for j, c in enumerate(self.model.criteria)) \
                            + self.y[dj] - self.yp[dj] == self.lbda \
                                                          - self.delta
 
         # sum w_j = 1
-        self.lp += sum(self.w[c.id] for c in self.criteria) == 1
+        self.lp += sum(self.w[c.id] for c in self.model.criteria) == 1
 
     def add_objective_scip(self):
         self.obj = sum([self.xp[dj]*coef \
@@ -278,7 +272,7 @@ class lp_electre_tri_weights():
         obj = solution.objective
 
         cvs = criteria_values()
-        for c in self.criteria:
+        for c in self.model.criteria:
             cv = criterion_value()
             cv.criterion_id = c.id
             cv.value = solution[self.w[c.id]]
@@ -291,7 +285,7 @@ class lp_electre_tri_weights():
     def add_variables_glpk(self):
         m1 = len(self.c_xi)
         m2 = len(self.c_yi)
-        n = len(self.criteria)
+        n = len(self.model.criteria)
 
         self.w = self.lp.var(xrange(n), 'w', bounds=(0, 1))
         self.lbda = self.lp.var(name='lambda', bounds=(0.5, 1))
@@ -303,7 +297,7 @@ class lp_electre_tri_weights():
             self.yp = self.lp.var(xrange(m2), 'yp', bounds=(0, 1))
 
     def add_constraints_glpk(self):
-        n = len(self.criteria)
+        n = len(self.model.criteria)
 
         for i, dj in enumerate(self.c_xi):
             coef = map(float, list(dj))
@@ -340,7 +334,7 @@ class lp_electre_tri_weights():
         obj = self.lp.vobj()
 
         cvs = criteria_values()
-        for j, c in enumerate(self.criteria):
+        for j, c in enumerate(self.model.criteria):
             cv = criterion_value()
             cv.criterion_id = c.id
             cv.value = float(self.w[j].primal)
@@ -409,7 +403,7 @@ if __name__ == "__main__":
     #print(aa)
 
     t1 = time.time()
-    lp_weights = lp_electre_tri_weights(c, aa, pt, cat, bpt, delta)
+    lp_weights = lp_electre_tri_weights(model, pt, aa, cat, delta)
     t2 = time.time()
     obj, cv_learned, lbda_learned = lp_weights.solve()
     t3 = time.time()
