@@ -73,7 +73,7 @@ class meta_electre_tri_global():
         a_pt = performance_table([ self.pt_dict[x] for x in a])
         aa_new = self.model.pessimist(a_pt)
 
-        aa.update(aa_new)
+        self.lp.update_linear_program(aa_new)
 
         return self.model
 
