@@ -11,6 +11,7 @@ from mcda.types import performance_table
 from tools.sorted import sorted_performance_table
 from tools.lp_electre_tri_weights import lp_electre_tri_weights
 from tools.meta_electre_tri_profiles import meta_electre_tri_profiles
+from tools.meta_electre_tri_profiles import compute_fitness
 from tools.generate_random import generate_random_categories_profiles
 from tools.generate_random import generate_random_alternatives
 from tools.generate_random import generate_random_criteria_values
@@ -35,8 +36,9 @@ class meta_electre_tri_global():
         self.pt = pt
         self.pt_dict = {ap.alternative_id: ap for ap in self.pt}
         self.pt_sorted = sorted_performance_table(pt)
+        self.aa = aa
         self.model = self.init_random_model()
-        self.lp = lp_electre_tri_weights(self.model, self.pt, aa, cat)
+        self.lp = lp_electre_tri_weights(self.model, self.pt, self.aa, cat)
         self.meta = meta_electre_tri_profiles(self.model, self.pt_sorted,
                                               cat, aa)
 
@@ -54,15 +56,20 @@ class meta_electre_tri_global():
 
         return model
 
-    def optimize(self):
-        obj = self.lp.solve()
+    def __optimize(self):
         aa = self.model.pessimist(self.pt)
 
-        old_profiles = model.profiles.copy()
+        print 'fitness:', compute_fitness(aa, self.aa)
+        print 'optimizing profiles...'
+        old_profiles = self.model.profiles.copy()
         self.meta.optimize(aa)
 
+        self.model.profiles.display()
+        aa = self.model.pessimist(self.pt)
+        print 'fitness:', compute_fitness(aa, self.aa)
+
         a = list()
-        for i, profile in enumerate(model.profiles):
+        for i, profile in enumerate(self.model.profiles):
             for c in self.criteria:
                 old = old_profiles[i].performances[c.id]
                 new = self.model.profiles[i].performances[c.id]
@@ -70,10 +77,16 @@ class meta_electre_tri_global():
                 l = self.pt_sorted.get_middle(c.id, old, new)
                 a.extend(x for x in l if x not in a)
 
-        a_pt = performance_table([ self.pt_dict[x] for x in a])
-        aa_new = self.model.pessimist(a_pt)
+        print 'optimizing weights...'
+        self.lp.update_linear_program(a)
+        obj = self.lp.solve()
+        aa = self.model.pessimist(self.pt)
+        print 'lambda:', self.model.lbda, 'w:', self.model.cv
+        print 'fitness:', compute_fitness(aa, self.aa)
 
-        self.lp.update_linear_program(aa_new)
+    def optimize(self, n=5000):
+        for i in range(n):
+            self.__optimize()
 
         return self.model
 
@@ -90,7 +103,7 @@ if __name__ == "__main__":
     from mcda.electre_tri import electre_tri
 
     # Original Electre Tri model
-    a = generate_random_alternatives(500)
+    a = generate_random_alternatives(5000)
     c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
