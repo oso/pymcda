@@ -85,11 +85,11 @@ def add_errors_in_affectations(alternatives_affectations, category_ids,
     aa = random.sample(alternatives_affectations, n)
 
     for a in aa:
-        new_cat = cat = None
+        cat = a.category_id
+        new_cat = a.category_id
         while new_cat == cat:
-            cat = a.category_id
-            newcat = random.sample(category_ids, 1)[0]
-            a.category_id = newcat
+            new_cat = random.sample(category_ids, 1)[0]
+        a.category_id = new_cat
 
 def display_affectations_and_pt(alternatives, criteria,
                                 alternatives_affectations,
