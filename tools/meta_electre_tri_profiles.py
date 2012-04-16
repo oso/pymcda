@@ -31,10 +31,11 @@ class meta_electre_tri_profiles():
     def compute_interval_ratios(self, n):
         self.nintervals = n
         intervals = []
-        for i in range(n):
+        for i in range(n-1):
             intervals += [ math.exp(i+1) ]
         s = sum(intervals)
-        self.interval_ratios = [ i/s for i in intervals ]
+        self.interval_ratios = [ i/s for i in intervals ] + [ 0.9 ]
+#        print self.interval_ratios
 
     def update_intervals(self, fitness):
         if fitness > 0.99:
@@ -69,7 +70,7 @@ class meta_electre_tri_profiles():
         size = above - profile
         intervals = [ profile + self.interval_ratios[i]*size \
                       for i in range(self.nintervals) ]
-        intervals = [ profile ] + intervals + [ above ]
+        intervals = [ profile ] + intervals
         ok = nok = 0
         for i in range(self.nintervals):
             alts = self.pt_sorted.get_middle(cid, intervals[i],
@@ -92,7 +93,7 @@ class meta_electre_tri_profiles():
         size = profile - below
         intervals = [ profile - self.interval_ratios[i]*size \
                       for i in range(self.nintervals) ]
-        intervals = [ profile ] + intervals + [ below ]
+        intervals = [ profile ] + intervals
         ok = nok = 0
         for i in range(self.nintervals):
             alts = self.pt_sorted.get_middle(cid, intervals[i+1],
