@@ -26,15 +26,25 @@ class meta_electre_tri_profiles():
         self.aa_by_cat = self.sort_alternative_by_category(aa_ori)
         self.b0 = pt_sorted.get_worst_ap()
         self.bp = pt_sorted.get_best_ap()
-        self.nintervals = 4
-        self.interval_ratios = self.compute_interval_ratios(self.nintervals)
+        self.compute_interval_ratios(3)
 
     def compute_interval_ratios(self, n):
+        self.nintervals = n
         intervals = []
         for i in range(n):
-            intervals += [ math.exp((i+1)) ]
+            intervals += [ math.exp(i+1) ]
         s = sum(intervals)
-        return [ i/s for i in intervals ]
+        self.interval_ratios = [ i/s for i in intervals ]
+
+    def update_intervals(self, fitness):
+        if fitness > 0.99:
+            self.compute_interval_ratios(7)
+        elif fitness > 0.95:
+            self.compute_interval_ratios(5)
+        elif fitness > 0.9:
+            self.compute_interval_ratios(4)
+        else:
+            self.compute_interval_ratios(3)
 
     def categories_rank(self, cat):
         return { c.id: c.rank for c in cat }
@@ -106,6 +116,9 @@ class meta_electre_tri_profiles():
         a_perfs = above.performances
         b_perfs = below.performances
 
+        moved = False
+        max_val = 0
+
         for c in self.model.criteria:
             cid = c.id
             h_below = self.compute_below_histogram(aa, cid, p_perfs[cid],
@@ -117,30 +130,54 @@ class meta_electre_tri_profiles():
 
             i_b = max(h_below, key=h_below.get)
             i_a = max(h_above, key=h_above.get)
-            r = random.random()/2
+            r = random.random()
 
             if h_below[i_b] > h_above[i_a]:
+                size = (p_perfs[cid] - b_perfs[cid])
                 if r < h_below[i_b]:
-                    size = (p_perfs[cid] - b_perfs[cid])
                     p_perfs[cid] = p_perfs[cid] \
                                     - self.interval_ratios[i_b] * size
+                    moved = True
+                elif moved is False and h_below[i_b] > max_val:
+                    max_val = h_below[i_b]
+                    max_cid = cid
+                    max_move = - self.interval_ratios[i_b] * size
             elif h_below[i_b] < h_above[i_a]:
+                size = (a_perfs[cid] - p_perfs[cid])
                 if r < h_above[i_a]:
-                    size = (a_perfs[cid] - p_perfs[cid])
                     p_perfs[cid] = p_perfs[cid] \
                                     + self.interval_ratios[i_a] * size
+                    moved = True
+                elif moved is False and h_above[i_a] > max_val:
+                    max_val = h_above[i_a]
+                    max_cid = cid
+                    max_move = self.interval_ratios[i_a] * size
             elif r > 0.5:
+                size = (p_perfs[cid] - b_perfs[cid])
                 r2 = random.random()
                 if r2 < h_below[i_b]:
-                    size = (p_perfs[cid] - b_perfs[cid])
                     p_perfs[cid] = p_perfs[cid] \
                                     - self.interval_ratios[i_b] * size
+                    moved = True
+                elif moved is False and h_below[i_b] > max_val:
+                    max_val = h_below[i_b]
+                    max_cid = cid
+                    max_move = - self.interval_ratios[i_b] * size
             elif r < 0.5:
+                size = (a_perfs[cid] - p_perfs[cid])
                 r2 = random.random()
                 if r2 < h_above[i_a]:
-                    size = (a_perfs[cid] - p_perfs[cid])
                     p_perfs[cid] = p_perfs[cid] \
                                     + self.interval_ratios[i_a] * size
+                    moved = True
+                elif moved is False and h_above[i_a] > max_val:
+                    max_val = h_above[i_a]
+                    max_cid = cid
+                    max_move = self.interval_ratios[i_a] * size
+
+        if moved is False and max_val > 0:
+#            print 'move', max_val
+            p_perfs[max_cid] = p_perfs[max_cid] + max_move
 
     def get_below_and_above_profiles(self, i):
         profiles = self.model.profiles
@@ -157,11 +194,12 @@ class meta_electre_tri_profiles():
 
         return below, above
 
-    def optimize(self, aa):
+    def optimize(self, aa, fitness):
         profiles = self.model.profiles
         for i, profile in enumerate(profiles):
             below, above = self.get_below_and_above_profiles(i)
             cat_b, cat_a = self.cat_ranked[i], self.cat_ranked[i+1]
+            self.update_intervals(fitness)
             self.compute_histograms(aa, profile, below, above, cat_b, cat_a)
 
 if __name__ == "__main__":
@@ -208,17 +246,17 @@ if __name__ == "__main__":
 
     pt_sorted = sorted_performance_table(pt)
     meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa)
-    meta.optimize(aa)
 
     for i in range(1, 501):
         aa2 = model2.pessimist(pt)
-        meta.optimize(aa2)
 
         f = compute_fitness(aa, aa2)
         print('%d: fitness: %g' % (i, f))
         bpt2.display(criterion_ids=cids)
         if f == 1:
             break
+
+        meta.optimize(aa2, f)
 
     print('Learned model')
     print('=============')
