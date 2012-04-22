@@ -32,11 +32,11 @@ class meta_greedy_electre_tri_profiles():
         self.pt = pt
         self.pt_dict = { ap.alternative_id: ap for ap in pt}
         self.pt_sorted = sorted_performance_table(pt)
+        self.nalternatives = len(self.pt)
         self.aa_ori = aa_ori
         self.b0 = self.pt_sorted.get_worst_ap()
         self.bp = self.pt_sorted.get_best_ap()
         self.intervals = self.compute_intervals()
-        print self.intervals
 
     def compute_intervals(self):
         intervals = {}
@@ -87,19 +87,17 @@ class meta_greedy_electre_tri_profiles():
             models_aa[m].update(aa_aids)
 
             l = len(aids)
-            ok = nchanged = 0
+            ok = 0
             for aid in aids:
                 if aa(aid) != aa_aids(aid):
                     if self.aa_ori(aid) == aa_aids(aid):
                         ok += 1
                     else:
                         ok -= 1
-                    nchanged += 1
 
-            models_fitness[m] += (ok / nchanged)
+            models_fitness[m] += (ok / self.nalternatives)
 
-#        return models
-        return models_fitness
+        return models_fitness, models_aa
 
     def get_below_and_above_profiles(self, i):
         profiles = self.model.profiles
@@ -116,13 +114,12 @@ class meta_greedy_electre_tri_profiles():
 
         return below, above
 
-    def optimize(self, aa, n):
+    def optimize(self, aa, f, n):
         f = compute_fitness(self.aa_ori, aa)
-        mf = self.generate_random_models(n, aa, f)
-#        models = self.generate_random_models(n, aa, f)
-#        mf = self.compute_models_fitness(models)
-        m = max(mf, key = lambda a: mf.get(a))
+        models_fitness, models_aa = self.generate_random_models(n, aa, f)
+        m = max(models_fitness, key = lambda a: models_fitness.get(a))
         self.model.profiles = m.profiles
+        return models_aa[m], models_fitness[m]
 
 if __name__ == "__main__":
     from tools.generate_random import generate_random_alternatives
@@ -168,16 +165,15 @@ if __name__ == "__main__":
     pt_sorted = sorted_performance_table(pt)
     meta = meta_greedy_electre_tri_profiles(model2, pt, aa)
 
+    aa2 = model2.pessimist(pt)
+    f = compute_fitness(aa, aa2)
     for i in range(1, 501):
-        aa2 = model2.pessimist(pt)
-
-        f = compute_fitness(aa, aa2)
         print('%d: fitness: %g' % (i, f))
         model2.profiles.display(criterion_ids=cids)
         if f == 1:
             break
 
-        meta.optimize(aa2, 10)
+        aa2, f = meta.optimize(aa2, f, 20)
 
     print('Learned model')
     print('=============')
