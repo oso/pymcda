@@ -1,6 +1,7 @@
 from __future__ import division
 import math
 from mcda.types import alternative_affectation, alternatives_affectations
+from copy import deepcopy
 
 def eq(a, b, eps=10e-10):
     return abs(a-b) <= eps
@@ -14,6 +15,9 @@ class electre_tri:
         self.profiles = profiles
         self.lbda = lbda
         self.categories = cats
+
+    def copy(self):
+        return deepcopy(self)
 
     def __check_input_params(self):
         if self.criteria is None:
