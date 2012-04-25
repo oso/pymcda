@@ -4,6 +4,14 @@ sys.path.insert(0, "..")
 import math
 import random
 
+def get_wrong_assignment(aa, aa_learned):
+    l = list()
+    for a in aa:
+        aid = a.alternative_id
+        if aa(aid) != aa_learned(aid):
+            l.append(aid)
+    return l
+
 def compute_fitness(aa, aa_learned):
     ok = total = 0
     for a in aa:
@@ -11,7 +19,6 @@ def compute_fitness(aa, aa_learned):
         if aa(aid) == aa_learned(aid):
             ok += 1
         total += 1
-
     return ok/total
 
 class meta_electre_tri_profiles():
@@ -39,13 +46,13 @@ class meta_electre_tri_profiles():
 
     def update_intervals(self, fitness):
         if fitness > 0.99:
-            self.compute_interval_ratios(7)
+            self.compute_interval_ratios(8)
         elif fitness > 0.95:
-            self.compute_interval_ratios(5)
+            self.compute_interval_ratios(6)
         elif fitness > 0.9:
-            self.compute_interval_ratios(4)
+            self.compute_interval_ratios(5)
         else:
-            self.compute_interval_ratios(3)
+            self.compute_interval_ratios(4)
 
     def categories_rank(self, cat):
         return { c.id: c.rank for c in cat }
@@ -120,6 +127,7 @@ class meta_electre_tri_profiles():
         moved = False
         max_val = 0
 
+        print cat_b, cat_a
         for c in self.model.criteria:
             cid = c.id
             h_below = self.compute_below_histogram(aa, cid, p_perfs[cid],
@@ -218,14 +226,14 @@ if __name__ == "__main__":
 
     a = generate_random_alternatives(10000)
 
-    c = generate_random_criteria(7)
+    c = generate_random_criteria(4)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
 
-    b = generate_random_alternatives(1, 'b')
+    b = generate_random_alternatives(3, 'b')
     bpt = generate_random_categories_profiles(b, c, 2345)
-    cat = generate_random_categories(2)
+    cat = generate_random_categories(4)
 
     lbda = 0.75
 
