@@ -113,7 +113,7 @@ class criterion:
         scale = ElementTree.SubElement(xmcda, 'scale')
         quant = ElementTree.SubElement(scale, 'quantitative')
         prefd = ElementTree.SubElement(quant, 'preferenceDirection')
-        if self.direction == MAXIMIZE:
+        if self.direction == 1:
             prefd.text = 'max'
         else:
             prefd.text = 'min'
