@@ -140,9 +140,10 @@ class electre_tri:
         for action_perfs in pt:
             cat_rank = len(profiles)
             for i, profile in enumerate(profiles):
-                outr = self.__outrank(action_perfs, self.criteria, self.cv,
-                                      profile, i+1, self.lbda)
-                if outr != "S" and outr != "I":
+                s_ab = self.credibility(action_perfs, profile,
+                                        self.criteria, self.cv,
+                                        i+1)
+                if not eq(s_ab, self.lbda) and s_ab < self.lbda:
                     cat_rank -= 1
 
             cat_id = self.categories[cat_rank].id
