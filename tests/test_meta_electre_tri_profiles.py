@@ -54,7 +54,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
                 if f == 1:
                     break
 
-                meta.optimize(aa2)
+                meta.optimize(aa2, f)
 
             f = compute_fitness(aa, aa2)
             fitness.append(f)
@@ -68,12 +68,12 @@ class metaheuristic_profiles_tests(unittest.TestCase):
                           for na in n_alts }
                     for nc in n_crit }
 
-        print('\nna\tnc\tncat\tseed\tnloop\tnmodels\tf_end')
+        print('\nna\tnc\tncat\tseed\tnloops\tnloopsu\tnmodels\tf_end')
         for na, nc, ncat, seed in product(n_alts, n_crit, n_cat, seeds):
             f = self.run_metaheuristic(na, nc, ncat, seed, nloop, nmodel)
             fitness[nc][na][ncat][seed][0:len(f)] = f
-            print("%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f" % (na, nc, ncat, seed,
-                  nloop, nmodel, f[-1]))
+            print("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f" % (na, nc, ncat, seed,
+                  nloop, len(f)-1, nmodel, f[-1]))
 
         print('Summary')
         print('=======')
