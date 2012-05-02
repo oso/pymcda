@@ -18,12 +18,14 @@ from tools.generate_random import generate_random_performance_table
 from tools.generate_random import generate_random_categories
 from tools.generate_random import generate_random_categories_profiles
 from tools.utils import normalize_criteria_weights
+from tools.utils import add_errors_in_affectations
 
 seeds = [ 123, 456, 789, 12, 345, 678, 901, 234, 567, 890 ]
 
 class metaheuristic_profiles_tests(unittest.TestCase):
 
-    def run_metaheuristic(self, na, nc, ncat, seed, nloop, nmodel):
+    def run_metaheuristic(self, na, nc, ncat, seed, nloop, nmodel,
+                          nerrors=0):
         fitness = []
 
         a = generate_random_alternatives(na)
@@ -41,39 +43,47 @@ class metaheuristic_profiles_tests(unittest.TestCase):
         model = electre_tri(c, cv, bpt, lbda, cat)
         aa = model.pessimist(pt)
 #        model.profiles.display()
+        aa_errors = model.pessimist(pt)
+        add_errors_in_affectations(aa_errors, cat.get_ids(), nerrors)
 
         pt_sorted = sorted_performance_table(pt)
 
-        for j in range(nmodel):
-            model.profiles = generate_random_categories_profiles(b, c)
-            meta = meta_electre_tri_profiles(model, pt_sorted, cat, aa)
-            for k in range(nloop):
-                aa2 = model.pessimist(pt)
-                f = compute_fitness(aa, aa2)
-                fitness.append(f)
-                if f == 1:
-                    break
+        t1 = time.time()
 
-                meta.optimize(aa2)
-
+        model.profiles = generate_random_categories_profiles(b, c)
+        meta = meta_electre_tri_profiles(model, pt_sorted, cat, aa_errors)
+        for k in range(nloop):
+            aa2 = model.pessimist(pt)
             f = compute_fitness(aa, aa2)
             fitness.append(f)
+            if f == 1:
+                break
 
-        return fitness
+            meta.optimize(aa2, f)
 
-    def run_one_set_of_tests(self, n_alts, n_crit, n_cat, nloop, nmodel):
+        f = compute_fitness(aa, aa2)
+        fitness.append(f)
+
+        t = time.time() - t1
+
+        return t, fitness
+
+    def run_one_set_of_tests(self, n_alts, n_crit, n_cat, nloop, nmodel,
+                             nerrors):
         fitness = { nc: { na: { ncat: { seed: [ 1 for i in range(nloop+1) ]
                                         for seed in seeds }
                                 for ncat in n_cat }
                           for na in n_alts }
                     for nc in n_crit }
 
-        print('\nna\tnc\tncat\tseed\tnloop\tnmodels\tf_end')
+        print('\nna\tnc\tncat\tseed\tnloop\tnloopu\tnmodels\tnerrors\tf_end\tf_best\ttime')
         for na, nc, ncat, seed in product(n_alts, n_crit, n_cat, seeds):
-            f = self.run_metaheuristic(na, nc, ncat, seed, nloop, nmodel)
+            t, f = self.run_metaheuristic(na, nc, ncat, seed, nloop, nmodel,
+                                          nerrors)
             fitness[nc][na][ncat][seed][0:len(f)] = f
-            print("%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f" % (na, nc, ncat, seed,
-                  nloop, nmodel, f[-1]))
+            print("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%g\t%-6.5f\t%-6.5f\t%-6.5f" \
+                  % (na, nc, ncat, seed, nloop, len(f), nmodel, nerrors,
+                  f[-1], max(f), t))
 
         print('Summary')
         print('=======')
@@ -94,15 +104,25 @@ class metaheuristic_profiles_tests(unittest.TestCase):
             print("%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f\t%-6.5f\t%-6.5f" % (na,
                   nc, ncat, len(seeds), loop, nmodel, favg, fmin, fmax))
 
-    def test001_small_test(self):
+    def test001_two_cat_no_errors(self):
         n_alts = [ 10000 ]
         n_crit = [ 5, 7, 10 ]
         n_cat = [ 2 ]
         nloop = 1000
         nmodel = 1
+        nerrors = 0
 
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors)
 
+    def test002_two_cat_10pc_errors(self):
+        n_alts = [ 10000 ]
+        n_crit = [ 5, 7, 10 ]
+        n_cat = [ 2 ]
+        nloop = 1000
+        nmodel = 1
+        nerrors = 0.1
+
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors)
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
