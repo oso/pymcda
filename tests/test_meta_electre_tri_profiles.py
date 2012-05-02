@@ -82,7 +82,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
                                           nerrors)
             fitness[nc][na][ncat][seed][0:len(f)] = f
             print("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%g\t%-6.5f\t%-6.5f\t%-6.5f" \
-                  % (na, nc, ncat, seed, nloop, len(f), nmodel, nerrors,
+                  % (na, nc, ncat, seed, nloop, len(f)-1, nmodel, nerrors,
                   f[-1], max(f), t))
 
         print('Summary')
