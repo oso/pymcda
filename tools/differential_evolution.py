@@ -50,7 +50,7 @@ def crossover_weights(cr, mc, g, best, h, s):
         else:
             nval = val
 
-        cvals.append(criterion_value(criterion_id=id, value=nval))
+        cvals.append(criterion_value(id=id, value=nval))
 
     return cvals
 
@@ -244,7 +244,7 @@ def init_one(c, pt, nprofiles, cats):
             continue
 
         cval = criterion_value()
-        cval.criterion_id = crit.id
+        cval.id = crit.id
         cvals.append(cval)
 
     random_vals = [ 0 , 1 ]

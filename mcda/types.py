@@ -162,14 +162,20 @@ class criterion:
         if value is not None:
             self.weight = unmarshal(value.getchildren()[0])
 
-class criteria_values(list):
+class criteria_values(dict):
 
-    def __call__(self, criterion_id):
-        for cval in self:
-            if cval.criterion_id == criterion_id:
-                return cval
+    def __init__(self, l=[]):
+        for i in l:
+            self[i.id] = i
 
-        raise KeyError("Criterion value %s not found" % criterion_id)
+    def __iter__(self):
+        return self.itervalues()
+
+    def __call__(self, id):
+        return self[id]
+
+    def append(self, c):
+        self[c.id] = c
 
     def copy(self):
         return deepcopy(self)
@@ -199,24 +205,22 @@ class criteria_values(list):
 
 class criterion_value():
 
-    def __init__(self, id=None, name=None, criterion_id=None, value=None):
+    def __init__(self, id=None, value=None):
         self.id = id
-        self.name = name
-        self.criterion_id = criterion_id
         self.value = value
 
     def __repr__(self):
-        return "%s: %s" % (self.criterion_id, self.value)
+        return "%s: %s" % (self.id, self.value)
 
     def copy(self):
         return deepcopy(self)
 
-    def to_xmcda(self):
+    def to_xmcda(self, id=None, name=None):
         xmcda = ElementTree.Element('criterionValue')
-        if self.id is not None:
-            xmcda.set('id', self.id)
-        if self.name is not None:
-            xmcda.set('name', self.name)
+        if id is not None:
+            xmcda.set('id', id)
+        if name is not None:
+            xmcda.set('name', name)
         critid = ElementTree.SubElement(xmcda, 'criterionID')
         critid.text = self.criterion_id
         val = ElementTree.SubElement(xmcda, 'value')

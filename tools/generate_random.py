@@ -31,7 +31,7 @@ def generate_random_criteria_values(crits, seed=None, k=3):
     cvals = criteria_values()
     for c in crits:
         cval = criterion_value()
-        cval.criterion_id = c.id
+        cval.id = c.id
         cval.value = round(random.random(), k)
         cvals.append(cval)
 

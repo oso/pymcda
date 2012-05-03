@@ -203,7 +203,7 @@ class lp_electre_tri_weights():
         cvs = criteria_values()
         for c in self.model.criteria:
             cv = criterion_value()
-            cv.criterion_id = c.id
+            cv.id = c.id
             cv.value = self.lp.solution.get_values('w'+c.id)
             cvs.append(cv)
 
@@ -275,7 +275,7 @@ class lp_electre_tri_weights():
         cvs = criteria_values()
         for c in self.model.criteria:
             cv = criterion_value()
-            cv.criterion_id = c.id
+            cv.id = c.id
             cv.value = solution[self.w[c.id]]
             cvs.append(cv)
 
@@ -338,7 +338,7 @@ class lp_electre_tri_weights():
         cvs = criteria_values()
         for j, c in enumerate(self.model.criteria):
             cv = criterion_value()
-            cv.criterion_id = c.id
+            cv.id = c.id
             cv.value = float(self.w[j].primal)
             cvs.append(cv)
 

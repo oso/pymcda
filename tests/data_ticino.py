@@ -17,11 +17,11 @@ competition = criterion('competition', 'competition', False, 1, 8)
 c = criteria([ prix, transport, envir, residents, competition ])
 
 # Criteria values
-cv_prix = criterion_value(None, None, 'prix', 25)
-cv_transport = criterion_value(None, None, 'transport', 45)
-cv_envir = criterion_value(None, None, 'envir', 10)
-cv_residents = criterion_value(None, None, 'residents', 12)
-cv_competition = criterion_value(None, None, 'competition', 8)
+cv_prix = criterion_value('prix', 25)
+cv_transport = criterion_value('transport', 45)
+cv_envir = criterion_value('envir', 10)
+cv_residents = criterion_value('residents', 12)
+cv_competition = criterion_value('competition', 8)
 cv = criteria_values([ cv_prix, cv_transport, cv_envir, cv_residents,
                        cv_competition ])
 
