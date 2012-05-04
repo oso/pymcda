@@ -31,36 +31,63 @@ class sorted_performance_table():
     def get_all(self, cid):
         return self.sorted_altid[cid]
 
-    def get_below(self, cid, val):
-        i = bisect.bisect(self.sorted_values[cid], val)
+    def get_below(self, cid, val, b=True):
+        if b is True:
+            i = bisect.bisect(self.sorted_values[cid], val)
+        else:
+            i = bisect.bisect_left(self.sorted_values[cid], val)
         return self.sorted_altid[cid][:i]
 
-    def get_above(self, cid, val):
-        i = bisect.bisect_left(self.sorted_values[cid], val)
+    def get_above(self, cid, val, a=True):
+        if a is True:
+            i = bisect.bisect_left(self.sorted_values[cid], val)
+        else:
+            i = bisect.bisect(self.sorted_values[cid], val)
         return self.sorted_altid[cid][i:]
 
-    def get_middle(self, cid, val_l, val_r):
+    def get_middle(self, cid, val_l, val_r, l=True, r=True):
         if val_l > val_r:
-            i = bisect.bisect_left(self.sorted_values[cid], val_r)
-            i2 = bisect.bisect(self.sorted_values[cid], val_l)
-        else:
+            tmp = val_r
+            val_r = val_l
+            val_l = tmp
+
+        if l is True:
             i = bisect.bisect_left(self.sorted_values[cid], val_l)
+        else:
+            i = bisect.bisect(self.sorted_values[cid], val_l)
+        if r is True:
             i2 = bisect.bisect(self.sorted_values[cid], val_r)
+        else:
+            i2 = bisect.bisect_left(self.sorted_values[cid], val_r)
+
         return self.sorted_altid[cid][i:i2]
 
-    def get_below_len(self, cid, val):
-        return bisect.bisect(self.sorted_values[cid], val)
-
-    def get_above_len(self, cid, val):
-        return self.n - bisect.bisect_left(self.sorted_values[cid], val)
-
-    def get_middle_len(self, cid, val_l, val_r):
-        if val_l > val_r:
-            i = bisect.bisect_left(self.sorted_values[cid], val_r)
-            i2 = bisect.bisect(self.sorted_values[cid], val_l)
+    def get_below_len(self, cid, val, r=True):
+        if r is True:
+            return bisect.bisect(self.sorted_values[cid], val)
         else:
+            return bisect.bisect_left(self.sorted_values[cid], val)
+
+    def get_above_len(self, cid, val, l=True):
+        if l is True:
+            return self.n - bisect.bisect_left(self.sorted_values[cid], val)
+        else:
+            return self.n - bisect.bisect(self.sorted_values[cid], val)
+
+    def get_middle_len(self, cid, val_l, val_r, l=True, r=True):
+        if val_l > val_r:
+            tmp = val_r
+            val_r = val_l
+            val_l = tmp
+
+        if l is True:
             i = bisect.bisect_left(self.sorted_values[cid], val_l)
+        else:
+            i = bisect.bisect(self.sorted_values[cid], val_l)
+        if r is True:
             i2 = bisect.bisect(self.sorted_values[cid], val_r)
+        else:
+            i2 = bisect.bisect_left(self.sorted_values[cid], val_r)
 
         return i2-i
 
