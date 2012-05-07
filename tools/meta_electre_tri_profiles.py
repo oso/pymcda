@@ -120,7 +120,7 @@ class meta_electre_tri_profiles():
         ok = nok = 0
         for i in range(self.nintervals):
             alts = self.pt_sorted.get_middle(cid, intervals[i],
-                                             intervals[i+1])
+                                             intervals[i+1])[0]
             for a in alts:
                 if aa(a) == self.aa_ori(a) and self.aa_ori(a) == cat_a:
                     ok += 1
@@ -143,7 +143,7 @@ class meta_electre_tri_profiles():
         ok = nok = 0
         for i in range(self.nintervals):
             alts = self.pt_sorted.get_middle(cid, intervals[i+1],
-                                             intervals[i])
+                                             intervals[i])[0]
             for a in alts:
                 if aa(a) == self.aa_ori(a) and self.aa_ori(a) == cat_b:
                     ok += 1

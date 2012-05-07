@@ -36,14 +36,14 @@ class sorted_performance_table():
             i = bisect.bisect(self.sorted_values[cid], val)
         else:
             i = bisect.bisect_left(self.sorted_values[cid], val)
-        return self.sorted_altid[cid][:i]
+        return self.sorted_altid[cid][:i], self.sorted_values[cid][:i]
 
     def get_above(self, cid, val, a=True):
         if a is True:
             i = bisect.bisect_left(self.sorted_values[cid], val)
         else:
             i = bisect.bisect(self.sorted_values[cid], val)
-        return self.sorted_altid[cid][i:]
+        return self.sorted_altid[cid][i:], self.sorted_values[cid][i:]
 
     def get_middle(self, cid, val_l, val_r, l=True, r=True):
         if val_l > val_r:
@@ -60,7 +60,7 @@ class sorted_performance_table():
         else:
             i2 = bisect.bisect_left(self.sorted_values[cid], val_r)
 
-        return self.sorted_altid[cid][i:i2]
+        return self.sorted_altid[cid][i:i2], self.sorted_values[cid][i:i2]
 
     def get_below_len(self, cid, val, r=True):
         if r is True:
@@ -107,6 +107,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_alternatives
     from tools.generate_random import generate_random_criteria
     from tools.generate_random import generate_random_performance_table
+    import time
 
     a = generate_random_alternatives(500)
     c = generate_random_criteria(5)
@@ -114,9 +115,10 @@ if __name__ == "__main__":
 
     sorted_pt = sorted_performance_table(pt)
 
-    print len(sorted_pt.get_below('c1', 0.1))
-    print len(sorted_pt.get_above('c1', 0.1))
-    print len(sorted_pt.get_middle('c1', 0, 1))
+    t1 = time.time()
+    print len(sorted_pt.get_below('c1', 0.1)[0])
+    print len(sorted_pt.get_above('c1', 0.1)[0])
+    print len(sorted_pt.get_middle('c1', 0, 1)[0])
     print sorted_pt.get_below_len('c1', 0.1)
     print sorted_pt.get_above_len('c1', 0.1)
     print sorted_pt.get_middle_len('c1', 0, 1)
@@ -124,3 +126,4 @@ if __name__ == "__main__":
     print len(sorted_pt.get_all('c1'))
     print sorted_pt.get_worst_ap()
     print sorted_pt.get_best_ap()
+    print time.time() - t1
