@@ -128,9 +128,9 @@ class meta_electre_tri_profiles():
                     nok += 1
 
             if (ok + nok) > 0:
-                h_above[i] = nok / (ok + nok)
+                h_above[intervals[i+1]] = nok / (ok + nok)
             else:
-                h_above[i] = 0
+                h_above[intervals[i+1]] = 0
 
         return h_above
 
@@ -151,9 +151,9 @@ class meta_electre_tri_profiles():
                     nok += 1
 
             if (ok + nok) > 0:
-                h_below[i] = nok / (ok + nok)
+                h_below[intervals[i+1]] = nok / (ok + nok)
             else:
-                h_below[i] = 0
+                h_below[intervals[i+1]] = 0
 
         return h_below
 
@@ -183,49 +183,45 @@ class meta_electre_tri_profiles():
             if h_below[i_b] > h_above[i_a]:
                 size = (p_perfs[cid] - b_perfs[cid])
                 if r < h_below[i_b]:
-                    p_perfs[cid] = p_perfs[cid] \
-                                    - self.interval_ratios[i_b] * size
+                    p_perfs[cid] = i_b
                     moved = True
                 elif moved is False and h_below[i_b] > max_val:
                     max_val = h_below[i_b]
                     max_cid = cid
-                    max_move = - self.interval_ratios[i_b] * size
+                    max_move = i_b
             elif h_below[i_b] < h_above[i_a]:
                 size = (a_perfs[cid] - p_perfs[cid])
                 if r < h_above[i_a]:
-                    p_perfs[cid] = p_perfs[cid] \
-                                    + self.interval_ratios[i_a] * size
+                    p_perfs[cid] = i_a
                     moved = True
                 elif moved is False and h_above[i_a] > max_val:
                     max_val = h_above[i_a]
                     max_cid = cid
-                    max_move = self.interval_ratios[i_a] * size
+                    max_move = i_a
             elif r > 0.5:
                 size = (p_perfs[cid] - b_perfs[cid])
                 r2 = random.random()
                 if r2 < h_below[i_b]:
-                    p_perfs[cid] = p_perfs[cid] \
-                                    - self.interval_ratios[i_b] * size
+                    p_perfs[cid] = i_b
                     moved = True
                 elif moved is False and h_below[i_b] > max_val:
                     max_val = h_below[i_b]
                     max_cid = cid
-                    max_move = - self.interval_ratios[i_b] * size
+                    max_move = i_b
             elif r < 0.5:
                 size = (a_perfs[cid] - p_perfs[cid])
                 r2 = random.random()
                 if r2 < h_above[i_a]:
-                    p_perfs[cid] = p_perfs[cid] \
-                                    + self.interval_ratios[i_a] * size
+                    p_perfs[cid] = i_a
                     moved = True
                 elif moved is False and h_above[i_a] > max_val:
                     max_val = h_above[i_a]
                     max_cid = cid
-                    max_move = self.interval_ratios[i_a] * size
+                    max_move = i_a
 
         if moved is False and max_val > 0:
 #            print 'move', max_val
-            p_perfs[max_cid] = p_perfs[max_cid] + max_move
+            p_perfs[max_cid] = max_move
 
     def get_below_and_above_profiles(self, i):
         profiles = self.model.profiles
