@@ -166,7 +166,6 @@ class meta_electre_tri_profiles():
         moved = False
         max_val = 0
 
-        print cat_b, cat_a
         for c in self.model.criteria:
             cid = c.id
             h_below = self.compute_below_histogram(aa, cid, p_perfs[cid],
@@ -220,7 +219,6 @@ class meta_electre_tri_profiles():
                     max_move = i_a
 
         if moved is False and max_val > 0:
-#            print 'move', max_val
             p_perfs[max_cid] = max_move
 
     def get_below_and_above_profiles(self, i):
