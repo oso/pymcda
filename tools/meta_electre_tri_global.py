@@ -235,14 +235,13 @@ class meta_electre_tri_global():
     #   - pt : alternative performance table
     #   - cps: categories profiles
     #   - cat: categories
-    def __init__(self, a, c, cvals, aa, pt, cps, cat):
+    def __init__(self, a, c, cvals, aa, pt, cps):
         self.alternatives = a
         self.criteria = c
         self.criteria_vals = cvals
         self.aa = aa
         self.pt = pt
         self.categories_profiles = cps
-        self.categories = cat
         self.b0 = get_worst_alternative_performances(pt, c)
         self.bp = get_best_alternative_performances(pt, c)
 
@@ -289,8 +288,7 @@ class meta_electre_tri_global():
     def loop_lp(self, models):
         models_fitness = {}
         for model in models:
-            lpw = lp_electre_tri_weights(model, self.pt, self.aa,
-                                         self.categories)
+            lpw = lp_electre_tri_weights(model, self.pt, self.aa, self.cps)
             obj = lpw.solve()
 
             #print("Objective value: %d" % obj)
@@ -386,7 +384,7 @@ if __name__ == "__main__":
     print("lambda\t%.7s" % lbda)
     #print(aa)
 
-    meta_global = meta_electre_tri_global(a, c, cv, aa, pt, cps, cat)
+    meta_global = meta_electre_tri_global(a, c, cv, aa, pt, cps)
 
     t1 = time.time()
     m = meta_global.solve(10, 50, 20)

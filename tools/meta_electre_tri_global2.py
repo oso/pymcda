@@ -33,19 +33,20 @@ class meta_electre_tri_global():
         self.alternatives = a
         self.criteria = c
         self.categories_profiles = cps
+        self.categories = cps.get_ordered_categories()
         self.pt = pt
         self.pt_dict = {ap.alternative_id: ap for ap in self.pt}
         self.pt_sorted = sorted_performance_table(pt)
         self.aa = aa
         self.model = self.init_random_model()
-        self.lp = lp_electre_tri_weights(self.model, self.pt, self.aa, cat)
+        self.lp = lp_electre_tri_weights(self.model, self.pt, self.aa, cps)
         self.meta = meta_electre_tri_profiles(self.model, self.pt_sorted,
                                               cat, aa)
 
     def init_random_model(self):
         model = electre_tri()
         model.criteria = self.criteria
-        model.categories_profiles = self.categories_profiles
+        model.categories = self.categories
 
         nprofiles = len(self.categories_profiles)
         self.b = generate_random_alternatives(nprofiles, 'b') # FIXME
@@ -58,11 +59,12 @@ class meta_electre_tri_global():
 
     def __optimize(self):
         aa = self.model.pessimist(self.pt)
+        f = compute_fitness(aa, self.aa)
 
-        print 'fitness:', compute_fitness(aa, self.aa)
+        print 'fitness:', f
         print 'optimizing profiles...'
         old_profiles = self.model.profiles.copy()
-        self.meta.optimize(aa)
+        self.meta.optimize(aa, f)
 
         self.model.profiles.display()
         aa = self.model.pessimist(self.pt)
@@ -78,7 +80,7 @@ class meta_electre_tri_global():
                 a.extend(x for x in l if x not in a)
 
         print 'optimizing weights...'
-        self.lp.update_linear_program(a)
+        self.lp.update_linear_program(aa)
         obj = self.lp.solve()
         aa = self.model.pessimist(self.pt)
         print 'lambda:', self.model.lbda, 'w:', self.model.cv
@@ -128,7 +130,7 @@ if __name__ == "__main__":
     print("lambda\t%.7s" % lbda)
     #print(aa)
 
-    meta = meta_electre_tri_global(a, c, cat, pt, aa)
+    meta = meta_electre_tri_global(a, c, cps, pt, aa)
 
     t1 = time.time()
     m = meta.optimize()

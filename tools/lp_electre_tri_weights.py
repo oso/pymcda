@@ -22,12 +22,12 @@ else:
 
 class lp_electre_tri_weights():
 
-    def __init__(self, model, pt, aa, cat, delta=0.0001):
+    def __init__(self, model, pt, aa, cps, delta=0.0001):
         self.model = model
-        self.categories = cat
-        self.profiles = [ b.alternative_id for b in model.profiles ]
+        self.categories = cps.get_ordered_categories()
+        self.profiles = cps.get_ordered_profiles()
         self.delta = delta
-        self.cat_ranks = { c.id: c.rank for c in self.categories }
+        self.cat_ranks = { c: i+1 for i, c in enumerate(self.categories) }
         self.pt = { a.alternative_id: a.performances \
                     for a in pt }
         self.update_linear_program(aa)
@@ -408,7 +408,7 @@ if __name__ == "__main__":
     #print(aa)
 
     t1 = time.time()
-    lp_weights = lp_electre_tri_weights(model, pt, aa, cat, delta)
+    lp_weights = lp_electre_tri_weights(model, pt, aa, cps, delta)
     t2 = time.time()
     obj = lp_weights.solve()
     t3 = time.time()
