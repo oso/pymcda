@@ -39,13 +39,13 @@ class criteria(dict):
     def append(self, c):
         self[c.id] = c
 
+    def copy(self):
+        return deepcopy(self)
+
     def display(self, header=True, criterion_ids=None):
         self[0].display(header)
         for aa in self[1:]:
             aa.display(False)
-
-    def copy(self):
-        return deepcopy(self)
 
     # FIXME: useless (in already do the same)
     def has_criterion(self, criterion_id):
@@ -645,7 +645,47 @@ class limits():
 
         return xmcda
 
-class categories_profiles(list):
+class categories_profiles(dict):
+
+    def __init__(self, l=[]):
+        for cp in l:
+            self[cp.id] = cp
+
+    def __iter__(self):
+        return self.itervalues()
+
+    def __call__(self, id):
+        return self[id]
+
+    def copy(self):
+        return deepcopy(self)
+
+    def append(self, cp):
+        self[cp.id] = cp
+
+    def copy(self):
+        return deepcopy(self)
+
+    def get_ordered_profiles(self):
+        lower_cat = { cp.value.lower: cp.id for cp in self }
+        upper_cat = { cp.value.upper: cp.id for cp in self }
+
+        lowest_highest = set(lower_cat.keys()) ^ set(upper_cat.keys())
+        lowest = list(set(lower_cat.keys()) & lowest_highest)
+
+        profiles = [ lower_cat[lowest[0]] ]
+        for i in range(1, len(self)):
+            ucat = self[profiles[-1]].value.upper
+            profiles.append(lower_cat[ucat])
+
+        return profiles
+
+    def get_ordered_categories(self):
+        profiles = self.get_ordered_profiles()
+        categories = [ self[profiles[0]].value.lower ]
+        for profile in profiles:
+            categories.append(self[profile].value.upper)
+        return categories
 
     def to_xmcda(self):
         root = ElementTree.Element('categoriesProfiles')
@@ -654,13 +694,10 @@ class categories_profiles(list):
             root.append(xmcda)
         return root
 
-    def copy(self):
-        return deepcopy(self)
-
 class category_profile():
 
-    def __init__(self, alternative_id, value):
-        self.alternative_id = alternative_id
+    def __init__(self, id, value):
+        self.id = id
         self.value = value
 
     def copy(self):
@@ -669,7 +706,7 @@ class category_profile():
     def to_xmcda(self):
         xmcda = ElementTree.Element('categoryProfile')
         altid = ElementTree.SubElement(xmcda, 'alternativeID')
-        altid.text = self.alternative_id
+        altid.text = self.id
         value = self.value.to_xmcda()
         xmcda.append(value)
         return xmcda

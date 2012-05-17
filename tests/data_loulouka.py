@@ -7,6 +7,7 @@ from mcda.types import alternative_performances, performance_table
 from mcda.types import threshold, thresholds, constant
 from mcda.types import alternative_affectation, alternatives_affectations
 from mcda.types import category, categories
+from mcda.types import category_profile, categories_profiles, limits
 
 # Weights
 g1 = criterion('g1', 'g1', False, 1, 0.02)
@@ -621,6 +622,12 @@ cat2 = category('cat2', rank=2)
 cat3 = category('cat3', rank=3)
 cat4 = category('cat4', rank=4)
 cats = categories([cat1, cat2, cat3, cat4])
+
+# Categories profiles
+cp1 = category_profile('b1', limits('cat1', 'cat2'))
+cp2 = category_profile('b2', limits('cat2', 'cat3'))
+cp3 = category_profile('b3', limits('cat3', 'cat4'))
+cps = categories_profiles([cp1, cp2, cp3])
 
 # Alternatives affectations
 aap = alternatives_affectations([
