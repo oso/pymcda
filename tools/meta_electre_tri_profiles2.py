@@ -127,6 +127,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
     from tools.generate_random import generate_random_categories
+    from tools.generate_random import generate_random_profiles
     from tools.generate_random import generate_random_categories_profiles
     from tools.utils import normalize_criteria_weights
     from tools.utils import display_affectations_and_pt
@@ -141,12 +142,13 @@ if __name__ == "__main__":
     pt = generate_random_performance_table(a, c, 1234)
 
     b = generate_random_alternatives(1, 'b')
-    bpt = generate_random_categories_profiles(b, c, 2345)
+    bpt = generate_random_profiles(b, c, 2345)
     cat = generate_random_categories(2)
+    cps = generate_random_categories_profiles(cat)
 
     lbda = 0.75
 
-    model = electre_tri(c, cv, bpt, lbda, cat)
+    model = electre_tri(c, cv, bpt, lbda, cps)
     aa = model.pessimist(pt)
 
     print('Original model')
@@ -156,8 +158,8 @@ if __name__ == "__main__":
     cv.display(criterion_ids=cids)
     print("lambda: %.7s" % lbda)
 
-    bpt2 = generate_random_categories_profiles(b, c, 0123)
-    model2 = electre_tri(c, cv, bpt2, lbda, cat)
+    bpt2 = generate_random_profiles(b, c, 0123)
+    model2 = electre_tri(c, cv, bpt2, lbda, cps)
     print('Original random profiles')
     print('========================')
     bpt2.display(criterion_ids=cids)

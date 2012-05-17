@@ -17,6 +17,7 @@ from tools.generate_random import generate_random_criteria
 from tools.generate_random import generate_random_criteria_values
 from tools.generate_random import generate_random_performance_table
 from tools.generate_random import generate_random_categories
+from tools.generate_random import generate_random_profiles
 from tools.generate_random import generate_random_categories_profiles
 from tools.utils import normalize_criteria_weights
 
@@ -34,12 +35,13 @@ class heuristic_profiles_tests(unittest.TestCase):
         pt = generate_random_performance_table(a, c)
 
         b = generate_random_alternatives(ncat-1, 'b')
-        bpt = generate_random_categories_profiles(b, c)
+        bpt = generate_random_profiles(b, c)
         cat = generate_random_categories(ncat)
+        cps = generate_random_categories_profiles(cat)
 
         lbda = random.uniform(0.5, 1)
 
-        model = electre_tri(c, cv, bpt, lbda, cat)
+        model = electre_tri(c, cv, bpt, lbda, cps)
         aa = model.pessimist(pt)
 
 #        model.profiles.display()
@@ -48,7 +50,7 @@ class heuristic_profiles_tests(unittest.TestCase):
         bp = get_best_alternative_performances(pt, c)
 
         for j in range(nmodel):
-            model.profiles = generate_random_categories_profiles(b, c)
+            model.profiles = generate_random_profiles(b, c)
             heur = heuristic_profiles(model, a, c, pt, aa, b0, bp)
             for k in range(nloop):
                 aa2 = model.pessimist(pt)
@@ -140,16 +142,17 @@ class metaheuristic_tests(unittest.TestCase):
         pt = generate_random_performance_table(a, c)
 
         b = generate_random_alternatives(ncat-1, 'b')
-        bpt = generate_random_categories_profiles(b, c)
+        bpt = generate_random_profiles(b, c)
         cat = generate_random_categories(ncat)
+        cps = generate_random_categories_profiles(cat)
 
         lbda = random.uniform(0.5, 1)
 
-        model = electre_tri(c, cv, bpt, lbda, cat)
+        model = electre_tri(c, cv, bpt, lbda, cps)
         aa = model.pessimist(pt)
 
         t1 = time.time()
-        meta = meta_electre_tri_global(a, c, cv, aa, pt, cat)
+        meta = meta_electre_tri_global(a, c, cv, aa, pt, cps, cat)
         model_learned = meta.solve(nmodel, nloop, nloop2)
         t2 = time.time()
 

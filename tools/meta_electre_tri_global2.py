@@ -12,7 +12,7 @@ from tools.sorted import sorted_performance_table
 from tools.lp_electre_tri_weights import lp_electre_tri_weights
 from tools.meta_electre_tri_profiles import meta_electre_tri_profiles
 from tools.meta_electre_tri_profiles import compute_fitness
-from tools.generate_random import generate_random_categories_profiles
+from tools.generate_random import generate_random_profiles
 from tools.generate_random import generate_random_alternatives
 from tools.generate_random import generate_random_criteria_values
 
@@ -29,10 +29,10 @@ def debug(*args):
 
 class meta_electre_tri_global():
 
-    def __init__(self, a, c, cat, pt, aa):
+    def __init__(self, a, c, cps, pt, aa):
         self.alternatives = a
         self.criteria = c
-        self.categories = cat
+        self.categories_profiles = cps
         self.pt = pt
         self.pt_dict = {ap.alternative_id: ap for ap in self.pt}
         self.pt_sorted = sorted_performance_table(pt)
@@ -45,11 +45,11 @@ class meta_electre_tri_global():
     def init_random_model(self):
         model = electre_tri()
         model.criteria = self.criteria
-        model.categories = self.categories
+        model.categories_profiles = self.categories_profiles
 
-        nprofiles = len(self.categories)-1
+        nprofiles = len(self.categories_profiles)
         self.b = generate_random_alternatives(nprofiles, 'b') # FIXME
-        bpt = generate_random_categories_profiles(self.b, self.criteria)
+        bpt = generate_random_profiles(self.b, self.criteria)
         model.profiles = bpt
         model.cv = generate_random_criteria_values(self.criteria)
         model.lbda = random.uniform(0.5, 1)
@@ -97,6 +97,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
     from tools.generate_random import generate_random_categories
+    from tools.generate_random import generate_random_profiles
     from tools.generate_random import generate_random_categories_profiles
     from tools.utils import normalize_criteria_weights
     from tools.utils import display_affectations_and_pt
@@ -110,12 +111,13 @@ if __name__ == "__main__":
     pt = generate_random_performance_table(a, c, 1234)
 
     b = generate_random_alternatives(2, 'b')
-    bpt = generate_random_categories_profiles(b, c, 2345)
+    bpt = generate_random_profiles(b, c, 2345)
     cat = generate_random_categories(3)
+    cps = generate_random_categories_profiles(cat)
 
     lbda = 0.75
 
-    model = electre_tri(c, cv, bpt, lbda, cat)
+    model = electre_tri(c, cv, bpt, lbda, cps)
     aa = model.pessimist(pt)
 
     print('Original model')

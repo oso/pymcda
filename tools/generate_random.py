@@ -6,6 +6,7 @@ from mcda.types import alternative_performances, performance_table
 from mcda.types import criterion, criteria
 from mcda.types import criterion_value, criteria_values
 from mcda.types import category, categories
+from mcda.types import category_profile, categories_profiles, limits
 
 def generate_random_alternatives(number, prefix='a'):
     alts = alternatives()
@@ -61,7 +62,7 @@ def generate_random_categories(number, prefix='cat'):
 
     return cats
 
-def generate_random_categories_profiles(alts, crits, seed=None, k=3):
+def generate_random_profiles(alts, crits, seed=None, k=3):
     if seed is not None:
         random.seed(seed)
 
@@ -85,6 +86,15 @@ def generate_random_categories_profiles(alts, crits, seed=None, k=3):
 
     return pt
 
+def generate_random_categories_profiles(cats, prefix='b'):
+    cat_ids = cats.get_ordered_categories()
+    cps = categories_profiles()
+    for i in range(len(cats)-1):
+        l = limits(cat_ids[i], cat_ids[i+1])
+        cp = category_profile("%s%d" % (prefix, i+1), l)
+        cps.append(cp)
+    return cps
+
 if __name__ == "__main__":
     alts = generate_random_alternatives(10)
     print(alts)
@@ -94,7 +104,9 @@ if __name__ == "__main__":
     print(cv)
     pt = generate_random_performance_table(alts, crits)
     print(pt)
+    bpt = generate_random_profiles(alts, crits)
+    print(bpt)
     cats = generate_random_categories(3)
     print(cats)
-    bpt = generate_random_categories_profiles(alts, crits)
-    print(bpt)
+    cps = generate_random_categories_profiles(cats)
+    print(cps)

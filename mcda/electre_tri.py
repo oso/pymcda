@@ -9,12 +9,13 @@ def eq(a, b, eps=10e-10):
 class electre_tri:
 
     def __init__(self, criteria=None, cv=None, profiles=None, lbda=None,
-                 cats=None):
+                 categories_profiles=None):
         self.criteria = criteria
         self.cv = cv
         self.profiles = profiles
         self.lbda = lbda
-        self.categories = cats
+        if categories_profiles:
+            self.categories = categories_profiles.get_ordered_categories()
 
     def copy(self):
         return deepcopy(self)
@@ -29,7 +30,7 @@ class electre_tri:
         if self.lbda is None:
             raise KeyError('No cut threshold specified')
         if self.categories is None:
-            raise KeyError('No cut threshold specified')
+            raise KeyError('No categories defined')
 
     def __get_threshold_by_profile(self, c, threshold_id, profile_rank):
         if c.thresholds is None:
@@ -146,7 +147,7 @@ class electre_tri:
                 if not eq(s_ab, self.lbda) and s_ab < self.lbda:
                     cat_rank -= 1
 
-            cat_id = self.categories[cat_rank].id
+            cat_id = self.categories[cat_rank]
             alternative_id = action_perfs.alternative_id
             alt_affect = alternative_affectation(alternative_id, cat_id)
             affectations.append(alt_affect)
@@ -165,7 +166,7 @@ class electre_tri:
                 if outr != "-":
                     cat_rank += 1
 
-            cat_id = self.categories[cat_rank].id
+            cat_id = self.categories[cat_rank]
             alternative_id = action_perfs.alternative_id
             alt_affect = alternative_affectation(alternative_id, cat_id)
             affectations.append(alt_affect)

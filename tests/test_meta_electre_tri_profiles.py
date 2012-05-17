@@ -16,6 +16,7 @@ from tools.generate_random import generate_random_criteria
 from tools.generate_random import generate_random_criteria_values
 from tools.generate_random import generate_random_performance_table
 from tools.generate_random import generate_random_categories
+from tools.generate_random import generate_random_profiles
 from tools.generate_random import generate_random_categories_profiles
 from tools.utils import normalize_criteria_weights
 from tools.utils import add_errors_in_affectations
@@ -35,12 +36,13 @@ class metaheuristic_profiles_tests(unittest.TestCase):
         pt = generate_random_performance_table(a, c)
 
         b = generate_random_alternatives(ncat-1, 'b')
-        bpt = generate_random_categories_profiles(b, c)
+        bpt = generate_random_profiles(b, c)
         cat = generate_random_categories(ncat)
+        cps = generate_random_categories_profiles(cat)
 
         lbda = random.uniform(0.5, 1)
 
-        model = electre_tri(c, cv, bpt, lbda, cat)
+        model = electre_tri(c, cv, bpt, lbda, cps)
         aa = model.pessimist(pt)
 #        model.profiles.display()
         aa_errors = model.pessimist(pt)
@@ -50,7 +52,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
 
         t1 = time.time()
 
-        model.profiles = generate_random_categories_profiles(b, c)
+        model.profiles = generate_random_profiles(b, c)
         meta = meta_electre_tri_profiles(model, pt_sorted, cat, aa_errors)
         for k in range(nloop):
             aa2 = model.pessimist(pt)

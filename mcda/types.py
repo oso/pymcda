@@ -562,6 +562,9 @@ class categories(list):
             root.append(xmcda)
         return root
 
+    def get_ordered_categories(self):
+        return [ cat.id for cat in self ]
+
     def from_xmcda(self, xmcda):
         if xmcda.tag != 'categories':
             raise TypeError('categories::invalid tag')

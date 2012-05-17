@@ -112,7 +112,7 @@ def crossover_lambda(cr, mc, g_lbda, best_lbda, h_lbda, s_lbda):
 
     return new_lbda
 
-def crossover(cr, mc, g, best, h, s, ba, wa, cats):
+def crossover(cr, mc, g, best, h, s, ba, wa, cps):
     # First crossover of the weights
     cvals = crossover_weights(cr, mc, g.cv, best.cv, h.cv, s.cv)
     normalize_weights_values(cvals)
@@ -125,13 +125,13 @@ def crossover(cr, mc, g, best, h, s, ba, wa, cats):
     # Finally crossover of lambda
     lbda = crossover_lambda(cr, mc, g.lbda, best.lbda, h.lbda, s.lbda)
 
-    return electre_tri(g.criteria, cvals, profiles, lbda, cats)
+    return electre_tri(g.criteria, cvals, profiles, lbda, cps)
 
-def crossovers(models, cr, mc, best, ba, wa, cats):
+def crossovers(models, cr, mc, best, ba, wa, cps):
     cross_models = []
     for i, g in enumerate(models):
         [ h, s ] = get_random_models(models)
-        gm = crossover(cr, mc, g, best, h, s, ba, wa, cats)
+        gm = crossover(cr, mc, g, best, h, s, ba, wa, cps)
         cross_models.append(gm)
     return cross_models
 
@@ -231,7 +231,7 @@ def get_best_model(models_fitness):
 def get_random_models(models):
     return random.sample(models, 2)
 
-def init_one(c, pt, nprofiles, cats):
+def init_one(c, pt, nprofiles, cps):
     """ Generate a random ELECTRE TRI model"""
 
     # Initialize lambda value
@@ -278,22 +278,22 @@ def init_one(c, pt, nprofiles, cats):
             bp = bpt(id)
             bp.performances[crit.id] = rval[i]
 
-    random_model = electre_tri(c, cvals, bpt, lbda, cats)
+    random_model = electre_tri(c, cvals, bpt, lbda, cps)
 
     return random_model
 
-def initialization(n, c, pt, cats):
+def initialization(n, c, pt, cps):
     """ Return several ELECTRE TRI models """
-    nprofiles = len(cats)-1
+    nprofiles = len(cps)
     models = []
     for i in range(n):
-        model = init_one(c, pt, nprofiles, cats)
+        model = init_one(c, pt, nprofiles, cps)
         models.append(model)
     return models
 
-def differential_evolution(ngen, pop, mc, cr, c, a, aa, pt, cats):
+def differential_evolution(ngen, pop, mc, cr, c, a, aa, pt, cps):
     """ Learn an ELECTRE TRI model """
-    models = initialization(pop, c, pt, cats)
+    models = initialization(pop, c, pt, cps)
 
     # Get worst and best possible alternative
     ba = get_best_alternative_performances(pt, c)
@@ -311,7 +311,7 @@ def differential_evolution(ngen, pop, mc, cr, c, a, aa, pt, cats):
             return best
 
         # Perform the crossover (include mutation)
-        cross_models = crossovers(models, cr, mc, best, wa, ba, cats)
+        cross_models = crossovers(models, cr, mc, best, wa, ba, cps)
 
         # Perform the selection
         selected_models = selection(cross_models, models, pt, aa)
@@ -328,6 +328,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
     from tools.generate_random import generate_random_categories
+    from tools.generate_random import generate_random_profiles
     from tools.generate_random import generate_random_categories_profiles
     from mcda.electre_tri import electre_tri
 
@@ -339,17 +340,18 @@ if __name__ == "__main__":
     pt = generate_random_performance_table(a, c, 1234)
 
     b = generate_random_alternatives(1, prefix='b')
-    bpt = generate_random_categories_profiles(b, c, 0123)
+    bpt = generate_random_profiles(b, c, 0123)
     cats = generate_random_categories(2)
+    cps = generate_random_categories_profiles(cats)
 
     lbda = 0.75
     print bpt
     print cv
 
-    model = electre_tri(c, cv, bpt, lbda, cats)
+    model = electre_tri(c, cv, bpt, lbda, cps)
     af = model.pessimist(pt)
 
-    de_model = differential_evolution(200, 200, 0.3, 0.2, c, a, af, pt, cats)
+    de_model = differential_evolution(200, 200, 0.3, 0.2, c, a, af, pt, cps)
     de_af = de_model.pessimist(pt)
 
     print(af)
