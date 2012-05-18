@@ -139,17 +139,18 @@ class heuristic_profiles():
         return histo
 
     def update_one_profile(self, aa, p_id):
-        current = self.m.profiles[p_id].performances
+        profiles = self.m.profiles
+        current = self.m.bpt[profiles[p_id]].performances
 
         if p_id == 0:
             below = self.b0.performances
         else:
-            below = self.m.profiles[p_id-1].performances
+            below = self.m.bpt[profiles[p_id-1]].performances
 
         if p_id == len(self.m.profiles)-1:
             above = self.bp.performances
         else:
-            above = self.m.profiles[p_id+1].performances
+            above = self.m.bpt[profiles[p_id+1]].performances
 
         histograms = self.compute_histograms(aa, current, above, below)
         h_bad_l, h_bad_r, h_good_l, h_good_r = histograms
@@ -215,7 +216,7 @@ class heuristic_profiles():
 
         c_perfs = {c.id:list() for c in self.m.criteria}
         for i, p in enumerate(self.m.profiles):
-            perfs = p.performances
+            perfs = self.m.bpt[p].performances
             for c in self.m.criteria:
                 c_perfs[c.id].append(perfs[c.id])
         for c in self.m.criteria:
@@ -241,7 +242,7 @@ class meta_electre_tri_global():
         self.criteria_vals = cvals
         self.aa = aa
         self.pt = pt
-        self.categories_profiles = cps
+        self.cps = cps
         self.b0 = get_worst_alternative_performances(pt, c)
         self.bp = get_best_alternative_performances(pt, c)
 
@@ -257,22 +258,18 @@ class meta_electre_tri_global():
                 ok = 1
                 nok += 1
 
-            perfs = self.pt(a.id)
-            for c in model.criteria:
-                for i in range(len(model.profiles)):
-                    pass
-
         return nok/total
 
     def init_one(self):
         model = electre_tri()
         model.criteria = self.criteria
-        model.categories = self.categories_profiles.get_ordered_categories()
+        model.categories = self.cps.get_ordered_categories()
+        model.profiles = self.cps.get_ordered_profiles()
 
-        nprofiles = len(self.categories_profiles)
+        nprofiles = len(self.cps)
         self.b = generate_random_alternatives(nprofiles, 'b') # FIXME
         bpt = generate_random_profiles(self.b, self.criteria)
-        model.profiles = bpt
+        model.bpt = bpt
         model.cv = generate_random_criteria_values(self.criteria)
         model.lbda = random.uniform(0.5, 1)
         return model

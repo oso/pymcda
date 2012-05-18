@@ -43,7 +43,7 @@ class meta_greedy_electre_tri_profiles():
         for c in self.model.criteria:
             cid = c.id
             interval = self.bp.performances[cid] - self.b0.performances[cid]
-            intervals[cid] = float(interval) / (len(self.model.profiles)+1)
+            intervals[cid] = float(interval) / (len(self.model.categories))
         return intervals
 
     def compute_models_fitness(self, models):
@@ -67,7 +67,7 @@ class meta_greedy_electre_tri_profiles():
                 interval = (1 - fitness) * self.intervals[c.id]
                 for m in models:
                     r = random.randint(-10, 10)
-                    p = m.profiles[i].performances
+                    p = m.bpt[self.model.profiles[i]].performances
 
                     old = p[c.id]
                     p[c.id] += interval * (r/10)
@@ -76,7 +76,7 @@ class meta_greedy_electre_tri_profiles():
                     if p[c.id] > above.performances[c.id]:
                         p[c.id] = above.performances[c.id]
 
-                    aids = self.pt_sorted.get_middle(c.id, old, p[c.id])
+                    aids = self.pt_sorted.get_middle(c.id, old, p[c.id])[0]
                     models_alternatives[m].extend(aids)
 
         for m in models:
@@ -101,16 +101,17 @@ class meta_greedy_electre_tri_profiles():
 
     def get_below_and_above_profiles(self, i):
         profiles = self.model.profiles
+        bpt = self.model.bpt
 
         if i == 0:
             below = self.b0
         else:
-            below = profiles[i-1]
+            below = bpt[profiles[i-1]]
 
         if i == self.nprofiles-1:
             above = self.bp
         else:
-            above = profiles[i+1]
+            above = bpt[profiles[i+1]]
 
         return below, above
 
@@ -118,7 +119,7 @@ class meta_greedy_electre_tri_profiles():
         f = compute_fitness(self.aa_ori, aa)
         models_fitness, models_aa = self.generate_random_models(n, aa, f)
         m = max(models_fitness, key = lambda a: models_fitness.get(a))
-        self.model.profiles = m.profiles
+        self.model.bpt = m.bpt
         return models_aa[m], models_fitness[m]
 
 if __name__ == "__main__":
@@ -171,7 +172,7 @@ if __name__ == "__main__":
     f = compute_fitness(aa, aa2)
     for i in range(1, 501):
         print('%d: fitness: %g' % (i, f))
-        model2.profiles.display(criterion_ids=cids)
+        model2.bpt.display(criterion_ids=cids)
         if f == 1:
             break
 

@@ -34,6 +34,7 @@ class meta_electre_tri_global():
         self.criteria = c
         self.categories_profiles = cps
         self.categories = cps.get_ordered_categories()
+        self.profiles = cps.get_ordered_profiles()
         self.pt = pt
         self.pt_dict = {ap.alternative_id: ap for ap in self.pt}
         self.pt_sorted = sorted_performance_table(pt)
@@ -47,11 +48,12 @@ class meta_electre_tri_global():
         model = electre_tri()
         model.criteria = self.criteria
         model.categories = self.categories
+        model.profiles = self.profiles
 
         nprofiles = len(self.categories_profiles)
         self.b = generate_random_alternatives(nprofiles, 'b') # FIXME
         bpt = generate_random_profiles(self.b, self.criteria)
-        model.profiles = bpt
+        model.bpt = bpt
         model.cv = generate_random_criteria_values(self.criteria)
         model.lbda = random.uniform(0.5, 1)
 
@@ -63,18 +65,18 @@ class meta_electre_tri_global():
 
         print 'fitness:', f
         print 'optimizing profiles...'
-        old_profiles = self.model.profiles.copy()
+        old_profiles = self.model.bpt.copy()
         self.meta.optimize(aa, f)
 
-        self.model.profiles.display()
+        self.model.bpt.display()
         aa = self.model.pessimist(self.pt)
         print 'fitness:', compute_fitness(aa, self.aa)
 
         a = list()
-        for i, profile in enumerate(self.model.profiles):
+        for profile in self.profiles:
             for c in self.criteria:
-                old = old_profiles[i].performances[c.id]
-                new = self.model.profiles[i].performances[c.id]
+                old = old_profiles[profile].performances[c.id]
+                new = self.model.bpt[profile].performances[c.id]
 
                 l = self.pt_sorted.get_middle(c.id, old, new)
                 a.extend(x for x in l if x not in a)

@@ -44,13 +44,13 @@ class heuristic_profiles_tests(unittest.TestCase):
         model = electre_tri(c, cv, bpt, lbda, cps)
         aa = model.pessimist(pt)
 
-#        model.profiles.display()
+#        model.bpt.display()
 
         b0 = get_worst_alternative_performances(pt, c)
         bp = get_best_alternative_performances(pt, c)
 
         for j in range(nmodel):
-            model.profiles = generate_random_profiles(b, c)
+            model.bpt = generate_random_profiles(b, c)
             heur = heuristic_profiles(model, a, c, pt, aa, b0, bp)
             for k in range(nloop):
                 aa2 = model.pessimist(pt)
@@ -59,7 +59,7 @@ class heuristic_profiles_tests(unittest.TestCase):
                 if wrong == 0:
                     break
                 heur.optimize(aa2)
-#                model.profiles.display(header=None)
+#                model.bpt.display(header=None)
 
             aa_learned = model.pessimist(pt)
 

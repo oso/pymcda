@@ -37,7 +37,7 @@ def mutation(mc, g, best, h, s):
 def crossover_weights(cr, mc, g, best, h, s):
     cvals = criteria_values()
     for w in g:
-        id = w.criterion_id
+        id = w.id
         val = w.value
         bval = best(id).value
         hval = h(id).value
@@ -54,14 +54,14 @@ def crossover_weights(cr, mc, g, best, h, s):
 
     return cvals
 
-def crossover_profiles(cr, mc, crit, g, b, h, s, ba, wa):
-    gnew = []
-    for i, profile in enumerate(g):
-        alt_id = g[i].alternative_id
-        perfs = g[i].performances
-        bperfs = b[i].performances
-        hperfs = h[i].performances
-        sperfs = s[i].performances
+def crossover_profiles(cr, mc, crit, profiles, g, b, h, s, ba, wa):
+    gnew = performance_table()
+    for i, profile in enumerate(profiles):
+        alt_id = g[profile].alternative_id
+        perfs = g[profile].performances
+        bperfs = b[profile].performances
+        hperfs = h[profile].performances
+        sperfs = s[profile].performances
         gnew_perfs = {}
         for c in crit:
             if random.random() < cr:
@@ -73,17 +73,17 @@ def crossover_profiles(cr, mc, crit, g, b, h, s, ba, wa):
             if c.direction == 1:
                 if g_cr < wa.performances[c.id]:
                     g_cr = random.uniform(wa.performances[c.id],
-                                          g[i].performances[c.id])
+                                          g[profile].performances[c.id])
                 elif g_cr > ba.performances[c.id]:
-                    g_cr = random.uniform(g[i].performances[c.id],
+                    g_cr = random.uniform(g[profile].performances[c.id],
                                           ba.performances[c.id])
             elif c.direction == -1:
                 if g_cr > wa.performances[c.id]:
-                    g_cr = random.uniform(g[i].performances[c.id],
+                    g_cr = random.uniform(g[profile].performances[c.id],
                                           wa.performances[c.id])
                 elif g_cr < ba.performances[c.id]:
                     g_cr = random.uniform(ba.performances[c.id],
-                                          g[i].performances[c.id])
+                                          g[profile].performances[c.id])
 
             if i > 0:
                 if c.direction == 1 and g_cr < g[i-1].performances[c.id]:
@@ -118,8 +118,8 @@ def crossover(cr, mc, g, best, h, s, ba, wa, cps):
     normalize_weights_values(cvals)
 
     # Then crossover of the profiles
-    profiles = crossover_profiles(cr, mc, g.criteria, g.profiles, \
-                                  best.profiles, h.profiles, s.profiles, \
+    profiles = crossover_profiles(cr, mc, g.criteria, g.profiles, g.bpt, \
+                                  best.bpt, h.bpt, s.bpt, \
                                   ba, wa)
 
     # Finally crossover of lambda
@@ -165,11 +165,12 @@ def compute_ca(model_af, dm_af):
 def compute_auc_k(model, pt, ais, ajs, k):
     auck = float(0)
     profile = model.profiles[k-1]
+    pperfs = model.bpt[profile]
     for ai in ais:
-        sxi = model.credibility(pt(ai), profile, model.criteria, model.cv,
+        sxi = model.credibility(pt(ai), pperfs, model.criteria, model.cv,
                                 k)
         for aj in ajs:
-            sxj = model.credibility(pt(aj), profile, model.criteria,
+            sxj = model.credibility(pt(aj), pperfs, model.criteria,
                                     model.cv, k)
             if sxi > sxj:
                 auck += 1
@@ -276,7 +277,7 @@ def init_one(c, pt, nprofiles, cps):
         for i in range(nprofiles):
             id = "b%d" % (i+1)
             bp = bpt(id)
-            bp.performances[crit.id] = rval[i]
+            bp[crit.id] = rval[i]
 
     random_model = electre_tri(c, cvals, bpt, lbda, cps)
 
@@ -304,7 +305,7 @@ def differential_evolution(ngen, pop, mc, cr, c, a, aa, pt, cps):
         fit_best, best = get_best_model(models_fitness)
         print("%d: fitness: %g" % (i, fit_best))
         print best
-        print best.profiles
+        print best.bpt
         print best.cv
         print best.lbda
         if fit_best == 1:

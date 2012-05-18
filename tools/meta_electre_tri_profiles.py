@@ -83,7 +83,7 @@ class meta_electre_tri_profiles():
             # Profile too low
             print self.cat[aa(aid)], self.cat[self.aa_ori(aid)]
             profile = self.model.profiles[self.cat[self.aa_ori(aid)]-1]
-            profile_perfs = profile.performances
+            profile_perfs = self.model.bpt[profile].performances
             print profile
             for c in self.model.criteria:
                 print 'aid', ap.performances[c.id]
@@ -96,7 +96,7 @@ class meta_electre_tri_profiles():
         elif self.cat[aa(aid)] == self.cat[self.aa_ori(aid)]-1:
             # Profile too high
             profile = self.model.profiles[self.cat[self.aa_ori(aid)]-2]
-            profile_perfs = profile.performances
+            profile_perfs = self.model.bpt[profile].performances
             print profile
             for c in self.model.criteria:
                 print 'aid', ap.performances[c.id]
@@ -223,16 +223,17 @@ class meta_electre_tri_profiles():
 
     def get_below_and_above_profiles(self, i):
         profiles = self.model.profiles
+        bpt = self.model.bpt
 
         if i == 0:
             below = self.b0
         else:
-            below = profiles[i-1]
+            below = bpt[profiles[i-1]]
 
         if i == self.nprofiles-1:
             above = self.bp
         else:
-            above = profiles[i+1]
+            above = bpt[profiles[i+1]]
 
         return below, above
 
@@ -243,10 +244,11 @@ class meta_electre_tri_profiles():
 
         profiles = self.model.profiles
         for i, profile in enumerate(profiles):
+            pperfs = self.model.bpt[profile]
             below, above = self.get_below_and_above_profiles(i)
             cat_b, cat_a = self.cat_ranked[i], self.cat_ranked[i+1]
             self.update_intervals(fitness)
-            self.compute_histograms(aa, profile, below, above, cat_b, cat_a)
+            self.compute_histograms(aa, pperfs, below, above, cat_b, cat_a)
 
 if __name__ == "__main__":
     from tools.generate_random import generate_random_alternatives

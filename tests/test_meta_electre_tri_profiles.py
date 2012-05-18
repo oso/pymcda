@@ -44,7 +44,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
 
         model = electre_tri(c, cv, bpt, lbda, cps)
         aa = model.pessimist(pt)
-#        model.profiles.display()
+#        model.bpt.display()
         aa_errors = model.pessimist(pt)
         add_errors_in_affectations(aa_errors, cat.get_ids(), nerrors)
 
@@ -52,7 +52,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
 
         t1 = time.time()
 
-        model.profiles = generate_random_profiles(b, c)
+        model.bpt = generate_random_profiles(b, c)
         meta = meta_electre_tri_profiles(model, pt_sorted, cat, aa_errors)
         for k in range(nloop):
             aa2 = model.pessimist(pt)

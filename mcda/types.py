@@ -295,32 +295,23 @@ class alternative:
         else:
             self.disabled = False
 
-class performance_table(list):
+class performance_table(dict):
 
-    def __call__(self, alternative_id, criterion_id=None):
-        alt_perfs = None
-        for altp in self:
-            if altp.alternative_id == alternative_id:
-                alt_perfs = altp
-                break
+    def __init__(self, l=[]):
+        for i in l:
+            self[i.alternative_id] = i
 
-        if alt_perfs is None:
-            raise KeyError("Alternative %s not found" % alternative_id)
+    def __iter__(self):
+        return self.itervalues()
 
-        if criterion_id is None:
-            return alt_perfs
-        else:
-            return alt_perfs(criterion_id)
+    def __call__(self, id):
+        return self[id].performances
 
     def copy(self):
         return deepcopy(self)
 
-    def has_alternative(self, alternative):
-        for altp in self:
-            if altp.alternative_id == alternative.id:
-                return True
-
-        return False
+    def append(self, ap):
+        self[ap.alternative_id] = ap
 
     def to_xmcda(self):
         root = ElementTree.Element('performanceTable')
@@ -340,12 +331,11 @@ class performance_table(list):
             self.append(altp)
 
     def display(self, header=True, criterion_ids=None, append=''):
-        if criterion_ids is None:
-            criterion_ids = self[0].performances.keys()
-
-        self[0].display(header, criterion_ids, append)
-        for ap in self[1:]:
-            ap.display(False, criterion_ids, append)
+        show_header = header
+        criterion_ids = next(self.itervalues()).performances.keys()
+        for ap in self:
+            ap.display(show_header, criterion_ids, append)
+            show_header = False
 
 class alternative_performances():
 

@@ -128,16 +128,17 @@ class meta_electre_tri_profiles():
 
     def get_below_and_above_profiles(self, i):
         profiles = self.model.profiles
+        bpt = self.model.bpt
 
         if i == 0:
             below = self.b0
         else:
-            below = profiles[i-1]
+            below = bpt[profiles[i-1]]
 
         if i == self.nprofiles-1:
             above = self.bp
         else:
-            above = profiles[i+1]
+            above = bpt[profiles[i+1]]
 
         return below, above
 
@@ -148,9 +149,10 @@ class meta_electre_tri_profiles():
 
         profiles = self.model.profiles
         for i, profile in enumerate(profiles):
+            pperfs = self.model.bpt[profile]
             below, above = self.get_below_and_above_profiles(i)
             cat_b, cat_a = self.cat_ranked[i], self.cat_ranked[i+1]
-            self.compute_histograms(aa, profile, below, above, cat_b, cat_a)
+            self.compute_histograms(aa, pperfs, below, above, cat_b, cat_a)
 
 if __name__ == "__main__":
     from tools.generate_random import generate_random_alternatives

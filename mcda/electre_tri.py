@@ -8,14 +8,15 @@ def eq(a, b, eps=10e-10):
 
 class electre_tri:
 
-    def __init__(self, criteria=None, cv=None, profiles=None, lbda=None,
+    def __init__(self, criteria=None, cv=None, bpt=None, lbda=None,
                  categories_profiles=None):
         self.criteria = criteria
         self.cv = cv
-        self.profiles = profiles
+        self.bpt = bpt
         self.lbda = lbda
         if categories_profiles:
             self.categories = categories_profiles.get_ordered_categories()
+            self.profiles = categories_profiles.get_ordered_profiles()
 
     def copy(self):
         return deepcopy(self)
@@ -25,12 +26,14 @@ class electre_tri:
             raise KeyError('No criteria specified')
         if self.cv is None:
             raise KeyError('No criteria values specified')
-        if self.profiles is None:
-            raise KeyError('No profiles specified')
+        if self.bpt is None:
+            raise KeyError('No profiles performances specified')
         if self.lbda is None:
             raise KeyError('No cut threshold specified')
         if self.categories is None:
             raise KeyError('No categories defined')
+        if self.profiles is None:
+            raise KeyError('No profiles defined')
 
     def __get_threshold_by_profile(self, c, threshold_id, profile_rank):
         if c.thresholds is None:
@@ -141,7 +144,7 @@ class electre_tri:
         for action_perfs in pt:
             cat_rank = len(profiles)
             for i, profile in enumerate(profiles):
-                s_ab = self.credibility(action_perfs, profile,
+                s_ab = self.credibility(action_perfs, self.bpt[profile],
                                         self.criteria, self.cv,
                                         i+1)
                 if not eq(s_ab, self.lbda) and s_ab < self.lbda:
@@ -162,7 +165,7 @@ class electre_tri:
             cat_rank = 0
             for i, profile in enumerate(profiles):
                 outr = self.__outrank(action_perfs, self.criteria, self.cv,
-                                      profile, i+1, self.lbda)
+                                      self.bpt[profile], i+1, self.lbda)
                 if outr != "-":
                     cat_rank += 1
 

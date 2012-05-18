@@ -12,7 +12,7 @@ class sorted_performance_table():
         self.__build_index()
 
     def __sort(self):
-        self.cids = self.pt[0].performances.keys()
+        self.cids = next(self.pt.itervalues()).performances.keys()
         self.n = len(self.pt)
         self.sorted_pt = { cid: list() for cid in self.cids }
         for ap in self.pt:

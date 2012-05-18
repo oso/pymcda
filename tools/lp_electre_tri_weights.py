@@ -33,7 +33,7 @@ class lp_electre_tri_weights():
         self.update_linear_program(aa)
 
     def update_linear_program(self, aa):
-        self.compute_constraints(aa, self.model.profiles)
+        self.compute_constraints(aa, self.model.bpt)
 
         if solver == 'glpk':
             self.lp = pymprog.model('lp_elecre_tri_weights')
