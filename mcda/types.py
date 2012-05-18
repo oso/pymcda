@@ -227,7 +227,20 @@ class criterion_value():
         val.append(marshal(value))
         return xmcda
 
-class alternatives(list):
+class alternatives(dict):
+
+    def __init__(self, l=[]):
+        for i in l:
+            self[i.id] = i
+
+    def __iter__(self):
+        return self.itervalues()
+
+    def __call__(self, id):
+        return self[id]
+
+    def append(self, a):
+        self[a.id] = a
 
     def copy(self):
         return deepcopy(self)
