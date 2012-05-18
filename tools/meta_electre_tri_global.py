@@ -235,7 +235,6 @@ class meta_electre_tri_global():
     #   - aa: alternative affectations
     #   - pt : alternative performance table
     #   - cps: categories profiles
-    #   - cat: categories
     def __init__(self, a, c, cvals, aa, pt, cps):
         self.alternatives = a
         self.criteria = c

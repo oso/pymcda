@@ -528,22 +528,29 @@ class threshold():
             c = constant(None, 0)
             c.from_xmcda(values)
 
-class categories(list):
+class categories(dict):
+
+    def __init__(self, l=[]):
+        for i in l:
+            self[i.id] = i
+
+    def __iter__(self):
+        return self.itervalues()
 
     def __call__(self, id):
-        for c in self:
-            if c.id == id:
-                return c
-        return None
+        return self[id]
+
+    def copy(self):
+        return deepcopy(self)
+
+    def append(self, c):
+        self[c.id] = c
 
     def copy(self):
         return deepcopy(self)
 
     def get_ids(self):
-        cids = []
-        for cat in self:
-            cids.append(cat.id)
-        return cids
+        return self.keys()
 
     def to_xmcda(self):
         root = ElementTree.Element('categories')
