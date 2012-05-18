@@ -7,7 +7,7 @@ from itertools import product
 
 from mcda.electre_tri import electre_tri
 from mcda.types import alternative_affectation, alternatives_affectations
-from tools.lp_electre_tri_weights import lp_electre_tri_weights
+from inference.lp_electre_tri_weights import lp_electre_tri_weights
 from tools.generate_random import generate_random_profiles
 from tools.generate_random import generate_random_alternatives
 from tools.generate_random import generate_random_criteria_values

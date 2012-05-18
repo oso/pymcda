@@ -7,8 +7,8 @@ import random
 from itertools import product
 
 from mcda.electre_tri import electre_tri
-from tools.meta_electre_tri_global import heuristic_profiles
-from tools.meta_electre_tri_global import meta_electre_tri_global
+from inference.meta_electre_tri_global import heuristic_profiles
+from inference.meta_electre_tri_global import meta_electre_tri_global
 from tools.utils import get_best_alternative_performances
 from tools.utils import get_worst_alternative_performances
 from tools.utils import get_pc_of_wrong_assignment

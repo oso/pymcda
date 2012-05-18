@@ -8,10 +8,10 @@ from itertools import product
 from mcda.electre_tri import electre_tri
 from mcda.types import alternative_affectation, alternatives_affectations
 from mcda.types import performance_table
+from inference.lp_electre_tri_weights import lp_electre_tri_weights
+from inference.meta_electre_tri_profiles import meta_electre_tri_profiles
+from inference.meta_electre_tri_profiles import compute_fitness
 from tools.sorted import sorted_performance_table
-from tools.lp_electre_tri_weights import lp_electre_tri_weights
-from tools.meta_electre_tri_profiles import meta_electre_tri_profiles
-from tools.meta_electre_tri_profiles import compute_fitness
 from tools.generate_random import generate_random_profiles
 from tools.generate_random import generate_random_alternatives
 from tools.generate_random import generate_random_criteria_values
