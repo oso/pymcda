@@ -84,6 +84,15 @@ class meta_electre_tri_profiles():
 
         return h_below
 
+    def histogram_get_max(self, h, current):
+        key = None
+        val = 0
+        for k, v in h.items():
+            if v >= val and abs(current - k) >= key:
+                val = v
+                key = k
+        return key
+
     def compute_histograms(self, aa, profile, below, above, cat_b, cat_a):
         criteria = self.model.criteria
         p_perfs = profile.performances
@@ -110,7 +119,7 @@ class meta_electre_tri_profiles():
             if not h:
                 continue
 
-            i = max(h, key=h.get)
+            i = self.histogram_get_max(h, p_perfs[cid])
 #            print cid, i, h[i]
 
             r = random.random()
@@ -145,7 +154,7 @@ class meta_electre_tri_profiles():
     def optimize(self, aa, f):
         self.min_nok = (1 - f) * self.na / (self.nc * 20 ) #100
 #        self.min_nok = (1 - f) * self.na / 100
-        print self.min_nok
+        print 'min', self.min_nok
 
         profiles = self.model.profiles
         for i, profile in enumerate(profiles):
