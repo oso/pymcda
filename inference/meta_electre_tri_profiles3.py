@@ -63,8 +63,7 @@ class meta_electre_tri_profiles():
                 ok += 1
             elif aa(a) != self.aa_ori(a) and self.aa_ori(a) == cat_b:
                 nok += 1
-                if nok >= self.min_nok:
-                    h_above[perfs[i]+0.00001] = nok / (ok + nok)
+                h_above[perfs[i]+0.00001] = nok / (ok + nok)
 
         return h_above
 
@@ -79,8 +78,7 @@ class meta_electre_tri_profiles():
                 ok += 1
             elif aa(a) != self.aa_ori(a) and self.aa_ori(a) == cat_a:
                 nok += 1
-                if nok >= self.min_nok:
-                    h_below[perfs[i]] = nok / (ok + nok)
+                h_below[perfs[i]] = nok / (ok + nok)
 
         return h_below
 
@@ -142,7 +140,7 @@ class meta_electre_tri_profiles():
                 max_move = i
 
         if moved is False and max_val > 0:
-            print i, max_move
+#            print i, max_move
             p_perfs[max_cid] = max_move
 
     def get_below_and_above_profiles(self, i):
@@ -162,11 +160,6 @@ class meta_electre_tri_profiles():
         return below, above
 
     def optimize(self, aa, f):
-        self.min_nok = (1 - f) * self.na / (self.nc * 20 ) #100
-#        self.min_nok = (1 - f) * self.na / 100
-#        print 'min', self.min_nok
-        self.min_nok = 0
-
         profiles = self.model.profiles
         for i, profile in enumerate(profiles):
             pperfs = self.model.bpt[profile]
