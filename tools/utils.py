@@ -110,7 +110,8 @@ def display_affectations_and_pt(alternatives, criteria,
 
         for c in criteria:
             for pt in performance_table:
-                print("%-6.5f" % pt(a.id, c.id)),
+                perfs = pt(a.id)
+                print("%-6.5f" % perfs[c.id]),
         print('')
 
 def get_pc_of_wrong_assignment(aa, aa2):
