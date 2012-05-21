@@ -266,14 +266,14 @@ if __name__ == "__main__":
 
     a = generate_random_alternatives(10000)
 
-    c = generate_random_criteria(4)
+    c = generate_random_criteria(9)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
 
-    b = generate_random_alternatives(3, 'b')
+    b = generate_random_alternatives(1, 'b')
     bpt = generate_random_profiles(b, c, 2345)
-    cat = generate_random_categories(4)
+    cat = generate_random_categories(2)
     cps = generate_random_categories_profiles(cat)
 
     lbda = 0.75
@@ -297,7 +297,7 @@ if __name__ == "__main__":
     pt_sorted = sorted_performance_table(pt)
     meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa)
 
-    for i in range(1, 501):
+    for i in range(1, 101):
         aa2 = model2.pessimist(pt)
 
         f = compute_fitness(aa, aa2)
