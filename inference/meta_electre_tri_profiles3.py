@@ -87,11 +87,21 @@ class meta_electre_tri_profiles():
     def histogram_get_max(self, h, current):
         key = None
         val = 0
+        diff = 0
         for k, v in h.items():
-            if v >= val and abs(current - k) >= key:
-                val = v
-                key = k
+            if v >= val:
+                tmp = abs(current - k)
+                if tmp >= diff:
+                    key = k
+                    val = v
+                    diff = tmp
         return key
+
+    def print_histo(self, h):
+        val = h.keys()
+        val.sort()
+        for i in val:
+            print i,':', h[i]
 
     def compute_histograms(self, aa, profile, below, above, cat_b, cat_a):
         criteria = self.model.criteria
@@ -102,7 +112,6 @@ class meta_electre_tri_profiles():
         moved = False
         max_val = 0
 
-#        print cat_b, cat_a
         for c in self.model.criteria:
             cid = c.id
             h_below = self.compute_below_histogram(aa, cid, p_perfs[cid],
@@ -114,13 +123,13 @@ class meta_electre_tri_profiles():
 
             h = h_below
             h.update(h_above)
-#            print h
 
             if not h:
                 continue
 
+#            self.print_histo(h)
             i = self.histogram_get_max(h, p_perfs[cid])
-#            print cid, i, h[i]
+#            print 'move', cid, i, h[i]
 
             r = random.random()
 
@@ -133,6 +142,7 @@ class meta_electre_tri_profiles():
                 max_move = i
 
         if moved is False and max_val > 0:
+            print i, max_move
             p_perfs[max_cid] = max_move
 
     def get_below_and_above_profiles(self, i):
@@ -154,7 +164,8 @@ class meta_electre_tri_profiles():
     def optimize(self, aa, f):
         self.min_nok = (1 - f) * self.na / (self.nc * 20 ) #100
 #        self.min_nok = (1 - f) * self.na / 100
-        print 'min', self.min_nok
+#        print 'min', self.min_nok
+        self.min_nok = 0
 
         profiles = self.model.profiles
         for i, profile in enumerate(profiles):
@@ -178,14 +189,14 @@ if __name__ == "__main__":
 
     a = generate_random_alternatives(10000)
 
-    c = generate_random_criteria(5)
+    c = generate_random_criteria(9)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
 
-    b = generate_random_alternatives(1, 'b')
+    b = generate_random_alternatives(2, 'b')
     bpt = generate_random_profiles(b, c, 2345)
-    cat = generate_random_categories(2)
+    cat = generate_random_categories(3)
     cps = generate_random_categories_profiles(cat)
 
     lbda = 0.75
