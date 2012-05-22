@@ -6,7 +6,7 @@ from mcda.electre_tri import electre_tri
 from tools.utils import get_worst_alternative_performances
 from tools.utils import get_best_alternative_performances
 
-def display_electre_tri_models(etri, etri2, pt, pt2):
+def display_electre_tri_models(etri, pt):
     app = QtGui.QApplication(sys.argv)
 
     sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,
@@ -15,25 +15,32 @@ def display_electre_tri_models(etri, etri2, pt, pt2):
     sizePolicy.setVerticalStretch(0);
     sizePolicy.setHeightForWidth(sizePolicy.hasHeightForWidth());
 
-    view = mygraphicsview()
-    view.setRenderHint(QtGui.QPainter.Antialiasing)
-    view.setSizePolicy(sizePolicy)
-    view2 = mygraphicsview()
-    view2.setRenderHint(QtGui.QPainter.Antialiasing)
-    view2.setSizePolicy(sizePolicy)
+    layout = QtGui.QGridLayout()
 
-    layout = QtGui.QHBoxLayout()
-    layout.addWidget(view)
-    layout.addWidget(view2)
+    ncol = len(etri) / 2
+    i = j = 0
+    views = {}
+    for m in etri:
+        view = mygraphicsview()
+        view.setRenderHint(QtGui.QPainter.Antialiasing)
+        view.setSizePolicy(sizePolicy)
+
+        if j == ncol-1:
+            i += 1
+            j = 0
+        else:
+            j += 1
+
+        views[m] = view
+        layout.addWidget(view, i, j, 1, 1)
 
     dialog = QtGui.QDialog()
     dialog.setLayout(layout)
-    dialog.resize(1024, 400)
+    dialog.resize(1024, 768)
 
-    graph = graph_etri(etri, pt, view.size())
-    graph2 = graph_etri(etri2, pt, view2.size())
-    view.setScene(graph)
-    view2.setScene(graph2)
+    for i, m in enumerate(etri):
+        graph = graph_etri(m, pt[i], views[m].size())
+        views[m].setScene(graph)
 
     dialog.show()
     app.exec_()

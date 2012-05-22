@@ -330,5 +330,5 @@ if __name__ == "__main__":
         print("Alternatives wrongly assigned:")
         display_affectations_and_pt(anok, c, [aa, aa2], [pt])
 
-    display_electre_tri_models(model, model2, pt, pt)
+    display_electre_tri_models([model, model2], [pt, pt])
 
