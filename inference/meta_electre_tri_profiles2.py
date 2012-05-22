@@ -134,6 +134,7 @@ if __name__ == "__main__":
     from tools.utils import display_affectations_and_pt
     from tools.sorted import sorted_performance_table
     from mcda.electre_tri import electre_tri
+    from ui.graphic import display_electre_tri_models
 
     a = generate_random_alternatives(10000)
 
@@ -199,3 +200,5 @@ if __name__ == "__main__":
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
         display_affectations_and_pt(anok, c, [aa, aa2], [pt])
+
+    display_electre_tri_models([model, model2], [pt, pt])
