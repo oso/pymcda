@@ -175,3 +175,36 @@ class electre_tri:
             affectations.append(alt_affect)
 
         return affectations
+
+class electre_tri_bm(electre_tri):
+
+    def __get_threshold_by_profile(self, c, threshold_id, profile_rank):
+        if c.thresholds is None:
+            return None
+
+        threshid = "%s%s" % (threshold_id, profile_rank)
+        if c.thresholds.has_threshold(threshid):
+            return c.thresholds(threshid).values.value
+        elif c.thresholds.has_threshold(threshold_id):
+            return c.thresholds(threshold_id).values.value
+        else:
+            return None
+
+    def credibility(self, x, y, clist, cv, profile_rank):
+        w = 0
+        wsum = 0
+        for c in clist:
+            if c.disabled == 1:
+                continue
+
+            cval = cv(c.id)
+            v = self.__get_threshold_by_profile(c, 'v', profile_rank)
+            diff = (y.performances[c.id]-x.performances[c.id])*c.direction
+            if diff <= 0:
+                w += cval.value
+            elif v is not None and diff > v:
+                return 0
+
+            wsum += cval.value
+
+        return w/wsum

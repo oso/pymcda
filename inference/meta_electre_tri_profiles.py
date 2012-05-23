@@ -261,7 +261,7 @@ if __name__ == "__main__":
     from tools.utils import normalize_criteria_weights
     from tools.utils import display_affectations_and_pt
     from tools.sorted import sorted_performance_table
-    from mcda.electre_tri import electre_tri
+    from mcda.electre_tri import electre_tri_bm
     from ui.graphic import display_electre_tri_models
 
     a = generate_random_alternatives(10000)
@@ -278,7 +278,7 @@ if __name__ == "__main__":
 
     lbda = 0.75
 
-    model = electre_tri(c, cv, bpt, lbda, cps)
+    model = electre_tri_bm(c, cv, bpt, lbda, cps)
     aa = model.pessimist(pt)
 
     print('Original model')
@@ -289,7 +289,7 @@ if __name__ == "__main__":
     print("lambda: %.7s" % lbda)
 
     bpt2 = generate_random_profiles(b, c, 0123)
-    model2 = electre_tri(c, cv, bpt2, lbda, cps)
+    model2 = electre_tri_bm(c, cv, bpt2, lbda, cps)
     print('Original random profiles')
     print('========================')
     bpt2.display(criterion_ids=cids)
