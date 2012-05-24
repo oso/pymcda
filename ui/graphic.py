@@ -168,8 +168,6 @@ class graph_etri(QtGui.QGraphicsScene):
             font.setPointSize(6)
             text.setFont(font)
             text.setPos(p)
-            if i == n-1:
-                text.moveBy(-text.boundingRect().width(), 0)
             text.setZValue(1)
 
             points.append(p)
