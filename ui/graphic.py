@@ -1,8 +1,7 @@
-from PyQt4 import QtCore
-from PyQt4 import QtGui
 import colorsys
 import sys
-from mcda.electre_tri import electre_tri
+from PyQt4 import QtCore
+from PyQt4 import QtGui
 from tools.utils import get_worst_alternative_performances
 from tools.utils import get_best_alternative_performances
 
