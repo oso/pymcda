@@ -96,10 +96,16 @@ class axis(QtGui.QGraphicsItem):
 
 class graph_etri(QtGui.QGraphicsScene):
 
-    def __init__(self, model, pt, size, parent=None):
+    def __init__(self, model, pt, size, criteria_order = None,
+                 parent = None):
         super(QtGui.QGraphicsScene, self).__init__(parent)
         self.model = model
         self.pt = pt
+        if criteria_order:
+            self.criteria_order = criteria_order
+        else:
+            self.criteria_order = self.model.criteria.keys()
+            self.criteria_order.sort()
         self.update(size)
 
     def update(self, size):
@@ -123,7 +129,8 @@ class graph_etri(QtGui.QGraphicsScene):
     def __plot_axis(self):
         self.criteria_text = {}
 
-        for i, criterion in enumerate(self.model.criteria):
+        for i, id in enumerate(self.criteria_order):
+            criterion = self.model.criteria(id)
             x = i*self.hspacing
 
             line = axis(x, 0, x, -self.axis_height, criterion.direction)
@@ -149,7 +156,8 @@ class graph_etri(QtGui.QGraphicsScene):
 
         n = len(self.model.criteria)
         points = []
-        for i, criterion in enumerate(self.model.criteria):
+        for i, id in enumerate(self.criteria_order):
+            criterion = self.model.criteria(id)
             x = i*self.hspacing
 
             num = ap.performances[criterion.id] - self.worst.performances[criterion.id]
