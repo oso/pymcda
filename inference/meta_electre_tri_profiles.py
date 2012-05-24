@@ -124,7 +124,7 @@ class meta_electre_tri_profiles():
             for a in alts:
                 if aa(a) == self.aa_ori(a) and self.aa_ori(a) == cat_a:
                     ok += 1
-                elif aa(a) != self.aa_ori(a) and self.aa_ori(a) == cat_b:
+                elif aa(a) == cat_a and self.aa_ori(a) == cat_b:
                     nok += 1
 
             if (ok + nok) > 0:
@@ -147,7 +147,7 @@ class meta_electre_tri_profiles():
             for a in alts:
                 if aa(a) == self.aa_ori(a) and self.aa_ori(a) == cat_b:
                     ok += 1
-                elif aa(a) != self.aa_ori(a) and self.aa_ori(a) == cat_a:
+                elif aa(a) == cat_b and self.aa_ori(a) == cat_a:
                     nok += 1
 
             if (ok + nok) > 0:
@@ -297,7 +297,7 @@ if __name__ == "__main__":
     pt_sorted = sorted_performance_table(pt)
     meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa)
 
-    for i in range(1, 501):
+    for i in range(1, 201):
         aa2 = model2.pessimist(pt)
 
         f = compute_fitness(aa, aa2)
