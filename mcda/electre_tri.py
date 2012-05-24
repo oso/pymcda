@@ -35,7 +35,7 @@ class electre_tri:
         if self.profiles is None:
             raise KeyError('No profiles defined')
 
-    def __get_threshold_by_profile(self, c, threshold_id, profile_rank):
+    def get_threshold_by_profile(self, c, threshold_id, profile_rank):
         if c.thresholds is None:
             return None
 
@@ -52,8 +52,8 @@ class electre_tri:
         diff = (y.performances[c.id]-x.performances[c.id])*c.direction
 
         # compute c_j(a, b)
-        p = self.__get_threshold_by_profile(c, 'p', profile_rank)
-        q = self.__get_threshold_by_profile(c, 'q', profile_rank)
+        p = self.get_threshold_by_profile(c, 'p', profile_rank)
+        q = self.get_threshold_by_profile(c, 'q', profile_rank)
         if q is None:
             q = 0
         if p is None:
@@ -91,8 +91,8 @@ class electre_tri:
         diff = (y.performances[c.id]-x.performances[c.id])*c.direction
 
         # compute d_j(a,b)
-        p = self.__get_threshold_by_profile(c, 'p', profile_rank)
-        v = self.__get_threshold_by_profile(c, 'v', profile_rank)
+        p = self.get_threshold_by_profile(c, 'p', profile_rank)
+        v = self.get_threshold_by_profile(c, 'v', profile_rank)
         if v is None:
             return 0
         elif diff > v:
@@ -178,18 +178,6 @@ class electre_tri:
 
 class electre_tri_bm(electre_tri):
 
-    def __get_threshold_by_profile(self, c, threshold_id, profile_rank):
-        if c.thresholds is None:
-            return None
-
-        threshid = "%s%s" % (threshold_id, profile_rank)
-        if c.thresholds.has_threshold(threshid):
-            return c.thresholds(threshid).values.value
-        elif c.thresholds.has_threshold(threshold_id):
-            return c.thresholds(threshold_id).values.value
-        else:
-            return None
-
     def credibility(self, x, y, clist, cv, profile_rank):
         w = 0
         wsum = 0
@@ -198,7 +186,7 @@ class electre_tri_bm(electre_tri):
                 continue
 
             cval = cv(c.id)
-            v = self.__get_threshold_by_profile(c, 'v', profile_rank)
+            v = self.get_threshold_by_profile(c, 'v', profile_rank)
             diff = (y.performances[c.id]-x.performances[c.id])*c.direction
             if diff <= 0:
                 w += cval.value
