@@ -59,9 +59,12 @@ class meta_electre_tri_profiles():
         ok = nok = 0
         alts, perfs = self.pt_sorted.get_middle(cid, profile, above, False, False)
         for i, a in enumerate(alts):
-            if aa(a) == self.aa_ori(a) and self.aa_ori(a) == cat_a:
+            if aa(a) != cat_a:
+                continue
+
+            if self.aa_ori(a) == cat_a:
                 ok += 1
-            elif aa(a) != self.aa_ori(a) and self.aa_ori(a) == cat_b:
+            elif self.aa_ori(a) == cat_b:
                 nok += 1
                 h_above[perfs[i]+0.00001] = nok / (ok + nok)
 
@@ -74,9 +77,12 @@ class meta_electre_tri_profiles():
         alts.reverse()
         perfs.reverse()
         for i, a in enumerate(alts):
-            if aa(a) == self.aa_ori(a) and self.aa_ori(a) == cat_b:
+            if aa(a) != cat_b:
+                continue
+
+            if self.aa_ori(a) == cat_b:
                 ok += 1
-            elif aa(a) != self.aa_ori(a) and self.aa_ori(a) == cat_a:
+            elif self.aa_ori(a) == cat_a:
                 nok += 1
                 h_below[perfs[i]] = nok / (ok + nok)
 
@@ -118,7 +124,6 @@ class meta_electre_tri_profiles():
             h_above = self.compute_above_histogram(aa, cid, p_perfs[cid],
                                                    a_perfs[cid], cat_b,
                                                    cat_a)
-
             h = h_below
             h.update(h_above)
 
@@ -140,7 +145,7 @@ class meta_electre_tri_profiles():
                 max_move = i
 
         if moved is False and max_val > 0:
-#            print i, max_move
+#            print max_cid, i,  max_move
             p_perfs[max_cid] = max_move
 
     def get_below_and_above_profiles(self, i):
