@@ -9,7 +9,7 @@ from itertools import product
 from mcda.electre_tri import electre_tri
 from inference.meta_electre_tri_profiles import meta_electre_tri_profiles
 from inference.meta_electre_tri_profiles import compute_fitness
-from tools.utils import get_pc_of_wrong_assignment
+from tools.utils import compute_ac
 from tools.sorted import sorted_performance_table
 from tools.generate_random import generate_random_alternatives
 from tools.generate_random import generate_random_criteria

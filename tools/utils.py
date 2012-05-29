@@ -91,6 +91,8 @@ def add_errors_in_affectations(alternatives_affectations, category_ids,
             new_cat = random.sample(category_ids, 1)[0]
         a.category_id = new_cat
 
+    return aa
+
 def display_affectations_and_pt(alternatives, criteria,
                                 alternatives_affectations,
                                 performance_table):
@@ -114,12 +116,16 @@ def display_affectations_and_pt(alternatives, criteria,
                 print("%-6.5f" % perfs[c.id]),
         print('')
 
-def get_pc_of_wrong_assignment(aa, aa2):
-    total = len(aa)
-    nok = 0
-    for a in aa:
-        af = aa2(a.alternative_id)
-        if af != a.category_id:
-            nok += 1
+def compute_ac(aa, aa2, alist=None):
+    if alist is None:
+        alist = aa.keys()
 
-    return nok/total
+    total = len(alist)
+    ok = 0
+    for aid in alist:
+        af = aa(aid)
+        af2 = aa2(aid)
+        if af == af2:
+            ok += 1
+
+    return ok / total

@@ -11,7 +11,7 @@ from inference.meta_electre_tri_global import heuristic_profiles
 from inference.meta_electre_tri_global import meta_electre_tri_global
 from tools.utils import get_best_alternative_performances
 from tools.utils import get_worst_alternative_performances
-from tools.utils import get_pc_of_wrong_assignment
+from tools.utils import compute_ac
 from tools.generate_random import generate_random_alternatives
 from tools.generate_random import generate_random_criteria
 from tools.generate_random import generate_random_criteria_values
@@ -54,7 +54,7 @@ class heuristic_profiles_tests(unittest.TestCase):
             heur = heuristic_profiles(model, a, c, pt, aa, b0, bp)
             for k in range(nloop):
                 aa2 = model.pessimist(pt)
-                wrong = get_pc_of_wrong_assignment(aa, aa2)
+                wrong = 1 - compute_ac(aa, aa2)
                 fitness.append(1-wrong)
                 if wrong == 0:
                     break

@@ -12,15 +12,6 @@ def get_wrong_assignments(aa, aa_learned):
             l.append(aid)
     return l
 
-def compute_fitness(aa, aa_learned):
-    ok = total = 0
-    for a in aa:
-        aid = a.alternative_id
-        if aa(aid) == aa_learned(aid):
-            ok += 1
-        total += 1
-    return ok/total
-
 class meta_electre_tri_profiles():
 
     def __init__(self, model, pt_sorted, cat, aa_ori):
@@ -267,6 +258,7 @@ if __name__ == "__main__":
     from tools.utils import normalize_criteria_weights
     from tools.utils import display_affectations_and_pt
     from tools.utils import add_errors_in_affectations
+    from tools.utils import compute_ac
     from tools.sorted import sorted_performance_table
     from mcda.electre_tri import electre_tri_bm
     from ui.graphic import display_electre_tri_models
@@ -288,7 +280,7 @@ if __name__ == "__main__":
 
     model = electre_tri_bm(c, cv, bpt, lbda, cps)
     aa = model.pessimist(pt)
-    add_errors_in_affectations(aa, cat.get_ids(), errors)
+    aa_erroned = add_errors_in_affectations(aa, cat.get_ids(), errors)
 
     print('Original model')
     print('==============')
@@ -309,7 +301,7 @@ if __name__ == "__main__":
     for i in range(1, 1001):
         aa2 = model2.pessimist(pt)
 
-        f = compute_fitness(aa, aa2)
+        f = compute_ac(aa, aa2)
         print('%d: fitness: %g' % (i, f))
         bpt2.display(criterion_ids=cids)
         if f == 1:
