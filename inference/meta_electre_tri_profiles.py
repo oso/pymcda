@@ -266,6 +266,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_categories_profiles
     from tools.utils import normalize_criteria_weights
     from tools.utils import display_affectations_and_pt
+    from tools.utils import add_errors_in_affectations
     from tools.sorted import sorted_performance_table
     from mcda.electre_tri import electre_tri_bm
     from ui.graphic import display_electre_tri_models
@@ -283,9 +284,11 @@ if __name__ == "__main__":
     cps = generate_random_categories_profiles(cat)
 
     lbda = 0.75
+    errors = 0.0
 
     model = electre_tri_bm(c, cv, bpt, lbda, cps)
     aa = model.pessimist(pt)
+    add_errors_in_affectations(aa, cat.get_ids(), errors)
 
     print('Original model')
     print('==============')
@@ -303,7 +306,7 @@ if __name__ == "__main__":
     pt_sorted = sorted_performance_table(pt)
     meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa)
 
-    for i in range(1, 201):
+    for i in range(1, 1001):
         aa2 = model2.pessimist(pt)
 
         f = compute_fitness(aa, aa2)
