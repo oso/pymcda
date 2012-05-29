@@ -115,11 +115,11 @@ def display_affectations_and_pt(alternatives, criteria,
         print('')
 
 def get_pc_of_wrong_assignment(aa, aa2):
-        total = len(aa)
-        nok = 0
-        for a in aa:
-            af = aa2(a.alternative_id)
-            if af != a.category_id:
-                nok += 1
+    total = len(aa)
+    nok = 0
+    for a in aa:
+        af = aa2(a.alternative_id)
+        if af != a.category_id:
+            nok += 1
 
-        return nok/total
+    return nok/total
