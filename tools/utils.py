@@ -1,6 +1,7 @@
 from __future__ import division
 import random
 from mcda.types import alternative_performances
+from mcda.types import alternatives_affectations
 
 def get_max_alternative_performance(pt, crit):
     val = None
@@ -79,25 +80,24 @@ def normalize_criteria_weights(criteria_values):
     for cv in criteria_values:
         cv.value /= total
 
-def add_errors_in_affectations(alternatives_affectations, category_ids,
-                               errors_pc):
-    n = int(len(alternatives_affectations)*errors_pc)
-    aa = random.sample(alternatives_affectations, n)
+def add_errors_in_affectations(aa, category_ids, errors_pc):
+    n = int(len(aa)*errors_pc)
+    aa_erroned = random.sample(aa, n)
 
-    for a in aa:
+    l = alternatives_affectations([])
+    for a in aa_erroned:
         cat = a.category_id
         new_cat = a.category_id
         while new_cat == cat:
             new_cat = random.sample(category_ids, 1)[0]
         a.category_id = new_cat
+        l.append(a)
 
-    return aa
+    return l
 
-def display_affectations_and_pt(alternatives, criteria,
-                                alternatives_affectations,
-                                performance_table):
+def display_affectations_and_pt(alternatives, criteria, aas, pts):
 
-    for i, aas in enumerate(alternatives_affectations):
+    for i, aa in enumerate(aas):
         print("\taa%d" % i),
     print('\t|'),
     for i, c in enumerate(criteria):
@@ -106,12 +106,12 @@ def display_affectations_and_pt(alternatives, criteria,
 
     for a in alternatives:
         print("%6s" % a.id),
-        for aas in alternatives_affectations:
-            print("\t%-6s" % aas(a.id)),
+        for aa in aas:
+            print("\t%-6s" % aa(a.id)),
         print('\t|'),
 
         for c in criteria:
-            for pt in performance_table:
+            for pt in pts:
                 perfs = pt(a.id)
                 print("%-6.5f" % perfs[c.id]),
         print('')

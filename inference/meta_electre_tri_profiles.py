@@ -317,15 +317,22 @@ if __name__ == "__main__":
     print("lambda: %.7s" % lbda)
 
     total = len(a)
-    nok = 0
+    nok = nok_erroned = 0
     anok = []
     for alt in a:
         if aa(alt.id) != aa2(alt.id):
             anok.append(alt)
             nok += 1
+            if alt.id in aa_erroned:
+                nok_erroned += 1
 
-    print("Good affectations: %3g %%" % (float(total-nok)/total*100))
-    print("Bad affectations : %3g %%" % (float(nok)/total*100))
+    print("Good affectations          : %3g %%" \
+          % (float(total-nok)/total*100))
+    print("Bad affectations           : %3g %%" \
+          % (float(nok)/total*100))
+    if aa_erroned:
+        print("Bad in erroned affectations: %3g %%" \
+              % (float(nok_erroned)/len(aa_erroned)*100))
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
