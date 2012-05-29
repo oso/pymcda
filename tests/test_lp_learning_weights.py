@@ -26,8 +26,8 @@ def variable_number_alternatives_and_criteria(ncat, er=0):
     n_alts = [ i*1000 for i in range(1, 11) ]
     n_crit = [ 5 ]
 
-    print('\nnc\tna\tncat\terr\tseed\tobj\terrors\tt_total\tt_const' \
-          '\tt_solve')
+    print('\nnc\tna\tncat\terr\tseed\tobj\terrors\terr_bad\tt_total' \
+          '\tt_const\tt_solve')
 
     objectives = { nc: {na: dict() for na in n_alts} for nc in n_crit }
     times_total = { nc: {na: dict() for na in n_alts} for nc in n_crit }
@@ -36,6 +36,7 @@ def variable_number_alternatives_and_criteria(ncat, er=0):
     errors = { nc: {na: dict() for na in n_alts} for nc in n_crit }
     errors_min = { nc: {na: dict() for na in n_alts} for nc in n_crit }
     errors_max = { nc: {na: dict() for na in n_alts} for nc in n_crit }
+    errors_erroned = { nc: {na: dict() for na in n_alts} for nc in n_crit }
     for nc, na, seed in product(n_crit, n_alts, seeds):
         a = generate_random_alternatives(na)
         c = generate_random_criteria(nc)
@@ -54,7 +55,7 @@ def variable_number_alternatives_and_criteria(ncat, er=0):
         aa = model.pessimist(pt)
         aa_errors = model.pessimist(pt)
 
-        add_errors_in_affectations(aa_errors, cat.get_ids(), er)
+        aa_erroned = add_errors_in_affectations(aa_errors, cat.get_ids(), er)
 
         t1 = time.time()
         lp_weights = lp_electre_tri_weights(model, pt, aa_errors, cps, 0.0001)
@@ -70,25 +71,33 @@ def variable_number_alternatives_and_criteria(ncat, er=0):
         aa_learned = model.pessimist(pt)
 
         total = len(a)
-        nok = 0
+        nok = nok_erroned = 0
         a_assign = { alt.alternative_id: alt.category_id for alt in aa }
         a_assign2 = { alt.alternative_id: alt.category_id
                       for alt in aa_learned}
         for alt in a:
             if a_assign[alt.id] != a_assign2[alt.id]:
                 nok += 1
+                if alt.id in aa_erroned:
+                    nok_erroned += 1
 
         e = nok/total
         errors[nc][na][seed] = nok/total
+        if aa_erroned:
+            e_err = nok_erroned / len(aa_erroned)
+        else:
+            e_err = 0
+
+        errors_erroned[nc][na][seed] = e_err
 
         print("%d\t%d\t%d\t%-6.4f\t%s\t%-6.4f\t%-6.5f\t%-6.5f\t%-6.5f" \
-              "\t%-6.5f" % (nc, na, ncat, er, seed, obj, e, t3-t1, t2-t1,
-              t3-t2))
+              "\t%-6.5f\t%-6.5f" % (nc, na, ncat, er, seed, obj, e, e_err,
+              t3-t1, t2-t1, t3-t2))
 
     print('Summary')
     print('========')
     print("nseeds: %d" % len(seeds))
-    print('nc\tna\tncat\terr\tobj\terr_avg\terr_min\terr_max\tt_total' \
+    print('nc\tna\tncat\terr\tobj\terr_avg\terr_min\terr_max\terr_bad\tt_total' \
           '\tt_cons\tt_solve')
     for nc, na in product(n_crit, n_alts):
         obj = sum(objectives[nc][na].values())/len(seeds)
@@ -98,9 +107,10 @@ def variable_number_alternatives_and_criteria(ncat, er=0):
         err = sum(errors[nc][na].values())/len(seeds)
         err_min = min(errors[nc][na].values())
         err_max = max(errors[nc][na].values())
+        err_erroned = sum(errors_erroned[nc][na].values())/len(seeds)
         print("%d\t%d\t%d\t%-6.5f\t%-6.4f\t%-6.5f\t%-6.5f\t%-6.5f\t%-6.5f" \
-              "\t%-6.5f\t%-6.5f" % (nc, na, ncat, er, obj, err, err_min,
-              err_max, tim_tot, tim_con, tim_sol))
+              "\t%-6.5f\t%-6.5f\t%-6.5f" % (nc, na, ncat, er, obj, err,
+              err_min, err_max, err_erroned, tim_tot, tim_con, tim_sol))
 
 class tests_lp_electre_tri_weights(unittest.TestCase):
 

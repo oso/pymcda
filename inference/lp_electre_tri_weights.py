@@ -394,7 +394,8 @@ if __name__ == "__main__":
 
     model = electre_tri(c, cv, bpt, lbda, cps)
     aa = model.pessimist(pt)
-    add_errors_in_affectations(aa, cat.get_ids(), errors)
+    aa_err = aa.copy()
+    aa_erroned = add_errors_in_affectations(aa_err, cat.get_ids(), errors)
 
     print('Original model')
     print('==============')
@@ -408,7 +409,7 @@ if __name__ == "__main__":
     #print(aa)
 
     t1 = time.time()
-    lp_weights = lp_electre_tri_weights(model, pt, aa, cps, delta)
+    lp_weights = lp_electre_tri_weights(model, pt, aa_err, cps, delta)
     t2 = time.time()
     obj = lp_weights.solve()
     t3 = time.time()
@@ -428,7 +429,7 @@ if __name__ == "__main__":
     #print(aa_learned)
 
     total = len(a)
-    nok = 0
+    nok = nok_erroned = 0
     anok = []
     a_assign = {alt.alternative_id: alt.category_id for alt in aa}
     a_assign2 = {alt.alternative_id: alt.category_id for alt in aa_learned}
@@ -436,9 +437,16 @@ if __name__ == "__main__":
         if a_assign[alt.id] != a_assign2[alt.id]:
             anok.append(alt)
             nok += 1
+            if alt.id in aa_erroned:
+                nok_erroned += 1
 
-    print("Good affectations: %3g %%" % (float(total-nok)/total*100))
-    print("Bad affectations : %3g %%" % (float(nok)/total*100))
+    print("Good affectations          : %3g %%" \
+          % (float(total-nok)/total*100))
+    print("Bad affectations           : %3g %%" \
+          % (float(nok)/total*100))
+    if aa_erroned:
+        print("Bad in erroned affectations: %3g %%" \
+              % (float(nok_erroned)/len(aa_erroned)*100))
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
