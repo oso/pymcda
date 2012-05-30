@@ -246,16 +246,26 @@ if __name__ == "__main__":
     pt_sorted = sorted_performance_table(pt)
     meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa)
 
+    best_f = 0
+    best_bpt = model2.bpt.copy()
     for i in range(1, 1001):
         aa2 = model2.pessimist(pt)
 
         f = compute_ac(aa, aa2)
         print('%d: fitness: %g' % (i, f))
         bpt2.display(criterion_ids=cids)
+        if f >= best_f:
+            best_f = f
+            best_bpt = model2.bpt.copy()
+
         if f == 1:
             break
 
         meta.optimize(aa2, f)
+
+    model2.bpt = best_bpt
+    aa2 = model2.pessimist(pt)
+    f = compute_ac(aa, aa2)
 
     print('Learned model')
     print('=============')
@@ -287,4 +297,3 @@ if __name__ == "__main__":
         display_affectations_and_pt(anok, c, [aa, aa2], [pt])
 
     display_electre_tri_models([model, model2], [pt, pt])
-
