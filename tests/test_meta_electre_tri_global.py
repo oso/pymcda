@@ -152,7 +152,7 @@ class metaheuristic_tests(unittest.TestCase):
         aa = model.pessimist(pt)
 
         t1 = time.time()
-        meta = meta_electre_tri_global(a, c, cv, aa, pt, cps, cat)
+        meta = meta_electre_tri_global(a, c, cv, aa, pt, cps)
         model_learned = meta.solve(nmodel, nloop, nloop2)
         t2 = time.time()
 
