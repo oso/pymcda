@@ -4,14 +4,6 @@ sys.path.insert(0, "..")
 import math
 import random
 
-def get_wrong_assignments(aa, aa_learned):
-    l = list()
-    for a in aa:
-        aid = a.alternative_id
-        if aa(aid) != aa_learned(aid):
-            l.append(aid)
-    return l
-
 class meta_electre_tri_profiles():
 
     def __init__(self, model, pt_sorted, cat, aa_ori):
@@ -33,7 +25,6 @@ class meta_electre_tri_profiles():
             intervals += [ math.exp(i+1) ]
         s = sum(intervals)
         self.interval_ratios = [ i/s for i in intervals ] + [ 0.9 ]
-#        print self.interval_ratios
 
     def update_intervals(self, fitness):
         if fitness > 0.99:
@@ -62,45 +53,6 @@ class meta_electre_tri_profiles():
             else:
                 aa_by_cat[cat] = [ aid ]
         return aa_by_cat
-
-    def heuristic(self, aa):
-        aids = get_wrong_assignments(aa, self.aa_ori)
-        aid = random.choice(aids)
-        ap = pt(aid)
-
-        crit = None
-        move = 0
-        if self.cat[aa(aid)] == self.cat[self.aa_ori(aid)]+1:
-            # Profile too low
-            print self.cat[aa(aid)], self.cat[self.aa_ori(aid)]
-            profile = self.model.profiles[self.cat[self.aa_ori(aid)]-1]
-            profile_perfs = self.model.bpt[profile].performances
-            print profile
-            for c in self.model.criteria:
-                print 'aid', ap.performances[c.id]
-                diff =  ap.performances[c.id] - profile_perfs[c.id]
-#                if diff > 0 and diff > move:
-#                    crit = c.id
-#                    move = diff
-                if diff > 0 and diff < 0.1:
-                    profile.performances[c.id] += diff+0.0001
-        elif self.cat[aa(aid)] == self.cat[self.aa_ori(aid)]-1:
-            # Profile too high
-            profile = self.model.profiles[self.cat[self.aa_ori(aid)]-2]
-            profile_perfs = self.model.bpt[profile].performances
-            print profile
-            for c in self.model.criteria:
-                print 'aid', ap.performances[c.id]
-                diff =  ap.performances[c.id] - profile_perfs[c.id]
-#                if diff < 0 and diff < move:
-#                    crit = c.id
-#                    move = diff
-                if diff < 0 and diff > -0.1:
-                    profile.performances[c.id] += diff
-
-#        if move != 0:
-#            print 'move ', crit, move
-#            profile.performances[crit] += move
 
     def compute_above_histogram(self, aa, cid, profile, above, cat_b, cat_a):
         h_above = {}
@@ -235,10 +187,6 @@ class meta_electre_tri_profiles():
         return below, above
 
     def optimize(self, aa, fitness):
-#        if fitness > 0.99:
-#            self.heuristic(aa)
-#            return
-
         profiles = self.model.profiles
         for i, profile in enumerate(profiles):
             pperfs = self.model.bpt[profile]
