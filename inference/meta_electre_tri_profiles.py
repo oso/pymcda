@@ -218,10 +218,10 @@ if __name__ == "__main__":
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
 
-    b = generate_random_alternatives(2, 'b')
-    bpt = generate_random_profiles(b, c, 2345)
     cat = generate_random_categories(3)
     cps = generate_random_categories_profiles(cat)
+    b = cps.get_ordered_profiles()
+    bpt = generate_random_profiles(b, c, 2345)
 
     lbda = 0.75
     errors = 0.0

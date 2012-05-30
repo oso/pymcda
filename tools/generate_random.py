@@ -81,7 +81,7 @@ def generate_random_profiles(alts, crits, seed=None, k=3):
         perfs = {}
         for c in crits:
             perfs[c.id] = crit_random[c.id][i]
-        ap = alternative_performances(a.id, perfs)
+        ap = alternative_performances(a, perfs)
         pt.append(ap)
 
     return pt

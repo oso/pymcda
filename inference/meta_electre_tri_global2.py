@@ -10,7 +10,7 @@ from mcda.types import alternative_affectation, alternatives_affectations
 from mcda.types import performance_table
 from inference.lp_electre_tri_weights import lp_electre_tri_weights
 from inference.meta_electre_tri_profiles import meta_electre_tri_profiles
-from inference.meta_electre_tri_profiles import compute_fitness
+from tools.utils import compute_ac
 from tools.sorted import sorted_performance_table
 from tools.generate_random import generate_random_profiles
 from tools.generate_random import generate_random_alternatives
@@ -51,8 +51,7 @@ class meta_electre_tri_global():
         model.profiles = self.profiles
 
         nprofiles = len(self.categories_profiles)
-        self.b = generate_random_alternatives(nprofiles, 'b') # FIXME
-        bpt = generate_random_profiles(self.b, self.criteria)
+        bpt = generate_random_profiles(model.profiles, self.criteria)
         model.bpt = bpt
         model.cv = generate_random_criteria_values(self.criteria)
         model.lbda = random.uniform(0.5, 1)
@@ -61,7 +60,7 @@ class meta_electre_tri_global():
 
     def __optimize(self):
         aa = self.model.pessimist(self.pt)
-        f = compute_fitness(aa, self.aa)
+        f = compute_ac(aa, self.aa)
 
         print 'fitness:', f
         print 'optimizing profiles...'
@@ -70,7 +69,7 @@ class meta_electre_tri_global():
 
         self.model.bpt.display()
         aa = self.model.pessimist(self.pt)
-        print 'fitness:', compute_fitness(aa, self.aa)
+        print 'fitness:', compute_ac(aa, self.aa)
 
         a = list()
         for profile in self.profiles:
@@ -86,7 +85,7 @@ class meta_electre_tri_global():
         obj = self.lp.solve()
         aa = self.model.pessimist(self.pt)
         print 'lambda:', self.model.lbda, 'w:', self.model.cv
-        print 'fitness:', compute_fitness(aa, self.aa)
+        print 'fitness:', compute_ac(aa, self.aa)
 
     def optimize(self, n=5000):
         for i in range(n):
@@ -114,10 +113,10 @@ if __name__ == "__main__":
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
 
-    b = generate_random_alternatives(2, 'b')
-    bpt = generate_random_profiles(b, c, 2345)
     cat = generate_random_categories(3)
     cps = generate_random_categories_profiles(cat)
+    b = cps.get_ordered_profiles()
+    bpt = generate_random_profiles(b, c, 2345)
 
     lbda = 0.75
 

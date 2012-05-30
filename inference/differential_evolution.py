@@ -340,10 +340,10 @@ if __name__ == "__main__":
     normalize_weights_values(cv)
     pt = generate_random_performance_table(a, c, 1234)
 
-    b = generate_random_alternatives(1, prefix='b')
-    bpt = generate_random_profiles(b, c, 0123)
     cats = generate_random_categories(2)
     cps = generate_random_categories_profiles(cats)
+    b = cps.get_ordered_profiles()
+    bpt = generate_random_profiles(b, c, 0123)
 
     lbda = 0.75
     print bpt

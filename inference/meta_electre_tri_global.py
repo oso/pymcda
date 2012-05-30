@@ -266,8 +266,7 @@ class meta_electre_tri_global():
         model.profiles = self.cps.get_ordered_profiles()
 
         nprofiles = len(self.cps)
-        self.b = generate_random_alternatives(nprofiles, 'b') # FIXME
-        bpt = generate_random_profiles(self.b, self.criteria)
+        bpt = generate_random_profiles(model.profiles, self.criteria)
         model.bpt = bpt
         model.cv = generate_random_criteria_values(self.criteria)
         model.lbda = random.uniform(0.5, 1)
@@ -362,10 +361,10 @@ if __name__ == "__main__":
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
 
-    b = generate_random_alternatives(2, 'b')
-    bpt = generate_random_profiles(b, c, 2345)
     cat = generate_random_categories(3)
     cps = generate_random_categories_profiles(cat)
+    b = cps.get_ordered_profiles()
+    bpt = generate_random_profiles(b, c, 2345)
 
     lbda = 0.75
 

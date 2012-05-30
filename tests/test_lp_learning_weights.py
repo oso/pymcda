@@ -44,10 +44,10 @@ def variable_number_alternatives_and_criteria(ncat, er=0):
         normalize_criteria_weights(cv)
         pt = generate_random_performance_table(a, c)
 
-        b = generate_random_alternatives(ncat-1, 'b')
-        bpt = generate_random_profiles(b, c)
         cat = generate_random_categories(ncat)
         cps = generate_random_categories_profiles(cat)
+        b = cps.get_ordered_profiles()
+        bpt = generate_random_profiles(b, c)
 
         lbda = random.uniform(0.5, 1)
 

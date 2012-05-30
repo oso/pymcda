@@ -382,10 +382,10 @@ if __name__ == "__main__":
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c)
 
-    b = generate_random_alternatives(2, 'b')
-    bpt = generate_random_profiles(b, c)
-    cat = generate_random_categories(3)
+    cat = generate_random_categories(5)
     cps = generate_random_categories_profiles(cat)
+    b = cps.get_ordered_profiles()
+    bpt = generate_random_profiles(b, c)
 
     lbda = random.uniform(0.5, 1)
 #    lbda = 0.75
@@ -402,8 +402,8 @@ if __name__ == "__main__":
     print("Number of alternatives: %d" % len(a))
     print("Errors in alternatives affectations: %g%%" % (errors*100))
     cids = c.get_ids()
-    bpt.display(criterion_ids=cids)
-    cv.display(criterion_ids=cids)
+    bpt.display(criterion_ids = cids, alternative_ids = b)
+    cv.display(criterion_ids = cids)
     print("lambda\t%.7s" % lbda)
     print("delta: %g" % delta)
     #print(aa)
