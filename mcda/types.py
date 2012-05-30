@@ -343,10 +343,15 @@ class performance_table(dict):
             altp.from_xmcda(tag)
             self.append(altp)
 
-    def display(self, header=True, criterion_ids=None, append=''):
+    def display(self, header = True, criterion_ids = None,
+                append = '', alternative_ids = None):
         show_header = header
-        criterion_ids = next(self.itervalues()).performances.keys()
-        for ap in self:
+        if criterion_ids is None:
+            criterion_ids = next(self.itervalues()).performances.keys()
+        if alternative_ids is None:
+            alternative_ids = self.keys()
+        for aid in alternative_ids:
+            ap = self[aid]
             ap.display(show_header, criterion_ids, append)
             show_header = False
 
