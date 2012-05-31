@@ -24,7 +24,7 @@ def variable_number_alternatives_and_criteria(ncat, er=0):
     n_alts = [ i*1000 for i in range(1, 11) ]
     n_crit = [ i for i in range(2,21) ]
     n_alts = [ i*1000 for i in range(1, 11) ]
-    n_crit = [ 5 ]
+    n_crit = [ 5, 7, 10]
 
     print('\nnc\tna\tncat\terr\tseed\tobj\terrors\terr_bad\tt_total' \
           '\tt_const\tt_solve')
