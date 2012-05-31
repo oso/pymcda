@@ -189,9 +189,11 @@ class graph_etri(QtGui.QGraphicsScene):
 
     def __plot_profiles(self):
         bpt = self.model.bpt
+        b = self.model.profiles
         polygon_list = []
         below = self.__profile_get_points(self.worst)
-        for i, ap in enumerate(bpt):
+        for i, ap in enumerate(b):
+            ap = bpt[ap]
             below.reverse()
             above = self.__profile_get_points(ap)
             ppoints = below + above
