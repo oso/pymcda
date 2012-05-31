@@ -241,7 +241,7 @@ if __name__ == "__main__":
     print('Original model')
     print('==============')
     cids = c.get_ids()
-    bpt.display(criterion_ids=cids)
+    bpt.display(criterion_ids=cids, alternative_ids = b)
     cv.display(criterion_ids=cids)
     print("lambda: %.7s" % lbda)
 
@@ -249,7 +249,7 @@ if __name__ == "__main__":
     model2 = electre_tri_bm(c, cv, bpt2, lbda, cps)
     print('Original random profiles')
     print('========================')
-    bpt2.display(criterion_ids=cids)
+    bpt2.display(criterion_ids = cids, alternative_ids = b)
 
     pt_sorted = sorted_performance_table(pt_learn)
     meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa_learn)
@@ -261,7 +261,7 @@ if __name__ == "__main__":
 
         f = compute_ac(aa_learn, aa2)
         print('%d: fitness: %g' % (i, f))
-        bpt2.display(criterion_ids=cids)
+        bpt2.display(criterion_ids = cids, alternative_ids = b)
         if f >= best_f:
             best_f = f
             best_bpt = model2.bpt.copy()
@@ -279,7 +279,7 @@ if __name__ == "__main__":
     print('=============')
     print("Number of iterations: %d" % i)
     print("Fitness score: %g %%" % (float(f) * 100))
-    bpt2.display(criterion_ids=cids)
+    bpt2.display(criterion_ids = cids, alternative_ids = b)
     cv.display(criterion_ids=cids)
     print("lambda: %.7s" % lbda)
 
