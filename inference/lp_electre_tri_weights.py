@@ -9,7 +9,7 @@ verbose = False
 try:
     solver = os.environ['SOLVER']
 except:
-    solver = 'cplex'
+    solver = 'glpk'
 
 if solver == 'glpk':
     import pymprog
@@ -373,6 +373,7 @@ if __name__ == "__main__":
     from tools.utils import add_errors_in_affectations
     from tools.utils import display_affectations_and_pt
     from mcda.electre_tri import electre_tri
+    from mcda.types import alternatives_affectations, performance_table
 
     print("Solver used: %s" % solver)
     # Original Electre Tri model
@@ -391,15 +392,22 @@ if __name__ == "__main__":
 #    lbda = 0.75
     errors = 0.0
     delta = 0.0001
+    nlearn = 1.00
 
     model = electre_tri(c, cv, bpt, lbda, cps)
     aa = model.pessimist(pt)
-    aa_err = aa.copy()
+
+    a_learn = random.sample(a, int(nlearn*len(a)))
+    aa_learn = alternatives_affectations([ aa[alt.id] for alt in a_learn ])
+    pt_learn = performance_table([ pt[alt.id] for alt in a_learn ])
+
+    aa_err = aa_learn.copy()
     aa_erroned = add_errors_in_affectations(aa_err, cat.get_ids(), errors)
 
     print('Original model')
     print('==============')
     print("Number of alternatives: %d" % len(a))
+    print("Number of learning alternatives: %d" % len(aa_learn))
     print("Errors in alternatives affectations: %g%%" % (errors*100))
     cids = c.get_ids()
     bpt.display(criterion_ids = cids, alternative_ids = b)
@@ -409,7 +417,7 @@ if __name__ == "__main__":
     #print(aa)
 
     t1 = time.time()
-    lp_weights = lp_electre_tri_weights(model, pt, aa_err, cps, delta)
+    lp_weights = lp_electre_tri_weights(model, pt_learn, aa_err, cps, delta)
     t2 = time.time()
     obj = lp_weights.solve()
     t3 = time.time()
