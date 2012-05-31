@@ -208,6 +208,7 @@ if __name__ == "__main__":
     from tools.utils import add_errors_in_affectations
     from tools.utils import compute_ac
     from tools.sorted import sorted_performance_table
+    from mcda.types import alternatives_affectations, performance_table
     from mcda.electre_tri import electre_tri_bm
     from ui.graphic import display_electre_tri_models
 
@@ -225,10 +226,17 @@ if __name__ == "__main__":
 
     lbda = 0.75
     errors = 0.0
+    nlearn = 1.0
 
     model = electre_tri_bm(c, cv, bpt, lbda, cps)
     aa = model.pessimist(pt)
-    aa_erroned = add_errors_in_affectations(aa, cat.get_ids(), errors)
+
+    a_learn = random.sample(a, int(nlearn*len(a)))
+    aa_learn = alternatives_affectations([ aa[alt.id] for alt in a_learn ])
+    pt_learn = performance_table([ pt[alt.id] for alt in a_learn ])
+
+    aa_err = aa_learn.copy()
+    aa_erroned = add_errors_in_affectations(aa_err, cat.get_ids(), errors)
 
     print('Original model')
     print('==============')
@@ -243,15 +251,15 @@ if __name__ == "__main__":
     print('========================')
     bpt2.display(criterion_ids=cids)
 
-    pt_sorted = sorted_performance_table(pt)
-    meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa)
+    pt_sorted = sorted_performance_table(pt_learn)
+    meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa_learn)
 
     best_f = 0
     best_bpt = model2.bpt.copy()
     for i in range(1, 1001):
-        aa2 = model2.pessimist(pt)
+        aa2 = model2.pessimist(pt_learn)
 
-        f = compute_ac(aa, aa2)
+        f = compute_ac(aa_learn, aa2)
         print('%d: fitness: %g' % (i, f))
         bpt2.display(criterion_ids=cids)
         if f >= best_f:
@@ -264,16 +272,18 @@ if __name__ == "__main__":
         meta.optimize(aa2, f)
 
     model2.bpt = best_bpt
-    aa2 = model2.pessimist(pt)
-    f = compute_ac(aa, aa2)
+    aa2 = model2.pessimist(pt_learn)
+    f = compute_ac(aa_learn, aa2)
 
     print('Learned model')
     print('=============')
     print("Number of iterations: %d" % i)
+    print("Fitness score: %g %%" % (float(f) * 100))
     bpt2.display(criterion_ids=cids)
     cv.display(criterion_ids=cids)
     print("lambda: %.7s" % lbda)
 
+    aa2 = model2.pessimist(pt)
     total = len(a)
     nok = nok_erroned = 0
     anok = []
