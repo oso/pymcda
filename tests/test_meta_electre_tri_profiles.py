@@ -136,7 +136,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
     def test001_two_cat_no_errors(self):
         n_alts = [ 10000 ]
         n_crit = [ 5, 7, 10 ]
-        n_cat = [ 2 ]
+        n_cat = [ 2, 3 ]
         nloop = 1000
         nmodel = 1
         nerrors = 0

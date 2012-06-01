@@ -68,10 +68,13 @@ class meta_electre_tri_profiles():
                 if aa(a) != cat_a:
                     continue
 
-                if self.aa_ori(a) == cat_a:
+                if aa(a) == cat_b and self.aa_ori(a) == cat_a:
                     ok += 1
-                elif self.aa_ori(a) == cat_b:
-                    nok += 1
+                elif aa(a) == cat_a:
+                    if self.aa_ori(a) == cat_a:
+                        ok += 1
+                    elif self.aa_ori(a) == cat_b:
+                        nok += 1
 
             if (ok + nok) > 0:
                 h_above[intervals[i+1]] = nok / (ok + nok)
@@ -91,13 +94,13 @@ class meta_electre_tri_profiles():
             alts = self.pt_sorted.get_middle(cid, intervals[i+1],
                                              intervals[i])[0]
             for a in alts:
-                if aa(a) != cat_b:
-                    continue
-
-                if self.aa_ori(a) == cat_b:
+                if aa(a) == cat_a and self.aa_ori(a) == cat_b:
                     ok += 1
-                elif self.aa_ori(a) == cat_a:
-                    nok += 1
+                elif aa(a) == cat_b:
+                    if self.aa_ori(a) == cat_b:
+                        ok += 1
+                    elif self.aa_ori(a) == cat_a:
+                        nok += 1
 
             if (ok + nok) > 0:
                 h_below[intervals[i+1]] = nok / (ok + nok)
