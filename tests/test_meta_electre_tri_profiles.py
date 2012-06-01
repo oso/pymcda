@@ -58,7 +58,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
         best_bpt = model.bpt.copy()
         for k in range(nloop):
             aa2 = model.pessimist(pt)
-            f = compute_ac(aa, aa2)
+            f = compute_ac(aa_errors, aa2)
             fitness.append(f)
             if f >= best_f:
                 best_f = f
@@ -71,7 +71,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
 
         aa2 = model.pessimist(pt)
 
-        f = compute_ac(aa, aa2)
+        f = compute_ac(aa_errors, aa2)
         fitness.append(f)
 
         t = time.time() - t1
@@ -79,18 +79,22 @@ class metaheuristic_profiles_tests(unittest.TestCase):
         model.bpt = best_bpt
         aa2 = model.pessimist(pt)
 
-        nok = 0
-        for a in aa_erroned:
-            aid = a.alternative_id
-            if a.category_id != aa2(aid):
-                nok +=1
+        nok = nok_erroned = 0
+        for alt in a:
+            if aa(alt.id) != aa2[alt.id]:
+                nok += 1
+                if alt.id in aa_erroned:
+                    nok_erroned += 1
+
+        total = len(a)
+        er = float(total-nok) / total
 
         if aa_erroned:
-            erroned_bad = nok/len(aa_erroned)
+            erroned_bad = nok_erroned/len(aa_erroned)
         else:
             erroned_bad = 0
 
-        return t, fitness, erroned_bad
+        return t, fitness, er, erroned_bad
 
     def run_one_set_of_tests(self, n_alts, n_crit, n_cat, nloop, nmodel,
                              nerrors):
@@ -100,15 +104,15 @@ class metaheuristic_profiles_tests(unittest.TestCase):
                           for na in n_alts }
                     for nc in n_crit }
 
-        print('\nna\tnc\tncat\tseed\tnloop\tnloopu\tnmodels\tnerrors\tf_end\tf_best\terr_bad\ttime')
+        print('\nna\tnc\tncat\tseed\tnloop\tnloopu\tnmodels\tnerrors\tf_end\tf_best\terr\terr_bad\ttime')
         for na, nc, ncat, seed in product(n_alts, n_crit, n_cat, seeds):
-            t, f, eb = self.run_metaheuristic(na, nc, ncat, seed, nloop, nmodel,
-                                              nerrors)
+            t, f, er, eb = self.run_metaheuristic(na, nc, ncat, seed, nloop,
+                                                  nmodel, nerrors)
             fitness[nc][na][ncat][seed][0:len(f)] = f
             print("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%g\t%-6.5f\t%-6.5f\t%-6.5f" \
-                  "\t%-6.5f" \
+                  "\t%-6.5f\t%-6.5f" \
                   % (na, nc, ncat, seed, nloop, len(f)-1, nmodel, nerrors,
-                  f[-1], max(f), eb, t))
+                  f[-1], max(f), er, eb, t))
 
         print('Summary')
         print('=======')
