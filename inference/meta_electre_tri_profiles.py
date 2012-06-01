@@ -252,14 +252,14 @@ if __name__ == "__main__":
     bpt2.display(criterion_ids = cids, alternative_ids = b)
 
     pt_sorted = sorted_performance_table(pt_learn)
-    meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa_learn)
+    meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa_err)
 
     best_f = 0
     best_bpt = model2.bpt.copy()
     for i in range(1, 1001):
         aa2 = model2.pessimist(pt_learn)
 
-        f = compute_ac(aa_learn, aa2)
+        f = compute_ac(aa_err, aa2)
         print('%d: fitness: %g' % (i, f))
         bpt2.display(criterion_ids = cids, alternative_ids = b)
         if f >= best_f:
@@ -273,7 +273,7 @@ if __name__ == "__main__":
 
     model2.bpt = best_bpt
     aa2 = model2.pessimist(pt_learn)
-    f = compute_ac(aa_learn, aa2)
+    f = compute_ac(aa_err, aa2)
 
     print('Learned model')
     print('=============')
