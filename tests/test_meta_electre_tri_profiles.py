@@ -81,20 +81,20 @@ class metaheuristic_profiles_tests(unittest.TestCase):
 
         nok = nok_erroned = 0
         for alt in a:
-            if aa(alt.id) != aa2[alt.id]:
+            if aa(alt.id) != aa2(alt.id):
                 nok += 1
                 if alt.id in aa_erroned:
                     nok_erroned += 1
 
         total = len(a)
-        er = float(total-nok) / total
+        ac = float(total-nok) / total
 
         if aa_erroned:
             erroned_bad = nok_erroned/len(aa_erroned)
         else:
             erroned_bad = 0
 
-        return t, fitness, er, erroned_bad
+        return t, fitness, ac, erroned_bad
 
     def run_one_set_of_tests(self, n_alts, n_crit, n_cat, nloop, nmodel,
                              nerrors):
@@ -104,15 +104,15 @@ class metaheuristic_profiles_tests(unittest.TestCase):
                           for na in n_alts }
                     for nc in n_crit }
 
-        print('\nna\tnc\tncat\tseed\tnloop\tnloopu\tnmodels\tnerrors\tf_end\tf_best\terr\terr_bad\ttime')
+        print('\nna\tnc\tncat\tseed\tnloop\tnloopu\tnmodels\tnerrors\tf_end\tf_best\tac\terr_bad\ttime')
         for na, nc, ncat, seed in product(n_alts, n_crit, n_cat, seeds):
-            t, f, er, eb = self.run_metaheuristic(na, nc, ncat, seed, nloop,
+            t, f, ac, eb = self.run_metaheuristic(na, nc, ncat, seed, nloop,
                                                   nmodel, nerrors)
             fitness[nc][na][ncat][seed][0:len(f)] = f
             print("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%g\t%-6.5f\t%-6.5f\t%-6.5f" \
                   "\t%-6.5f\t%-6.5f" \
                   % (na, nc, ncat, seed, nloop, len(f)-1, nmodel, nerrors,
-                  f[-1], max(f), er, eb, t))
+                  f[-1], max(f), ac, eb, t))
 
         print('Summary')
         print('=======')
@@ -146,7 +146,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
     def test002_two_cat_10pc_errors(self):
         n_alts = [ 10000 ]
         n_crit = [ 5, 7, 10 ]
-        n_cat = [ 2 ]
+        n_cat = [ 2, 3 ]
         nloop = 1000
         nmodel = 1
         nerrors = 0.1
