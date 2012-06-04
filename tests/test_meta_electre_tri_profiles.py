@@ -89,10 +89,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
         total = len(a)
         ac = float(total-nok) / total
 
-        if aa_erroned:
-            erroned_bad = nok_erroned/len(aa_erroned)
-        else:
-            erroned_bad = 0
+        erroned_bad = nok_erroned/total
 
         return t, fitness, ac, erroned_bad
 

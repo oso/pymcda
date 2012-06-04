@@ -303,7 +303,7 @@ if __name__ == "__main__":
           % (float(nok)/total*100))
     if aa_erroned:
         print("Bad in erroned affectations: %3g %%" \
-              % (float(nok_erroned)/len(aa_erroned)*100))
+              % (float(nok_erroned)/total*100))
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
