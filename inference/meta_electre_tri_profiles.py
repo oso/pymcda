@@ -216,16 +216,15 @@ if __name__ == "__main__":
     from ui.graphic import display_electre_tri_models
 
     a = generate_random_alternatives(10000)
-
     c = generate_random_criteria(9)
-    cv = generate_random_criteria_values(c, 012)
+    cv = generate_random_criteria_values(c, 456)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c)
 
     cat = generate_random_categories(3)
     cps = generate_random_categories_profiles(cat)
     b = cps.get_ordered_profiles()
-    bpt = generate_random_profiles(b, c, 2345)
+    bpt = generate_random_profiles(b, c)
 
     lbda = random.uniform(0.5, 1)
     errors = 0.0
@@ -233,6 +232,9 @@ if __name__ == "__main__":
 
     model = electre_tri_bm(c, cv, bpt, lbda, cps)
     aa = model.pessimist(pt)
+
+    bpt2 = generate_random_profiles(b, c)
+    model2 = electre_tri_bm(c, cv, bpt2, lbda, cps)
 
     a_learn = random.sample(a, int(nlearn*len(a)))
     aa_learn = alternatives_affectations([ aa[alt.id] for alt in a_learn ])
@@ -248,8 +250,6 @@ if __name__ == "__main__":
     cv.display(criterion_ids=cids)
     print("lambda: %.7s" % lbda)
 
-    bpt2 = generate_random_profiles(b, c, 0123)
-    model2 = electre_tri_bm(c, cv, bpt2, lbda, cps)
     print('Original random profiles')
     print('========================')
     bpt2.display(criterion_ids = cids, alternative_ids = b)
