@@ -6,6 +6,7 @@ import time
 import random
 from itertools import product
 
+from mcda.types import alternatives_affectations, performance_table
 from mcda.electre_tri import electre_tri
 from inference.meta_electre_tri_profiles import meta_electre_tri_profiles
 from tools.utils import compute_ac
@@ -25,7 +26,7 @@ seeds = [ 123, 456, 789, 12, 345, 678, 901, 234, 567, 890 ]
 class metaheuristic_profiles_tests(unittest.TestCase):
 
     def run_metaheuristic(self, na, nc, ncat, seed, nloop, nmodel,
-                          nerrors=0):
+                          nerrors=0, nlearn=1.0):
         fitness = []
 
         a = generate_random_alternatives(na)
@@ -43,22 +44,34 @@ class metaheuristic_profiles_tests(unittest.TestCase):
 
         model = electre_tri(c, cv, bpt, lbda, cps)
         aa = model.pessimist(pt)
-        aa_errors = model.pessimist(pt)
 
-        aa_erroned = add_errors_in_affectations(aa_errors, cat.get_ids(), nerrors)
+        # Reinitialize the model with bad profiles
+        model.bpt = generate_random_profiles(b, c)
 
-        pt_sorted = sorted_performance_table(pt)
+        # Select the alternatives used to learn the weights
+        a_learn = random.sample(a, int(nlearn*len(a)))
+        aa_learn = alternatives_affectations([ aa[alt.id]
+                                               for alt in a_learn ])
+        pt_learn = performance_table([ pt[alt.id] for alt in a_learn ])
+
+        # Add errors
+        aa_err = aa_learn.copy()
+        aa_erroned = add_errors_in_affectations(aa_err, cat.get_ids(),
+                                                nerrors)
+
+        # Sort the performance table
+        pt_sorted = sorted_performance_table(pt_learn)
 
         t1 = time.time()
 
-        model.bpt = generate_random_profiles(b, c)
-        meta = meta_electre_tri_profiles(model, pt_sorted, cat, aa_errors)
+        # Run the algorithm
+        meta = meta_electre_tri_profiles(model, pt_sorted, cat, aa_err)
 
         best_f = 0
         best_bpt = model.bpt.copy()
         for k in range(nloop):
             aa2 = model.pessimist(pt)
-            f = compute_ac(aa_errors, aa2)
+            f = compute_ac(aa_err, aa2)
             fitness.append(f)
             if f >= best_f:
                 best_f = f
@@ -71,7 +84,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
 
         aa2 = model.pessimist(pt)
 
-        f = compute_ac(aa_errors, aa2)
+        f = compute_ac(aa_err, aa2)
         fitness.append(f)
 
         t = time.time() - t1
@@ -94,7 +107,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
         return t, fitness, ac, erroned_bad
 
     def run_one_set_of_tests(self, n_alts, n_crit, n_cat, nloop, nmodel,
-                             nerrors):
+                             nerrors, nlearn=1.0):
         fitness = { nc: { na: { ncat: { seed: [ 1 for i in range(nloop+1) ]
                                         for seed in seeds }
                                 for ncat in n_cat }
@@ -104,7 +117,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
         print('\nna\tnc\tncat\tseed\tnloop\tnloopu\tnmodels\tnerrors\tf_end\tf_best\tac\terr_bad\ttime')
         for na, nc, ncat, seed in product(n_alts, n_crit, n_cat, seeds):
             t, f, ac, eb = self.run_metaheuristic(na, nc, ncat, seed, nloop,
-                                                  nmodel, nerrors)
+                                                  nmodel, nerrors, nlearn)
             fitness[nc][na][ncat][seed][0:len(f)] = f
             print("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%g\t%-6.5f\t%-6.5f\t%-6.5f" \
                   "\t%-6.5f\t%-6.5f" \
