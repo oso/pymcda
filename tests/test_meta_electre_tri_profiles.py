@@ -123,7 +123,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
             t, f, ac, eb = self.run_metaheuristic(na, nc, ncat, seed, nloop,
                                                   nlearn, nerrors, nlearn)
             fitness[nc][na][ncat][seed][0:len(f)] = f
-            print("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%g\t%-6.5f\t%-6.5f\t%-6.5f" \
+            print("%d\t%d\t%d\t%d\t%d\t%d\t%g\t%g\t%-6.5f\t%-6.5f\t%-6.5f" \
                   "\t%-6.5f\t%-6.5f" \
                   % (na, nc, ncat, seed, nloop, len(f)-1, nlearn, nerrors,
                   f[-1], max(f), ac, eb, t))
@@ -144,8 +144,9 @@ class metaheuristic_profiles_tests(unittest.TestCase):
                 if f[loop] > fmax:
                     fmax = f[loop]
             favg /= len(seeds)
-            print("%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f\t%-6.5f\t%-6.5f" % (na,
-                  nc, ncat, len(seeds), loop, nlearn, favg, fmin, fmax))
+            print("%d\t%d\t%d\t%d\t%d\t%g\t%g\t%-6.5f\t%-6.5f\t%-6.5f" \
+                  % (na, nc, ncat, len(seeds), loop, nlearn, nerrors,
+                     favg, fmin, fmax))
 
     def test001_no_errors(self):
         n_alts = [ 10000 ]
