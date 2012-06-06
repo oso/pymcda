@@ -218,16 +218,16 @@ if __name__ == "__main__":
     a = generate_random_alternatives(10000)
 
     c = generate_random_criteria(9)
-    cv = generate_random_criteria_values(c, 4567)
+    cv = generate_random_criteria_values(c, 012)
     normalize_criteria_weights(cv)
-    pt = generate_random_performance_table(a, c, 1234)
+    pt = generate_random_performance_table(a, c)
 
     cat = generate_random_categories(3)
     cps = generate_random_categories_profiles(cat)
     b = cps.get_ordered_profiles()
     bpt = generate_random_profiles(b, c, 2345)
 
-    lbda = 0.75
+    lbda = random.uniform(0.5, 1)
     errors = 0.0
     nlearn = 1.0
 
