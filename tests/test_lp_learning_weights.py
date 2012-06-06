@@ -82,11 +82,8 @@ def variable_number_alternatives_and_criteria(ncat, er=0):
                     nok_erroned += 1
 
         e = nok/total
-        errors[nc][na][seed] = nok/total
-        if aa_erroned:
-            e_err = nok_erroned / len(aa_erroned)
-        else:
-            e_err = 0
+        errors[nc][na][seed] = nok / total
+        e_err = nok_erroned / total
 
         errors_erroned[nc][na][seed] = e_err
 
