@@ -86,6 +86,9 @@ class metaheuristic_profiles_tests(unittest.TestCase):
 
         f = compute_ac(aa_err, aa2)
         fitness.append(f)
+        if f >= best_f:
+            best_f = f
+            best_bpt = model.bpt.copy()
 
         t = time.time() - t1
 
@@ -114,7 +117,8 @@ class metaheuristic_profiles_tests(unittest.TestCase):
                           for na in n_alts }
                     for nc in n_crit }
 
-        print('\nna\tnc\tncat\tseed\tnloop\tnloopu\tnmodels\tnerrors\tf_end\tf_best\tac\terr_bad\ttime')
+        print('\nna\tnc\tncat\tseed\tnloop\tnloopu\tnmodels\tnerrors' \
+              '\tf_end\tf_best\tac\terr_bad\ttime')
         for na, nc, ncat, seed in product(n_alts, n_crit, n_cat, seeds):
             t, f, ac, eb = self.run_metaheuristic(na, nc, ncat, seed, nloop,
                                                   nmodel, nerrors, nlearn)
