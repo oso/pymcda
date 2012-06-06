@@ -117,21 +117,21 @@ class metaheuristic_profiles_tests(unittest.TestCase):
                           for na in n_alts }
                     for nc in n_crit }
 
-        print('\nna\tnc\tncat\tseed\tnloop\tnloopu\tnmodels\tnerrors' \
+        print('\nna\tnc\tncat\tseed\tnloop\tnloopu\tnlearn\tnerrors' \
               '\tf_end\tf_best\tac\terr_bad\ttime')
         for na, nc, ncat, seed in product(n_alts, n_crit, n_cat, seeds):
             t, f, ac, eb = self.run_metaheuristic(na, nc, ncat, seed, nloop,
-                                                  nmodel, nerrors, nlearn)
+                                                  nlearn, nerrors, nlearn)
             fitness[nc][na][ncat][seed][0:len(f)] = f
             print("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%g\t%-6.5f\t%-6.5f\t%-6.5f" \
                   "\t%-6.5f\t%-6.5f" \
-                  % (na, nc, ncat, seed, nloop, len(f)-1, nmodel, nerrors,
+                  % (na, nc, ncat, seed, nloop, len(f)-1, nlearn, nerrors,
                   f[-1], max(f), ac, eb, t))
 
         print('Summary')
         print('=======')
         print("nseeds: %d" % len(seeds))
-        print('na\tnc\tncat\tnseeds\tloop\tnmodels\tf_avg\tf_min\tf_max')
+        print('na\tnc\tncat\tnseeds\tloop\tnlearn\tf_avg\tf_min\tf_max')
         for na, nc, ncat, loop in product(n_alts, n_crit, n_cat,
                                           range(nloop)):
             favg = fmax = 0
@@ -145,9 +145,9 @@ class metaheuristic_profiles_tests(unittest.TestCase):
                     fmax = f[loop]
             favg /= len(seeds)
             print("%d\t%d\t%d\t%d\t%d\t%d\t%-6.5f\t%-6.5f\t%-6.5f" % (na,
-                  nc, ncat, len(seeds), loop, nmodel, favg, fmin, fmax))
+                  nc, ncat, len(seeds), loop, nlearn, favg, fmin, fmax))
 
-    def test001_two_cat_no_errors(self):
+    def test001_no_errors(self):
         n_alts = [ 10000 ]
         n_crit = [ 5, 7, 10 ]
         n_cat = [ 2, 3 ]
@@ -157,7 +157,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
 
         self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors)
 
-    def test002_two_cat_10pc_errors(self):
+    def test002__10pc_errors(self):
         n_alts = [ 10000 ]
         n_crit = [ 5, 7, 10 ]
         n_cat = [ 2, 3 ]
@@ -166,6 +166,25 @@ class metaheuristic_profiles_tests(unittest.TestCase):
         nerrors = 0.1
 
         self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors)
+
+    def test003_pc_alternatives(self):
+        n_alts = [ 10000 ]
+        n_crit = [ 5, 7, 10 ]
+        n_cat = [ 2, 3 ]
+        nloop = 1000
+        nmodel = 1
+        nerrors = 0
+
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 1)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.9)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.8)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.7)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.6)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.5)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.4)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.3)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.2)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.1)
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
