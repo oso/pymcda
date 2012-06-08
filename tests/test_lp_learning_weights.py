@@ -157,9 +157,66 @@ class tests_lp_electre_tri_weights_with_errors(unittest.TestCase):
     def test008_three_categories_errors_40pc(self):
         variable_number_alternatives_and_criteria(3, 0.4)
 
+class test_lp_electre_tri_weights_subset(unittest.TestCase):
+
+    def test001_two_categories_90pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.1)
+
+    def test002_two_categories_80pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.8)
+
+    def test003_two_categories_70pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.7)
+
+    def test004_two_categories_60pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.6)
+
+    def test005_two_categories_50pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.5)
+
+    def test006_two_categories_40pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.4)
+
+    def test007_two_categories_30pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.3)
+
+    def test008_two_categories_20pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.2)
+
+    def test008_two_categories_10pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.1)
+
+    def test001_three_categories_90pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.9)
+
+    def test002_three_categories_80pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.8)
+
+    def test003_three_categories_70pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.7)
+
+    def test004_three_categories_60pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.6)
+
+    def test005_three_categories_50pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.5)
+
+    def test006_three_categories_40pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.4)
+
+    def test007_three_categories_30pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.3)
+
+    def test008_three_categories_20pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.2)
+
+    def test008_three_categories_10pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.1)
+
 if __name__ == "__main__":
     loader = unittest.TestLoader()
     suite1 = loader.loadTestsFromTestCase(tests_lp_electre_tri_weights)
     suite2 = loader.loadTestsFromTestCase(tests_lp_electre_tri_weights_with_errors)
-    alltests = unittest.TestSuite([suite1, suite2])
+    suite3 = loader.loadTestsFromTestCase(test_lp_electre_tri_weights_subset)
+    alltests = unittest.TestSuite([suite1, suite2, suite3])
     unittest.TextTestRunner(verbosity=2).run(alltests)
