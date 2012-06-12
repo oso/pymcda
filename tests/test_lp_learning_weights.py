@@ -160,7 +160,7 @@ class tests_lp_electre_tri_weights_with_errors(unittest.TestCase):
 class test_lp_electre_tri_weights_subset(unittest.TestCase):
 
     def test001_two_categories_90pc(self):
-        variable_number_alternatives_and_criteria(2, 0.0, 0.1)
+        variable_number_alternatives_and_criteria(2, 0.0, 0.9)
 
     def test002_two_categories_80pc(self):
         variable_number_alternatives_and_criteria(2, 0.0, 0.8)
