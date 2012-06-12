@@ -353,9 +353,10 @@ if __name__ == "__main__":
     from tools.utils import normalize_criteria_weights
     from tools.utils import display_affectations_and_pt
     from mcda.electre_tri import electre_tri
+    from ui.graphic import display_electre_tri_models
 
     # Original Electre Tri model
-    a = generate_random_alternatives(500)
+    a = generate_random_alternatives(1000)
     c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
@@ -390,8 +391,8 @@ if __name__ == "__main__":
 
     print('Learned model')
     print('=============')
-    model.profiles.display(criterion_ids=cids)
-    m.profiles.display(header=False, criterion_ids=cids, append='_learned')
+    model.bpt.display(criterion_ids=cids)
+    m.bpt.display(header=False, criterion_ids=cids, append='_learned')
     model.cv.display(criterion_ids=cids, name='w')
     m.cv.display(header=False, criterion_ids=cids, name='w_learned')
     print("lambda\t%.7s" % m.lbda)
@@ -411,3 +412,5 @@ if __name__ == "__main__":
     if len(anok) > 0:
         print("Alternatives and affectations")
         display_affectations_and_pt(anok, c, [aa, aa_learned], [pt])
+
+    display_electre_tri_models([model, m], [pt, pt])
