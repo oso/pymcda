@@ -357,7 +357,7 @@ if __name__ == "__main__":
 
     # Original Electre Tri model
     a = generate_random_alternatives(1000)
-    c = generate_random_criteria(5)
+    c = generate_random_criteria(9)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
