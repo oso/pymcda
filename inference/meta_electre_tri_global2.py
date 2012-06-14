@@ -59,39 +59,53 @@ class meta_electre_tri_global():
         return model
 
     def __optimize(self):
+        print 'optimizing weights...'
         aa = self.model.pessimist(self.pt)
         f = compute_ac(aa, self.aa)
+        print 'fitness:', f
+
+        self.lp.update_linear_program(self.aa)
+        obj = self.lp.solve()
+        aa = self.model.pessimist(self.pt)
+        print 'lambda:', self.model.lbda, 'w:', self.model.cv
+
+        aa = self.model.pessimist(self.pt)
+        f = compute_ac(aa, self.aa)
+        best_bpt = self.model.bpt.copy()
+        best_f = f
 
         print 'fitness:', f
         print 'optimizing profiles...'
         old_profiles = self.model.bpt.copy()
-        self.meta.optimize(aa, f)
+        for i in range(20):
+            self.meta.optimize(aa, f)
+            aa = self.model.pessimist(self.pt)
+            f = compute_ac(aa, self.aa)
+            print i, ':fitness:', f
+            self.model.bpt.display()
+            if f > best_f:
+                best_f = f
+                best_bpt = self.model.bpt.copy()
 
-        self.model.bpt.display()
+        self.model.bpt = best_bpt
         aa = self.model.pessimist(self.pt)
-        print 'fitness:', compute_ac(aa, self.aa)
+        f = compute_ac(aa, self.aa)
+        print 'fitness:', f
 
-        a = list()
-        for profile in self.profiles:
-            for c in self.criteria:
-                old = old_profiles[profile].performances[c.id]
-                new = self.model.bpt[profile].performances[c.id]
+#        a = list()
+#        for profile in self.profiles:
+#            for c in self.criteria:
+#                old = old_profiles[profile].performances[c.id]
+#                new = self.model.bpt[profile].performances[c.id]
+#
+#                l = self.pt_sorted.get_middle(c.id, old, new)
+#                a.extend(x for x in l if x not in a)
 
-                l = self.pt_sorted.get_middle(c.id, old, new)
-                a.extend(x for x in l if x not in a)
 
-        print 'optimizing weights...'
-        self.lp.update_linear_program(aa)
-        obj = self.lp.solve()
-        aa = self.model.pessimist(self.pt)
-        print 'lambda:', self.model.lbda, 'w:', self.model.cv
-        print 'fitness:', compute_ac(aa, self.aa)
+        return self.model, f
 
-    def optimize(self, n=5000):
-        for i in range(n):
-            self.__optimize()
-
-        return self.model
+    def optimize(self):
+        return self.__optimize()
 
 if __name__ == "__main__":
     import time
@@ -105,10 +119,11 @@ if __name__ == "__main__":
     from tools.utils import normalize_criteria_weights
     from tools.utils import display_affectations_and_pt
     from mcda.electre_tri import electre_tri
+    from ui.graphic import display_electre_tri_models
 
     # Original Electre Tri model
-    a = generate_random_alternatives(5000)
-    c = generate_random_criteria(5)
+    a = generate_random_alternatives(10000)
+    c = generate_random_criteria(7)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c, 1234)
@@ -119,6 +134,9 @@ if __name__ == "__main__":
     bpt = generate_random_profiles(b, c, 2345)
 
     lbda = 0.75
+
+    nmodels = 10
+    nloops = 50
 
     model = electre_tri(c, cv, bpt, lbda, cps)
     aa = model.pessimist(pt)
@@ -131,19 +149,39 @@ if __name__ == "__main__":
     print("lambda\t%.7s" % lbda)
     #print(aa)
 
-    meta = meta_electre_tri_global(a, c, cps, pt, aa)
+    metas = []
+    for i in range(nmodels):
+        meta = meta_electre_tri_global(a, c, cps, pt, aa)
+        metas.append(meta)
 
     t1 = time.time()
-    m = meta.optimize()
+    for i in range(nloops):
+        models_fitness = {}
+        for meta in metas:
+            m, f = meta.optimize()
+            models_fitness[m] = f
+
+        models_fitness = sorted(models_fitness.iteritems(),
+                                key = lambda (k,v): (v,k),
+                                reverse = True)
+
+        print models_fitness
+        if models_fitness[0][1] == 1:
+            break
+
+        for j in range(int(nmodels / 2), nmodels):
+            metas[j] = meta_electre_tri_global(a, c, cps, pt, aa)
+
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
 
+    m = models_fitness[0][0]
     aa_learned = m.pessimist(pt)
 
     print('Learned model')
     print('=============')
-    model.profiles.display(criterion_ids=cids)
-    m.profiles.display(header=False, criterion_ids=cids, append='_learned')
+    model.bpt.display(criterion_ids=cids)
+    m.bpt.display(header=False, criterion_ids=cids, append='_learned')
     model.cv.display(criterion_ids=cids, name='w')
     m.cv.display(header=False, criterion_ids=cids, name='w_learned')
     print("lambda\t%.7s" % m.lbda)
@@ -160,6 +198,8 @@ if __name__ == "__main__":
     print("Good affectations: %g %%" % (float(total-nok)/total*100))
     print("Bad affectations : %g %%" % (float(nok)/total*100))
 
-    if len(anok) > 0:
-        print("Alternatives and affectations")
-        display_affectations_and_pt(anok, c, [aa, aa_learned], [pt])
+#    if len(anok) > 0:
+#        print("Alternatives and affectations")
+#        display_affectations_and_pt(anok, c, [aa, aa_learned], [pt])
+
+    display_electre_tri_models([model, m], [pt, pt])
