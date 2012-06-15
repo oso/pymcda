@@ -123,19 +123,19 @@ if __name__ == "__main__":
 
     # Original Electre Tri model
     a = generate_random_alternatives(10000)
-    c = generate_random_criteria(7)
+    c = generate_random_criteria(9)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
-    pt = generate_random_performance_table(a, c, 1234)
+    pt = generate_random_performance_table(a, c,)
 
     cat = generate_random_categories(3)
     cps = generate_random_categories_profiles(cat)
     b = cps.get_ordered_profiles()
-    bpt = generate_random_profiles(b, c, 2345)
+    bpt = generate_random_profiles(b, c)
 
     lbda = 0.75
 
-    nmodels = 10
+    nmodels = 6
     nloops = 50
 
     model = electre_tri(c, cv, bpt, lbda, cps)
@@ -160,6 +160,8 @@ if __name__ == "__main__":
         for meta in metas:
             m, f = meta.optimize()
             models_fitness[m] = f
+            if f == 1:
+                break
 
         models_fitness = sorted(models_fitness.iteritems(),
                                 key = lambda (k,v): (v,k),
