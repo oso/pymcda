@@ -131,7 +131,8 @@ class metaheuristic_profiles_tests(unittest.TestCase):
         print('Summary')
         print('=======')
         print("nseeds: %d" % len(seeds))
-        print('na\tnc\tncat\tnseeds\tloop\tnlearn\tf_avg\tf_min\tf_max')
+        print('na\tnc\tncat\tnseeds\tloop\tnlearn\terrors\tf_avg\tf_min' \
+              '\tf_max')
         for na, nc, ncat, loop in product(n_alts, n_crit, n_cat,
                                           range(nloop)):
             favg = fmax = 0
