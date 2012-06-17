@@ -159,59 +159,59 @@ class tests_lp_electre_tri_weights_with_errors(unittest.TestCase):
 
 class test_lp_electre_tri_weights_subset(unittest.TestCase):
 
-    def test001_two_categories_90pc(self):
-        variable_number_alternatives_and_criteria(2, 0.0, 0.9)
+    def test001_two_categories_9pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.09)
 
-    def test002_two_categories_80pc(self):
-        variable_number_alternatives_and_criteria(2, 0.0, 0.8)
+    def test002_two_categories_8pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.08)
 
-    def test003_two_categories_70pc(self):
-        variable_number_alternatives_and_criteria(2, 0.0, 0.7)
+    def test003_two_categories_7pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.07)
 
-    def test004_two_categories_60pc(self):
-        variable_number_alternatives_and_criteria(2, 0.0, 0.6)
+    def test004_two_categories_6pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.06)
 
-    def test005_two_categories_50pc(self):
-        variable_number_alternatives_and_criteria(2, 0.0, 0.5)
+    def test005_two_categories_5pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.05)
 
-    def test006_two_categories_40pc(self):
-        variable_number_alternatives_and_criteria(2, 0.0, 0.4)
+    def test006_two_categories_4pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.04)
 
-    def test007_two_categories_30pc(self):
-        variable_number_alternatives_and_criteria(2, 0.0, 0.3)
+    def test007_two_categories_3pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.03)
 
-    def test008_two_categories_20pc(self):
-        variable_number_alternatives_and_criteria(2, 0.0, 0.2)
+    def test008_two_categories_2pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.02)
 
-    def test008_two_categories_10pc(self):
-        variable_number_alternatives_and_criteria(2, 0.0, 0.1)
+    def test008_two_categories_1pc(self):
+        variable_number_alternatives_and_criteria(2, 0.0, 0.01)
 
-    def test001_three_categories_90pc(self):
-        variable_number_alternatives_and_criteria(3, 0.0, 0.9)
+    def test001_three_categories_9pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.09)
 
-    def test002_three_categories_80pc(self):
-        variable_number_alternatives_and_criteria(3, 0.0, 0.8)
+    def test002_three_categories_8pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.08)
 
-    def test003_three_categories_70pc(self):
-        variable_number_alternatives_and_criteria(3, 0.0, 0.7)
+    def test003_three_categories_7pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.07)
 
-    def test004_three_categories_60pc(self):
-        variable_number_alternatives_and_criteria(3, 0.0, 0.6)
+    def test004_three_categories_6pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.06)
 
-    def test005_three_categories_50pc(self):
-        variable_number_alternatives_and_criteria(3, 0.0, 0.5)
+    def test005_three_categories_5pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.05)
 
-    def test006_three_categories_40pc(self):
-        variable_number_alternatives_and_criteria(3, 0.0, 0.4)
+    def test006_three_categories_4pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.04)
 
-    def test007_three_categories_30pc(self):
-        variable_number_alternatives_and_criteria(3, 0.0, 0.3)
+    def test007_three_categories_3pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.03)
 
-    def test008_three_categories_20pc(self):
-        variable_number_alternatives_and_criteria(3, 0.0, 0.2)
+    def test008_three_categories_2pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.02)
 
-    def test008_three_categories_10pc(self):
-        variable_number_alternatives_and_criteria(3, 0.0, 0.1)
+    def test008_three_categories_1pc(self):
+        variable_number_alternatives_and_criteria(3, 0.0, 0.01)
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()

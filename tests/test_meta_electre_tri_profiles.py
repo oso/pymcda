@@ -178,15 +178,15 @@ class metaheuristic_profiles_tests(unittest.TestCase):
         nerrors = 0
 
         self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 1)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.9)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.8)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.7)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.6)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.5)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.4)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.3)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.2)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.1)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.09)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.08)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.07)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.06)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.05)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.04)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.03)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.02)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.01)
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
