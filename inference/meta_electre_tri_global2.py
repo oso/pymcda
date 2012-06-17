@@ -29,7 +29,7 @@ def debug(*args):
 
 class meta_electre_tri_global():
 
-    def __init__(self, a, c, cps, pt, aa):
+    def __init__(self, a, c, cps, pt, cat, aa):
         self.alternatives = a
         self.criteria = c
         self.categories_profiles = cps
@@ -58,31 +58,31 @@ class meta_electre_tri_global():
 
         return model
 
-    def __optimize(self):
-        print 'optimizing weights...'
+    def optimize(self, nmeta):
+#        print 'optimizing weights...'
         aa = self.model.pessimist(self.pt)
         f = compute_ac(aa, self.aa)
-        print 'fitness:', f
+#        print 'fitness:', f
 
         self.lp.update_linear_program(self.aa)
         obj = self.lp.solve()
         aa = self.model.pessimist(self.pt)
-        print 'lambda:', self.model.lbda, 'w:', self.model.cv
+#        print 'lambda:', self.model.lbda, 'w:', self.model.cv
 
         aa = self.model.pessimist(self.pt)
         f = compute_ac(aa, self.aa)
         best_bpt = self.model.bpt.copy()
         best_f = f
 
-        print 'fitness:', f
-        print 'optimizing profiles...'
+#        print 'fitness:', f
+#        print 'optimizing profiles...'
         old_profiles = self.model.bpt.copy()
-        for i in range(20):
+        for i in range(nmeta):
             self.meta.optimize(aa, f)
             aa = self.model.pessimist(self.pt)
             f = compute_ac(aa, self.aa)
-            print i, ':fitness:', f
-            self.model.bpt.display()
+#            print i, ':fitness:', f
+#            self.model.bpt.display()
             if f > best_f:
                 best_f = f
                 best_bpt = self.model.bpt.copy()
@@ -90,7 +90,7 @@ class meta_electre_tri_global():
         self.model.bpt = best_bpt
         aa = self.model.pessimist(self.pt)
         f = compute_ac(aa, self.aa)
-        print 'fitness:', f
+#        print 'fitness:', f
 
 #        a = list()
 #        for profile in self.profiles:
@@ -103,9 +103,6 @@ class meta_electre_tri_global():
 
 
         return self.model, f
-
-    def optimize(self):
-        return self.__optimize()
 
 if __name__ == "__main__":
     import time
@@ -136,6 +133,7 @@ if __name__ == "__main__":
     lbda = 0.75
 
     nmodels = 6
+    nmeta = 20
     nloops = 50
 
     model = electre_tri(c, cv, bpt, lbda, cps)
@@ -149,16 +147,17 @@ if __name__ == "__main__":
     print("lambda\t%.7s" % lbda)
     #print(aa)
 
+    t1 = time.time()
+
     metas = []
     for i in range(nmodels):
-        meta = meta_electre_tri_global(a, c, cps, pt, aa)
+        meta = meta_electre_tri_global(a, c, cps, pt, cat, aa)
         metas.append(meta)
 
-    t1 = time.time()
     for i in range(nloops):
         models_fitness = {}
         for meta in metas:
-            m, f = meta.optimize()
+            m, f = meta.optimize(nmeta)
             models_fitness[m] = f
             if f == 1:
                 break
@@ -167,12 +166,12 @@ if __name__ == "__main__":
                                 key = lambda (k,v): (v,k),
                                 reverse = True)
 
-        print models_fitness
+        print i, models_fitness
         if models_fitness[0][1] == 1:
             break
 
         for j in range(int(nmodels / 2), nmodels):
-            metas[j] = meta_electre_tri_global(a, c, cps, pt, aa)
+            metas[j] = meta_electre_tri_global(a, c, cps, pt, cat, aa)
 
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
