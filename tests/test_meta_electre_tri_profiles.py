@@ -25,10 +25,11 @@ seeds = [ 123, 456, 789, 12, 345, 678, 901, 234, 567, 890 ]
 
 class metaheuristic_profiles_tests(unittest.TestCase):
 
-    def run_metaheuristic(self, na, nc, ncat, seed, nloop, nmodel,
-                          nerrors=0, nlearn=1.0):
+    def run_metaheuristic(self, na, nc, ncat, seed, nloop, nerrors = 0,
+                          na_gen = int(10000)):
         fitness = []
 
+        # Generate an ELECTRE TRI model and assignment examples
         a = generate_random_alternatives(na)
         c = generate_random_criteria(nc)
         cv = generate_random_criteria_values(c, seed)
@@ -45,93 +46,91 @@ class metaheuristic_profiles_tests(unittest.TestCase):
         model = electre_tri(c, cv, bpt, lbda, cps)
         aa = model.pessimist(pt)
 
-        # Reinitialize the model with bad profiles
-        model.bpt = generate_random_profiles(b, c)
+        # Create a new model with same weights and different profiles
+        model2 = model.copy()
+        model2.bpt = generate_random_profiles(b, c)
 
-        # Select the alternatives used to learn the weights
-        a_learn = random.sample(a, int(nlearn*len(a)))
-        aa_learn = alternatives_affectations([ aa[alt.id]
-                                               for alt in a_learn ])
-        pt_learn = performance_table([ pt[alt.id] for alt in a_learn ])
-
-        # Add errors
-        aa_err = aa_learn.copy()
+        # Add errors in the affectations
+        aa_err = aa.copy()
         aa_erroned = add_errors_in_affectations(aa_err, cat.get_ids(),
                                                 nerrors)
 
         # Sort the performance table
-        pt_sorted = sorted_performance_table(pt_learn)
+        pt_sorted = sorted_performance_table(pt)
 
         t1 = time.time()
 
         # Run the algorithm
-        meta = meta_electre_tri_profiles(model, pt_sorted, cat, aa_err)
+        meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa_err)
 
         best_f = 0
-        best_bpt = model.bpt.copy()
+        best_bpt = model2.bpt.copy()
         for k in range(nloop):
-            aa2 = model.pessimist(pt)
+            aa2 = model2.pessimist(pt)
             f = compute_ac(aa_err, aa2)
             fitness.append(f)
             if f >= best_f:
                 best_f = f
-                best_bpt = model.bpt.copy()
+                best_bpt = model2.bpt.copy()
 
             if f == 1:
                 break
 
             meta.optimize(aa2, f)
 
-        aa2 = model.pessimist(pt)
-
+        aa2 = model2.pessimist(pt)
         f = compute_ac(aa_err, aa2)
         fitness.append(f)
         if f >= best_f:
             best_f = f
-            best_bpt = model.bpt.copy()
+            best_bpt = model2.bpt.copy()
 
         t = time.time() - t1
 
-        model.bpt = best_bpt
-        aa2 = model.pessimist(pt)
+        # Determine the number of erroned alternatives badly assigned
+        model2.bpt = best_bpt
+        aa2 = model2.pessimist(pt)
 
         nok = nok_erroned = 0
         for alt in a:
-            if aa(alt.id) != aa2(alt.id):
-                nok += 1
-                if alt.id in aa_erroned:
-                    nok_erroned += 1
+            if aa(alt.id) != aa2(alt.id) and alt.id in aa_erroned:
+                nok_erroned += 1
 
         total = len(a)
-        ac = float(total-nok) / total
+        erroned_bad = nok_erroned / total
 
-        erroned_bad = nok_erroned/total
+        # Generate alternatives for the generalization
+        a_gen = generate_random_alternatives(na_gen)
+        pt_gen = generate_random_performance_table(a_gen, c)
+        aa_gen = model.pessimist(pt_gen)
+        aa_gen2 = model2.pessimist(pt_gen)
+        ca = compute_ac(aa_gen, aa_gen2)
 
-        return t, fitness, ac, erroned_bad
+        return t, fitness, ca, erroned_bad
 
-    def run_one_set_of_tests(self, n_alts, n_crit, n_cat, nloop, nmodel,
-                             nerrors, nlearn=1.0):
+    def run_one_set_of_tests(self, n_alts, n_crit, n_cat, nloop, nerrors,
+                             na_gen=10000):
         fitness = { nc: { na: { ncat: { seed: [ 1 for i in range(nloop+1) ]
                                         for seed in seeds }
                                 for ncat in n_cat }
                           for na in n_alts }
                     for nc in n_crit }
 
-        print('\nna\tnc\tncat\tseed\tnloop\tnloopu\tnlearn\tnerrors' \
-              '\tf_end\tf_best\tac\terr_bad\ttime')
+        print('\nna\tnc\tncat\tseed\tnloop\tnloopu\tna_gen\tnerrors' \
+              '\tf_end\tf_best\tca\terr_bad\ttime')
         for na, nc, ncat, seed in product(n_alts, n_crit, n_cat, seeds):
-            t, f, ac, eb = self.run_metaheuristic(na, nc, ncat, seed, nloop,
-                                                  nlearn, nerrors, nlearn)
+            t, f, ca, eb = self.run_metaheuristic(na, nc, ncat, seed, nloop,
+                                                  nerrors, na_gen)
             fitness[nc][na][ncat][seed][0:len(f)] = f
             print("%d\t%d\t%d\t%d\t%d\t%d\t%g\t%g\t%-6.5f\t%-6.5f\t%-6.5f" \
                   "\t%-6.5f\t%-6.5f" \
-                  % (na, nc, ncat, seed, nloop, len(f)-1, nlearn, nerrors,
-                  f[-1], max(f), ac, eb, t))
+                  % (na, nc, ncat, seed, nloop, len(f)-1, na_gen, nerrors,
+                  f[-1], max(f), ca, eb, t))
 
         print('Summary')
         print('=======')
         print("nseeds: %d" % len(seeds))
-        print('na\tnc\tncat\tnseeds\tloop\tnlearn\terrors\tf_avg\tf_min' \
+        print('na\tnc\tncat\tnseeds\tloop\tna_gen\terrors\tf_avg\tf_min' \
               '\tf_max')
         for na, nc, ncat, loop in product(n_alts, n_crit, n_cat,
                                           range(nloop)):
@@ -146,7 +145,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
                     fmax = f[loop]
             favg /= len(seeds)
             print("%d\t%d\t%d\t%d\t%d\t%g\t%g\t%-6.5f\t%-6.5f\t%-6.5f" \
-                  % (na, nc, ncat, len(seeds), loop, nlearn, nerrors,
+                  % (na, nc, ncat, len(seeds), loop, na_gen, nerrors,
                      favg, fmin, fmax))
 
     def test001_no_errors(self):
@@ -154,10 +153,9 @@ class metaheuristic_profiles_tests(unittest.TestCase):
         n_crit = [ 5, 7, 10 ]
         n_cat = [ 2, 3 ]
         nloop = 1000
-        nmodel = 1
         nerrors = 0
 
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors)
 
     def test002__10pc_errors(self):
         n_alts = [ 10000 ]
@@ -167,7 +165,7 @@ class metaheuristic_profiles_tests(unittest.TestCase):
         nmodel = 1
         nerrors = 0.1
 
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors)
 
     def test003_pc_alternatives(self):
         n_alts = [ 10000 ]
@@ -177,16 +175,16 @@ class metaheuristic_profiles_tests(unittest.TestCase):
         nmodel = 1
         nerrors = 0
 
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 1)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.09)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.08)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.07)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.06)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.05)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.04)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.03)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.02)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors, 0.01)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 1)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.09)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.08)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.07)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.06)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.05)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.04)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.03)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.02)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.01)
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
