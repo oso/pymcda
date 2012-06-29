@@ -156,7 +156,7 @@ class metaheuristic_global_tests(unittest.TestCase):
         n_alts = [ 1000 ]
         n_crit = [ 10 ]
         n_cat = [ 3 ]
-        nloops = 500
+        nloops = 100
         nmodels = 10
         nmeta = 20
         nerrors = 0
@@ -164,15 +164,17 @@ class metaheuristic_global_tests(unittest.TestCase):
         self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloops, nmodels,
                                   nmeta, nerrors)
 
-#    def test002__10pc_errors(self):
-#        n_alts = [ 10000 ]
-#        n_crit = [ 5, 7, 10 ]
-#        n_cat = [ 2, 3 ]
-#        nloop = 1000
-#        nmodel = 1
-#        nerrors = 0.1
-#
-#        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodel, nerrors)
+    def test002__10pc_errors(self):
+        n_alts = [ 1000 ]
+        n_crit = [ 10 ]
+        n_cat = [ 3 ]
+        nloop = 100
+        nmodels = 10
+        nmeta = 20
+        nerrors = 0.1
+
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nmodels,
+                                  nmeta, nerrors)
 #
 #    def test003_pc_alternatives(self):
 #        n_alts = [ 10000 ]
