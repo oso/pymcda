@@ -20,8 +20,7 @@ from tools.utils import compute_ac
 from tools.utils import normalize_criteria_weights
 from tools.utils import add_errors_in_affectations
 
-#seeds = [ 123, 456, 789, 12, 345, 678, 901, 234, 567, 890 ]
-seeds = [ 123 ]
+seeds = [ 123, 456, 789, 12, 345, 678, 901, 234, 567, 890 ]
 
 def variable_number_alternatives_and_criteria(ncat, er = 0, na_gen = 10000):
     n_alts = [ i*1000 for i in range(1, 11) ]
@@ -98,7 +97,6 @@ def variable_number_alternatives_and_criteria(ncat, er = 0, na_gen = 10000):
         aa2 = model2.pessimist(pt_gen)
         ca = compute_ac(aa, aa2)
         cas[nc][na][seed] = ca
-        print 'ca', ca
 
         print("%d\t%d\t%d\t%d\t%-6.4f\t%s\t%-6.4f\t%-6.5f\t%-6.5f"
               "\t%-6.5f\t%-6.5f\t%-6.5f\t%-6.5f" % (nc, na, ncat, na_gen,
@@ -108,7 +106,7 @@ def variable_number_alternatives_and_criteria(ncat, er = 0, na_gen = 10000):
     print('========')
     print("nseeds: %d" % len(seeds))
     print('nc\tna\tncat\tna_gen\terr\tobj\terr_avg\terr_min\terr_max' \
-          '\terr_bad\tca\tt_total\tt_cons\tt_solve')
+          '\terr_bad\tca\tca_min\tca_max\tt_total\tt_cons\tt_solve')
     for nc, na in product(n_crit, n_alts):
         obj = sum(objectives[nc][na].values()) / len(seeds)
         tim_tot = sum(times_total[nc][na].values()) / len(seeds)
@@ -119,10 +117,12 @@ def variable_number_alternatives_and_criteria(ncat, er = 0, na_gen = 10000):
         err_max = max(errors[nc][na].values())
         err_erroned = sum(errors_erroned[nc][na].values()) / len(seeds)
         ca = sum(cas[nc][na].values()) / len(seeds)
+        ca_min = min(cas[nc][na].values())
+        ca_max = max(cas[nc][na].values())
         print("%d\t%d\t%d\t%d\t%-6.5f\t%-6.4f\t%-6.5f\t%-6.5f\t%-6.5f"
-              "\t%-6.5f\t%-6.5f\t%-6.5f\t%-6.5f\t%-6.5f" % (nc, na, ncat,
-              na_gen, er, obj, err, err_min, err_max, err_erroned, ca,
-              tim_tot, tim_con, tim_sol))
+              "\t%-6.5f\t%-6.5f\t%-6.5f\t%-6.5f\t%-6.5f\t%-6.5f\t%-6.5f" \
+              % (nc, na, ncat, na_gen, er, obj, err, err_min, err_max,
+              err_erroned, ca, ca_min, ca_max, tim_tot, tim_con, tim_sol))
 
 class tests_lp_electre_tri_weights(unittest.TestCase):
 
