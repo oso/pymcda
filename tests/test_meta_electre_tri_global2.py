@@ -68,7 +68,7 @@ class metaheuristic_global_tests(unittest.TestCase):
         # Run the algorithm
         metas = []
         for i in range(nmodels):
-            meta = meta_electre_tri_global(a, c, cps, pt, cat, aa)
+            meta = meta_electre_tri_global(a, c, cps, pt, cat, aa_err)
             metas.append(meta)
 
         for i in range(nloops):
@@ -89,7 +89,7 @@ class metaheuristic_global_tests(unittest.TestCase):
                 break
 
             for j in range(int(nmodels / 2), nmodels):
-                metas[j] = meta_electre_tri_global(a, c, cps, pt, cat, aa)
+                metas[j] = meta_electre_tri_global(a, c, cps, pt, cat, aa_err)
 
         model = models_fitness[0][0]
         aa2 = model.pessimist(pt)
