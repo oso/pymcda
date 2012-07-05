@@ -69,7 +69,7 @@ class metaheuristic_global_tests(unittest.TestCase):
             meta = meta_electre_tri_global(a, c, cps, pt, cat, aa_err)
             metas.append(meta)
 
-        for i in range(0, nloops+1):
+        for i in range(0, nloops):
             models_fitness = {}
             for meta in metas:
                 m, f = meta.optimize(nmeta)
