@@ -27,9 +27,11 @@ seeds = [ 123, 456, 789, 12, 345, 678, 901, 234, 567, 890 ]
 class metaheuristic_global_tests(unittest.TestCase):
 
     def run_metaheuristic(self, na, nc, ncat, seed, nloops, nmodels, nmeta,
-                          nerrors=0, nlearn=1.0):
+                          nerrors=0, na_gen=10000):
         fitness = []
+        ca_gen = []
 
+        # Generate random ELECTRE TRI model
         a = generate_random_alternatives(na)
         c = generate_random_criteria(nc)
         cv = generate_random_criteria_values(c, seed)
@@ -46,22 +48,18 @@ class metaheuristic_global_tests(unittest.TestCase):
         model = electre_tri(c, cv, bpt, lbda, cps)
         aa = model.pessimist(pt)
 
-        # Reinitialize the model with bad profiles
-        model.bpt = generate_random_profiles(b, c)
+        # Generate generalization set
+        a_gen = generate_random_alternatives(na_gen)
+        pt_gen = generate_random_performance_table(a_gen, c)
+        aa_gen = model.pessimist(pt_gen)
 
-        # Select the alternatives used to learn the weights
-        a_learn = random.sample(a, int(nlearn*len(a)))
-        aa_learn = alternatives_affectations([ aa[alt.id]
-                                               for alt in a_learn ])
-        pt_learn = performance_table([ pt[alt.id] for alt in a_learn ])
-
-        # Add errors
-        aa_err = aa_learn.copy()
+        # Add errors in assignment examples
+        aa_err = aa.copy()
         aa_erroned = add_errors_in_affectations(aa_err, cat.get_ids(),
                                                 nerrors)
 
         # Sort the performance table
-        pt_sorted = sorted_performance_table(pt_learn)
+        pt_sorted = sorted_performance_table(pt)
 
         t1 = time.time()
 
@@ -71,7 +69,7 @@ class metaheuristic_global_tests(unittest.TestCase):
             meta = meta_electre_tri_global(a, c, cps, pt, cat, aa_err)
             metas.append(meta)
 
-        for i in range(nloops):
+        for i in range(0, nloops+1):
             models_fitness = {}
             for meta in metas:
                 m, f = meta.optimize(nmeta)
@@ -85,16 +83,24 @@ class metaheuristic_global_tests(unittest.TestCase):
 
             fitness.append(models_fitness[0][1])
 
+            # Compute assignment of generalization set
+            model2 = models_fitness[0][0]
+            aa_gen2 = model2.pessimist(pt_gen)
+            ca = compute_ac(aa_gen, aa_gen2)
+            ca_gen.append(ca)
+
             if models_fitness[0][1] == 1:
                 break
 
             for j in range(int(nmodels / 2), nmodels):
-                metas[j] = meta_electre_tri_global(a, c, cps, pt, cat, aa_err)
-
-        model = models_fitness[0][0]
-        aa2 = model.pessimist(pt)
+                metas[j] = meta_electre_tri_global(a, c, cps, pt, cat,
+                                                   aa_err)
 
         t = time.time() - t1
+
+        # Find the percentage of erroned assignment originaly erroned
+        model = models_fitness[0][0]
+        aa2 = model.pessimist(pt)
 
         nok = nok_erroned = 0
         for alt in a:
@@ -104,41 +110,46 @@ class metaheuristic_global_tests(unittest.TestCase):
                     nok_erroned += 1
 
         total = len(a)
-        ac = float(total-nok) / total
+        erroned_bad = nok_erroned / total
 
-        erroned_bad = nok_erroned/total
-
-        return t, fitness, ac, erroned_bad
+        return t, fitness, ca_gen, erroned_bad
 
     def run_one_set_of_tests(self, n_alts, n_crit, n_cat, nloop, nmodels,
-                             nmeta, nerrors, nlearn=1.0):
+                             nmeta, nerrors, na_gen = 10000):
         fitness = { nc: { na: { ncat: { seed: [ 1 for i in range(nloop+1) ]
                                         for seed in seeds }
                                 for ncat in n_cat }
                           for na in n_alts }
                     for nc in n_crit }
+        ca_gen = { nc: { na: { ncat: { seed: [ 1 for i in range(nloop+1) ]
+                                       for seed in seeds }
+                               for ncat in n_cat }
+                         for na in n_alts }
+                   for nc in n_crit }
 
-        print('\nna\tnc\tncat\tseed\tnmodel\tnmeta\tnloop\tnloopu\tnlearn' \
-              '\tnerrors\tf_end\tac\terr_bad\ttime')
+        print('\nna\tnc\tncat\tseed\tnmodel\tnmeta\tnloop\tnloopu\tna_gen' \
+              '\tnerrors\tf_end\tca_gen\terr_bad\ttime')
         for na, nc, ncat, seed in product(n_alts, n_crit, n_cat, seeds):
-            t, f, ac, eb = self.run_metaheuristic(na, nc, ncat, seed, nloop,
-                                                  nmodels, nmeta, nerrors,
-                                                  nlearn)
+            t, f, ca, eb = self.run_metaheuristic(na, nc, ncat, seed,
+                                                      nloop, nmodels,
+                                                      nmeta, nerrors,
+                                                      na_gen)
             fitness[nc][na][ncat][seed][0:len(f)] = f
+            ca_gen[nc][na][ncat][seed][0:len(f)] = ca
             print("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%g\t%g\t%-6.5f" \
                   "\t%-6.5f\t%-6.5f\t%-6.5f" \
-                  % (na, nc, ncat, seed, nmodels, nmeta, nloop, len(f)-1,
-                     nlearn, nerrors, f[-1], ac, eb, t))
+                  % (na, nc, ncat, seed, nmodels, nmeta, nloop, len(f),
+                     na_gen, nerrors, f[-1], ca[-1], eb, t))
 
         print('Summary')
         print('=======')
         print("nseeds: %d" % len(seeds))
-        print('na\tnc\tncat\tnseeds\tnmodel\tnmeta\tloop\tnlearn\terrors' \
-              '\tf_avg\tf_min\tf_max')
+        print('na\tnc\tncat\tnseeds\tnmodel\tnmeta\tloop\tna_gen\terrors' \
+              '\tf_avg\tf_min\tf_max\tca_avg\tca_min\tca_max')
         for na, nc, ncat, loop in product(n_alts, n_crit, n_cat,
                                           range(nloop)):
-            favg = fmax = 0
-            fmin = 1
+            favg = fmax = caavg = camax = 0
+            fmin = camin = 1
             for seed in fitness[nc][na][ncat]:
                 f = fitness[nc][na][ncat][seed]
                 favg += f[loop]
@@ -146,11 +157,19 @@ class metaheuristic_global_tests(unittest.TestCase):
                     fmin = f[loop]
                 if f[loop] > fmax:
                     fmax = f[loop]
+
+                ca = ca_gen[nc][na][ncat][seed]
+                caavg += ca[loop]
+                if ca[loop] < camin:
+                    camin = ca[loop]
+                if ca[loop] > camax:
+                    camax = ca[loop]
             favg /= len(seeds)
-            print("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%g\t%g\t%-6.5f\t%-6.5f" \
-                  "\t%-6.5f" \
-                  % (na, nc, ncat, nmodels, nmeta, len(seeds), loop, nlearn,
-                     nerrors, favg, fmin, fmax))
+            caavg /= len(seeds)
+            print("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%g\t%-6.5f\t%-6.5f" \
+                  "\t%-6.5f\t%-6.5f\t%-6.5f\t%-6.5f" \
+                  % (na, nc, ncat, nmodels, nmeta, len(seeds), loop, na_gen,
+                     nerrors, favg, fmin, fmax, caavg, camin, camax))
 
     def test001_no_errors(self):
         n_alts = [ 1000 ]
