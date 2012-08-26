@@ -34,16 +34,19 @@ class test_list():
             self.test_list[i]['name'] = name
             self.test_list[i]['method'] = method
 
-    def print(self, ids = None):
+    def show(self, ids = None):
         for test in self.test_list:
             if ids and test not in ids:
                 continue
 
-            printc("* %d. %s" % (test, self.test_list[test]['name']))
+            printc("* %3d. %s" % (test, self.test_list[test]['name']))
 
     def run(self, ids = None):
         printc("* Tests to be run:");
-        self.print(ids)
+        if ids is None:
+            ids = [ i for i in range(1, len(self.test_list)+1) ]
+        self.show(ids)
+
         for id in ids:
             if id not in self.test_list:
                 printc("* Test id %s not found!" % id)
@@ -76,7 +79,7 @@ class test_list_example():
 if __name__ == "__main__":
     a = test_list_example()
     tests = test_list([a])
-    tests.print()
+    tests.show()
     try:
         to_run = input("Which one(s)? ")
     except:
