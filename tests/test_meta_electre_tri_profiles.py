@@ -158,33 +158,54 @@ class metaheuristic_profiles_tests(unittest.TestCase):
         self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors)
 
     def test002__10pc_errors(self):
-        n_alts = [ 10000 ]
-        n_crit = [ 5, 7, 10 ]
-        n_cat = [ 2, 3 ]
+        n_alts = [ 1000 ]
+        n_crit = [ 10 ]
+        n_cat = [ 3 ]
         nloop = 1000
         nmodel = 1
         nerrors = 0.1
 
         self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors)
 
+    def test002__20pc_errors(self):
+        n_alts = [ 1000 ]
+        n_crit = [ 10 ]
+        n_cat = [ 3 ]
+        nloop = 1000
+        nmodel = 1
+        nerrors = 0.2
+
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors)
+
+    def test002__30pc_errors(self):
+        n_alts = [ 1000 ]
+        n_crit = [ 10 ]
+        n_cat = [ 3 ]
+        nloop = 1000
+        nmodel = 1
+        nerrors = 0.3
+
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors)
+
+    def test002__40pc_errors(self):
+        n_alts = [ 1000 ]
+        n_crit = [ 10 ]
+        n_cat = [ 3 ]
+        nloop = 1000
+        nmodel = 1
+        nerrors = 0.4
+
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors)
+
     def test003_pc_alternatives(self):
-        n_alts = [ 10000 ]
+        n_alts = [ 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000 ]
         n_crit = [ 5, 7, 10 ]
         n_cat = [ 2, 3 ]
         nloop = 1000
         nmodel = 1
         nerrors = 0
 
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 1)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.09)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.08)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.07)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.06)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.05)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.04)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.03)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.02)
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors, 0.01)
+        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors)
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
