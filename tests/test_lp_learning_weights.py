@@ -75,7 +75,7 @@ def variable_number_alternatives_and_criteria(ncat, er = 0, na_gen = 10000):
         times_solve[nc][na][seed] = t3-t2
 
         # Compute new assignment and classification accuracy
-        aa2 = model.pessimist(pt)
+        aa2 = model2.pessimist(pt)
         nok = nok_erroned = 0
         for alt in a:
             if aa(alt.id) != aa2(alt.id):
