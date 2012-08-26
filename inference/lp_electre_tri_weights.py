@@ -9,7 +9,7 @@ verbose = False
 try:
     solver = os.environ['SOLVER']
 except:
-    solver = 'glpk'
+    solver = 'cplex'
 
 if solver == 'glpk':
     import pymprog
