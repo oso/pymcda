@@ -1,7 +1,6 @@
 from __future__ import division
 import sys
 sys.path.insert(0, "..")
-import unittest
 import time
 import random
 from itertools import product
@@ -124,7 +123,7 @@ def variable_number_alternatives_and_criteria(ncat, er = 0, na_gen = 10000):
               % (nc, na, ncat, na_gen, er, obj, err, err_min, err_max,
               err_erroned, ca, ca_min, ca_max, tim_tot, tim_con, tim_sol))
 
-class tests_lp_electre_tri_weights(unittest.TestCase):
+class tests_lp_electre_tri_weights():
 
     def test001_two_categories(self):
         variable_number_alternatives_and_criteria(2)
@@ -138,7 +137,7 @@ class tests_lp_electre_tri_weights(unittest.TestCase):
     def test004_five_categories(self):
         variable_number_alternatives_and_criteria(5)
 
-class tests_lp_electre_tri_weights_with_errors(unittest.TestCase):
+class tests_lp_electre_tri_weights_with_errors():
 
     def test001_two_categories_errors_10pc(self):
         variable_number_alternatives_and_criteria(2, 0.1)
@@ -165,8 +164,40 @@ class tests_lp_electre_tri_weights_with_errors(unittest.TestCase):
         variable_number_alternatives_and_criteria(3, 0.4)
 
 if __name__ == "__main__":
-    loader = unittest.TestLoader()
-    suite1 = loader.loadTestsFromTestCase(tests_lp_electre_tri_weights)
-    suite2 = loader.loadTestsFromTestCase(tests_lp_electre_tri_weights_with_errors)
-    alltests = unittest.TestSuite([suite1, suite2])
-    unittest.TextTestRunner(verbosity=2).run(alltests)
+    from test_utils import test_list
+    from optparse import OptionParser
+
+    parser = OptionParser(usage = "-t <test_ids>")
+    parser.add_option("-l", "--list",  action="store_true", dest="show",
+                      help = "show list of tests")
+    parser.add_option("-t", "--tests", dest = "tests", default="all",
+                      help = "run tests ids (all = All tests;" \
+                             "ask = Display list and ask)",
+                      metavar = "test_ids")
+
+    (options, args) = parser.parse_args()
+    print options
+    print args
+
+    suite1 = tests_lp_electre_tri_weights()
+    suite2 = tests_lp_electre_tri_weights_with_errors()
+    tests = test_list([suite1, suite2])
+
+    if options.show is True:
+        tests.show()
+
+    if options.tests is 'all':
+        tests.run()
+    elif options.tests is 'ask':
+        tests.show()
+        to_run = input("Which test(s) should be run? ")
+        if type(to_run) == int:
+            to_run = [ to_run ]
+        elif type(to_run) != tuple:
+            print('Invalid input');
+            exit(1)
+        test.run(to_run)
+    elif options.tests is 'none':
+        pass
+    else:
+        tests.run(options.tests)
