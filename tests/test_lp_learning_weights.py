@@ -164,40 +164,8 @@ class tests_lp_electre_tri_weights_with_errors():
         variable_number_alternatives_and_criteria(3, 0.4)
 
 if __name__ == "__main__":
-    from test_utils import test_list
-    from optparse import OptionParser
-
-    parser = OptionParser(usage = "-t <test_ids>")
-    parser.add_option("-l", "--list",  action="store_true", dest="show",
-                      help = "show list of tests")
-    parser.add_option("-t", "--tests", dest = "tests", default="all",
-                      help = "run tests ids (all = All tests;" \
-                             "ask = Display list and ask)",
-                      metavar = "test_ids")
-
-    (options, args) = parser.parse_args()
-    print options
-    print args
+    from test_utils import test_init
 
     suite1 = tests_lp_electre_tri_weights()
     suite2 = tests_lp_electre_tri_weights_with_errors()
-    tests = test_list([suite1, suite2])
-
-    if options.show is True:
-        tests.show()
-
-    if options.tests is 'all':
-        tests.run()
-    elif options.tests is 'ask':
-        tests.show()
-        to_run = input("Which test(s) should be run? ")
-        if type(to_run) == int:
-            to_run = [ to_run ]
-        elif type(to_run) != tuple:
-            print('Invalid input');
-            exit(1)
-        test.run(to_run)
-    elif options.tests is 'none':
-        pass
-    else:
-        tests.run(options.tests)
+    test_init([suite1, suite2])

@@ -3,14 +3,27 @@ import sys
 import time
 import traceback
 
-def printc(*args):
-    print("\033[93m", end = '')
+#following from Python cookbook, #475186
+def has_colours(stream):
+    if not hasattr(stream, "isatty"):
+        return False
+    if not stream.isatty():
+        return False # auto color only on TTYs
     try:
-        print(*args)
+        import curses
+        curses.setupterm()
+        return curses.tigetnum("colors") > 2
     except:
-        print("\033[0m", end = '')
-        traceback.print_exc(sys.stderr)
-    print("\033[0m", end = '')
+        # guess false in case of error
+        return False
+has_colours = has_colours(sys.stdout)
+
+def printc(*args):
+    if has_colours:
+        print("\033[93m", end = '')
+        print(*args, end = "\033[0m\n" )
+    else:
+        print(*args)
 
 class test_list():
 
@@ -75,6 +88,40 @@ class test_list_example():
     def test002_b(self):
         print('beuh!')
         time.sleep(2)
+
+def test_init(l = []):
+    from optparse import OptionParser
+
+    parser = OptionParser(usage = "-t <test_ids>")
+    parser.add_option("-l", "--list",  action="store_true", dest="show",
+                      help = "show list of tests")
+    parser.add_option("-t", "--tests", dest = "tests", default="all",
+                      help = "run tests ids (all = All tests;" \
+                             "ask = Display list and ask)",
+                      metavar = "test_ids")
+
+    (options, args) = parser.parse_args()
+
+    tests = test_list(l)
+
+    if options.show is True:
+        tests.show()
+
+    if options.tests == 'all':
+        tests.run()
+    elif options.tests == 'ask':
+        tests.show()
+        to_run = input("Which test(s) should be run? ")
+        if type(to_run) == int:
+            to_run = [ to_run ]
+        elif type(to_run) != tuple:
+            print('Invalid input');
+            exit(1)
+        tests.run(to_run)
+    elif options.tests == 'none':
+        pass
+    else:
+        tests.run()
 
 if __name__ == "__main__":
     a = test_list_example()
