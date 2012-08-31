@@ -46,6 +46,7 @@ class test_list():
             self.test_list[i] = dict()
             self.test_list[i]['name'] = name
             self.test_list[i]['method'] = method
+            self.test_list[i]['desc'] = method.__doc__
 
     def show(self, ids = None):
         for test in self.test_list:
@@ -66,6 +67,8 @@ class test_list():
                 continue
 
             printc("* Running %s..." % self.test_list[id]['name'])
+            if self.test_list[id]['desc']:
+                printc("* Description: %s" % self.test_list[id]['desc'])
 
             try:
                 t1 = time.time()
@@ -83,6 +86,7 @@ class test_list_example():
         pass
 
     def test001_test_a(self):
+        """Just print coucou"""
         print('coucou!')
 
     def test002_b(self):
