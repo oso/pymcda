@@ -3,6 +3,34 @@ import sys
 import time
 import traceback
 
+class test_result():
+
+    def __init__(self, test_name):
+        self.test_name = test_name
+
+    def __getitem__(self, name):
+        if not hasattr(self, name):
+            return None
+        return getattr(self, name)
+
+    def __repr__(self):
+        return self.test_name
+
+    def get_params(self):
+        return self.__dict__.keys()
+
+class tests_results(list):
+
+    def get(self, name, val):
+        l = tests_results()
+        for tr in self:
+            if tr[name] != val:
+                continue
+
+            l.append(tr)
+
+        return l
+
 #following from Python cookbook, #475186
 def has_colours(stream):
     if not hasattr(stream, "isatty"):
