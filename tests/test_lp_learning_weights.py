@@ -1,4 +1,6 @@
 from __future__ import division
+import csv
+import datetime
 import sys
 sys.path.insert(0, "..")
 import time
@@ -18,154 +20,195 @@ from tools.generate_random import generate_random_categories_profiles
 from tools.utils import compute_ac
 from tools.utils import normalize_criteria_weights
 from tools.utils import add_errors_in_affectations
+from test_utils import test_result, test_results
 
-seeds = [ 123, 456, 789, 12, 345, 678, 901, 234, 567, 890 ]
+fields = [ 'seed', 'na', 'nc', 'ncat', 'na_gen', 'pcerrors', 'obj', 'ca', \
+           'ca_erroned', 'ca_gen', 't_total', 't_const', 't_solve' ]
+fields_summary = [ 'na', 'nc', 'ncat', 'na_gen', 'pcerrors', \
+                   'obj_avg', 'obj_min', 'obj_max', \
+                   'ca_avg', 'ca_min', 'ca_max', \
+                   'ca_erroned_avg', 'ca_erroned_min', 'ca_erroned_max', \
+                   'ca_gen_avg', 'ca_gen_min', 'ca_gen_max', \
+                   't_total_avg', 't_total_min', 't_total_max', \
+                   't_const_avg', 't_const_min', 't_const_max', \
+                   't_solve_avg', 't_solve_min', 't_solve_max'  ]
 
-def variable_number_alternatives_and_criteria(ncat, er = 0, na_gen = 10000):
-    n_alts = [ i*1000 for i in range(1, 11) ]
-    n_crit = [ 5, 7, 10]
+def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
+    # Generate a random ELECTRE TRI model and assignment examples
+    a = generate_random_alternatives(na)
+    c = generate_random_criteria(nc)
+    cv = generate_random_criteria_values(c, seed)
+    normalize_criteria_weights(cv)
+    pt = generate_random_performance_table(a, c)
 
-    print('\nnc\tna\tncat\tna_gen\terr\tseed\tobj\terrors\terr_bad\tca'
-          '\tt_total\tt_const\tt_solve')
+    cat = generate_random_categories(ncat)
+    cps = generate_random_categories_profiles(cat)
+    b = cps.get_ordered_profiles()
+    bpt = generate_random_profiles(b, c)
 
-    objectives = { nc: {na: dict() for na in n_alts} for nc in n_crit }
-    times_total = { nc: {na: dict() for na in n_alts} for nc in n_crit }
-    times_const = { nc: {na: dict() for na in n_alts} for nc in n_crit }
-    times_solve = { nc: {na: dict() for na in n_alts} for nc in n_crit }
-    errors = { nc: {na: dict() for na in n_alts} for nc in n_crit }
-    errors_min = { nc: {na: dict() for na in n_alts} for nc in n_crit }
-    errors_max = { nc: {na: dict() for na in n_alts} for nc in n_crit }
-    errors_erroned = { nc: {na: dict() for na in n_alts} for nc in n_crit }
-    cas = { nc: {na: dict() for na in n_alts} for nc in n_crit }
-    for nc, na, seed in product(n_crit, n_alts, seeds):
-        # Generate a random ELECTRE TRI model and assignment examples
-        a = generate_random_alternatives(na)
-        c = generate_random_criteria(nc)
-        cv = generate_random_criteria_values(c, seed)
-        normalize_criteria_weights(cv)
-        pt = generate_random_performance_table(a, c)
+    lbda = random.uniform(0.5, 1)
 
-        cat = generate_random_categories(ncat)
-        cps = generate_random_categories_profiles(cat)
-        b = cps.get_ordered_profiles()
-        bpt = generate_random_profiles(b, c)
+    model = electre_tri(c, cv, bpt, lbda, cps)
+    model2 = model.copy()
+    aa = model.pessimist(pt)
 
-        lbda = random.uniform(0.5, 1)
+    # Add errors in assignment examples
+    aa_err = aa.copy()
+    aa_erroned = add_errors_in_affectations(aa_err, cat.get_ids(), pcerrors)
 
-        model = electre_tri(c, cv, bpt, lbda, cps)
-        model2 = model.copy()
-        aa = model.pessimist(pt)
+    # Run linear program
+    t1 = time.time()
+    lp_weights = lp_electre_tri_weights(model2, pt, aa_err, cps,
+        0.0001)
+    t2 = time.time()
+    obj = lp_weights.solve()
+    t3 = time.time()
 
-        # Add errors in assignment examples
-        aa_err = aa.copy()
-        aa_erroned = add_errors_in_affectations(aa_err, cat.get_ids(), er)
-
-        # Run linear program
-        t1 = time.time()
-        lp_weights = lp_electre_tri_weights(model2, pt, aa_err, cps,
-                                            0.0001)
-        t2 = time.time()
-        obj = lp_weights.solve()
-        t3 = time.time()
-
-        objectives[nc][na][seed] = obj
-        times_total[nc][na][seed] = t3-t1
-        times_const[nc][na][seed] = t2-t1
-        times_solve[nc][na][seed] = t3-t2
-
-        # Compute new assignment and classification accuracy
-        aa2 = model2.pessimist(pt)
-        nok = nok_erroned = 0
-        for alt in a:
-            if aa(alt.id) != aa2(alt.id):
-                nok += 1
-                if alt.id in aa_erroned:
-                    nok_erroned += 1
+    # Compute new assignment and classification accuracy
+    aa2 = model2.pessimist(pt)
+    ok = ok_erroned = 0
+    for alt in a:
+        if aa(alt.id) == aa2(alt.id):
+            ok += 1
+            if alt.id in aa_erroned:
+                ok_erroned += 1
 
         total = len(a)
+    ca = ok / total
+    ca_erroned = ok_erroned / total
 
-        e = nok/total
-        e_err = nok_erroned / total
-        errors[nc][na][seed] = nok / total
-        errors_erroned[nc][na][seed] = e_err
+    # Perform the generalization
+    a_gen = generate_random_alternatives(na_gen)
+    pt_gen = generate_random_performance_table(a_gen, c)
+    aa = model.pessimist(pt_gen)
+    aa2 = model2.pessimist(pt_gen)
+    ca_gen = compute_ac(aa, aa2)
 
-        # Perform the generalization
-        a_gen = generate_random_alternatives(na_gen)
-        pt_gen = generate_random_performance_table(a_gen, c)
-        aa = model.pessimist(pt_gen)
-        aa2 = model2.pessimist(pt_gen)
-        ca = compute_ac(aa, aa2)
-        cas[nc][na][seed] = ca
+    # Save all infos in test_result class
+    t = test_result("%s-%d-%d-%d-%d-%g" % (seed, na, nc, ncat, na_gen,
+                    pcerrors))
 
-        print("%d\t%d\t%d\t%d\t%-6.4f\t%s\t%-6.4f\t%-6.5f\t%-6.5f"
-              "\t%-6.5f\t%-6.5f\t%-6.5f\t%-6.5f" % (nc, na, ncat, na_gen,
-              er, seed, obj, e, e_err, ca, t3-t1, t2-t1, t3-t2))
+    # Input params
+    t['seed'] = seed
+    t['na'] = na
+    t['nc'] = nc
+    t['ncat'] = ncat
+    t['na_gen'] = na_gen
+    t['pcerrors'] = pcerrors
 
-    print('Summary')
-    print('========')
-    print("nseeds: %d" % len(seeds))
-    print('nc\tna\tncat\tna_gen\terr\tobj\terr_avg\terr_min\terr_max' \
-          '\terr_bad\tca\tca_min\tca_max\tt_total\tt_cons\tt_solve')
-    for nc, na in product(n_crit, n_alts):
-        obj = sum(objectives[nc][na].values()) / len(seeds)
-        tim_tot = sum(times_total[nc][na].values()) / len(seeds)
-        tim_con = sum(times_const[nc][na].values()) / len(seeds)
-        tim_sol = sum(times_solve[nc][na].values()) / len(seeds)
-        err = sum(errors[nc][na].values()) / len(seeds)
-        err_min = min(errors[nc][na].values())
-        err_max = max(errors[nc][na].values())
-        err_erroned = sum(errors_erroned[nc][na].values()) / len(seeds)
-        ca = sum(cas[nc][na].values()) / len(seeds)
-        ca_min = min(cas[nc][na].values())
-        ca_max = max(cas[nc][na].values())
-        print("%d\t%d\t%d\t%d\t%-6.5f\t%-6.4f\t%-6.5f\t%-6.5f\t%-6.5f"
-              "\t%-6.5f\t%-6.5f\t%-6.5f\t%-6.5f\t%-6.5f\t%-6.5f\t%-6.5f" \
-              % (nc, na, ncat, na_gen, er, obj, err, err_min, err_max,
-              err_erroned, ca, ca_min, ca_max, tim_tot, tim_con, tim_sol))
+    # Output params
+    t['obj'] = obj
+    t['ca'] = ca
+    t['ca_erroned'] = ca_erroned
+    t['ca_gen'] = ca_gen
+    t['t_total'] = t3 - t1
+    t['t_const'] = t2 - t1
+    t['t_solve'] = t3 - t2
 
-class tests_lp_electre_tri_weights():
+    return t
 
-    def test001_two_categories(self):
-        variable_number_alternatives_and_criteria(2)
+def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, filename):
+    # Create the CSV writer
+    writer = csv.writer(open(filename, 'wb'))
+    writer.writerow(fields)
 
-    def test002_three_categories(self):
-        variable_number_alternatives_and_criteria(3)
+    # Create a test results instance
+    results = test_results()
 
-    def test003_four_categories(self):
-        variable_number_alternatives_and_criteria(4)
+    # Initialize the seeds
+    seeds = range(nseeds)
 
-    def test004_five_categories(self):
-        variable_number_alternatives_and_criteria(5)
+    # Run the algorithm
+    for _na, _nc, _ncat, _na_gen, _pcerrors, seed \
+        in product(na, nc, ncat, na_gen, pcerrors, seeds):
 
-class tests_lp_electre_tri_weights_with_errors():
+        t1 = time.time()
+        t = test_lp_learning_weights(seed, _na, _nc, _ncat, _na_gen,
+                                     _pcerrors)
+        t2 = time.time()
 
-    def test001_two_categories_errors_10pc(self):
-        variable_number_alternatives_and_criteria(2, 0.1)
+        t.set_attributes_order(fields)
+        t.tocsv(writer, fields)
+        print("%s (%5f seconds)" % (t, t2 - t1))
 
-    def test002_two_categories_errors_20pc(self):
-        variable_number_alternatives_and_criteria(2, 0.2)
+        results.append(t)
 
-    def test003_two_categories_errors_30pc(self):
-        variable_number_alternatives_and_criteria(2, 0.3)
-
-    def test004_two_categories_errors_40pc(self):
-        variable_number_alternatives_and_criteria(2, 0.4)
-
-    def test005_three_categories_errors_10pc(self):
-        variable_number_alternatives_and_criteria(3, 0.1)
-
-    def test006_three_categories_errors_20pc(self):
-        variable_number_alternatives_and_criteria(3, 0.2)
-
-    def test007_three_categories_errors_30pc(self):
-        variable_number_alternatives_and_criteria(3, 0.3)
-
-    def test008_three_categories_errors_40pc(self):
-        variable_number_alternatives_and_criteria(3, 0.4)
+    # Perform a summary
+    writer.writerow([])
+    t = results.summary(['na', 'nc', 'ncat', 'na_gen', 'pcerrors'],
+                        [ 'obj', 'ca', 'ca_erroned', 'ca_gen', 't_total',
+                          't_const', 't_solve'])
+    t.tocsv(writer)
 
 if __name__ == "__main__":
-    from test_utils import test_init
+    from optparse import OptionParser
 
-    suite1 = tests_lp_electre_tri_weights()
-    suite2 = tests_lp_electre_tri_weights_with_errors()
-    test_init([suite1, suite2])
+    parser = OptionParser(usage = "-n <na> -c <nc> -t <ncat> -g <na_gen>" \
+                          "-e <pc_errors> -s <nseed>")
+    parser.add_option("-n", "--na", action = "store", type="string",
+                      dest = "na",
+                      help = "number of assignment examples")
+    parser.add_option("-c", "--nc", action = "store", type="string",
+                      dest = "nc",
+                      help = "number of criteria")
+    parser.add_option("-t", "--ncat", action = "store", type="string",
+                      dest = "ncat",
+                      help = "number of categories")
+    parser.add_option("-g", "--na_gen", action = "store", type="string",
+                      dest = "na_gen",
+                      help = "number of generalization alternatives")
+    parser.add_option("-e", "--errors", action = "store", type="string",
+                      dest = "pcerrors",
+                      help = "ratio of errors in the learning set")
+    parser.add_option("-s", "--nseeds", action = "store", type="string",
+                      dest = "nseeds",
+                      help = "number of seeds")
+    parser.add_option("-f", "--filename", action = "store", type="string",
+                      dest = "filename",
+                      help = "filename to save csv output")
+
+    (options, args) = parser.parse_args()
+
+    while not options.na:
+        options.na = raw_input("Number of assignment examples ? ")
+    options.na = options.na.split(",")
+    options.na = [ int(x) for x in options.na ]
+
+    while not options.nc:
+        options.nc = raw_input("Number of criteria ? ")
+    options.nc = options.nc.split(",")
+    options.nc = [ int(x) for x in options.nc ]
+
+    while not options.ncat:
+        options.ncat = raw_input("Number of categories ? ")
+    options.ncat = options.ncat.split(",")
+    options.ncat = [ int(x) for x in options.ncat ]
+
+    while not options.na_gen:
+        options.na_gen = raw_input("Number of generalization " \
+                                   "alternatives ? ")
+    options.na_gen = options.na_gen.split(",")
+    options.na_gen = [ int(x) for x in options.na_gen ]
+
+    while not options.pcerrors:
+        options.pcerrors = raw_input("Ratio of errors ? ")
+    options.pcerrors = options.pcerrors.split(",")
+    options.pcerrors = [ float(x) for x in options.pcerrors ]
+
+    while not options.nseeds:
+        options.nseeds = raw_input("Number of seeds ? ")
+    options.nseeds = int(options.nseeds)
+
+    while not options.filename:
+        dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        default_filename = "test_lp_learning_weights-%s.csv" % dt
+        options.filename = raw_input("File to save CSV data [%s] ? " \
+                                     % default_filename)
+        if not options.filename:
+            options.filename = default_filename
+
+    if options.filename[-4:] != ".csv":
+        options.filename += ".csv"
+
+    run_tests(options.na, options.nc, options.ncat, options.na_gen,
+              options.pcerrors, options.nseeds, options.filename)

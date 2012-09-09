@@ -1,28 +1,44 @@
 from __future__ import print_function
+import csv
 import sys
 import time
 import traceback
+from itertools import product
 
 class test_result():
 
     def __init__(self, test_name):
         self.test_name = test_name
+        self.attr_list = []
 
     def __getitem__(self, name):
-        if not hasattr(self, name):
-            return None
         return getattr(self, name)
+
+    def __setitem__(self, name, value):
+        if name not in self.attr_list:
+            self.attr_list.append(name)
+
+        setattr(self, name, value)
 
     def __repr__(self):
         return self.test_name
 
-    def get_params(self):
-        return self.__dict__.keys()
+    def set_attributes_order(self, order):
+        self.attr_list = set(order).union(set(self.attr_list))
 
-class tests_results(list):
+    def get_attributes(self):
+        return self.attr_list
+
+    def tocsv(self, writer, fields = None):
+        if fields is None:
+            fields = self.get_attributes()
+
+        writer.writerow([ self[field] for field in fields ])
+
+class test_results(list):
 
     def get(self, name, val):
-        l = tests_results()
+        l = test_results()
         for tr in self:
             if tr[name] != val:
                 continue
@@ -30,6 +46,53 @@ class tests_results(list):
             l.append(tr)
 
         return l
+
+    def unique(self, field):
+        unique_values = []
+        for tr in self:
+            value = tr[field]
+            if value not in unique_values:
+                unique_values.append(value)
+
+        return unique_values
+
+    def summary(self, unique_fields, average_fields):
+        # Research uniques values for each field
+        unique_values = {}
+        for uf in unique_fields:
+            unique_values[uf] = self.unique(uf)
+
+        # For each combination perform the average, min and max
+        trs = test_results()
+
+        keys = unique_values.keys()
+        for indices in product(*unique_values.values()):
+            tr = test_result(None)
+
+            params = dict(zip(keys, indices))
+            l = self
+            for k, v in params.items():
+                l = l.get(k, v)
+                tr[k] = v
+
+            tr["#"] = len(l)
+
+            for af in average_fields:
+                v = [ r[af] for r in l ]
+                tr["%s_avg" % af] = sum(v) / len(v)
+                tr["%s_min" % af] = min(v)
+                tr["%s_max" % af] = max(v)
+
+            trs.append(tr)
+
+        return trs
+
+    def tocsv(self, writer, fields = None):
+        if fields is None:
+            fields = self[0].get_attributes()
+        writer.writerow(fields)
+        for tr in self:
+            tr.tocsv(writer, fields)
 
 #following from Python cookbook, #475186
 def has_colours(stream):
