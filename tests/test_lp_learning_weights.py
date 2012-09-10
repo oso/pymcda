@@ -22,17 +22,6 @@ from tools.utils import normalize_criteria_weights
 from tools.utils import add_errors_in_affectations
 from test_utils import test_result, test_results
 
-fields = [ 'seed', 'na', 'nc', 'ncat', 'na_gen', 'pcerrors', 'obj', 'ca', \
-           'ca_erroned', 'ca_gen', 't_total', 't_const', 't_solve' ]
-fields_summary = [ 'na', 'nc', 'ncat', 'na_gen', 'pcerrors', \
-                   'obj_avg', 'obj_min', 'obj_max', \
-                   'ca_avg', 'ca_min', 'ca_max', \
-                   'ca_erroned_avg', 'ca_erroned_min', 'ca_erroned_max', \
-                   'ca_gen_avg', 'ca_gen_min', 'ca_gen_max', \
-                   't_total_avg', 't_total_min', 't_total_max', \
-                   't_const_avg', 't_const_min', 't_const_max', \
-                   't_solve_avg', 't_solve_min', 't_solve_max'  ]
-
 def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
     # Generate a random ELECTRE TRI model and assignment examples
     a = generate_random_alternatives(na)
@@ -110,7 +99,6 @@ def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
 def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, filename):
     # Create the CSV writer
     writer = csv.writer(open(filename, 'wb'))
-    writer.writerow(fields)
 
     # Create a test results instance
     results = test_results()
@@ -119,6 +107,7 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, filename):
     seeds = range(nseeds)
 
     # Run the algorithm
+    initialized = False
     for _na, _nc, _ncat, _na_gen, _pcerrors, seed \
         in product(na, nc, ncat, na_gen, pcerrors, seeds):
 
@@ -127,8 +116,11 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, filename):
                                      _pcerrors)
         t2 = time.time()
 
-        t.set_attributes_order(fields)
-        t.tocsv(writer, fields)
+        if initialized is False:
+            writer.writerow(t.get_attributes())
+            initialized = True
+
+        t.tocsv(writer)
         print("%s (%5f seconds)" % (t, t2 - t1))
 
         results.append(t)
