@@ -9,14 +9,20 @@ class test_result():
 
     def __init__(self, test_name):
         self.test_name = test_name
-        self.attr_list = []
+        self.attributes = []
+        self.attributes_size = {}
 
     def __getitem__(self, name):
         return getattr(self, name)
 
     def __setitem__(self, name, value):
-        if name not in self.attr_list:
-            self.attr_list.append(name)
+        if name not in self.attributes:
+            self.attributes.append(name)
+
+        if type(value) == list:
+            self.attributes_size[name] = len(value)
+        else:
+            self.attributes_size[name] = 1
 
         setattr(self, name, value)
 
@@ -24,16 +30,38 @@ class test_result():
         return self.test_name
 
     def set_attributes_order(self, order):
-        self.attr_list = set(order).union(set(self.attr_list))
+        self.attributes = set(order).union(set(self.attributes))
 
     def get_attributes(self):
-        return self.attr_list
+        return self.attributes
+
+    def get_attributes_size(self):
+        return self.attributes_size
+
+    def get_header(self):
+        header = []
+        for attr in self.attributes:
+            size = self.attributes_size[attr]
+            if size > 1:
+                header += [ attr + "%d" % i for i in range(size) ]
+            else:
+                header += [ attr ]
+
+        return header
 
     def tocsv(self, writer, fields = None):
         if fields is None:
             fields = self.get_attributes()
 
-        writer.writerow([ self[field] for field in fields ])
+        row = []
+        for field in fields:
+            if type(self[field]) == list:
+                for val in self[field]:
+                    row += [ val ]
+            else:
+                row += [ self[field] ]
+
+        writer.writerow(row)
 
 class test_results(list):
 
@@ -69,6 +97,7 @@ class test_results(list):
         # For each combination perform the average, min and max
         trs = test_results()
 
+        attributes_size = self[0].get_attributes_size()
         keys = unique_values.keys()
         for indices in product(*unique_values.values()):
             tr = test_result(None)
@@ -82,10 +111,23 @@ class test_results(list):
             tr["#"] = len(l)
 
             for af in average_fields:
-                v = [ r[af] for r in l ]
-                tr["%s_avg" % af] = sum(v) / len(v)
-                tr["%s_min" % af] = min(v)
-                tr["%s_max" % af] = max(v)
+                if attributes_size[af] > 1:
+                    n = len(l)
+                    v = zip(*(r[af] for r in l))
+                    avg_values = [ sum(x) / n for x in v ]
+                    min_values = [ min(x) for x in v ]
+                    max_values = [ max(x) for x in v ]
+                    for i, val in enumerate(avg_values):
+                        tr["%s%d_avg" % (af, i)] = val
+                    for i, val in enumerate(min_values):
+                        tr["%s%d_min" % (af, i)] = val
+                    for i, val in enumerate(max_values):
+                        tr["%s%d_max" % (af, i)] = val
+                else:
+                    v = [ r[af] for r in l ]
+                    tr["%s_avg" % af] = sum(v) / len(v)
+                    tr["%s_min" % af] = min(v)
+                    tr["%s_max" % af] = max(v)
 
             trs.append(tr)
 
