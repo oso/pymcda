@@ -56,6 +56,10 @@ class test_results(list):
 
         return unique_values
 
+    def set_attributes_order(self, order):
+        for tr in self:
+            tr.set_attributes_order(order)
+
     def summary(self, unique_fields, average_fields):
         # Research uniques values for each field
         unique_values = {}
@@ -71,9 +75,9 @@ class test_results(list):
 
             params = dict(zip(keys, indices))
             l = self
-            for k, v in params.items():
-                l = l.get(k, v)
-                tr[k] = v
+            for k in unique_fields:
+                l = l.get(k, params[k])
+                tr[k] = params[k]
 
             tr["#"] = len(l)
 
