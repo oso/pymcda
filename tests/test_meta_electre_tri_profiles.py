@@ -1,4 +1,5 @@
 from __future__ import division
+import csv
 import sys
 sys.path.insert(0, "..")
 import unittest
@@ -20,194 +21,224 @@ from tools.generate_random import generate_random_profiles
 from tools.generate_random import generate_random_categories_profiles
 from tools.utils import normalize_criteria_weights
 from tools.utils import add_errors_in_affectations
+from test_utils import test_result, test_results
 
-seeds = [ 123, 456, 789, 12, 345, 678, 901, 234, 567, 890 ]
+def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
+                                   max_loops):
+    # Generate an ELECTRE TRI model and assignment examples
+    a = generate_random_alternatives(na)
+    c = generate_random_criteria(nc)
+    cv = generate_random_criteria_values(c, seed)
+    normalize_criteria_weights(cv)
+    pt = generate_random_performance_table(a, c)
 
-class metaheuristic_profiles_tests(unittest.TestCase):
+    cat = generate_random_categories(ncat)
+    cps = generate_random_categories_profiles(cat)
+    b = cps.get_ordered_profiles()
+    bpt = generate_random_profiles(b, c)
 
-    def run_metaheuristic(self, na, nc, ncat, seed, nloop, nerrors = 0,
-                          na_gen = int(10000)):
-        fitness = []
+    lbda = random.uniform(0.5, 1)
 
-        # Generate an ELECTRE TRI model and assignment examples
-        a = generate_random_alternatives(na)
-        c = generate_random_criteria(nc)
-        cv = generate_random_criteria_values(c, seed)
-        normalize_criteria_weights(cv)
-        pt = generate_random_performance_table(a, c)
+    model = electre_tri(c, cv, bpt, lbda, cps)
+    model2 = model.copy()
+    aa = model.pessimist(pt)
 
-        cat = generate_random_categories(ncat)
-        cps = generate_random_categories_profiles(cat)
-        b = cps.get_ordered_profiles()
-        bpt = generate_random_profiles(b, c)
+    # Initiate model with random profiles
+    model2.bpt = generate_random_profiles(b, c)
 
-        lbda = random.uniform(0.5, 1)
+    # Add errors in assignment examples
+    aa_err = aa.copy()
+    aa_erroned = add_errors_in_affectations(aa_err, cat.get_ids(), pcerrors)
 
-        model = electre_tri(c, cv, bpt, lbda, cps)
-        aa = model.pessimist(pt)
+    # Sort the performance table
+    pt_sorted = sorted_performance_table(pt)
 
-        # Create a new model with same weights and different profiles
-        model2 = model.copy()
-        model2.bpt = generate_random_profiles(b, c)
+    t1 = time.time()
 
-        # Add errors in the affectations
-        aa_err = aa.copy()
-        aa_erroned = add_errors_in_affectations(aa_err, cat.get_ids(),
-                                                nerrors)
+    # Run the algorithm
+    meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa_err)
 
-        # Sort the performance table
-        pt_sorted = sorted_performance_table(pt)
+    ca_iter = [1] * (max_loops + 1)
+    aa2 = model2.pessimist(pt)
+    ca = compute_ac(aa_err, aa2)
+    best_ca = ca
+    best_bpt = model2.bpt.copy()
+    ca_iter[0] = ca
+
+    for k in range(max_loops):
+        if best_ca == 1:
+            break
+
+        meta.optimize(aa2, ca)
+
+        aa2 = model2.pessimist(pt)
+        ca = compute_ac(aa_err, aa2)
+
+        ca_iter[k + 1] = ca
+
+        if ca > best_ca:
+            best_ca = ca
+            best_bpt =  model2.bpt.copy()
+
+    t_total = time.time() - t1
+
+    # Determine the number of erroned alternatives badly assigned
+    model2.bpt = best_bpt
+    aa2 = model2.pessimist(pt)
+
+    ok_erroned = 0
+    for alt in a:
+        if aa(alt.id) == aa2(alt.id) and alt.id in aa_erroned:
+            ok_erroned += 1
+
+    total = len(a)
+    ca_erroned = ok_erroned / total
+
+    # Generate alternatives for the generalization
+    a_gen = generate_random_alternatives(na_gen)
+    pt_gen = generate_random_performance_table(a_gen, c)
+    aa_gen = model.pessimist(pt_gen)
+    aa_gen2 = model2.pessimist(pt_gen)
+    ca_gen = compute_ac(aa_gen, aa_gen2)
+
+    # Save all infos in test_result class
+    t = test_result("%s-%d-%d-%d-%d-%g-%d" % (seed, na, nc, ncat, na_gen,
+                    pcerrors, max_loops))
+
+    # Input params
+    t['seed'] = seed
+    t['na'] = na
+    t['nc'] = nc
+    t['ncat'] = ncat
+    t['na_gen'] = na_gen
+    t['pcerrors'] = pcerrors
+    t['max_loops'] = max_loops
+
+    # Ouput params
+    t['ca_best'] = best_ca
+    t['ca_erroned'] = ca_erroned
+    t['ca_gen'] = ca_gen
+    t['t_total'] = t_total
+
+    t['ca_iter'] = ca_iter
+
+    return t
+
+def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, filename):
+    # Create the CSV writer
+    writer = csv.writer(open(filename, 'wb'))
+
+    # Create a test_results instance
+    results = test_results()
+
+    # Initialize the seeds
+    seeds = range(nseeds)
+
+    # Run the algorithm
+    initialized = False
+    for _na, _nc, _ncat, _na_gen, _pcerrors, seed \
+        in product(na, nc, ncat, na_gen, pcerrors, seeds):
 
         t1 = time.time()
+        t = test_meta_electre_tri_profiles(seed, _na, _nc, _ncat, _na_gen,
+                                           _pcerrors, max_loops)
+        t2 = time.time()
 
-        # Run the algorithm
-        meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa_err)
+        if initialized is False:
+            writer.writerow(t.get_header())
+            initialized = True
 
-        best_f = 0
-        best_bpt = model2.bpt.copy()
-        for k in range(nloop):
-            aa2 = model2.pessimist(pt)
-            f = compute_ac(aa_err, aa2)
-            fitness.append(f)
-            if f >= best_f:
-                best_f = f
-                best_bpt = model2.bpt.copy()
+        t.tocsv(writer)
+        print("%s (%5f seconds)" % (t, t2 - t1))
 
-            if f == 1:
-                break
+        results.append(t)
 
-            meta.optimize(aa2, f)
+    # Perform a summary
+    writer.writerow([])
 
-        aa2 = model2.pessimist(pt)
-        f = compute_ac(aa_err, aa2)
-        fitness.append(f)
-        if f >= best_f:
-            best_f = f
-            best_bpt = model2.bpt.copy()
-
-        t = time.time() - t1
-
-        # Determine the number of erroned alternatives badly assigned
-        model2.bpt = best_bpt
-        aa2 = model2.pessimist(pt)
-
-        nok = nok_erroned = 0
-        for alt in a:
-            if aa(alt.id) != aa2(alt.id) and alt.id in aa_erroned:
-                nok_erroned += 1
-
-        total = len(a)
-        erroned_bad = nok_erroned / total
-
-        # Generate alternatives for the generalization
-        a_gen = generate_random_alternatives(na_gen)
-        pt_gen = generate_random_performance_table(a_gen, c)
-        aa_gen = model.pessimist(pt_gen)
-        aa_gen2 = model2.pessimist(pt_gen)
-        ca = compute_ac(aa_gen, aa_gen2)
-
-        return t, fitness, ca, erroned_bad
-
-    def run_one_set_of_tests(self, n_alts, n_crit, n_cat, nloop, nerrors,
-                             na_gen=10000):
-        fitness = { nc: { na: { ncat: { seed: [ 1 for i in range(nloop+1) ]
-                                        for seed in seeds }
-                                for ncat in n_cat }
-                          for na in n_alts }
-                    for nc in n_crit }
-
-        print('\nna\tnc\tncat\tseed\tnloop\tnloopu\tna_gen\tnerrors' \
-              '\tf_end\tf_best\tca\terr_bad\ttime')
-        for na, nc, ncat, seed in product(n_alts, n_crit, n_cat, seeds):
-            t, f, ca, eb = self.run_metaheuristic(na, nc, ncat, seed, nloop,
-                                                  nerrors, na_gen)
-            fitness[nc][na][ncat][seed][0:len(f)] = f
-            print("%d\t%d\t%d\t%d\t%d\t%d\t%g\t%g\t%-6.5f\t%-6.5f\t%-6.5f" \
-                  "\t%-6.5f\t%-6.5f" \
-                  % (na, nc, ncat, seed, nloop, len(f)-1, na_gen, nerrors,
-                  f[-1], max(f), ca, eb, t))
-
-        print('Summary')
-        print('=======')
-        print("nseeds: %d" % len(seeds))
-        print('na\tnc\tncat\tnseeds\tloop\tna_gen\terrors\tf_avg\tf_min' \
-              '\tf_max')
-        for na, nc, ncat, loop in product(n_alts, n_crit, n_cat,
-                                          range(nloop)):
-            favg = fmax = 0
-            fmin = 1
-            for seed in fitness[nc][na][ncat]:
-                f = fitness[nc][na][ncat][seed]
-                favg += f[loop]
-                if f[loop] < fmin:
-                    fmin = f[loop]
-                if f[loop] > fmax:
-                    fmax = f[loop]
-            favg /= len(seeds)
-            print("%d\t%d\t%d\t%d\t%d\t%g\t%g\t%-6.5f\t%-6.5f\t%-6.5f" \
-                  % (na, nc, ncat, len(seeds), loop, na_gen, nerrors,
-                     favg, fmin, fmax))
-
-    def test001_no_errors(self):
-        n_alts = [ 10000 ]
-        n_crit = [ 5, 7, 10 ]
-        n_cat = [ 2, 3 ]
-        nloop = 1000
-        nerrors = 0
-
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors)
-
-    def test002__10pc_errors(self):
-        n_alts = [ 1000 ]
-        n_crit = [ 10 ]
-        n_cat = [ 3 ]
-        nloop = 1000
-        nmodel = 1
-        nerrors = 0.1
-
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors)
-
-    def test002__20pc_errors(self):
-        n_alts = [ 1000 ]
-        n_crit = [ 10 ]
-        n_cat = [ 3 ]
-        nloop = 1000
-        nmodel = 1
-        nerrors = 0.2
-
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors)
-
-    def test002__30pc_errors(self):
-        n_alts = [ 1000 ]
-        n_crit = [ 10 ]
-        n_cat = [ 3 ]
-        nloop = 1000
-        nmodel = 1
-        nerrors = 0.3
-
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors)
-
-    def test002__40pc_errors(self):
-        n_alts = [ 1000 ]
-        n_crit = [ 10 ]
-        n_cat = [ 3 ]
-        nloop = 1000
-        nmodel = 1
-        nerrors = 0.4
-
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors)
-
-    def test003_pc_alternatives(self):
-        n_alts = [ 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000 ]
-        n_crit = [ 5, 7, 10 ]
-        n_cat = [ 2, 3 ]
-        nloop = 1000
-        nmodel = 1
-        nerrors = 0
-
-        self.run_one_set_of_tests(n_alts, n_crit, n_cat, nloop, nerrors)
+    t = results.summary(['na', 'nc', 'ncat', 'na_gen', 'pcerrors',
+                         'max_loops'],
+                         ['ca_best', 'ca_erroned', 't_total', 'ca_iter'])
+    t.tocsv(writer)
 
 if __name__ == "__main__":
-    loader = unittest.TestLoader()
-    suite = loader.loadTestsFromTestCase(metaheuristic_profiles_tests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    from optparse import OptionParser
+
+    parser = OptionParser(usage = "-n <na> -c <nc> -t <ncat> -g <na_gen> " \
+                          "-e <pc_errors> -s <nseed> -l <max_loops> " \
+                          "-f <filename>")
+    parser.add_option("-n", "--na", action = "store", type="string",
+                      dest = "na",
+                      help = "number of assignment examples")
+    parser.add_option("-c", "--nc", action = "store", type="string",
+                      dest = "nc",
+                      help = "number of criteria")
+    parser.add_option("-t", "--ncat", action = "store", type="string",
+                      dest = "ncat",
+                      help = "number of categories")
+    parser.add_option("-g", "--na_gen", action = "store", type="string",
+                      dest = "na_gen",
+                      help = "number of generalization alternatives")
+    parser.add_option("-e", "--errors", action = "store", type="string",
+                      dest = "pcerrors",
+                      help = "ratio of errors in the learning set")
+    parser.add_option("-s", "--nseeds", action = "store", type="string",
+                      dest = "nseeds",
+                      help = "number of seeds")
+    parser.add_option("-l", "--max-loops", action = "store", type="string",
+                      dest = "max_loops",
+                      help = "number of seeds")
+    parser.add_option("-f", "--filename", action = "store", type="string",
+                      dest = "filename",
+                      help = "filename to save csv output")
+
+    (options, args) = parser.parse_args()
+
+    while not options.na:
+        options.na = raw_input("Number of assignment examples ? ")
+    options.na = options.na.split(",")
+    options.na = [ int(x) for x in options.na ]
+
+    while not options.nc:
+        options.nc = raw_input("Number of criteria ? ")
+    options.nc = options.nc.split(",")
+    options.nc = [ int(x) for x in options.nc ]
+
+    while not options.ncat:
+        options.ncat = raw_input("Number of categories ? ")
+    options.ncat = options.ncat.split(",")
+    options.ncat = [ int(x) for x in options.ncat ]
+
+    while not options.na_gen:
+        options.na_gen = raw_input("Number of generalization " \
+                                   "alternatives ? ")
+    options.na_gen = options.na_gen.split(",")
+    options.na_gen = [ int(x) for x in options.na_gen ]
+
+    while not options.pcerrors:
+        options.pcerrors = raw_input("Ratio of errors ? ")
+    options.pcerrors = options.pcerrors.split(",")
+    options.pcerrors = [ float(x) for x in options.pcerrors ]
+
+    while not options.nseeds:
+        options.nseeds = raw_input("Number of seeds ? ")
+    options.nseeds = int(options.nseeds)
+
+    while not options.max_loops:
+        options.max_loops = raw_input("Max number of loops ? ")
+    options.max_loops = int(options.max_loops)
+
+    while not options.filename:
+        dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        default_filename = "test_meta_electre_tri_profiles-%s.csv" % dt
+        options.filename = raw_input("File to save CSV data [%s] ? " \
+                                     % default_filename)
+        if not options.filename:
+            options.filename = default_filename
+
+    if options.filename[-4:] != ".csv":
+        options.filename += ".csv"
+
+    run_tests(options.na, options.nc, options.ncat, options.na_gen,
+              options.pcerrors, options.nseeds, options.max_loops,
+              options.filename)
