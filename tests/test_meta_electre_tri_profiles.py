@@ -64,12 +64,14 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
     best_ca = ca
     best_bpt = model2.bpt.copy()
     ca_iter[0] = ca
+    nloops = 0
 
     for k in range(max_loops):
         if best_ca == 1:
             break
 
         meta.optimize(aa2, ca)
+        nloops += 1
 
         aa2 = model2.pessimist(pt)
         ca = compute_ac(aa_err, aa2)
@@ -118,6 +120,7 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
     t['ca_best'] = best_ca
     t['ca_erroned'] = ca_erroned
     t['ca_gen'] = ca_gen
+    t['nloops'] = nloops
     t['t_total'] = t_total
 
     t['ca_iter'] = ca_iter
@@ -145,10 +148,13 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, filename):
         t2 = time.time()
 
         if initialized is False:
-            writer.writerow(t.get_header())
+            fields = ['seed', 'na', 'nc', 'ncat', 'na_gen', 'pcerrors',
+                      'max_loops', 'ca_best', 'ca_erroned', 'nloops',
+                      't_total']
+            writer.writerow(fields)
             initialized = True
 
-        t.tocsv(writer)
+        t.tocsv(writer, fields)
         print("%s (%5f seconds)" % (t, t2 - t1))
 
         results.append(t)
@@ -158,7 +164,15 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, filename):
 
     t = results.summary(['na', 'nc', 'ncat', 'na_gen', 'pcerrors',
                          'max_loops'],
-                         ['ca_best', 'ca_erroned', 't_total', 'ca_iter'])
+                         ['ca_best', 'ca_erroned', 'nloops', 't_total'])
+    t.tocsv(writer)
+
+    # Summary by columns
+    writer.writerow([])
+
+    t = results.summary_columns(['na', 'nc', 'ncat', 'na_gen', 'pcerrors',
+                                 'max_loops'],
+                                ['ca_iter'], 'seed')
     t.tocsv(writer)
 
 if __name__ == "__main__":
