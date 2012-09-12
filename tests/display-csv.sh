@@ -1,3 +1,3 @@
 #!/bin/sh
 
-cat "$1" | column -s, -t | less -#2 -N -S
+cat "$1" | column -s, -t | less -#8 -N -S
