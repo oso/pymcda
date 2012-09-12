@@ -3,6 +3,7 @@ import csv
 import sys
 import time
 import traceback
+from copy import deepcopy
 from itertools import product
 
 class test_result():
@@ -112,9 +113,8 @@ class test_results(list):
 
             for af in average_fields:
                 if attributes_size[af] > 1:
-                    n = len(l)
                     v = zip(*(r[af] for r in l))
-                    avg_values = [ sum(x) / n for x in v ]
+                    avg_values = [ sum(x) / len(x) for x in v ]
                     min_values = [ min(x) for x in v ]
                     max_values = [ max(x) for x in v ]
                     for i, val in enumerate(avg_values):
@@ -130,6 +130,50 @@ class test_results(list):
                     tr["%s_max" % af] = max(v)
 
             trs.append(tr)
+
+        return trs
+
+    def summary_columns(self, unique_fields, column_fields, column_key):
+        # Research uniques values for each field
+        unique_values = {}
+        for uf in unique_fields:
+            unique_values[uf] = self.unique(uf)
+
+        # For each combination perform the average, min and max
+        trs = test_results()
+
+        attributes_size = self[0].get_attributes_size()
+        keys = unique_values.keys()
+        for indices in product(*unique_values.values()):
+            tr_unique = test_result(indices)
+
+            params = dict(zip(keys, indices))
+            l = self
+            for k in unique_fields:
+                l = l.get(k, params[k])
+                tr_unique[k] = params[k]
+
+            nrows = attributes_size[column_fields[0]]
+            for i in range(nrows):
+                tr = deepcopy(tr_unique)
+                for cf in column_fields:
+                    tr["#%s" % cf] = i
+
+                    col = []
+                    for t in l:
+                        suffix = t[column_key]
+                        tr["%s_%s" % (cf, suffix)] = t[cf][i]
+                        col += [ t[cf][i] ]
+
+                    avg_value = sum(col) / len(col)
+                    min_value = min(col)
+                    max_value = max(col)
+
+                    tr["%s_avg" % cf] = avg_value
+                    tr["%s_min" % cf] = min_value
+                    tr["%s_max" % cf] = max_value
+
+                trs.append(tr)
 
         return trs
 
