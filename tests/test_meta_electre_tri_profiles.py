@@ -209,7 +209,7 @@ if __name__ == "__main__":
                       help = "number of seeds")
     parser.add_option("-l", "--max-loops", action = "store", type="string",
                       dest = "max_loops",
-                      help = "number of seeds")
+                      help = "max number of loops")
     parser.add_option("-f", "--filename", action = "store", type="string",
                       dest = "filename",
                       help = "filename to save csv output")
