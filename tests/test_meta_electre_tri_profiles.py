@@ -131,6 +131,16 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, filename):
     # Create the CSV writer
     writer = csv.writer(open(filename, 'wb'))
 
+    # Write the test options
+    writer.writerow(['na', na])
+    writer.writerow(['nc', nc])
+    writer.writerow(['ncat', ncat])
+    writer.writerow(['na_gen', na_gen])
+    writer.writerow(['pcerrors', pcerrors])
+    writer.writerow(['nseeds', nseeds])
+    writer.writerow(['max_loops', max_loops])
+    writer.writerow([])
+
     # Create a test_results instance
     results = test_results()
 
