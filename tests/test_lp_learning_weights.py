@@ -135,8 +135,7 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, filename):
 if __name__ == "__main__":
     from optparse import OptionParser
 
-    parser = OptionParser(usage = "-n <na> -c <nc> -t <ncat> -g <na_gen>" \
-                          "-e <pc_errors> -s <nseed>")
+    parser = OptionParser(usage = "python %s [options]" % sys.argv[0])
     parser.add_option("-n", "--na", action = "store", type="string",
                       dest = "na",
                       help = "number of assignment examples")
