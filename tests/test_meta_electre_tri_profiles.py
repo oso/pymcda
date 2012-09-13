@@ -2,7 +2,6 @@ from __future__ import division
 import csv
 import sys
 sys.path.insert(0, "..")
-import unittest
 import time
 import random
 from itertools import product

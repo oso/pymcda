@@ -3,7 +3,6 @@ import csv
 import datetime
 import sys
 sys.path.insert(0, "..")
-import unittest
 import time
 import random
 from itertools import product
