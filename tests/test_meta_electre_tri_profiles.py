@@ -148,12 +148,12 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, filename):
 
     # Run the algorithm
     initialized = False
-    for _na, _nc, _ncat, _na_gen, _pcerrors, seed \
-        in product(na, nc, ncat, na_gen, pcerrors, seeds):
+    for _na, _nc, _ncat, _na_gen, _pcerrors, _max_loops, seed \
+        in product(na, nc, ncat, na_gen, pcerrors, max_loops, seeds):
 
         t1 = time.time()
         t = test_meta_electre_tri_profiles(seed, _na, _nc, _ncat, _na_gen,
-                                           _pcerrors, max_loops)
+                                           _pcerrors, _max_loops)
         t2 = time.time()
 
         if initialized is False:
@@ -241,13 +241,14 @@ if __name__ == "__main__":
     options.pcerrors = options.pcerrors.split(",")
     options.pcerrors = [ float(x) for x in options.pcerrors ]
 
+    while not options.max_loops:
+        options.max_loops = raw_input("Max number of loops ? ")
+    options.max_loops = options.max_loops.split(",")
+    options.max_loops = [ int(x) for x in options.max_loops ]
+
     while not options.nseeds:
         options.nseeds = raw_input("Number of seeds ? ")
     options.nseeds = int(options.nseeds)
-
-    while not options.max_loops:
-        options.max_loops = raw_input("Max number of loops ? ")
-    options.max_loops = int(options.max_loops)
 
     while not options.filename:
         dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
