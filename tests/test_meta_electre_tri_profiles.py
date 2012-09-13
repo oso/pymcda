@@ -138,7 +138,7 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, filename):
     writer.writerow(['pcerrors', pcerrors])
     writer.writerow(['nseeds', nseeds])
     writer.writerow(['max_loops', max_loops])
-    writer.writerow([])
+    writer.writerow(['', ''])
 
     # Create a test_results instance
     results = test_results()
@@ -169,7 +169,7 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, filename):
         results.append(t)
 
     # Perform a summary
-    writer.writerow([])
+    writer.writerow(['', ''])
 
     t = results.summary(['na', 'nc', 'ncat', 'na_gen', 'pcerrors',
                          'max_loops'],
@@ -177,7 +177,7 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, filename):
     t.tocsv(writer)
 
     # Summary by columns
-    writer.writerow([])
+    writer.writerow(['', ''])
 
     t = results.summary_columns(['na', 'nc', 'ncat', 'na_gen', 'pcerrors',
                                  'max_loops'],

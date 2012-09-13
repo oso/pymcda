@@ -100,6 +100,15 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, filename):
     # Create the CSV writer
     writer = csv.writer(open(filename, 'wb'))
 
+    # Write the test options
+    writer.writerow(['na', na])
+    writer.writerow(['nc', nc])
+    writer.writerow(['ncat', ncat])
+    writer.writerow(['na_gen', na_gen])
+    writer.writerow(['pcerrors', pcerrors])
+    writer.writerow(['nseeds', nseeds])
+    writer.writerow(['', ''])
+
     # Create a test results instance
     results = test_results()
 
@@ -126,7 +135,7 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, filename):
         results.append(t)
 
     # Perform a summary
-    writer.writerow([])
+    writer.writerow(['', ''])
     t = results.summary(['na', 'nc', 'ncat', 'na_gen', 'pcerrors'],
                         ['obj', 'ca', 'ca_erroned', 'ca_gen', 't_total',
                          't_const', 't_solve'])
