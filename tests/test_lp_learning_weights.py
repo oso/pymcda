@@ -57,7 +57,7 @@ def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
     aa2 = model2.pessimist(pt)
     ok = ok_erroned = 0
     for alt in a:
-        if aa(alt.id) == aa2(alt.id):
+        if aa_err(alt.id) == aa2(alt.id):
             ok += 1
             if alt.id in aa_erroned:
                 ok_erroned += 1
