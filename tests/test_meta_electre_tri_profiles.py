@@ -90,7 +90,7 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
 
     ok_erroned = 0
     for alt in a:
-        if aa(alt.id) == aa2(alt.id) and alt.id in aa_erroned:
+        if aa_err(alt.id) == aa2(alt.id) and alt.id in aa_erroned:
             ok_erroned += 1
 
     total = len(a)
