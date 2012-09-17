@@ -129,7 +129,8 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
 
 def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, filename):
     # Create the CSV writer
-    writer = csv.writer(open(filename, 'wb'))
+    f = open(filename, 'wb')
+    writer = csv.writer(f)
 
     # Write the test options
     writer.writerow(['na', na])
@@ -159,12 +160,13 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, filename):
 
         if initialized is False:
             fields = ['seed', 'na', 'nc', 'ncat', 'na_gen', 'pcerrors',
-                      'max_loops', 'ca_best', 'ca_erroned', 'nloops',
-                      't_total']
+                      'max_loops', 'ca_best', 'ca_erroned', 'ca_gen',
+                      'nloops', 't_total']
             writer.writerow(fields)
             initialized = True
 
         t.tocsv(writer, fields)
+        f.flush()
         print("%s (%5f seconds)" % (t, t2 - t1))
 
         results.append(t)
@@ -174,7 +176,8 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, filename):
 
     t = results.summary(['na', 'nc', 'ncat', 'na_gen', 'pcerrors',
                          'max_loops'],
-                         ['ca_best', 'ca_erroned', 'nloops', 't_total'])
+                         ['ca_best', 'ca_erroned', 'ca_gen', 'nloops',
+                          't_total'])
     t.tocsv(writer)
 
     # Summary by columns
