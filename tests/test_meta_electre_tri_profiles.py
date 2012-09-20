@@ -58,28 +58,28 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
     # Run the algorithm
     meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa_err)
 
-    ca_iter = [1] * (max_loops + 1)
+    ca2_iter = [1] * (max_loops + 1)
     aa2 = model2.pessimist(pt)
-    ca = compute_ac(aa_err, aa2)
-    best_ca = ca
+    ca2 = compute_ac(aa_err, aa2)
+    ca2_best = ca2
     best_bpt = model2.bpt.copy()
-    ca_iter[0] = ca
+    ca2_iter[0] = ca2
     nloops = 0
 
     for k in range(max_loops):
-        if best_ca == 1:
+        if ca2_best == 1:
             break
 
-        meta.optimize(aa2, ca)
+        meta.optimize(aa2, ca2)
         nloops += 1
 
         aa2 = model2.pessimist(pt)
-        ca = compute_ac(aa_err, aa2)
+        ca2 = compute_ac(aa_err, aa2)
 
-        ca_iter[k + 1] = ca
+        ca2_iter[k + 1] = ca2
 
-        if ca > best_ca:
-            best_ca = ca
+        if ca2 > ca2_best:
+            ca2_best = ca2
             best_bpt =  model2.bpt.copy()
 
     t_total = time.time() - t1
@@ -88,13 +88,20 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
     model2.bpt = best_bpt
     aa2 = model2.pessimist(pt)
 
-    ok_erroned = 0
+    ok = ok_errors = ok2_errors = 0
     for alt in a:
         if aa_err(alt.id) == aa2(alt.id) and alt.id in aa_erroned:
-            ok_erroned += 1
+            ok2_errors += 1
+
+        if aa(alt.id) == aa2(alt.id):
+            if alt.id in aa_erroned:
+                ok_errors += 1
+            ok += 1
 
     total = len(a)
-    ca_erroned = ok_erroned / total
+    ca_best = ok / total
+    ca_best_errors = ok_errors / total
+    ca2_best_errors = ok2_errors / total
 
     # Generate alternatives for the generalization
     a_gen = generate_random_alternatives(na_gen)
@@ -117,13 +124,15 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
     t['max_loops'] = max_loops
 
     # Ouput params
-    t['ca_best'] = best_ca
-    t['ca_erroned'] = ca_erroned
+    t['ca_best'] = ca_best
+    t['ca_best_errors'] = ca_best_errors
+    t['ca2_best'] = ca2_best
+    t['ca2_best_errors'] = ca2_best_errors
     t['ca_gen'] = ca_gen
     t['nloops'] = nloops
     t['t_total'] = t_total
 
-    t['ca_iter'] = ca_iter
+    t['ca2_iter'] = ca2_iter
 
     return t
 
@@ -160,8 +169,8 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, filename):
 
         if initialized is False:
             fields = ['seed', 'na', 'nc', 'ncat', 'na_gen', 'pcerrors',
-                      'max_loops', 'ca_best', 'ca_erroned', 'ca_gen',
-                      'nloops', 't_total']
+                      'max_loops', 'ca_best', 'ca_best_errors', 'ca2_best',
+                      'ca2_best_errors', 'ca_gen', 'nloops', 't_total']
             writer.writerow(fields)
             initialized = True
 
@@ -176,7 +185,8 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, filename):
 
     t = results.summary(['na', 'nc', 'ncat', 'na_gen', 'pcerrors',
                          'max_loops'],
-                         ['ca_best', 'ca_erroned', 'ca_gen', 'nloops',
+                         ['ca_best', 'ca_best_errors', 'ca2_best',
+                          'ca2_best_errors', 'ca_gen', 'nloops',
                           't_total'])
     t.tocsv(writer)
 
@@ -185,7 +195,7 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, filename):
 
     t = results.summary_columns(['na', 'nc', 'ncat', 'na_gen', 'pcerrors',
                                  'max_loops'],
-                                ['ca_iter'], 'seed')
+                                ['ca2_iter'], 'seed')
     t.tocsv(writer)
 
 if __name__ == "__main__":

@@ -60,15 +60,15 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
         metas.append(meta)
 
     # Perform at max oloops on the set of metas
-    ca_iter = [ 1 ] * (max_oloops + 1)
+    ca2_iter = [0] + [1] * (max_oloops)
     nloops = 0
     for i in range(0, max_oloops):
         models_ca = {}
         for meta in metas:
-            m, ca = meta.optimize(max_loops)
-            models_ca[m] = ca
+            m, ca2 = meta.optimize(max_loops)
+            models_ca[m] = ca2
 
-            if ca == 1:
+            if ca2 == 1:
                 break
 
         models_ca = sorted(models_ca.iteritems(),
@@ -76,11 +76,11 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
                            reverse = True)
 
         nloops += 1
-        ca_best = models_ca[0][1]
+        ca2_best = models_ca[0][1]
 
-        ca_iter.append(ca_best)
+        ca2_iter[i + 1] = ca2_best
 
-        if ca_best == 1:
+        if ca2_best == 1:
             break
 
         for j in range(int(nmodels / 2), nmodels):
@@ -94,13 +94,20 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
     # Determine the number of erroned alternatives badly assigned
     aa2 = model2.pessimist(pt)
 
-    ok_erroned = 0
+    ok_errors = ok2_errors = ok = 0
     for alt in a:
+        if aa(alt.id) == aa2(alt.id):
+            if alt.id in aa_erroned:
+                ok_errors += 1
+            ok += 1
+
         if aa_err(alt.id) == aa2(alt.id) and alt.id in aa_erroned:
-            ok_erroned += 1
+            ok2_errors += 1
 
     total = len(a)
-    ca_erroned = ok_erroned / total
+    ca2_errors = ok2_errors / total
+    ca_best = ok / total
+    ca_errors = ok_errors / total
 
     # Generate alternatives for the generalization
     a_gen = generate_random_alternatives(na_gen)
@@ -126,12 +133,14 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
 
     # Ouput params
     t['ca_best'] = ca_best
-    t['ca_erroned'] = ca_erroned
+    t['ca_errors'] = ca_errors
+    t['ca2_best'] = ca2_best
+    t['ca2_errors'] = ca2_errors
     t['ca_gen'] = ca_gen
     t['nloops'] = nloops
     t['t_total'] = t_total
 
-    t['ca_iter'] = ca_iter
+    t['ca2_iter'] = ca2_iter
 
     return t
 
@@ -174,7 +183,8 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, nmodels,
         if initialized is False:
             fields = ['seed', 'na', 'nc', 'ncat', 'na_gen', 'pcerrors',
                       'max_oloops', 'nmodels', 'max_loops', 'ca_best',
-                      'ca_erroned', 'nloops', 't_total']
+                      'ca_errors', 'ca2_best', 'ca2_errors', 'nloops',
+                      't_total']
             writer.writerow(fields)
             initialized = True
 
@@ -188,7 +198,8 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, nmodels,
 
     t = results.summary(['na', 'nc', 'ncat', 'na_gen', 'pcerrors',
                          'max_oloops', 'nmodels', 'max_loops'],
-                         ['ca_best', 'ca_erroned', 'nloops', 't_total'])
+                         ['ca_best', 'ca_errors', 'ca2_best',
+                          'ca2_errors', 'nloops', 't_total'])
     t.tocsv(writer)
 
     # Summary by columns
@@ -196,7 +207,7 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, nmodels,
 
     t = results.summary_columns(['na', 'nc', 'ncat', 'na_gen', 'pcerrors',
                                  'max_oloops', 'nmodels', 'max_loops'],
-                                ['ca_iter'], 'seed')
+                                ['ca2_iter'], 'seed')
     t.tocsv(writer)
 
 if __name__ == "__main__":

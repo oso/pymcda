@@ -55,16 +55,25 @@ def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
 
     # Compute new assignment and classification accuracy
     aa2 = model2.pessimist(pt)
-    ok = ok_erroned = 0
+    ok = ok_errors = ok2 = ok2_errors = 0
     for alt in a:
         if aa_err(alt.id) == aa2(alt.id):
+            ok2 += 1
+            if alt.id in aa_erroned:
+                ok2_errors += 1
+
+        if aa(alt.id) == aa2(alt.id):
             ok += 1
             if alt.id in aa_erroned:
-                ok_erroned += 1
+                ok_errors += 1
 
     total = len(a)
+
+    ca2 = ok2 / total
+    ca2_errors = ok2_errors / total
+
     ca = ok / total
-    ca_erroned = ok_erroned / total
+    ca_errors = ok_errors / total
 
     # Perform the generalization
     a_gen = generate_random_alternatives(na_gen)
@@ -88,7 +97,9 @@ def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
     # Output params
     t['obj'] = obj
     t['ca'] = ca
-    t['ca_erroned'] = ca_erroned
+    t['ca_errors'] = ca_errors
+    t['ca2'] = ca2
+    t['ca2_errors'] = ca2_errors
     t['ca_gen'] = ca_gen
     t['t_total'] = t3 - t1
     t['t_const'] = t2 - t1
@@ -137,8 +148,8 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, filename):
     # Perform a summary
     writer.writerow(['', ''])
     t = results.summary(['na', 'nc', 'ncat', 'na_gen', 'pcerrors'],
-                        ['obj', 'ca', 'ca_erroned', 'ca_gen', 't_total',
-                         't_const', 't_solve'])
+                        ['obj', 'ca', 'ca_errors', 'ca2', 'ca2_errors',
+                         'ca_gen', 't_total', 't_const', 't_solve'])
     t.tocsv(writer)
 
 if __name__ == "__main__":
