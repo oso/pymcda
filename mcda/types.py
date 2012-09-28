@@ -413,6 +413,74 @@ class alternative_performances():
             print("%-6.5f" % self.performances[c]),
         print('')
 
+class linear():
+
+    def __init__(self, slope, intercept):
+        self.slope = slope
+        self.intercept = intercept
+
+    def y(self, x):
+        return self.slope * x + self.intercept
+
+    def x(self, y):
+        return (y - self.intercept) / self.slope
+
+class segment():
+
+    def __init__(self, p1, p2, p1_in = True, p2_in = False):
+        if p1.x <= p2.x:
+            self.pl = p1
+            self.ph = p2
+            self.pl_in = p1_in
+            self.ph_in = p2_in
+        else:
+            self.pl = p2
+            self.ph = p1
+            self.pl_in = p2_in
+            self.ph_in = p1_in
+
+    def slope(self):
+        d = self.ph.x - self.pl.x
+        if d == 0:
+            return float("inf")
+        else:
+            return (self.ph.y - self.pl.y) / d
+
+    def y(self, x):
+        if x < self.pl.x or x > self.ph.x:
+            raise ValueError("Value out of the segment")
+        if x == self.pl.x and self.pl_in is False:
+            raise ValueError("Value out of the segment")
+        if x == self.ph.x and self.ph_in is False:
+            raise ValueError("Value out of the segment")
+
+        k = self.slope()
+        return self.pl.y + k * (x - self.pl.x)
+
+class piecewise_linear(list):
+
+    def find_segment(self, x):
+        for s in self:
+            if s.pl.x > x or s.ph.x < x:
+                continue
+
+            if s.pl.x == x and s.pl_in is False:
+                continue
+
+            if s.ph.x == x and s.ph_in is False:
+                continue
+
+            return s
+
+        return None
+
+    def y(self, x):
+        s = self.find_segment(x)
+        if s is None:
+            raise ValueError("No segment found for this value")
+
+        return s.y(x)
+
 class points(list):
 
     def __call__(self, id):
@@ -435,10 +503,10 @@ class points(list):
 
 class point():
 
-    def __init__(self, id, abscissa, ordinate):
+    def __init__(self, x, y, id = None):
         self.id = id
-        self.abscissa = abscissa
-        self.ordinate = ordinate
+        self.x = x
+        self.y = y
 
     def copy(self):
         return deepcopy(self)
@@ -446,9 +514,9 @@ class point():
     def to_xmcda(self):
         xmcda = ElementTree.Element('point')
         abscissa = ElementTree.SubElement('abscissa')
-        abscissa.append(marshal(self.abscissa))
+        abscissa.append(marshal(self.x))
         ordinate = ElementTree.SubElement('ordinate')
-        ordinate.append(marshal(self.ordinate))
+        ordinate.append(marshal(self.y))
         return xmcda
 
 class constant():
