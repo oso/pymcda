@@ -1,4 +1,5 @@
 from tools.utils import normalize_criteria_weights
+from mcda.types import alternative_value, alternative_values
 
 class uta():
 
@@ -20,14 +21,16 @@ class uta():
             ui = self.marginal_utility(c.id, ap)
             u += w * ui
 
-        return u
+        av = alternative_value(ap.alternative_id, u)
+
+        return av
 
     def global_utilities(self, pt):
-        au = {}
+        au = alternative_values()
 
         for ap in pt:
-            u = self.global_utility(ap)
-            au[ap.alternative_id] = u
+            av = self.global_utility(ap)
+            au[av.id] = av
 
         return au
 

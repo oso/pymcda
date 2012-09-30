@@ -46,9 +46,9 @@ class tests_uta(unittest.TestCase):
         ap3 = alternative_performances("a3",
                                        {"c1": 0, "c2": 0, "c3": 0})
 
-        self.assertAlmostEqual(model.global_utility(ap1), 0.425)
-        self.assertAlmostEqual(model.global_utility(ap2), 1)
-        self.assertAlmostEqual(model.global_utility(ap3), 0)
+        self.assertAlmostEqual(model.global_utility(ap1).value, 0.425)
+        self.assertAlmostEqual(model.global_utility(ap2).value, 1)
+        self.assertAlmostEqual(model.global_utility(ap3).value, 0)
 
 if __name__ == "__main__":
     suite = []
