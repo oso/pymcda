@@ -413,6 +413,27 @@ class alternative_performances():
             print("%-6.5f" % self.performances[c]),
         print('')
 
+class criterion_functions(dict):
+
+    def __init__(self, l=[]):
+        for i in l:
+            self[i.id] = i
+
+    def __iter__(self):
+        return self.itervalues()
+
+    def __call__(self, id):
+        return self[id]
+
+class criterion_function():
+
+    def __init__(self, id, function):
+        self.id = id
+        self.function = function
+
+    def y(self, x):
+        return self.function.y(x)
+
 class linear():
 
     def __init__(self, slope, intercept):
