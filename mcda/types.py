@@ -413,6 +413,24 @@ class alternative_performances():
             print("%-6.5f" % self.performances[c]),
         print('')
 
+class alternative_values(dict):
+
+    def __init__(self, l = []):
+        for i in l:
+            self[i.id] = i
+
+    def __iter__(self):
+        return self.itervalues()
+
+    def __call__(self, id):
+        return self[id]
+
+class alternative_value():
+
+    def __init__(self, id, value):
+        self.id = id
+        self.value = value
+
 class criterion_functions(dict):
 
     def __init__(self, l=[]):
