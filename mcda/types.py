@@ -413,6 +413,42 @@ class alternative_performances():
             print("%-6.5f" % self.performances[c]),
         print('')
 
+class category_values(dict):
+
+    def __init__(self, l = []):
+        for i in l:
+            self[i.id] = i
+
+    def __iter__(self):
+        return self.itervalues()
+
+    def __call__(self, id):
+        return self[id]
+
+    def get_category(self, val):
+       pass
+
+class category_value():
+
+    def __init__(self, id, value):
+        self.id = id
+        self.value = value
+
+class interval():
+
+    def __init__(self, lower = float("-inf"), upper = float("inf")):
+        self.lower = lower
+        self.upper = upper
+
+    def in(self, value):
+        if lower and value < lower:
+            return False
+
+        if upper and value > upper:
+            return False
+
+        return True
+
 class alternative_values(dict):
 
     def __init__(self, l = []):
