@@ -425,9 +425,6 @@ class category_values(dict):
     def __call__(self, id):
         return self[id]
 
-    def get_category(self, val):
-       pass
-
 class category_value():
 
     def __init__(self, id, value):
@@ -440,7 +437,7 @@ class interval():
         self.lower = lower
         self.upper = upper
 
-    def in(self, value):
+    def included(self, value):
         if lower and value < lower:
             return False
 
