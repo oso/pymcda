@@ -133,11 +133,11 @@ def compute_ac(aa, aa2, alist=None):
 def get_categories_upper_limits(category_values):
     d = {}
     for cv in category_values:
-        d[cv.value.upper] = cv.id
+        d[cv.id] = cv.value.upper
     return d
 
 def get_categories_lower_limits(category_values):
     d = {}
     for cv in category_values:
-        d[cv.value.lower] = cv.id
+        d[cv.id] = cv.value.lower
     return d
