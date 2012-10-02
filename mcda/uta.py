@@ -3,8 +3,9 @@ import bisect
 from tools.utils import normalize_criteria_weights
 from tools.utils import get_categories_upper_limits
 from mcda.types import alternative_value, alternative_values
+from mcda.types import alternative_affectation
 
-class uta():
+class uta(object):
 
     def __init__(self, criteria = None, cvs = None, cfs = None):
         self.criteria = criteria
@@ -43,12 +44,13 @@ class utadis(uta):
                  cat_values = None):
         super(utadis, self).__init__(criteria, cvs, cfs)
         self.cat_values = cat_values
-        self.limits = get_categories_upper_limits(cat_values)
+        upper = get_categories_upper_limits(cat_values)
+        self.cat_limits = sorted(upper.iteritems(),
+                                 key = lambda (k, v): (v, k))
+        self.limits = [ cat_limit[1] for cat_limit in self.cat_limits ]
 
     def get_assignment(self, ap):
         av = self.global_utility(ap)
-        a = self.limits.keys()
-        a.sort()
-        i = bisect.bisect_left(a, av.value)
-        cat = self.cat_values[i]
+        i = bisect.bisect_left(self.limits, av.value)
+        cat = self.cat_limits[i][0]
         return alternative_affectation(ap.alternative_id, cat)
