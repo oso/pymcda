@@ -4,6 +4,7 @@ from tools.utils import normalize_criteria_weights
 from tools.utils import get_categories_upper_limits
 from mcda.types import alternative_value, alternative_values
 from mcda.types import alternative_affectation
+from mcda.types import alternatives_affectations
 
 class uta(object):
 
@@ -54,3 +55,9 @@ class utadis(uta):
         i = bisect.bisect_left(self.limits, av.value)
         cat = self.cat_limits[i][0]
         return alternative_affectation(ap.alternative_id, cat)
+
+    def get_assignments(self, pt):
+        assignments = alternatives_affectations([])
+        for ap in pt:
+            assignments.append(self.get_assignment(ap))
+        return assignments
