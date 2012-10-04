@@ -39,9 +39,6 @@ class criteria(dict):
     def append(self, c):
         self[c.id] = c
 
-    def copy(self):
-        return deepcopy(self)
-
     def display(self, header=True, criterion_ids=None):
         self[0].display(header)
         for aa in self[1:]:
