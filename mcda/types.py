@@ -629,10 +629,6 @@ class thresholds(dict):
     def append(self, threshold):
         self[threshold.id] = threshold
 
-    # FIXME: to remove
-    def has_threshold(self, threshold_id):
-        return threshold_id in self
-
     def to_xmcda(self):
         root = ElementTree.Element('thresholds')
         for t in self:
