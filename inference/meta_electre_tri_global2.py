@@ -141,7 +141,7 @@ if __name__ == "__main__":
 
     print('Original model')
     print('==============')
-    cids = c.get_ids()
+    cids = c.keys()
     bpt.display(criterion_ids=cids)
     cv.display(criterion_ids=cids)
     print("lambda\t%.7s" % lbda)

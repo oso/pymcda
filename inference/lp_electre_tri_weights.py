@@ -402,14 +402,14 @@ if __name__ == "__main__":
     pt_learn = performance_table([ pt[alt.id] for alt in a_learn ])
 
     aa_err = aa_learn.copy()
-    aa_erroned = add_errors_in_affectations(aa_err, cat.get_ids(), errors)
+    aa_erroned = add_errors_in_affectations(aa_err, cat.keys(), errors)
 
     print('Original model')
     print('==============')
     print("Number of alternatives: %d" % len(a))
     print("Number of learning alternatives: %d" % len(aa_learn))
     print("Errors in alternatives affectations: %g%%" % (errors*100))
-    cids = c.get_ids()
+    cids = c.keys()
     bpt.display(criterion_ids = cids, alternative_ids = b)
     cv.display(criterion_ids = cids)
     print("lambda\t%.7s" % lbda)

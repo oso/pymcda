@@ -43,7 +43,7 @@ def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
 
     # Add errors in assignment examples
     aa_err = aa.copy()
-    aa_erroned = add_errors_in_affectations(aa_err, cat.get_ids(), pcerrors)
+    aa_erroned = add_errors_in_affectations(aa_err, cat.keys(), pcerrors)
 
     # Run linear program
     t1 = time.time()

@@ -61,12 +61,6 @@ class criteria(dict):
             c.from_xmcda(tag)
             self.append(c)
 
-    def get_ids(self):
-        ids = []
-        for c in self:
-            ids.append(c.id)
-        return ids
-
 class criterion:
 
     MINIMIZE = -1
