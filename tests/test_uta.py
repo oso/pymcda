@@ -99,6 +99,50 @@ class tests_utadis(unittest.TestCase):
         aa1 = model.get_assignment(ap1)
         self.assertEquals(aa1.category_id, "cat2")
 
+    def test002(self):
+        model = self.generate_model()
+
+        a2 = alternative("a2")
+        ap2 = alternative_performances("a2",
+                                       {"c1": 0, "c2": 0, "c3": 0})
+        aa2 = model.get_assignment(ap2)
+        self.assertEquals(aa2.category_id, "cat1")
+
+    def test003(self):
+        model = self.generate_model()
+
+        a3 = alternative("a3")
+        ap3 = alternative_performances("a3",
+                {"c1": 5, "c2": 5, "c3": 5})
+        aa3 = model.get_assignment(ap3)
+        self.assertEquals(aa3.category_id, "cat3")
+
+    def test004(self):
+        model = self.generate_model()
+
+        a1 = alternative("a1")
+        ap1 = alternative_performances("a1",
+                                       {"c1": 2.5, "c2": 2.5, "c3": 2.5})
+        aa1 = model.get_assignment(ap1)
+
+        a2 = alternative("a2")
+        ap2 = alternative_performances("a2",
+                                       {"c1": 0, "c2": 0, "c3": 0})
+        aa2 = model.get_assignment(ap2)
+
+        a3 = alternative("a3")
+        ap3 = alternative_performances("a3",
+                {"c1": 5, "c2": 5, "c3": 5})
+        aa3 = model.get_assignment(ap3)
+
+        pt = performance_table([ap1, ap2, ap3])
+
+        assignments = model.get_assignments(pt)
+
+        self.assertEquals(assignments["a1"].category_id, "cat2")
+        self.assertEquals(assignments["a2"].category_id, "cat1")
+        self.assertEquals(assignments["a3"].category_id, "cat3")
+
 if __name__ == "__main__":
     suite = []
     suite.append(unittest.TestLoader().loadTestsFromTestCase(tests_uta))
