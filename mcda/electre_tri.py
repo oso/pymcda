@@ -40,9 +40,9 @@ class electre_tri:
             return None
 
         threshid = "%s%s" % (threshold_id, profile_rank)
-        if c.thresholds.has_threshold(threshid):
+        if threshid in c.thresholds:
             return c.thresholds(threshid).values.value
-        elif c.thresholds.has_threshold(threshold_id):
+        elif threshold_id in c.thresholds:
             return c.thresholds(threshold_id).values.value
         else:
             return None
