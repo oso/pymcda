@@ -47,10 +47,6 @@ class criteria(dict):
         for aa in self[1:]:
             aa.display(False)
 
-    # FIXME: useless (in already do the same)
-    def has_criterion(self, criterion_id):
-        return criterion_id in self
-
     def to_xmcda(self):
         root = ElementTree.Element('criteria')
         for crit in self:
@@ -633,6 +629,7 @@ class thresholds(dict):
     def append(self, threshold):
         self[threshold.id] = threshold
 
+    # FIXME: to remove
     def has_threshold(self, threshold_id):
         return threshold_id in self
 
