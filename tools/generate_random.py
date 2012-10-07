@@ -7,6 +7,7 @@ from mcda.types import criterion, criteria
 from mcda.types import criterion_value, criteria_values
 from mcda.types import category, categories
 from mcda.types import category_profile, categories_profiles, limits
+from mcda.types import piecewise_linear, point, segment
 
 def generate_random_alternatives(number, prefix='a'):
     alts = alternatives()
@@ -95,6 +96,26 @@ def generate_random_categories_profiles(cats, prefix='b'):
         cps.append(cp)
     return cps
 
+def generate_random_piecewise_linear(gi_min, gi_max, n_segments,
+                                     ui_min = 0, ui_max = 1):
+    d = ui_max - ui_min
+    r = [ ui_min + d * random.random() for i in range(n_segments - 1) ]
+    r.append(ui_min)
+    r.append(ui_max)
+    r.sort()
+
+    interval = (gi_max - gi_min) / n_segments
+
+    f = piecewise_linear([])
+    for i in range(n_segments):
+        a = point(gi_min + i * interval, r[i])
+        b = point(gi_min + (i + 1) * interval, r[i + 1])
+        s = segment(a, b)
+
+        f.append(s)
+
+    return f
+
 if __name__ == "__main__":
     alts = generate_random_alternatives(10)
     print(alts)
@@ -110,3 +131,5 @@ if __name__ == "__main__":
     print(cats)
     cps = generate_random_categories_profiles(cats)
     print(cps)
+    pl = generate_random_piecewise_linear(0, 5, 3)
+    print(pl)
