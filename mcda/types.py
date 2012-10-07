@@ -234,12 +234,10 @@ class alternatives(dict):
 
     def to_xmcda(self):
         root = ElementTree.Element('alternatives')
-        root2 = ElementTree.Element('performanceTable')
         for action in self:
-            alt, perf = action.to_xmcda()
+            alt = action.to_xmcda()
             root.append(alt)
-            root2.append(perf)
-        return (root, root2)
+        return root
 
     def from_xmcda(self, xmcda):
         if xmcda.tag != 'alternatives':
