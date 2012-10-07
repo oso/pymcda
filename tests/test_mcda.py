@@ -1,7 +1,39 @@
 import sys
 sys.path.insert(0, "..")
+from xml.etree import ElementTree
+from lxml import etree
 from mcda.types import *
 import unittest
+
+XMCDA_HEADER = '{http://www.decision-deck.org/2012/XMCDA-2.2.1}XMCDA'
+XMCDA_FILE = 'XMCDA-2.2.1.xsd'
+
+class tests_xmcda(unittest.TestCase):
+
+    def validate(self, xml):
+        root = ElementTree.Element(XMCDA_HEADER)
+        root.append(xml)
+        xml = ElementTree.tostring(root)
+
+        doc = etree.parse(XMCDA_FILE)
+        schema = etree.XMLSchema(doc)
+        return schema.validate(etree.fromstring(xml))
+
+    def test001(self):
+        c1 = criterion("c1")
+        c2 = criterion("c2")
+        c = criteria([c1, c2])
+        xmcda = c.to_xmcda()
+
+        self.assertEqual(self.validate(xmcda), True)
+
+    def test002(self):
+        a1 = alternative("a1")
+        a2 = alternative("a2")
+        a = alternatives([a1, a2])
+        xmcda = a.to_xmcda()
+
+        self.assertEqual(self.validate(xmcda), True)
 
 class tests_segment(unittest.TestCase):
 
@@ -147,6 +179,7 @@ class tests_piecewise_linear(unittest.TestCase):
 
 if __name__ == "__main__":
     suite = []
+    suite.append(unittest.TestLoader().loadTestsFromTestCase(tests_xmcda))
     suite.append(unittest.TestLoader().loadTestsFromTestCase(tests_segment))
     suite.append(unittest.TestLoader().loadTestsFromTestCase(tests_piecewise_linear))
     alltests = unittest.TestSuite(suite)
