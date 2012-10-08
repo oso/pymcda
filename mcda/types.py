@@ -440,7 +440,7 @@ class interval():
         upper.append(marshal(self.upper))
         return xmcda
 
-class alternative_values(dict):
+class alternatives_values(dict):
 
     def __init__(self, l = []):
         for i in l:

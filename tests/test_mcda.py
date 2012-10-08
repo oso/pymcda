@@ -62,7 +62,7 @@ class tests_xmcda(unittest.TestCase):
     def test006(self):
         av1 = alternative_value('a1', 10)
         av2 = alternative_value('a2', 20)
-        av = alternative_values([av1, av2])
+        av = alternatives_values([av1, av2])
         xmcda = av.to_xmcda()
 
         self.assertEqual(self.validate(xmcda), True)

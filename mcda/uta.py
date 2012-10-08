@@ -2,7 +2,7 @@ import bisect
 
 from tools.utils import normalize_criteria_weights
 from tools.utils import get_categories_upper_limits
-from mcda.types import alternative_value, alternative_values
+from mcda.types import alternative_value, alternatives_values
 from mcda.types import alternative_affectation
 from mcda.types import alternatives_affectations
 
@@ -31,7 +31,7 @@ class uta(object):
         return av
 
     def global_utilities(self, pt):
-        au = alternative_values()
+        au = alternatives_values()
 
         for ap in pt:
             av = self.global_utility(ap)
