@@ -35,6 +35,14 @@ class tests_xmcda(unittest.TestCase):
 
         self.assertEqual(self.validate(xmcda), True)
 
+    def test003(self):
+        cv1 = criterion_value('cv1', 10)
+        cv2 = criterion_value('cv2', 20)
+        cv = criteria_values([cv1, cv2])
+        xmcda = cv.to_xmcda()
+
+        self.assertEqual(self.validate(xmcda), True)
+
 class tests_segment(unittest.TestCase):
 
     def test001(self):
