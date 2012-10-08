@@ -449,11 +449,26 @@ class alternative_values(dict):
     def __iter__(self):
         return self.itervalues()
 
+    def to_xmcda(self):
+        root = ElementTree.Element('alternativesValues')
+        for a_value in self:
+            xmcda = a_value.to_xmcda()
+            root.append(xmcda)
+        return root
+
 class alternative_value():
 
     def __init__(self, id, value):
         self.id = id
         self.value = value
+
+    def to_xmcda(self):
+        xmcda = ElementTree.Element('alternativeValue')
+        lower = ElementTree.SubElement(xmcda, "alternativeID")
+        lower.text = str(id)
+        value = ElementTree.SubElement(xmcda, "value")
+        value.append(marshal(self.value))
+        return xmcda
 
 class criterion_functions(dict):
 
