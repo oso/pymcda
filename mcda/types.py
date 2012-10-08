@@ -396,11 +396,26 @@ class category_values(dict):
     def __iter__(self):
         return self.itervalues()
 
+    def to_xmcda(self):
+        root = ElementTree.Element('categoriesValues')
+        for cat_value in self:
+            xmcda = cat_value.to_xmcda()
+            root.append(xmcda)
+        return root
+
 class category_value():
 
     def __init__(self, id, value):
         self.id = id
         self.value = value
+
+    def to_xmcda(self):
+        xmcda = ElementTree.Element('categoryValue')
+        catid = ElementTree.SubElement(xmcda, 'categoryID')
+        catid.text = self.id
+        value = ElementTree.SubElement(xmcda, 'value')
+        value.append(self.value.to_xmcda())
+        return xmcda
 
 class interval():
 
@@ -416,6 +431,14 @@ class interval():
             return False
 
         return True
+
+    def to_xmcda(self):
+        xmcda = ElementTree.Element('interval')
+        lower = ElementTree.SubElement(xmcda, "lowerBound")
+        lower.append(marshal(self.lower))
+        upper = ElementTree.SubElement(xmcda, "upperBound")
+        upper.append(marshal(self.upper))
+        return xmcda
 
 class alternative_values(dict):
 
