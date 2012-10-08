@@ -30,9 +30,6 @@ class criteria(dict):
     def __iter__(self):
         return self.itervalues()
 
-    def __call__(self, id):
-        return self[id]
-
     def copy(self):
         return deepcopy(self)
 
@@ -158,9 +155,6 @@ class criteria_values(dict):
     def __iter__(self):
         return self.itervalues()
 
-    def __call__(self, id):
-        return self[id]
-
     def append(self, c):
         self[c.id] = c
 
@@ -186,7 +180,7 @@ class criteria_values(dict):
 
         print('%.6s\t' % name),
         for cid in criterion_ids:
-            cv = self(cid)
+            cv = self[cid]
             print("%-6.5f" % cv.value),
         print('')
 
@@ -222,9 +216,6 @@ class alternatives(dict):
 
     def __iter__(self):
         return self.itervalues()
-
-    def __call__(self, id):
-        return self[id]
 
     def append(self, a):
         self[a.id] = a
@@ -407,9 +398,6 @@ class category_values(dict):
     def __iter__(self):
         return self.itervalues()
 
-    def __call__(self, id):
-        return self[id]
-
 class category_value():
 
     def __init__(self, id, value):
@@ -440,9 +428,6 @@ class alternative_values(dict):
     def __iter__(self):
         return self.itervalues()
 
-    def __call__(self, id):
-        return self[id]
-
 class alternative_value():
 
     def __init__(self, id, value):
@@ -457,9 +442,6 @@ class criterion_functions(dict):
 
     def __iter__(self):
         return self.itervalues()
-
-    def __call__(self, id):
-        return self[id]
 
 class criterion_function():
 
@@ -609,9 +591,6 @@ class thresholds(dict):
     def __iter__(self):
         return self.itervalues()
 
-    def __call__(self, id):
-        return self[id]
-
     def copy(self):
         return deepcopy(self)
 
@@ -674,9 +653,6 @@ class categories(dict):
 
     def __iter__(self):
         return self.itervalues()
-
-    def __call__(self, id):
-        return self[id]
 
     def copy(self):
         return deepcopy(self)
@@ -791,9 +767,6 @@ class categories_profiles(dict):
 
     def __iter__(self):
         return self.itervalues()
-
-    def __call__(self, id):
-        return self[id]
 
     def copy(self):
         return deepcopy(self)

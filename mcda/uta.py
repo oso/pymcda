@@ -16,7 +16,7 @@ class uta(object):
 
     def marginal_utility(self, cid, aps):
         gi = aps(cid)
-        cf = self.cfs(cid)
+        cf = self.cfs[cid]
         return cf.function.y(gi)
 
     def global_utility(self, ap):

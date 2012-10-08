@@ -130,7 +130,7 @@ class graph_etri(QtGui.QGraphicsScene):
         self.criteria_text = {}
 
         for i, id in enumerate(self.criteria_order):
-            criterion = self.model.criteria(id)
+            criterion = self.model.criteria[id]
             x = i*self.hspacing
 
             line = axis(x, 0, x, -self.axis_height, criterion.direction)
@@ -157,7 +157,7 @@ class graph_etri(QtGui.QGraphicsScene):
         n = len(self.model.criteria)
         points = []
         for i, id in enumerate(self.criteria_order):
-            criterion = self.model.criteria(id)
+            criterion = self.model.criteria[id]
             x = i*self.hspacing
 
             num = ap.performances[criterion.id] - self.worst.performances[criterion.id]

@@ -41,9 +41,9 @@ class electre_tri:
 
         threshid = "%s%s" % (threshold_id, profile_rank)
         if threshid in c.thresholds:
-            return c.thresholds(threshid).values.value
+            return c.thresholds[threshid].values.value
         elif threshold_id in c.thresholds:
-            return c.thresholds(threshold_id).values.value
+            return c.thresholds[threshold_id].values.value
         else:
             return None
 
@@ -77,7 +77,7 @@ class electre_tri:
 
             cj = self.__partial_concordance(x, y, c, profile_rank)
 
-            cval = cv(c.id)
+            cval = cv[c.id]
             weight = cval.value
             wcj = float(weight)*cj
 
@@ -185,7 +185,7 @@ class electre_tri_bm(electre_tri):
             if c.disabled == 1:
                 continue
 
-            cval = cv(c.id)
+            cval = cv[c.id]
             v = self.get_threshold_by_profile(c, 'v', profile_rank)
             diff = (y.performances[c.id]-x.performances[c.id])*c.direction
             if diff <= 0:
