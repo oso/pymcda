@@ -200,12 +200,10 @@ class criterion_value():
         xmcda = ElementTree.Element('criterionValue')
         if id is not None:
             xmcda.set('id', id)
-        if name is not None:
-            xmcda.set('name', name)
         critid = ElementTree.SubElement(xmcda, 'criterionID')
-        critid.text = self.criterion_id
+        critid.text = self.id
         val = ElementTree.SubElement(xmcda, 'value')
-        val.append(marshal(value))
+        val.append(marshal(self.value))
         return xmcda
 
 class alternatives(dict):
