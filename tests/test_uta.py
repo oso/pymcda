@@ -86,7 +86,7 @@ class tests_utadis(unittest.TestCase):
         catv2 = category_value("cat2", interval(0.25, 0.65))
         catv3 = category_value("cat3", interval(0.65, 1))
 
-        catv = category_values([catv1, catv2, catv3])
+        catv = categories_values([catv1, catv2, catv3])
 
         return utadis(c, cvs, cfs, catv)
 

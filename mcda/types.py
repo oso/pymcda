@@ -387,7 +387,7 @@ class alternative_performances():
             print("%-6.5f" % self.performances[c]),
         print('')
 
-class category_values(dict):
+class categories_values(dict):
 
     def __init__(self, l = []):
         for i in l:

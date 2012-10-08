@@ -130,14 +130,14 @@ def compute_ac(aa, aa2, alist=None):
 
     return ok / total
 
-def get_categories_upper_limits(category_values):
+def get_categories_upper_limits(categories_values):
     d = {}
-    for cv in category_values:
+    for cv in categories_values:
         d[cv.id] = cv.value.upper
     return d
 
-def get_categories_lower_limits(category_values):
+def get_categories_lower_limits(categories_values):
     d = {}
-    for cv in category_values:
+    for cv in categories_values:
         d[cv.id] = cv.value.lower
     return d
