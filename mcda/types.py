@@ -30,6 +30,9 @@ class criteria(dict):
     def __iter__(self):
         return self.itervalues()
 
+    def __repr__(self):
+        return "criteria(%s)" % self.values()
+
     def copy(self):
         return deepcopy(self)
 
@@ -75,10 +78,7 @@ class criterion:
         self.thresholds = thresholds
 
     def __repr__(self):
-        if self.name is not None:
-            return "%s" % self.name
-        else:
-            return "%s" % self.id
+        return "%s" % self.id
 
     def copy(self):
         return deepcopy(self)
@@ -159,6 +159,9 @@ class criteria_values(dict):
     def __iter__(self):
         return self.itervalues()
 
+    def __str__(self):
+        return "criteria_values(%s)" % self.values()
+
     def append(self, c):
         self[c.id] = c
 
@@ -219,6 +222,9 @@ class alternatives(dict):
     def __iter__(self):
         return self.itervalues()
 
+    def __repr__(self):
+        return "alternatives(%s)" % self.values()
+
     def append(self, a):
         self[a.id] = a
 
@@ -250,10 +256,7 @@ class alternative:
         self.disabled = disabled
 
     def __repr__(self):
-        if self.name is not None:
-            return "%s" % self.name
-        else:
-            return "%s" % self.id
+        return "%s" % self.id
 
     def copy(self):
         return deepcopy(self)
@@ -297,6 +300,9 @@ class performance_table(dict):
 
     def __call__(self, id):
         return self[id].performances
+
+    def __repr__(self):
+        return "performance_table(%s)" % self.values()
 
     def copy(self):
         return deepcopy(self)
@@ -400,6 +406,9 @@ class categories_values(dict):
     def __iter__(self):
         return self.itervalues()
 
+    def __repr__(self):
+        return "categories_values(%s)" % self.values()
+
     def to_xmcda(self):
         root = ElementTree.Element('categoriesValues')
         for cat_value in self:
@@ -412,6 +421,9 @@ class category_value():
     def __init__(self, id, value):
         self.id = id
         self.value = value
+
+    def __repr__(self):
+        return "%s: %s" % (self.id, self.value)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('categoryValue')
@@ -426,6 +438,9 @@ class interval():
     def __init__(self, lower = float("-inf"), upper = float("inf")):
         self.lower = lower
         self.upper = upper
+
+    def __repr__(self):
+        return "interval(%s,%s)" % (lower, upper)
 
     def included(self, value):
         if lower and value < lower:
@@ -453,6 +468,9 @@ class alternatives_values(dict):
     def __iter__(self):
         return self.itervalues()
 
+    def __repr__(self):
+        return "alternatives_values(%s)" % self.values()
+
     def to_xmcda(self):
         root = ElementTree.Element('alternativesValues')
         for a_value in self:
@@ -465,6 +483,9 @@ class alternative_value():
     def __init__(self, id, value):
         self.id = id
         self.value = value
+
+    def __repr__(self):
+        return "%s: %s" % (self.id, self.value)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('alternativeValue')
@@ -483,11 +504,17 @@ class criterion_functions(dict):
     def __iter__(self):
         return self.itervalues()
 
+    def __repr__(self):
+        return "criterion_functions(%s)" % self.values()
+
 class criterion_function():
 
     def __init__(self, id, function):
         self.id = id
         self.function = function
+
+    def __repr__(self):
+        return "criterion_function(%s)" % self.function
 
     def y(self, x):
         return self.function.y(x)
@@ -497,6 +524,9 @@ class linear():
     def __init__(self, slope, intercept):
         self.slope = slope
         self.intercept = intercept
+
+    def __repr__(self):
+        return "linear(%sx + %d)" % (self.slope, self.intercept)
 
     def y(self, x):
         return self.slope * x + self.intercept
@@ -576,6 +606,9 @@ class points(list):
 
         return p
 
+    def __repr__(self):
+        return "points(%s)" % self[:]
+
     def copy(self):
         return deepcopy(self)
 
@@ -613,6 +646,9 @@ class constant():
         self.id = id
         self.value = value
 
+    def __repr__(self):
+        return "%s: %s", (self.id, self.value)
+
     def copy(self):
         return deepcopy(self)
 
@@ -639,6 +675,9 @@ class thresholds(dict):
 
     def __iter__(self):
         return self.itervalues()
+
+    def __repr__(self):
+        return "thresholds(%s)", self.values()
 
     def copy(self):
         return deepcopy(self)
@@ -669,6 +708,9 @@ class threshold():
         self.id = id
         self.name = name
         self.values = values
+
+    def __repr__(self):
+        return "%s: %s" % (self.id, self.values)
 
     def copy(self):
         return deepcopy(self)
@@ -702,6 +744,9 @@ class categories(dict):
 
     def __iter__(self):
         return self.itervalues()
+
+    def __repr__(self):
+        return "categories(%s)" % self.values()
 
     def copy(self):
         return deepcopy(self)
@@ -744,10 +789,7 @@ class category():
         self.rank = rank
 
     def __repr__(self):
-        if self.name is not None:
-            return "%s" % self.name
-        else:
-            return "%s" % self.id
+        return "%s: %d" % (self.id, self.rank)
 
     def copy(self):
         return deepcopy(self)
@@ -791,6 +833,9 @@ class limits():
         self.lower = lower
         self.upper  = upper
 
+    def __repr__(self):
+        return "limits(%s,%s)" % (self.lower, self.upper)
+
     def copy(self):
         return deepcopy(self)
 
@@ -817,6 +862,9 @@ class categories_profiles(dict):
 
     def __iter__(self):
         return self.itervalues()
+
+    def __repr__(self):
+        return "categories_profiles(%s)" % self.values()
 
     def copy(self):
         return deepcopy(self)
@@ -861,6 +909,9 @@ class category_profile():
         self.id = id
         self.value = value
 
+    def __repr__(self):
+        return "%s: %s" % (self.id, self.value)
+
     def copy(self):
         return deepcopy(self)
 
@@ -883,6 +934,9 @@ class alternatives_affectations(dict):
 
     def __call__(self, id):
         return self[id].category_id
+
+    def __repr__(self):
+        return "alternatives_affectations(%s)" % self.values()
 
     def copy(self):
         return deepcopy(self)
