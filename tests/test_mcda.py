@@ -75,6 +75,14 @@ class tests_xmcda(unittest.TestCase):
 
         self.assertEqual(self.validate(xmcda), True)
 
+    def test008(self):
+        cp1 = category_profile('b1', limits('cat1', 'cat2'))
+        cp2 = category_profile('b2', limits('cat2', 'cat3'))
+        cp = categories_profiles([cp1, cp2])
+        xmcda = cp.to_xmcda()
+
+        self.assertEqual(self.validate(xmcda), True)
+
 class tests_segment(unittest.TestCase):
 
     def test001(self):
