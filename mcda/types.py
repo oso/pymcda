@@ -627,7 +627,7 @@ class point():
         self.y = y
 
     def __repr__(self):
-        return "(%d,%d)" % (self.x, self.y)
+        return "(%g,%g)" % (self.x, self.y)
 
     def copy(self):
         return deepcopy(self)
