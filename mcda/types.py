@@ -740,7 +740,8 @@ class category():
         return deepcopy(self)
 
     def to_xmcda(self):
-        xmcda = ElementTree.Element('category', self.id)
+        xmcda = ElementTree.Element('category')
+        xmcda.set('id', self.id)
         if self.name is not None:
             xmcda.set('name', self.name)
 
@@ -751,7 +752,7 @@ class category():
             active.text = 'false'
 
         rank = ElementTree.SubElement(xmcda, 'rank')
-        rank.text = marshal(self.rank)
+        rank.append(marshal(self.rank))
 
         return xmcda
 
