@@ -27,6 +27,8 @@ class tests_xmcda(unittest.TestCase):
 
         self.assertEqual(self.validate(xmcda), True)
 
+        c_from = criteria().from_xmcda(xmcda)
+
     def test002(self):
         a1 = alternative("a1")
         a2 = alternative("a2")
