@@ -518,6 +518,9 @@ class segment():
             self.pl_in = p2_in
             self.ph_in = p1_in
 
+    def __repr__(self):
+        return "segment(%s,%s)" % (self.pl, self.ph)
+
     def slope(self):
         d = self.ph.x - self.pl.x
         if d == 0:
@@ -537,6 +540,9 @@ class segment():
         return self.pl.y + k * (x - self.pl.x)
 
 class piecewise_linear(list):
+
+    def __repr__(self):
+        return "piecewise_linear(%s)" % self[:]
 
     def find_segment(self, x):
         for s in self:
@@ -586,6 +592,9 @@ class point():
         self.id = id
         self.x = x
         self.y = y
+
+    def __repr__(self):
+        return "(%d,%d)" % (self.x, self.y)
 
     def copy(self):
         return deepcopy(self)
