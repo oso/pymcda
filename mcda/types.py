@@ -54,9 +54,11 @@ class criteria(dict):
 
         tag_list = xmcda.getiterator('criterion')
         for tag in tag_list:
-            c = criterion(None)
+            c = criterion()
             c.from_xmcda(tag)
             self.append(c)
+
+        return self
 
 class criterion:
 
@@ -118,22 +120,22 @@ class criterion:
         if xmcda.tag != 'criterion':
             raise TypeError('criterion::invalid tag')
 
-        c_id = crit.get('id')
+        c_id = xmcda.get('id')
         if c_id is not None:
             self.id = c_id
 
-        name = crit.get('name')
+        name = xmcda.get('name')
         if name is not None:
             self.name = name
 
-        active = crit.find('.//active')
+        active = xmcda.find('.//active')
         if active is not None:
             if active.text == 'false':
                 self.disabled = True
             else:
                 self.disabled = False
 
-        pdir = crit.find('.//scale/quantitative/preferenceDirection')
+        pdir = xmcda.find('.//scale/quantitative/preferenceDirection')
         if pdir is not None:
             if pdir.text == 'max':
                 self.direction = 1
@@ -142,9 +144,11 @@ class criterion:
             else:
                 raise TypeError('criterion::invalid preferenceDirection')
 
-        value = crit.find('.//criterionValue/value')
+        value = xmcda.find('.//criterionValue/value')
         if value is not None:
             self.weight = unmarshal(value.getchildren()[0])
+
+        return self
 
 class criteria_values(dict):
 
