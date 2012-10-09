@@ -786,12 +786,12 @@ class limits():
         if self.lower:
             lower = ElementTree.SubElement(xmcda, 'lowerCategory')
             catid = ElementTree.SubElement(lower, 'categoryID')
-            catid.text = lower
+            catid.text = str(self.lower)
 
         if self.upper:
             upper = ElementTree.SubElement(xmcda, 'upperCategory')
             catid = ElementTree.SubElement(upper, 'categoryID')
-            catid.text = upper
+            catid.text = str(self.upper)
 
         return xmcda
 
@@ -853,7 +853,7 @@ class category_profile():
     def to_xmcda(self):
         xmcda = ElementTree.Element('categoryProfile')
         altid = ElementTree.SubElement(xmcda, 'alternativeID')
-        altid.text = self.id
+        altid.text = str(self.id)
         value = self.value.to_xmcda()
         xmcda.append(value)
         return xmcda
