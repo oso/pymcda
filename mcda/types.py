@@ -63,7 +63,7 @@ class criteria(dict):
 
         return self
 
-class criterion:
+class criterion(object):
 
     MINIMIZE = -1
     MAXIMIZE = 1
@@ -191,7 +191,7 @@ class criteria_values(dict):
             print("%-6.5f" % cv.value),
         print('')
 
-class criterion_value():
+class criterion_value(object):
 
     def __init__(self, id=None, value=None):
         self.id = id
@@ -248,7 +248,7 @@ class alternatives(dict):
             alt.from_xmcda(tag)
             self.append(alt)
 
-class alternative:
+class alternative(object):
 
     def __init__(self, id=None, name=None, disabled=False):
         self.id = id
@@ -339,7 +339,7 @@ class performance_table(dict):
             ap.display(show_header, criterion_ids, append)
             show_header = False
 
-class alternative_performances():
+class alternative_performances(object):
 
     def __init__(self, alternative_id=None, performances=None):
         self.alternative_id = alternative_id
@@ -416,7 +416,7 @@ class categories_values(dict):
             root.append(xmcda)
         return root
 
-class category_value():
+class category_value(object):
 
     def __init__(self, id, value):
         self.id = id
@@ -433,7 +433,7 @@ class category_value():
         value.append(self.value.to_xmcda())
         return xmcda
 
-class interval():
+class interval(object):
 
     def __init__(self, lower = float("-inf"), upper = float("inf")):
         self.lower = lower
@@ -478,7 +478,7 @@ class alternatives_values(dict):
             root.append(xmcda)
         return root
 
-class alternative_value():
+class alternative_value(object):
 
     def __init__(self, id, value):
         self.id = id
@@ -507,7 +507,7 @@ class criterion_functions(dict):
     def __repr__(self):
         return "criterion_functions(%s)" % self.values()
 
-class criterion_function():
+class criterion_function(object):
 
     def __init__(self, id, function):
         self.id = id
@@ -519,7 +519,7 @@ class criterion_function():
     def y(self, x):
         return self.function.y(x)
 
-class linear():
+class linear(object):
 
     def __init__(self, slope, intercept):
         self.slope = slope
@@ -534,7 +534,7 @@ class linear():
     def x(self, y):
         return (y - self.intercept) / self.slope
 
-class segment():
+class segment(object):
 
     def __init__(self, p1, p2, p1_in = True, p2_in = False):
         if p1.x <= p2.x:
@@ -619,7 +619,7 @@ class points(list):
             root.append(xmcda)
         return root
 
-class point():
+class point(object):
 
     def __init__(self, x, y, id = None):
         self.id = id
@@ -640,7 +640,7 @@ class point():
         ordinate.append(marshal(self.y))
         return xmcda
 
-class constant():
+class constant(object):
 
     def __init__(self, id, value):
         self.id = id
@@ -702,7 +702,7 @@ class thresholds(dict):
             t.from_xmcda(tag)
             self.append(t)
 
-class threshold():
+class threshold(object):
 
     def __init__(self, id, name=None, values=None):
         self.id = id
@@ -780,7 +780,7 @@ class categories(dict):
             c.from_xmcda(tag)
             self.append(c)
 
-class category():
+class category(object):
 
     def __init__(self, id=None, name=None, disabled=False, rank=None):
         self.id = id
@@ -827,7 +827,7 @@ class category():
         rank = xmcda.find('.//rank')
         self.rank = unmarshal(rank.getchildren()[0])
 
-class limits():
+class limits(object):
 
     def __init__(self, lower=None, upper=None):
         self.lower = lower
@@ -903,7 +903,7 @@ class categories_profiles(dict):
             root.append(xmcda)
         return root
 
-class category_profile():
+class category_profile(object):
 
     def __init__(self, id, value):
         self.id = id
@@ -966,7 +966,7 @@ class alternatives_affectations(dict):
             aa.from_xmcda(tag)
             self.append(aa)
 
-class alternative_affectation():
+class alternative_affectation(object):
 
     def __init__(self, alternative_id=None, category_id=None):
         self.alternative_id = alternative_id
