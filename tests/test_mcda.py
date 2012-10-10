@@ -28,6 +28,7 @@ class tests_xmcda(unittest.TestCase):
         self.assertEqual(self.validate(xmcda), True)
 
         c_from = criteria().from_xmcda(xmcda)
+        self.assertEqual(c, c_from)
 
     def test002(self):
         a1 = alternative("a1")
@@ -38,6 +39,7 @@ class tests_xmcda(unittest.TestCase):
         self.assertEqual(self.validate(xmcda), True)
 
         a_from = alternatives().from_xmcda(xmcda)
+        self.assertEqual(a, a_from)
 
     def test003(self):
         cv1 = criterion_value('c1', 10)
@@ -48,6 +50,7 @@ class tests_xmcda(unittest.TestCase):
         self.assertEqual(self.validate(xmcda), True)
 
         cv_from = criteria_values().from_xmcda(xmcda)
+        self.assertEqual(cv, cv_from)
 
     def test004(self):
         p1 = alternative_performances('a1', {'c1': 120, 'c2':  284})
