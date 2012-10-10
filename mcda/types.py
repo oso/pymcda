@@ -76,6 +76,9 @@ class criterion(object):
         self.weight = weight
         self.thresholds = thresholds
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     def __repr__(self):
         return "%s" % self.id
 
@@ -207,6 +210,9 @@ class criterion_value(object):
         self.id = id
         self.value = value
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     def __repr__(self):
         return "%s: %s" % (self.id, self.value)
 
@@ -282,6 +288,9 @@ class alternative(object):
         self.id = id
         self.name = name
         self.disabled = disabled
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
 
     def __repr__(self):
         return "%s" % self.id
@@ -375,6 +384,9 @@ class alternative_performances(object):
         self.alternative_id = alternative_id
         self.performances = performances
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     def __call__(self, criterion_id):
         return self.performances[criterion_id]
 
@@ -452,6 +464,9 @@ class category_value(object):
         self.id = id
         self.value = value
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     def __repr__(self):
         return "%s: %s" % (self.id, self.value)
 
@@ -468,6 +483,9 @@ class interval(object):
     def __init__(self, lower = float("-inf"), upper = float("inf")):
         self.lower = lower
         self.upper = upper
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
 
     def __repr__(self):
         return "interval(%s,%s)" % (lower, upper)
@@ -514,6 +532,9 @@ class alternative_value(object):
         self.id = id
         self.value = value
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     def __repr__(self):
         return "%s: %s" % (self.id, self.value)
 
@@ -543,6 +564,9 @@ class criterion_function(object):
         self.id = id
         self.function = function
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     def __repr__(self):
         return "criterion_function(%s)" % self.function
 
@@ -554,6 +578,9 @@ class linear(object):
     def __init__(self, slope, intercept):
         self.slope = slope
         self.intercept = intercept
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
 
     def __repr__(self):
         return "linear(%sx + %d)" % (self.slope, self.intercept)
@@ -577,6 +604,9 @@ class segment(object):
             self.ph = p1
             self.pl_in = p2_in
             self.ph_in = p1_in
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
 
     def __repr__(self):
         return "segment(%s,%s)" % (self.pl, self.ph)
@@ -656,6 +686,9 @@ class point(object):
         self.x = x
         self.y = y
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     def __repr__(self):
         return "(%g,%g)" % (self.x, self.y)
 
@@ -675,6 +708,9 @@ class constant(object):
     def __init__(self, id, value):
         self.id = id
         self.value = value
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
 
     def __repr__(self):
         return "%s: %s", (self.id, self.value)
@@ -738,6 +774,9 @@ class threshold(object):
         self.id = id
         self.name = name
         self.values = values
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
 
     def __repr__(self):
         return "%s: %s" % (self.id, self.values)
@@ -818,6 +857,9 @@ class category(object):
         self.disabled = disabled
         self.rank = rank
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     def __repr__(self):
         return "%s: %d" % (self.id, self.rank)
 
@@ -862,6 +904,9 @@ class limits(object):
     def __init__(self, lower=None, upper=None):
         self.lower = lower
         self.upper  = upper
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
 
     def __repr__(self):
         return "limits(%s,%s)" % (self.lower, self.upper)
@@ -939,6 +984,9 @@ class category_profile(object):
         self.id = id
         self.value = value
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     def __repr__(self):
         return "%s: %s" % (self.id, self.value)
 
@@ -1001,6 +1049,9 @@ class alternative_affectation(object):
     def __init__(self, alternative_id=None, category_id=None):
         self.alternative_id = alternative_id
         self.category_id = category_id
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
 
     def __repr__(self):
         return "%s: %s" % (self.alternative_id, self.category_id)
