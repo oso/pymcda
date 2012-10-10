@@ -57,8 +57,7 @@ class criteria(dict):
 
         tag_list = xmcda.getiterator('criterion')
         for tag in tag_list:
-            c = criterion()
-            c.from_xmcda(tag)
+            c = criterion().from_xmcda(tag)
             self.append(c)
 
         return self
@@ -174,6 +173,17 @@ class criteria_values(dict):
             cv = cval.to_xmcda()
             xmcda.append(cv)
         return xmcda
+
+    def from_xmcda(self, xmcda):
+        if xmcda.tag != 'criteriaValues':
+            raise TypeError('criteriaValues::invalid tag')
+
+        tag_list = xmcda.getiterator('criterionValue')
+        for tag in tag_list:
+            cv = criterion_value().from_xmcda(tag)
+            self.append(cv)
+
+        return self
 
     def display(self, header=True, criterion_ids=None, name='w'):
         if criterion_ids is None:
