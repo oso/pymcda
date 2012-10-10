@@ -242,11 +242,12 @@ class alternatives(dict):
         if xmcda.tag != 'alternatives':
             raise TypeError('alternatives::invalid tag')
 
-        tag_list = alternatives.getiterator('alternative')
+        tag_list = xmcda.getiterator('alternative')
         for tag in tag_list:
-            alt = alternative(None)
-            alt.from_xmcda(tag)
+            alt = alternative().from_xmcda(tag)
             self.append(alt)
+
+        return self
 
 class alternative(object):
 
@@ -278,16 +279,18 @@ class alternative(object):
         if xmcda.tag != 'alternative':
             raise TypeError('alternative::invalid tag')
 
-        self.id = alternative.get('id')
-        name = alternative.get('name')
+        self.id = xmcda.get('id')
+        name = xmcda.get('name')
         if name:
             self.name = name
 
-        active = alternative.find('active')
+        active = xmcda.find('active')
         if active is not None and active.text == 'false':
             self.disabled = True
         else:
             self.disabled = False
+
+        return self
 
 class performance_table(dict):
 
