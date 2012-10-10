@@ -29,7 +29,7 @@ class tests_uta(unittest.TestCase):
         cf1 = criterion_function("c1", f1)
         cf2 = criterion_function("c2", f2)
         cf3 = criterion_function("c3", f3)
-        cfs = criterion_functions([cf1, cf2, cf3])
+        cfs = criteria_functions([cf1, cf2, cf3])
 
         return uta(c, cvs, cfs)
 
@@ -75,7 +75,7 @@ class tests_utadis(unittest.TestCase):
         cf1 = criterion_function("c1", f1)
         cf2 = criterion_function("c2", f2)
         cf3 = criterion_function("c3", f3)
-        cfs = criterion_functions([cf1, cf2, cf3])
+        cfs = criteria_functions([cf1, cf2, cf3])
 
         cat1 = category("cat1")
         cat2 = category("cat2")

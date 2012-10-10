@@ -546,7 +546,7 @@ class alternative_value(object):
         value.append(marshal(self.value))
         return xmcda
 
-class criterion_functions(dict):
+class criteria_functions(dict):
 
     def __init__(self, l=[]):
         for i in l:
@@ -556,7 +556,7 @@ class criterion_functions(dict):
         return self.itervalues()
 
     def __repr__(self):
-        return "criterion_functions(%s)" % self.values()
+        return "criteria_functions(%s)" % self.values()
 
 class criterion_function(object):
 
