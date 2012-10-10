@@ -213,7 +213,7 @@ class criterion_value(object):
     def copy(self):
         return deepcopy(self)
 
-    def to_xmcda(self, id=None, name=None):
+    def to_xmcda(self, id=None):
         xmcda = ElementTree.Element('criterionValue')
         if id is not None:
             xmcda.set('id', id)
@@ -222,6 +222,23 @@ class criterion_value(object):
         val = ElementTree.SubElement(xmcda, 'value')
         val.append(marshal(self.value))
         return xmcda
+
+    def from_xmcda(self, xmcda):
+        if xmcda.tag != 'criterionValue':
+            raise TypeError('criterionValue::invalid tag')
+
+        name = xmcda.get('id')
+        if name is not None:
+            self.id = id
+
+        criterion_id = xmcda.find('.//criterionID')
+        self.id = criterion_id.text
+
+        value = xmcda.find('.//value')
+        if value is not None:
+            self.value = unmarshal(value.getchildren()[0])
+
+        return self
 
 class alternatives(dict):
 
