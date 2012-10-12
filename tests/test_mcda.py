@@ -71,6 +71,9 @@ class tests_xmcda(unittest.TestCase):
 
         self.assertEqual(self.validate(xmcda), True)
 
+        cv_from = categories_values().from_xmcda(xmcda)
+        self.assertEqual(cv, cv_from)
+
     def test006(self):
         av1 = alternative_value('a1', 10)
         av2 = alternative_value('a2', 20)

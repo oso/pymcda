@@ -363,7 +363,6 @@ class performance_table(dict):
         tag_list = xmcda.getiterator('alternativePerformances')
         for tag in tag_list:
             altp = alternative_performances().from_xmcda(tag)
-            print altp
             self.append(altp)
 
         return self
@@ -382,9 +381,12 @@ class performance_table(dict):
 
 class alternative_performances(object):
 
-    def __init__(self, alternative_id=None, performances=dict()):
+    def __init__(self, alternative_id=None, performances=None):
         self.alternative_id = alternative_id
-        self.performances = performances
+        if performances is None:
+            self.performances = {}
+        else:
+            self.performances = performances
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -427,8 +429,6 @@ class alternative_performances(object):
             crit_val = unmarshal(value.getchildren()[0])
             self.performances[crit_id] = crit_val
 
-        print altid.text,
-        print crit_id, crit_val
         return self
 
     def display(self, header=True, criterion_ids=None, append=''):
@@ -457,6 +457,9 @@ class categories_values(dict):
     def __repr__(self):
         return "categories_values(%s)" % self.values()
 
+    def append(self, cv):
+        self[cv.id] = cv
+
     def to_xmcda(self):
         root = ElementTree.Element('categoriesValues')
         for cat_value in self:
@@ -464,9 +467,20 @@ class categories_values(dict):
             root.append(xmcda)
         return root
 
+    def from_xmcda(self, xmcda):
+        if xmcda.tag != 'categoriesValues':
+            raise TypeError('categoriesValues::invalid tag')
+
+        tag_list = xmcda.getiterator('categoryValue')
+        for tag in tag_list:
+            altp = category_value().from_xmcda(tag)
+            self.append(altp)
+
+        return self
+
 class category_value(object):
 
-    def __init__(self, id, value):
+    def __init__(self, id = None, value = None):
         self.id = id
         self.value = value
 
@@ -484,6 +498,19 @@ class category_value(object):
         value.append(self.value.to_xmcda())
         return xmcda
 
+    def from_xmcda(self, xmcda):
+        if xmcda.tag != 'categoryValue':
+            raise TypeError('categoryValue::invalid tag')
+
+        self.id = xmcda.find('.//categoryID').text
+        value = xmcda.find('.//value').getchildren()[0]
+        if value.tag == 'interval':
+            self.value = interval().from_xmcda(value)
+        else:
+            self.value = unmarshal(value)
+
+        return self
+
 class interval(object):
 
     def __init__(self, lower = float("-inf"), upper = float("inf")):
@@ -494,7 +521,7 @@ class interval(object):
         return self.__dict__ == other.__dict__
 
     def __repr__(self):
-        return "interval(%s,%s)" % (lower, upper)
+        return "interval(%s,%s)" % (self.lower, self.upper)
 
     def included(self, value):
         if lower and value < lower:
@@ -512,6 +539,16 @@ class interval(object):
         upper = ElementTree.SubElement(xmcda, "upperBound")
         upper.append(marshal(self.upper))
         return xmcda
+
+    def from_xmcda(self, xmcda):
+        if xmcda.tag != 'interval':
+            raise TypeError('interval::invalid tag')
+
+        lower = xmcda.find('.//lowerBound')
+        self.lower = unmarshal(lower.getchildren()[0])
+        upper = xmcda.find('.//upperBound')
+        self.upper = unmarshal(upper.getchildren()[0])
+        return self
 
 class alternatives_values(dict):
 
