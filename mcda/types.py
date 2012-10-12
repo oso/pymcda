@@ -360,11 +360,13 @@ class performance_table(dict):
         if xmcda.tag != 'performanceTable':
             raise TypeError('performanceTable::invalid tag')
 
-        tag_list = pt.getiterator('alternativePerformances')
+        tag_list = xmcda.getiterator('alternativePerformances')
         for tag in tag_list:
-            altp = alternative_performances(0, {})
-            altp.from_xmcda(tag)
+            altp = alternative_performances().from_xmcda(tag)
+            print altp
             self.append(altp)
+
+        return self
 
     def display(self, header = True, criterion_ids = None,
                 append = '', alternative_ids = None):
@@ -380,7 +382,7 @@ class performance_table(dict):
 
 class alternative_performances(object):
 
-    def __init__(self, alternative_id=None, performances=None):
+    def __init__(self, alternative_id=None, performances=dict()):
         self.alternative_id = alternative_id
         self.performances = performances
 
@@ -415,15 +417,19 @@ class alternative_performances(object):
         if xmcda.tag != 'alternativePerformances':
             raise TypeError('alternativePerformances::invalid tag')
 
-        altid = altp.find('.//alternativeID')
+        altid = xmcda.find('.//alternativeID')
         self.alternative_id = altid.text
 
-        tag_list = altp.getiterator('performance')
+        tag_list = xmcda.getiterator('performance')
         for tag in tag_list:
             crit_id = tag.find('.//criterionID').text
             value = tag.find('.//value')
             crit_val = unmarshal(value.getchildren()[0])
             self.performances[crit_id] = crit_val
+
+        print altid.text,
+        print crit_id, crit_val
+        return self
 
     def display(self, header=True, criterion_ids=None, append=''):
         if criterion_ids is None:
