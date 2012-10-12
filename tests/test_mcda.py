@@ -60,6 +60,9 @@ class tests_xmcda(unittest.TestCase):
 
         self.assertEqual(self.validate(xmcda), True)
 
+        pt_from = performance_table().from_xmcda(xmcda)
+        self.assertEqual(pt, pt_from)
+
     def test005(self):
         cv1 = category_value('cat1', interval(0, 0.25))
         cv2 = category_value('cat2', interval(0.25, 0.5))
