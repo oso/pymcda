@@ -93,6 +93,9 @@ class tests_xmcda(unittest.TestCase):
 
         self.assertEqual(self.validate(xmcda), True)
 
+        af_from = alternatives_affectations().from_xmcda(xmcda)
+        self.assertEqual(af, af_from)
+
     def test008(self):
         cp1 = category_profile('b1', limits('cat1', 'cat2'))
         cp2 = category_profile('b2', limits('cat2', 'cat3'))

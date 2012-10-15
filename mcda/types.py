@@ -1102,7 +1102,7 @@ class alternatives_affectations(dict):
         return root
 
     def from_xmcda(self, xmcda):
-        if xmcda.tag != 'alternatives_affectations':
+        if xmcda.tag != 'alternativesAffectations':
             raise TypeError('alternatives_affectations::invalid tag')
 
         tag_list = xmcda.getiterator('alternativeAffectation')
@@ -1110,6 +1110,8 @@ class alternatives_affectations(dict):
             aa = alternative_affectation()
             aa.from_xmcda(tag)
             self.append(aa)
+
+        return self
 
 class alternative_affectation(object):
 
@@ -1141,10 +1143,12 @@ class alternative_affectation(object):
         return xmcda
 
     def from_xmcda(self, xmcda):
-        if xmcda.tag != 'alternative_affectation':
-            raise TypeError('alternative_affectation::invalid tag')
+        if xmcda.tag != 'alternativeAffectation':
+            raise TypeError('alternativeAffectation::invalid tag')
 
         altid = xmcda.find('alternativeID')
-        self.alternative_id = altid.text 
+        self.alternative_id = altid.text
         catid = xmcda.find('categoryID')
         self.category_id = catid.text
+
+        return self
