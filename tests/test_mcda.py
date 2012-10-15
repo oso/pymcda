@@ -115,6 +115,9 @@ class tests_xmcda(unittest.TestCase):
 
         self.assertEqual(self.validate(xmcda), True)
 
+        cat_from = categories().from_xmcda(xmcda)
+        self.assertEqual(cat, cat_from)
+
 class tests_segment(unittest.TestCase):
 
     def test001(self):

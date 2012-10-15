@@ -916,6 +916,8 @@ class categories(dict):
             c.from_xmcda(tag)
             self.append(c)
 
+        return self
+
 class category(object):
 
     def __init__(self, id=None, name=None, disabled=False, rank=None):
@@ -965,6 +967,8 @@ class category(object):
 
         rank = xmcda.find('.//rank')
         self.rank = unmarshal(rank.getchildren()[0])
+
+        return self
 
 class limits(object):
 
