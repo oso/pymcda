@@ -104,6 +104,9 @@ class tests_xmcda(unittest.TestCase):
 
         self.assertEqual(self.validate(xmcda), True)
 
+        cp_from = categories_profiles().from_xmcda(xmcda)
+        self.assertEqual(cp, cp_from)
+
     def test009(self):
         cat1 = category('cat1', rank=1)
         cat2 = category('cat2', rank=2)

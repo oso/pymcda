@@ -996,6 +996,17 @@ class limits(object):
 
         return xmcda
 
+    def from_xmcda(self, xmcda):
+        if xmcda.tag != 'limits':
+            raise TypeError('limits::invalid tag')
+
+        lower = xmcda.find('.//lowerCategory/categoryID')
+        self.lower = lower.text
+        upper = xmcda.find('.//upperCategory/categoryID')
+        self.upper = upper.text
+
+        return self
+
 class categories_profiles(dict):
 
     def __init__(self, l=[]):
@@ -1045,9 +1056,20 @@ class categories_profiles(dict):
             root.append(xmcda)
         return root
 
+    def from_xmcda(self, xmcda):
+        if xmcda.tag != 'categoriesProfiles':
+            raise TypeError('categories_profiles::invalid tag')
+
+        tag_list = xmcda.getiterator('categoryProfile')
+        for tag in tag_list:
+            catp = category_profile().from_xmcda(tag)
+            self.append(catp)
+
+        return self
+
 class category_profile(object):
 
-    def __init__(self, id, value):
+    def __init__(self, id = None, value = None):
         self.id = id
         self.value = value
 
@@ -1067,6 +1089,18 @@ class category_profile(object):
         value = self.value.to_xmcda()
         xmcda.append(value)
         return xmcda
+
+    def from_xmcda(self, xmcda):
+        if xmcda.tag != 'categoryProfile':
+            raise TypeError('category_profile::invalid tag')
+
+        self.id = xmcda.find('.//alternativeID').text
+
+        value = xmcda.find('.//limits')
+        if value is not None:
+            self.value = limits().from_xmcda(value)
+
+        return self
 
 class alternatives_affectations(dict):
 
