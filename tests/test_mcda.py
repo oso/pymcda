@@ -82,6 +82,9 @@ class tests_xmcda(unittest.TestCase):
 
         self.assertEqual(self.validate(xmcda), True)
 
+        av_from = alternatives_values().from_xmcda(xmcda)
+        self.assertEqual(av, av_from)
+
     def test007(self):
         af1 = alternative_affectation('a1', 'cat1')
         af2 = alternative_affectation('a2', 'cat2')

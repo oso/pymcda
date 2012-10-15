@@ -562,6 +562,9 @@ class alternatives_values(dict):
     def __repr__(self):
         return "alternatives_values(%s)" % self.values()
 
+    def append(self, av):
+        self[av.id] = av
+
     def to_xmcda(self):
         root = ElementTree.Element('alternativesValues')
         for a_value in self:
@@ -569,9 +572,20 @@ class alternatives_values(dict):
             root.append(xmcda)
         return root
 
+    def from_xmcda(self, xmcda):
+        if xmcda.tag != 'alternativesValues':
+            raise TypeError('alternativesValues::invalid tag')
+
+        tag_list = xmcda.getiterator('alternativeValue')
+        for tag in tag_list:
+            altp = alternative_value().from_xmcda(tag)
+            self.append(altp)
+
+        return self
+
 class alternative_value(object):
 
-    def __init__(self, id, value):
+    def __init__(self, id = None, value = None):
         self.id = id
         self.value = value
 
@@ -584,10 +598,20 @@ class alternative_value(object):
     def to_xmcda(self):
         xmcda = ElementTree.Element('alternativeValue')
         lower = ElementTree.SubElement(xmcda, "alternativeID")
-        lower.text = str(id)
+        lower.text = str(self.id)
         value = ElementTree.SubElement(xmcda, "value")
         value.append(marshal(self.value))
         return xmcda
+
+    def from_xmcda(self, xmcda):
+        if xmcda.tag != 'alternativeValue':
+            raise TypeError('alternativesValues::invalid tag')
+
+        self.id = xmcda.find('.//alternativeID').text
+        value = xmcda.find('.//value').getchildren()[0]
+        self.value = unmarshal(value)
+
+        return self
 
 class criteria_functions(dict):
 
