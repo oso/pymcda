@@ -6,6 +6,7 @@ from mcda.types import alternative, alternatives
 from mcda.types import alternative_performances, performance_table
 from mcda.types import criterion, criteria
 from mcda.types import criterion_value, criteria_values
+from mcda.types import criterion_function, criteria_functions
 from mcda.types import category, categories
 from mcda.types import category_profile, categories_profiles, limits
 from mcda.types import piecewise_linear, point, segment
@@ -27,7 +28,8 @@ def generate_random_criteria(number, prefix='c'):
 
     return crits
 
-def generate_random_criteria_values(crits, seed=None, k=3):
+def generate_random_criteria_values(crits, seed = None, k = 3,
+                                    type = 'float', vmin = 0, vmax = 1):
     if seed is not None:
         random.seed(seed)
 
@@ -35,7 +37,10 @@ def generate_random_criteria_values(crits, seed=None, k=3):
     for c in crits:
         cval = criterion_value()
         cval.id = c.id
-        cval.value = round(random.random(), k)
+        if type == 'integer':
+            cval.value = random.randint(vmin, vmax)
+        else:
+            cval.value = round(random.uniform(vmin, vmax), k)
         cvals.append(cval)
 
     return cvals
@@ -97,7 +102,7 @@ def generate_random_categories_profiles(cats, prefix='b'):
         cps.append(cp)
     return cps
 
-def generate_random_piecewise_linear(gi_min, gi_max, n_segments,
+def generate_random_piecewise_linear(gi_min = 0, gi_max = 1, n_segments = 3,
                                      ui_min = 0, ui_max = 1):
     d = ui_max - ui_min
     r = [ ui_min + d * random.random() for i in range(n_segments - 1) ]
@@ -116,6 +121,19 @@ def generate_random_piecewise_linear(gi_min, gi_max, n_segments,
         f.append(s)
 
     return f
+
+def generate_random_criteria_functions(crits, gi_min = 0, gi_max = 1,
+                                       nseg_min = 1, nseg_max = 5,
+                                       ui_min = 0, ui_max = 1):
+    cfs = criteria_functions()
+    for crit in crits:
+        ns = random.randint(nseg_min, nseg_max)
+        f = generate_random_piecewise_linear(gi_min, gi_max, ns, ui_min,
+                                             ui_max)
+        cf = criterion_function(crit.id, f)
+        cfs.append(cf)
+
+    return cfs
 
 if __name__ == "__main__":
     alts = generate_random_alternatives(10)
