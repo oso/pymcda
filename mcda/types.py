@@ -625,6 +625,9 @@ class criteria_functions(dict):
     def __repr__(self):
         return "criteria_functions(%s)" % self.values()
 
+    def append(self, c):
+        self[c.id] = c
+
 class criterion_function(object):
 
     def __init__(self, id, function):
