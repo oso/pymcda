@@ -628,6 +628,24 @@ class criteria_functions(dict):
     def append(self, c):
         self[c.id] = c
 
+    def to_xmcda(self):
+        root = ElementTree.Element('criteriaFunctions')
+        for a_value in self:
+            xmcda = a_value.to_xmcda()
+            root.append(xmcda)
+        return root
+
+    def from_xmcda(self, xmcda)
+        if xmcda.tag != 'criteriaFunctions':
+            raise TypeError('criteria_functions::invalid tag')
+
+        tag_list = xmcda.getiterator('criterionFunction')
+        for tag in tag_list:
+            cf = criterion_function().from_xmcda(tag)
+            self.append(cf)
+
+        return self
+
 class criterion_function(object):
 
     def __init__(self, id, function):
@@ -642,6 +660,30 @@ class criterion_function(object):
 
     def y(self, x):
         return self.function.y(x)
+
+    def to_xmcda(self):
+        root = ElementTree.Element('criterionFunction')
+        critid = ElementTree.SubElement(xmcda, 'criterionID')
+        critid.text = self.id
+        function = self.function.to_xmcda()
+        root.append(function)
+        return root
+
+    def from_xmcda(self):
+        if xmcda.tag != 'criterionFunction':
+            raise TypeError('criterion_function::invalid tag')
+
+        self.id = xmcda.find('.//criterionID').text
+
+        value = xmcda.find('.//piecewise_linear')
+        if value:
+            self.function = piecewise_linear().from_xmcda(value)
+
+        value = xmcda.find('.//points')
+        if value:
+            self.function = points().from_xmcda(value)
+
+        return self
 
 class linear(object):
 
@@ -699,6 +741,26 @@ class segment(object):
         k = self.slope()
         return self.pl.y + k * (x - self.pl.x)
 
+    def to_xmcda(self):
+        root = ElementTree.Element('segment')
+        for elem in self:
+            xmcda = elem.to_xmcda()
+            root.append(xmcda)
+        return root
+
+    def from_xmcda(self):
+        if xmcda.tag != 'segment':
+            raise TypeError('segment::invalid tag')
+
+        tag_list = xmcda.getiterator('point')
+        if tag_list != 2:
+            raise ValueError('segment:: invalid number of points')
+
+        p1 = point().from_xmcda(tag_list[0])
+        p2 = point().from_xmcda(tag_list[1])
+
+        return self
+
 class piecewise_linear(list):
 
     def __repr__(self):
@@ -726,6 +788,24 @@ class piecewise_linear(list):
 
         return s.y(x)
 
+    def to_xmcda(self):
+        root = ElementTree.Element('piecewiseLinear')
+        for elem in self:
+            xmcda = elem.to_xmcda()
+            root.append(xmcda)
+        return root
+
+    def from_xmcda(self):
+        if xmcda.tag != 'piecewiseLinear':
+            raise TypeError('piecewise_linear::invalid tag')
+
+        tag_list = xmcda.getiterator('segment')
+        for tag in tag_list:
+            s = segment().from_xmcda(tag)
+            self.append(s)
+
+        return self
+
 class points(list):
 
     def __call__(self, id):
@@ -748,6 +828,17 @@ class points(list):
             xmcda = p.to_xmcda()
             root.append(xmcda)
         return root
+
+    def from_xmcda(self, xmcda):
+        if xmcda.tag != 'points':
+            raise TypeError('points::invalid tag')
+
+        tag_list = xmcda.getiterator('point')
+        for tag in tag_list:
+            p = point().from_xmcda(tag)
+            self.append(p)
+
+        return self
 
 class point(object):
 
@@ -772,6 +863,21 @@ class point(object):
         ordinate = ElementTree.SubElement('ordinate')
         ordinate.append(marshal(self.y))
         return xmcda
+
+    def from_xmcda(self):
+        if xmcda.tag != 'point':
+            raise TypeError('point::invalid tag')
+
+        id = xmcda.get('id')
+        if id is not None:
+            self.id = id
+
+        x = xmcda.find('.//abscissa').getchildren()[0]
+        self.x = unmarshal(x)
+        y = xmcda.find('.//ordinate').getchildren()[0]
+        self.y = unmarshal(y)
+
+        return self
 
 class constant(object):
 
