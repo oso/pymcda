@@ -8,8 +8,10 @@ import cplex
 
 class lp_utadis(object):
 
-    def __init__(self, cs, c, gi_worst, gi_best):
+    def __init__(self, cs, cat, gi_worst, gi_best):
         self.cs = cs
+        self.cat = cat.get_ordered_categories()
+        print "****", self.cat
         self.gi_worst = gi_worst
         self.gi_best = gi_best
         self.__compute_abscissa()
@@ -33,14 +35,55 @@ class lp_utadis(object):
         right = bisect.bisect_right(self.points[cid], x)
         return left, right
 
+    def add_variables(self, aids):
+        self.lp.variables.add(names = ['x' + aid for aid in aids ],
+                              lb = [0 for aid in aids],
+                              ub = [1 for aid in aids])
+        self.lp.variables.add(names = ['y' + aid for aid in aids ],
+                              lb = [0 for aid in aids],
+                              ub = [1 for aid in aids])
+
+        for cs in self.cs:
+            cid = cs.id
+            nseg = cs.value
+            self.lp.variables.add(names = ['w_' + cid + "_%d" % i
+                                           for i in range(nseg)],
+                                  lb = [0 for i in range(nseg)],
+                                  ub = [1 for i in range(nseg)])
+
+        ncat = len(self.cat)
+        self.lp.variables.add(names = ["u_%d" % i for i in range(ncat-1)],
+                              lb = [0 for i in range(ncat-1)],
+                              ub = [1 for i in range(ncat-1)])
+
     def encode_constraint(self, aa, ap):
+        constraints = self.lp.linear_constraints
+
+        c_vars = {}
+        c_coefs = {}
+        l_vars = []
+        l_coefs = []
         for cs in self.cs:
             perf = ap.performances[cs.id]
             left, right = self.__get_points(cs.id, perf)
             d = self.points[cs.id][right] - self.points[cs.id][left]
             k = (perf - self.points[cs.id][left]) / d
 
+            w_vars = ['w_' + cs.id + "_%d" % i for i in range(cs.value)]
+            w_coefs = [1] * left + [k] + [0] * (cs.value - right)
+
+            l_vars += w_vars
+            l_coefs += w_coefs
+
+            c_vars[cs.id] = w_vars
+            c_coefs[cs.id] = w_coefs
+
+        print l_vars
+        print l_coefs
+
     def encode_constraints(self, aas, pt):
+        self.add_variables(aas.keys())
+
         for aa in aas:
             self.encode_constraint(aa, pt[aa.alternative_id])
 
