@@ -635,7 +635,7 @@ class criteria_functions(dict):
             root.append(xmcda)
         return root
 
-    def from_xmcda(self, xmcda)
+    def from_xmcda(self, xmcda):
         if xmcda.tag != 'criteriaFunctions':
             raise TypeError('criteria_functions::invalid tag')
 
@@ -1013,7 +1013,8 @@ class categories(dict):
         return root
 
     def get_ordered_categories(self):
-        return [ cat.id for cat in self ]
+        d = {c.id: c.rank for c in self}
+        return sorted(d, key = lambda key: d[key])
 
     def from_xmcda(self, xmcda):
         if xmcda.tag != 'categories':
