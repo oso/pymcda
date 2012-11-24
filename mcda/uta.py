@@ -12,7 +12,6 @@ class uta(object):
         self.criteria = criteria
         self.cvs = cvs
         self.cfs = cfs
-        normalize_criteria_weights(cvs)
 
     def marginal_utility(self, cid, aps):
         gi = aps(cid)
