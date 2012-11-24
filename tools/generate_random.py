@@ -120,6 +120,8 @@ def generate_random_piecewise_linear(gi_min = 0, gi_max = 1, n_segments = 3,
 
         f.append(s)
 
+    s.ph_in = True
+
     return f
 
 def generate_random_criteria_functions(crits, gi_min = 0, gi_max = 1,
