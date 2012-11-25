@@ -7,7 +7,20 @@ from mcda.types import category_value, categories_values
 from tools.generate_random import generate_random_criteria_values
 from tools.generate_random import generate_random_criteria_functions
 
-import cplex
+
+try:
+    solver = os.environ['SOLVER']
+except:
+    solver = 'cplex'
+
+#if solver == 'glpk':
+#    import pymprog
+#elif solver == 'scip':
+#    from zibopt import scip
+if solver == 'cplex':
+    import cplex
+else:
+    raise NameError('Invalid solver selected')
 
 class lp_utadis(object):
 
@@ -19,7 +32,8 @@ class lp_utadis(object):
         self.gi_best = gi_best
         self.__compute_abscissa()
 
-        self.lp = cplex.Cplex()
+        if solver == 'cplex':
+            self.lp = cplex.Cplex()
 
     def __compute_abscissa(self):
         self.points = {}
@@ -39,7 +53,7 @@ class lp_utadis(object):
             left -= 1
         return left
 
-    def add_variables(self, aids):
+    def add_variables_cplex(self, aids):
         self.lp.variables.add(names = ['x_' + aid for aid in aids],
                               lb = [0 for aid in aids],
                               ub = [1 for aid in aids])
@@ -47,6 +61,7 @@ class lp_utadis(object):
                               lb = [0 for aid in aids],
                               ub = [1 for aid in aids])
 
+        self.l_vars = []
         for cs in self.cs:
             cid = cs.id
             nseg = cs.value
@@ -55,14 +70,16 @@ class lp_utadis(object):
                                   lb = [0 for i in range(nseg)],
                                   ub = [1 for i in range(nseg)])
 
+            w_vars = ['w_' + cs.id + "_%d" % i
+                      for i in range(1, cs.value+1)]
+            self.l_vars += w_vars
+
         ncat = len(self.cat)
         self.lp.variables.add(names = ["u_%d" % i for i in range(1, ncat)],
                               lb = [0 for i in range(ncat-1)],
                               ub = [1 for i in range(ncat-1)])
 
-    def encode_constraint(self, aa, ap):
-        constraints = self.lp.linear_constraints
-
+    def compute_constraint(self, aa, ap):
         c_vars = {}
         c_coefs = {}
         l_vars = []
@@ -73,18 +90,14 @@ class lp_utadis(object):
             d = self.points[cs.id][left + 1] - self.points[cs.id][left]
             k = (perf - self.points[cs.id][left]) / d
 
-            w_vars = ['w_' + cs.id + "_%d" % i for i in range(1, cs.value+1)]
             w_coefs = [1] * left + [k] + [0] * (cs.value - left - 1)
-            print cs.value, len(w_vars), len(w_coefs)
-
-            l_vars += w_vars
             l_coefs += w_coefs
 
-            c_vars[cs.id] = w_vars
-            c_coefs[cs.id] = w_coefs
+        return l_coefs
 
-        print l_vars
-        print l_coefs
+    def encode_constraint_cplex(self, aa, ap):
+        constraints = self.lp.linear_constraints
+        l_coefs = self.compute_constraint(aa, ap)
 
         cat_nr = self.cat[aa.category_id]
 
@@ -92,7 +105,7 @@ class lp_utadis(object):
             constraints.add(names = ['csup' + aa.alternative_id],
                             lin_expr =
                                 [[
-                                 l_vars +
+                                 self.l_vars +
                                   ["u_%d" % cat_nr,
                                    'x_' + aa.alternative_id],
                                  l_coefs + [-1.0, 1.0],
@@ -105,7 +118,7 @@ class lp_utadis(object):
             constraints.add(names = ['cinf' + aa.alternative_id],
                             lin_expr =
                                 [[
-                                 l_vars +
+                                 self.l_vars +
                                   ["u_%d" % (cat_nr - 1),
                                    'y_' + aa.alternative_id],
                                  l_coefs + [-1.0, -1.0],
@@ -114,13 +127,13 @@ class lp_utadis(object):
                             rhs = [0.00001],
                            )
 
-    def encode_constraints(self, aas, pt):
-        self.add_variables(aas.keys())
+    def encode_constraints_cplex(self, aas, pt):
+        self.add_variables_cplex(aas.keys())
 
-        # sum ((sum w_it) + k * w_it+1) - u_k + x_j >= d_1
-        # sum ((sum w_it) + k * w_it+1) - u_k - y_j <= -d_2
+        # sum ((sum w_it) + k * w_it+1) - u_k + x_j <= -d1
+        # sum ((sum w_it) + k * w_it+1) - u_k - y_j >= d2
         for aa in aas:
-            self.encode_constraint(aa, pt[aa.alternative_id])
+            self.encode_constraint_cplex(aa, pt[aa.alternative_id])
 
         # sum (sum w_it) = 1
         constraints = self.lp.linear_constraints
@@ -146,16 +159,26 @@ class lp_utadis(object):
                             rhs = [0.01],
                            )
 
-    def add_objective(self, aa):
+    def add_objective_cplex(self, aa):
         self.lp.objective.set_sense(self.lp.objective.sense.minimize)
         for aa in aa.keys():
             self.lp.objective.set_linear('x_' + aa, 1)
             self.lp.objective.set_linear('y_' + aa, 1)
 
+    def encode_constraints(self, aa, pt):
+        if solver == 'cplex':
+            self.encode_constraints_cplex(aa, pt)
+
+    def add_objective(self, aa):
+        if solver == 'cplex':
+            self.add_objective_cplex(aa)
+
     def solve(self, aa, pt):
         self.encode_constraints(aa, pt)
         self.add_objective(aa)
-        self.lp.solve()
+
+        if solver == 'cplex':
+            self.lp.solve()
 
         cfs = criteria_functions()
         cvs = criteria_values()
@@ -188,7 +211,6 @@ class lp_utadis(object):
             ui_b = self.lp.solution.get_values("u_%d" % i)
             catv.append(category_value(cat[i], interval(ui_a, ui_b)))
             ui_a = ui_b
-            print ui_b
 
         catv.append(category_value(cat[i + 1], interval(ui_a, 1)))
 
@@ -211,10 +233,10 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_criteria_functions
 
     # Generate an utadis model
-    c = generate_random_criteria(3)
+    c = generate_random_criteria(10)
     cv = generate_random_criteria_values(c, seed = 1235)
     normalize_criteria_weights(cv)
-    cat = generate_random_categories(3)
+    cat = generate_random_categories(4)
 
     cfs = generate_random_criteria_functions(c)
 
@@ -230,29 +252,23 @@ if __name__ == "__main__":
     pt = generate_random_performance_table(a, c)
     aa = u.get_assignments(pt)
 
+    print('Original model')
+    print('==============')
+    print("Number of alternatives: %d" % len(a))
+
     # Learn the parameters from assignment examples
-    gi_worst = alternative_performances('worst',
-                                        {'c1': 0, 'c2': 0, 'c3': 0})
-    gi_best = alternative_performances('best',
-                                       {'c1': 1, 'c2': 1, 'c3': 1})
+    gi_worst = alternative_performances('worst', {crit.id: 0 for crit in c})
+    gi_best = alternative_performances('best', {crit.id: 1 for crit in c})
 
     css = criteria_values([])
     for cf in cfs:
         cs = criterion_value(cf.id, len(cf.function))
         css.append(cs)
 
-    print(cfs)
-    print(gi_worst)
-    print(gi_best)
-    print(css)
-
     lp = lp_utadis(css, cat, gi_worst, gi_best)
     cvs, cfs, catv = lp.solve(aa, pt)
 
     u2 = utadis(c, cvs, cfs, catv)
     aa2 = u2.get_assignments(pt)
-
-    print aa
-    print aa2
 
     print compute_ac(aa, aa2)
