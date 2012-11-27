@@ -222,18 +222,6 @@ class lp_utadis(object):
         self.lp.min(sum(self.x[i] for i in range(len(self.x)))
                     + sum(self.y[i] for i in range(len(self.y))))
 
-    def solve(self, aa, pt):
-        if solver == 'cplex':
-            self.encode_constraints_cplex(aa, pt)
-            self.add_objective_cplex(aa)
-            solution = self.solve_cplex(aa, pt)
-        elif solver == 'glpk':
-            self.encode_constraints_glpk(aa, pt)
-            self.add_objective_glpk(aa)
-            solution = self.solve_glpk(aa, pt)
-
-        return solution
-
     def solve_glpk(self, aa, pt):
         self.lp.solve()
 
@@ -316,6 +304,18 @@ class lp_utadis(object):
         catv.append(category_value(cat[i + 1], interval(ui_a, 1)))
 
         return cvs, cfs, catv
+
+    def solve(self, aa, pt):
+        if solver == 'cplex':
+            self.encode_constraints_cplex(aa, pt)
+            self.add_objective_cplex(aa)
+            solution = self.solve_cplex(aa, pt)
+        elif solver == 'glpk':
+            self.encode_constraints_glpk(aa, pt)
+            self.add_objective_glpk(aa)
+            solution = self.solve_glpk(aa, pt)
+
+        return solution
 
 if __name__ == "__main__":
     from mcda.types import criteria_values, criterion_value
