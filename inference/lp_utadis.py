@@ -1,5 +1,6 @@
 from __future__ import division
 import bisect
+import os
 import sys
 sys.path.insert(0, "..")
 from mcda.types import point, segment, piecewise_linear
@@ -7,17 +8,18 @@ from mcda.types import category_value, categories_values
 from tools.generate_random import generate_random_criteria_values
 from tools.generate_random import generate_random_criteria_functions
 
+verbose = False
 
 try:
     solver = os.environ['SOLVER']
 except:
     solver = 'cplex'
 
-#if solver == 'glpk':
-#    import pymprog
+if solver == 'glpk':
+    import pymprog
 #elif solver == 'scip':
 #    from zibopt import scip
-if solver == 'cplex':
+elif solver == 'cplex':
     import cplex
 else:
     raise NameError('Invalid solver selected')
@@ -34,6 +36,9 @@ class lp_utadis(object):
 
         if solver == 'cplex':
             self.lp = cplex.Cplex()
+        elif solver == 'glpk':
+            self.lp = pymprog.model('lp_utadis')
+            self.lp.verb = verbose
 
     def __compute_abscissa(self):
         self.points = {}
@@ -80,9 +85,7 @@ class lp_utadis(object):
                               ub = [1 for i in range(ncat-1)])
 
     def compute_constraint(self, aa, ap):
-        c_vars = {}
-        c_coefs = {}
-        l_vars = []
+        d_coefs = {}
         l_coefs = []
         for cs in self.cs:
             perf = ap.performances[cs.id]
@@ -92,12 +95,14 @@ class lp_utadis(object):
 
             w_coefs = [1] * left + [k] + [0] * (cs.value - left - 1)
             l_coefs += w_coefs
+            d_coefs[cs.id] = w_coefs
 
-        return l_coefs
+        # FIXME: return only d_coefs
+        return l_coefs, d_coefs
 
     def encode_constraint_cplex(self, aa, ap):
         constraints = self.lp.linear_constraints
-        l_coefs = self.compute_constraint(aa, ap)
+        l_coefs, d_coefs = self.compute_constraint(aa, ap)
 
         cat_nr = self.cat[aa.category_id]
 
@@ -165,20 +170,116 @@ class lp_utadis(object):
             self.lp.objective.set_linear('x_' + aa, 1)
             self.lp.objective.set_linear('y_' + aa, 1)
 
-    def encode_constraints(self, aa, pt):
-        if solver == 'cplex':
-            self.encode_constraints_cplex(aa, pt)
+    def add_variables_glpk(self, aids):
+        self.x = self.lp.var(xrange(len(aids)), 'x', bounds=(0, 1))
+        self.y = self.lp.var(xrange(len(aids)), 'y', bounds=(0, 1))
 
-    def add_objective(self, aa):
-        if solver == 'cplex':
-            self.add_objective_cplex(aa)
+        self.l_vars = []
+        self.w = {}
+        for cs in self.cs:
+            cid = cs.id
+            self.w[cs.id] = self.lp.var(xrange(cs.value), 'w_' + cid,
+                                        bounds=(0, 1))
+            w_vars = ['w_' + cs.id + "_%d" % i
+                      for i in range(1, cs.value+1)]
+
+        ncat = len(self.cat)
+        self.u = self.lp.var(xrange(len(self.cat) - 1), 'u', bounds=(0, 1))
+
+    def encode_constraints_glpk(self, aas, pt):
+        self.add_variables_glpk(aas)
+
+        # sum ((sum w_it) + k * w_it+1) - u_k + x_j <= -d1
+        # sum ((sum w_it) + k * w_it+1) - u_k - y_j >= d2
+        n = len(self.l_vars)
+        for i, aa in enumerate(aas):
+            l_coefs, d_coefs = self.compute_constraint(aa, pt[aa.alternative_id])
+
+            cat_nr = self.cat[aa.category_id]
+
+            if cat_nr < len(self.cat):
+                self.lp.st(sum(d_coefs[cs.id][j] * self.w[cs.id][j] \
+                           for cs in self.cs for j in range(cs.value)) \
+                           + self.x[i] - self.u[cat_nr - 1] \
+                           <= -0.00001)
+
+            if cat_nr > 1:
+                self.lp.st(sum(d_coefs[cs.id][j] * self.w[cs.id][j] \
+                           for cs in self.cs for j in range(cs.value)) \
+                           - self.y[i] - self.u[cat_nr - 2] \
+                           >= 0.00001)
+
+        # sum (sum w_it) = 1
+        self.lp.st(sum(self.w[cs.id][i] for cs in self.cs \
+                   for i in range(cs.value)) == 1)
+
+        # u_k - u_k-1 >= s
+        ncat = len(self.cat)
+        for i in range(1, ncat - 1):
+            self.lp.st(self.u[i] - self.u[i - 1] >= 0.01)
+
+    def add_objective_glpk(self, aa):
+        self.lp.min(sum(self.x[i] for i in range(len(self.x)))
+                    + sum(self.y[i] for i in range(len(self.y))))
 
     def solve(self, aa, pt):
-        self.encode_constraints(aa, pt)
-        self.add_objective(aa)
-
         if solver == 'cplex':
-            self.lp.solve()
+            self.encode_constraints_cplex(aa, pt)
+            self.add_objective_cplex(aa)
+            solution = self.solve_cplex(aa, pt)
+        elif solver == 'glpk':
+            self.encode_constraints_glpk(aa, pt)
+            self.add_objective_glpk(aa)
+            solution = self.solve_glpk(aa, pt)
+
+        return solution
+
+    def solve_glpk(self, aa, pt):
+        self.lp.solve()
+
+        status = self.lp.status()
+        if status != 'opt':
+            raise RuntimeError("Solver status: %s" % self.lp.status())
+
+        cfs = criteria_functions()
+        cvs = criteria_values()
+        for cs in self.cs:
+            cv = criterion_value(cs.id, 1)
+            cvs.append(cv)
+
+            p1 = point(self.points[cs.id][0], 0)
+
+            ui = 0
+            f = piecewise_linear([])
+            for i in range(cs.value):
+                uivar = 'w_' + cs.id + "_%d" % (i + 1)
+                ui += self.w[cs.id][i].primal
+                p2 = point(self.points[cs.id][i + 1], ui)
+
+                s = segment(p1, p2)
+
+                f.append(s)
+
+                p1 = p2
+
+            s.ph_in = True
+            cf = criterion_function(cs.id, f)
+            cfs.append(cf)
+
+        cat = {v: k for k, v in self.cat.items()}
+        catv = categories_values()
+        ui_a = 0
+        for i in range(0, len(cat) - 1):
+            ui_b = self.u[i].primal
+            catv.append(category_value(cat[i + 1], interval(ui_a, ui_b)))
+            ui_a = ui_b
+
+        catv.append(category_value(cat[i + 2], interval(ui_a, 1)))
+
+        return cvs, cfs, catv
+
+    def solve_cplex(self, aa, pt):
+        self.lp.solve()
 
         cfs = criteria_functions()
         cvs = criteria_values()
@@ -233,10 +334,10 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_criteria_functions
 
     # Generate an utadis model
-    c = generate_random_criteria(10)
+    c = generate_random_criteria(3)
     cv = generate_random_criteria_values(c, seed = 1235)
     normalize_criteria_weights(cv)
-    cat = generate_random_categories(4)
+    cat = generate_random_categories(3)
 
     cfs = generate_random_criteria_functions(c)
 
@@ -248,7 +349,7 @@ if __name__ == "__main__":
     u = utadis(c, cv, cfs, catv)
 
     # Generate random alternative and compute assignments
-    a = generate_random_alternatives(1000)
+    a = generate_random_alternatives(10)
     pt = generate_random_performance_table(a, c)
     aa = u.get_assignments(pt)
 
@@ -267,6 +368,8 @@ if __name__ == "__main__":
 
     lp = lp_utadis(css, cat, gi_worst, gi_best)
     cvs, cfs, catv = lp.solve(aa, pt)
+    print cfs
+    print catv
 
     u2 = utadis(c, cvs, cfs, catv)
     aa2 = u2.get_assignments(pt)
