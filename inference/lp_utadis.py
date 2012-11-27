@@ -66,7 +66,6 @@ class lp_utadis(object):
                               lb = [0 for aid in aids],
                               ub = [1 for aid in aids])
 
-        self.l_vars = []
         for cs in self.cs:
             cid = cs.id
             nseg = cs.value
@@ -75,9 +74,6 @@ class lp_utadis(object):
                                   lb = [0 for i in range(nseg)],
                                   ub = [1 for i in range(nseg)])
 
-            w_vars = ['w_' + cs.id + "_%d" % i
-                      for i in range(1, cs.value+1)]
-            self.l_vars += w_vars
 
         ncat = len(self.cat)
         self.lp.variables.add(names = ["u_%d" % i for i in range(1, ncat)],
@@ -86,7 +82,6 @@ class lp_utadis(object):
 
     def compute_constraint(self, aa, ap):
         d_coefs = {}
-        l_coefs = []
         for cs in self.cs:
             perf = ap.performances[cs.id]
             left = self.__get_left_points(cs.id, perf)
@@ -94,23 +89,25 @@ class lp_utadis(object):
             k = (perf - self.points[cs.id][left]) / d
 
             w_coefs = [1] * left + [k] + [0] * (cs.value - left - 1)
-            l_coefs += w_coefs
             d_coefs[cs.id] = w_coefs
 
-        # FIXME: return only d_coefs
-        return l_coefs, d_coefs
+        return d_coefs
 
     def encode_constraint_cplex(self, aa, ap):
         constraints = self.lp.linear_constraints
-        l_coefs, d_coefs = self.compute_constraint(aa, ap)
+        d_coefs = self.compute_constraint(aa, ap)
 
         cat_nr = self.cat[aa.category_id]
+
+        l_vars = ['w_' + cid + '_%d' % j for cid in d_coefs.keys()
+                  for j in range(1, self.cs[cid].value + 1)]
+        l_coefs = [j for i in d_coefs.values() for j in i]
 
         if cat_nr < len(self.cat):
             constraints.add(names = ['csup' + aa.alternative_id],
                             lin_expr =
                                 [[
-                                 self.l_vars +
+                                 l_vars +
                                   ["u_%d" % cat_nr,
                                    'x_' + aa.alternative_id],
                                  l_coefs + [-1.0, 1.0],
@@ -123,7 +120,7 @@ class lp_utadis(object):
             constraints.add(names = ['cinf' + aa.alternative_id],
                             lin_expr =
                                 [[
-                                 self.l_vars +
+                                 l_vars +
                                   ["u_%d" % (cat_nr - 1),
                                    'y_' + aa.alternative_id],
                                  l_coefs + [-1.0, -1.0],
@@ -174,7 +171,6 @@ class lp_utadis(object):
         self.x = self.lp.var(xrange(len(aids)), 'x', bounds=(0, 1))
         self.y = self.lp.var(xrange(len(aids)), 'y', bounds=(0, 1))
 
-        self.l_vars = []
         self.w = {}
         for cs in self.cs:
             cid = cs.id
@@ -191,9 +187,8 @@ class lp_utadis(object):
 
         # sum ((sum w_it) + k * w_it+1) - u_k + x_j <= -d1
         # sum ((sum w_it) + k * w_it+1) - u_k - y_j >= d2
-        n = len(self.l_vars)
         for i, aa in enumerate(aas):
-            l_coefs, d_coefs = self.compute_constraint(aa, pt[aa.alternative_id])
+            d_coefs = self.compute_constraint(aa, pt[aa.alternative_id])
 
             cat_nr = self.cat[aa.category_id]
 
