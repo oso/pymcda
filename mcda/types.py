@@ -629,6 +629,22 @@ class criteria_functions(dict):
     def append(self, c):
         self[c.id] = c
 
+    def pprint(self, criterion_ids = None):
+        if criterion_ids is None:
+            criterion_ids = []
+            for cv in self:
+                criterion_ids.append(cv.id)
+
+        string = ""
+        for cid in criterion_ids:
+            cf = self[cid]
+            string += cf.pprint() + '\n'
+
+        return string[:-1]
+
+    def display(self, criterion_ids = None):
+        print(self.pprint(criterion_ids))
+
     def to_xmcda(self):
         root = ElementTree.Element('criteriaFunctions')
         for a_value in self:
@@ -661,6 +677,12 @@ class criterion_function(object):
 
     def y(self, x):
         return self.function.y(x)
+
+    def pprint(self):
+        return "%s:\t%s" % (self.id, self.function.pprint())
+
+    def display(self):
+        print(self.pprint())
 
     def to_xmcda(self):
         root = ElementTree.Element('criterionFunction')
@@ -742,6 +764,12 @@ class segment(object):
         k = self.slope()
         return self.pl.y + k * (x - self.pl.x)
 
+    def pprint(self):
+        return "%s-%s" % (self.pl, self.ph)
+
+    def display(self):
+        print(self.pprint())
+
     def to_xmcda(self):
         root = ElementTree.Element('segment')
         for elem in self:
@@ -788,6 +816,16 @@ class piecewise_linear(list):
             raise ValueError("No segment found for this value")
 
         return s.y(x)
+
+    def pprint(self):
+        string = "f("
+        for seg in self:
+            string += seg.pprint() + ';'
+        string = string[:-1] + ")"
+        return string
+
+    def display(self):
+        print(self.pprint())
 
     def to_xmcda(self):
         root = ElementTree.Element('piecewiseLinear')
