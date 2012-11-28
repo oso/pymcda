@@ -327,6 +327,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
     from tools.generate_random import generate_random_criteria_functions
+    from tools.utils import display_affectations_and_pt
 
     # Generate an utadis model
     c = generate_random_criteria(3)
@@ -344,13 +345,20 @@ if __name__ == "__main__":
     u = utadis(c, cv, cfs, catv)
 
     # Generate random alternative and compute assignments
-    a = generate_random_alternatives(10)
+    a = generate_random_alternatives(1000)
     pt = generate_random_performance_table(a, c)
     aa = u.get_assignments(pt)
 
+    print('==============')
     print('Original model')
     print('==============')
     print("Number of alternatives: %d" % len(a))
+    print('Criteria weights:')
+    cv.display()
+    print('Criteria functions:')
+    cfs.display()
+    print('Categories values:')
+    catv.display()
 
     # Learn the parameters from assignment examples
     gi_worst = alternative_performances('worst', {crit.id: 0 for crit in c})
@@ -363,10 +371,33 @@ if __name__ == "__main__":
 
     lp = lp_utadis(css, cat, gi_worst, gi_best)
     cvs, cfs, catv = lp.solve(aa, pt)
-    print cfs
-    print catv
+
+    print('=============')
+    print('Learned model')
+    print('=============')
+    print('Criteria weights:')
+    cvs.display()
+    print('Criteria functions:')
+    cfs.display()
+    print('Categories values:')
+    catv.display()
 
     u2 = utadis(c, cvs, cfs, catv)
     aa2 = u2.get_assignments(pt)
 
-    print compute_ac(aa, aa2)
+    total = len(a)
+    nok = 0
+    anok = []
+    for alt in a:
+        if aa(alt.id) != aa2(alt.id):
+            anok.append(alt)
+            nok += 1
+
+    print("Good affectations          : %3g %%" \
+          % ((total - nok) / total *100))
+    print("Bad affectations           : %3g %%" \
+          % ((nok) / total *100))
+
+    if len(anok) > 0:
+        print("Alternatives wrongly assigned:")
+        display_affectations_and_pt(anok, c, [aa, aa2], [pt])
