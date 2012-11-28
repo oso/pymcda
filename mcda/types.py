@@ -190,6 +190,7 @@ class criteria_values(dict):
 
     def display(self, header=True, criterion_ids=None, name='w'):
         if criterion_ids is None:
+            criterion_ids = []
             for cv in self:
                 criterion_ids.append(cv.id)
 
