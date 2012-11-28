@@ -461,6 +461,16 @@ class categories_values(dict):
     def append(self, cv):
         self[cv.id] = cv
 
+    def pprint(self):
+        string = ""
+        for cv in self:
+            string += cv.pprint() + '\n'
+
+        return string[:-1]
+
+    def display(self):
+        print(self.pprint())
+
     def to_xmcda(self):
         root = ElementTree.Element('categoriesValues')
         for cat_value in self:
@@ -490,6 +500,12 @@ class category_value(object):
 
     def __repr__(self):
         return "%s: %s" % (self.id, self.value)
+
+    def pprint(self):
+        return "%s: %s" % (self.id, self.value.pprint())
+
+    def display(self):
+        print(self.pprint())
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('categoryValue')
@@ -532,6 +548,12 @@ class interval(object):
             return False
 
         return True
+
+    def pprint(self):
+        return "%s - %s" % (self.lower, self.upper)
+
+    def display(self):
+        print(self.pprint())
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('interval')
