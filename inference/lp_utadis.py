@@ -5,6 +5,9 @@ import sys
 sys.path.insert(0, "..")
 from mcda.types import point, segment, piecewise_linear
 from mcda.types import category_value, categories_values
+from mcda.types import criteria_functions, criterion_function
+from mcda.types import criteria_values, criterion_value
+from mcda.types import categories_values, categories_values, interval
 from tools.generate_random import generate_random_criteria_values
 from tools.generate_random import generate_random_criteria_functions
 
