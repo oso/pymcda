@@ -10,6 +10,7 @@ from mcda.types import criterion_function, criteria_functions
 from mcda.types import category, categories
 from mcda.types import category_profile, categories_profiles, limits
 from mcda.types import piecewise_linear, point, segment
+from mcda.types import category_value, categories_values, interval
 
 def generate_random_alternatives(number, prefix='a'):
     alts = alternatives()
@@ -137,6 +138,24 @@ def generate_random_criteria_functions(crits, gi_min = 0, gi_max = 1,
 
     return cfs
 
+def generate_random_categories_values(cats):
+    ncats = len(cats)
+    r = [random.random() for i in range(ncats - 1)]
+    r.sort()
+
+    v0 = 0
+    catvs = categories_values()
+    for i, cat in enumerate(cats.get_ordered_categories()):
+        if i == ncats - 1:
+            v1 = 1
+        else:
+            v1 = r[i]
+        catv = category_value(cat, interval(v0, v1))
+        catvs.append(catv)
+        v0 = v1
+
+    return catvs
+
 if __name__ == "__main__":
     alts = generate_random_alternatives(10)
     print(alts)
@@ -154,3 +173,5 @@ if __name__ == "__main__":
     print(cps)
     pl = generate_random_piecewise_linear(0, 5, 3)
     print(pl)
+    catv = generate_random_categories_values(cats)
+    print(catv)
