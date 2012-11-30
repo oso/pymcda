@@ -327,6 +327,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
     from tools.generate_random import generate_random_criteria_functions
+    from tools.generate_random import generate_random_categories_values
     from tools.utils import display_affectations_and_pt
 
     # Generate an utadis model
@@ -336,11 +337,7 @@ if __name__ == "__main__":
     cat = generate_random_categories(3)
 
     cfs = generate_random_criteria_functions(c)
-
-    catv1 = category_value("cat1", interval(0, 0.25))
-    catv2 = category_value("cat2", interval(0.25, 0.65))
-    catv3 = category_value("cat3", interval(0.65, 1))
-    catv = categories_values([catv1, catv2, catv3])
+    catv = generate_random_categories_values(cat)
 
     u = utadis(c, cv, cfs, catv)
 
