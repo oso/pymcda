@@ -39,6 +39,9 @@ class lp_utadis(object):
 
         if solver == 'cplex':
             self.lp = cplex.Cplex()
+            if verbose is False:
+                self.lp.set_log_stream(None)
+                self.lp.set_results_stream(None)
         elif solver == 'glpk':
             self.lp = pymprog.model('lp_utadis')
             self.lp.verb = verbose
