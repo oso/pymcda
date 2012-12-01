@@ -227,6 +227,8 @@ class lp_utadis(object):
         if status != 'opt':
             raise RuntimeError("Solver status: %s" % self.lp.status())
 
+        obj = self.lp.vobj()
+
         cfs = criteria_functions()
         cvs = criteria_values()
         for cs in self.cs:
@@ -267,6 +269,8 @@ class lp_utadis(object):
     def solve_cplex(self, aa, pt):
         self.lp.solve()
 
+        obj = self.lp.solution.get_objective_value()
+
         cfs = criteria_functions()
         cvs = criteria_values()
         for cs in self.cs:
@@ -301,7 +305,7 @@ class lp_utadis(object):
 
         catv.append(category_value(cat[i + 1], interval(ui_a, 1)))
 
-        return cvs, cfs, catv
+        return obj, cvs, cfs, catv
 
     def solve(self, aa, pt):
         if solver == 'cplex':
