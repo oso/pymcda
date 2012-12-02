@@ -164,7 +164,7 @@ class lp_utadis(object):
                                          [1, -1],
                                        ]],
                             senses = ["G"],
-                            rhs = [0.01],
+                            rhs = [0.00001],
                            )
 
     def add_objective_cplex(self, aa):
@@ -217,7 +217,7 @@ class lp_utadis(object):
         # u_k - u_k-1 >= s
         ncat = len(self.cat)
         for i in range(1, ncat - 1):
-            self.lp.st(self.u[i] - self.u[i - 1] >= 0.01)
+            self.lp.st(self.u[i] - self.u[i - 1] >= 0.00001)
 
     def add_objective_glpk(self, aa):
         self.lp.min(sum(self.x[i] for i in range(len(self.x)))
@@ -267,10 +267,14 @@ class lp_utadis(object):
 
         catv.append(category_value(cat[i + 2], interval(ui_a, 1)))
 
-        return cvs, cfs, catv
+        return obj, cvs, cfs, catv
 
     def solve_cplex(self, aa, pt):
         self.lp.solve()
+
+        status = self.lp.solution.get_status()
+        if status == self.lp.solution.status.infeasible:
+            raise RuntimeError("Solver status: %s" % status)
 
         obj = self.lp.solution.get_objective_value()
 
@@ -341,8 +345,8 @@ if __name__ == "__main__":
     from tools.utils import display_affectations_and_pt
 
     # Generate an utadis model
-    c = generate_random_criteria(3)
-    cv = generate_random_criteria_values(c, seed = 1235)
+    c = generate_random_criteria(10)
+    cv = generate_random_criteria_values(c, seed = 3)
     normalize_criteria_weights(cv)
     cat = generate_random_categories(3)
 
@@ -352,7 +356,7 @@ if __name__ == "__main__":
     u = utadis(c, cv, cfs, catv)
 
     # Generate random alternative and compute assignments
-    a = generate_random_alternatives(1000)
+    a = generate_random_alternatives(2000)
     pt = generate_random_performance_table(a, c)
     aa = u.get_assignments(pt)
 
@@ -377,7 +381,7 @@ if __name__ == "__main__":
         css.append(cs)
 
     lp = lp_utadis(css, cat, gi_worst, gi_best)
-    cvs, cfs, catv = lp.solve(aa, pt)
+    obj, cvs, cfs, catv = lp.solve(aa, pt)
 
     print('=============')
     print('Learned model')
