@@ -104,9 +104,10 @@ def generate_random_categories_profiles(cats, prefix='b'):
     return cps
 
 def generate_random_piecewise_linear(gi_min = 0, gi_max = 1, n_segments = 3,
-                                     ui_min = 0, ui_max = 1):
+                                     ui_min = 0, ui_max = 1, k = 3):
     d = ui_max - ui_min
-    r = [ ui_min + d * random.random() for i in range(n_segments - 1) ]
+    r = [ ui_min + d * round(random.random(), k)
+          for i in range(n_segments - 1) ]
     r.append(ui_min)
     r.append(ui_max)
     r.sort()
@@ -138,9 +139,9 @@ def generate_random_criteria_functions(crits, gi_min = 0, gi_max = 1,
 
     return cfs
 
-def generate_random_categories_values(cats):
+def generate_random_categories_values(cats, k = 3):
     ncats = len(cats)
-    r = [random.random() for i in range(ncats - 1)]
+    r = [round(random.random(), k) for i in range(ncats - 1)]
     r.sort()
 
     v0 = 0
