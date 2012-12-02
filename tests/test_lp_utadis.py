@@ -34,8 +34,6 @@ def test_lp_utadis(seed, na, nc, ncat, na_gen, pcerrors):
     cfs = generate_random_criteria_functions(c)
     catv = generate_random_categories_values(cat)
 
-    lbda = random.uniform(0.5, 1)
-
     a = generate_random_alternatives(na)
     pt = generate_random_performance_table(a, c)
 
