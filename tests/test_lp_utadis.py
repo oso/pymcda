@@ -24,14 +24,15 @@ from tools.utils import normalize_criteria_weights
 from tools.utils import add_errors_in_affectations
 from test_utils import test_result, test_results
 
-def test_lp_utadis(seed, na, nc, ncat, na_gen, pcerrors):
+def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
     # Generate a random ELECTRE TRI model and assignment examples
     c = generate_random_criteria(nc)
     cv = generate_random_criteria_values(c, seed)
     normalize_criteria_weights(cv)
     cat = generate_random_categories(ncat)
 
-    cfs = generate_random_criteria_functions(c)
+    cfs = generate_random_criteria_functions(c, nseg_min = ns,
+                                             nseg_max = ns)
     catv = generate_random_categories_values(cat)
 
     a = generate_random_alternatives(na)
@@ -91,14 +92,15 @@ def test_lp_utadis(seed, na, nc, ncat, na_gen, pcerrors):
     ca_gen = compute_ac(aa, aa2)
 
     # Save all infos in test_result class
-    t = test_result("%s-%d-%d-%d-%d-%g" % (seed, na, nc, ncat, na_gen,
-                    pcerrors))
+    t = test_result("%s-%d-%d-%d-%d-%d-%g" % (seed, na, nc, ncat, ns,
+                    na_gen, pcerrors))
 
     # Input params
     t['seed'] = seed
     t['na'] = na
     t['nc'] = nc
     t['ncat'] = ncat
+    t['ns'] = ns
     t['na_gen'] = na_gen
     t['pcerrors'] = pcerrors
 
@@ -115,7 +117,7 @@ def test_lp_utadis(seed, na, nc, ncat, na_gen, pcerrors):
 
     return t
 
-def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, filename):
+def run_tests(na, nc, ncat, ns, na_gen, pcerrors, nseeds, filename):
     # Create the CSV writer
     writer = csv.writer(open(filename, 'wb'))
 
@@ -123,6 +125,7 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, filename):
     writer.writerow(['na', na])
     writer.writerow(['nc', nc])
     writer.writerow(['ncat', ncat])
+    writer.writerow(['ns', ns])
     writer.writerow(['na_gen', na_gen])
     writer.writerow(['pcerrors', pcerrors])
     writer.writerow(['nseeds', nseeds])
@@ -136,11 +139,11 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, filename):
 
     # Run the algorithm
     initialized = False
-    for _na, _nc, _ncat, _na_gen, _pcerrors, seed \
-        in product(na, nc, ncat, na_gen, pcerrors, seeds):
+    for _na, _nc, _ncat, _ns, _na_gen, _pcerrors, seed \
+        in product(na, nc, ncat, ns, na_gen, pcerrors, seeds):
 
         t1 = time.time()
-        t = test_lp_utadis(seed, _na, _nc, _ncat, _na_gen, _pcerrors)
+        t = test_lp_utadis(seed, _na, _nc, _ncat, _ns,  _na_gen, _pcerrors)
         t2 = time.time()
 
         if initialized is False:
@@ -172,6 +175,9 @@ if __name__ == "__main__":
     parser.add_option("-t", "--ncat", action = "store", type="string",
                       dest = "ncat",
                       help = "number of categories")
+    parser.add_option("-p", "--ns", action = "store", type="string",
+                      dest = "ns",
+                      help = "number of segments")
     parser.add_option("-g", "--na_gen", action = "store", type="string",
                       dest = "na_gen",
                       help = "number of generalization alternatives")
@@ -202,6 +208,11 @@ if __name__ == "__main__":
     options.ncat = options.ncat.split(",")
     options.ncat = [ int(x) for x in options.ncat ]
 
+    while not options.ns:
+        options.ns = raw_input("Number of function segments ? ")
+    options.ns = options.ns.split(",")
+    options.ns = [ int(x) for x in options.ns ]
+
     while not options.na_gen:
         options.na_gen = raw_input("Number of generalization " \
                                    "alternatives ? ")
@@ -228,5 +239,6 @@ if __name__ == "__main__":
     if options.filename[-4:] != ".csv":
         options.filename += ".csv"
 
-    run_tests(options.na, options.nc, options.ncat, options.na_gen,
-              options.pcerrors, options.nseeds, options.filename)
+    run_tests(options.na, options.nc, options.ncat, options.ns,
+              options.na_gen, options.pcerrors, options.nseeds,
+              options.filename)
