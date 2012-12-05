@@ -52,7 +52,10 @@ class utadis(uta):
     def get_assignment(self, ap):
         av = self.global_utility(ap)
         i = bisect.bisect_left(self.limits, av.value)
-        cat = self.cat_limits[i][0]
+        if i == len(self.limits):
+            cat = self.cat_limits[-1][0]
+        else:
+            cat = self.cat_limits[i][0]
         return alternative_affectation(ap.alternative_id, cat)
 
     def get_assignments(self, pt):
