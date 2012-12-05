@@ -118,7 +118,7 @@ class lp_utadis(object):
                                    'x_' + aa.alternative_id],
                                  l_coefs + [-1.0, 1.0],
                                 ]],
-                            senses = ["L"],
+                            senses = ["E"],
                             rhs = [-0.00001],
                            )
 
@@ -131,7 +131,7 @@ class lp_utadis(object):
                                    'y_' + aa.alternative_id],
                                  l_coefs + [-1.0, -1.0],
                                 ]],
-                            senses = ["G"],
+                            senses = ["E"],
                             rhs = [0.00001],
                            )
 
@@ -168,7 +168,7 @@ class lp_utadis(object):
                            )
 
     def add_objective_cplex(self, aa):
-        self.lp.objective.set_sense(self.lp.objective.sense.minimize)
+        self.lp.objective.set_sense(self.lp.objective.sense.maximize)
         for aa in aa.keys():
             self.lp.objective.set_linear('x_' + aa, 1)
             self.lp.objective.set_linear('y_' + aa, 1)
@@ -202,13 +202,13 @@ class lp_utadis(object):
                 self.lp.st(sum(d_coefs[cs.id][j] * self.w[cs.id][j] \
                            for cs in self.cs for j in range(cs.value)) \
                            + self.x[i] - self.u[cat_nr - 1] \
-                           <= -0.00001)
+                           == -0.00001)
 
             if cat_nr > 1:
                 self.lp.st(sum(d_coefs[cs.id][j] * self.w[cs.id][j] \
                            for cs in self.cs for j in range(cs.value)) \
                            - self.y[i] - self.u[cat_nr - 2] \
-                           >= 0.00001)
+                           == 0.00001)
 
         # sum (sum w_it) = 1
         self.lp.st(sum(self.w[cs.id][i] for cs in self.cs \
@@ -220,7 +220,7 @@ class lp_utadis(object):
             self.lp.st(self.u[i] - self.u[i - 1] >= 0.00001)
 
     def add_objective_glpk(self, aa):
-        self.lp.min(sum(self.x[i] for i in range(len(self.x)))
+        self.lp.max(sum(self.x[i] for i in range(len(self.x)))
                     + sum(self.y[i] for i in range(len(self.y))))
 
     def solve_glpk(self, aa, pt):
@@ -345,18 +345,18 @@ if __name__ == "__main__":
     from tools.utils import display_affectations_and_pt
 
     # Generate an utadis model
-    c = generate_random_criteria(10)
-    cv = generate_random_criteria_values(c, seed = 3)
+    c = generate_random_criteria(7)
+    cv = generate_random_criteria_values(c, seed = 6)
     normalize_criteria_weights(cv)
     cat = generate_random_categories(3)
 
-    cfs = generate_random_criteria_functions(c)
+    cfs = generate_random_criteria_functions(c, nseg_min = 3, nseg_max = 3)
     catv = generate_random_categories_values(cat)
 
     u = utadis(c, cv, cfs, catv)
 
     # Generate random alternative and compute assignments
-    a = generate_random_alternatives(2000)
+    a = generate_random_alternatives(1000)
     pt = generate_random_performance_table(a, c)
     aa = u.get_assignments(pt)
 
