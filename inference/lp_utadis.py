@@ -71,6 +71,12 @@ class lp_utadis(object):
         self.lp.variables.add(names = ['y_' + aid for aid in aids],
                               lb = [0 for aid in aids],
                               ub = [1 for aid in aids])
+        self.lp.variables.add(names = ['xp_' + aid for aid in aids],
+                              lb = [0 for aid in aids],
+                              ub = [1 for aid in aids])
+        self.lp.variables.add(names = ['yp_' + aid for aid in aids],
+                              lb = [0 for aid in aids],
+                              ub = [1 for aid in aids])
 
         for cs in self.cs:
             cid = cs.id
@@ -115,8 +121,9 @@ class lp_utadis(object):
                                 [[
                                  l_vars +
                                   ["u_%d" % cat_nr,
-                                   'x_' + aa.alternative_id],
-                                 l_coefs + [-1.0, 1.0],
+                                   'x_' + aa.alternative_id,
+                                   'xp_' + aa.alternative_id],
+                                 l_coefs + [-1.0, 1.0, -1.0],
                                 ]],
                             senses = ["E"],
                             rhs = [-0.00001],
@@ -128,8 +135,9 @@ class lp_utadis(object):
                                 [[
                                  l_vars +
                                   ["u_%d" % (cat_nr - 1),
-                                   'y_' + aa.alternative_id],
-                                 l_coefs + [-1.0, -1.0],
+                                   'y_' + aa.alternative_id,
+                                   'yp_' + aa.alternative_id],
+                                 l_coefs + [-1.0, -1.0, 1.0],
                                 ]],
                             senses = ["E"],
                             rhs = [0.00001],
@@ -138,8 +146,8 @@ class lp_utadis(object):
     def encode_constraints_cplex(self, aas, pt):
         self.add_variables_cplex(aas.keys())
 
-        # sum ((sum w_it) + k * w_it+1) - u_k + x_j <= -d1
-        # sum ((sum w_it) + k * w_it+1) - u_k - y_j >= d2
+        # sum ((sum w_it) + k * w_it+1) - u_k + x_j - x'_j <= -d1
+        # sum ((sum w_it) + k * w_it+1) - u_k - y_j + y'_j >= d2
         for aa in aas:
             self.encode_constraint_cplex(aa, pt[aa.alternative_id])
 
@@ -168,14 +176,16 @@ class lp_utadis(object):
                            )
 
     def add_objective_cplex(self, aa):
-        self.lp.objective.set_sense(self.lp.objective.sense.maximize)
+        self.lp.objective.set_sense(self.lp.objective.sense.minimize)
         for aa in aa.keys():
-            self.lp.objective.set_linear('x_' + aa, 1)
-            self.lp.objective.set_linear('y_' + aa, 1)
+            self.lp.objective.set_linear('xp_' + aa, 1)
+            self.lp.objective.set_linear('yp_' + aa, 1)
 
     def add_variables_glpk(self, aids):
         self.x = self.lp.var(xrange(len(aids)), 'x', bounds=(0, 1))
         self.y = self.lp.var(xrange(len(aids)), 'y', bounds=(0, 1))
+        self.xp = self.lp.var(xrange(len(aids)), 'xp', bounds=(0, 1))
+        self.yp = self.lp.var(xrange(len(aids)), 'yp', bounds=(0, 1))
 
         self.w = {}
         for cs in self.cs:
@@ -201,13 +211,13 @@ class lp_utadis(object):
             if cat_nr < len(self.cat):
                 self.lp.st(sum(d_coefs[cs.id][j] * self.w[cs.id][j] \
                            for cs in self.cs for j in range(cs.value)) \
-                           + self.x[i] - self.u[cat_nr - 1] \
+                           + self.x[i] - self.xp[i] - self.u[cat_nr - 1] \
                            == -0.00001)
 
             if cat_nr > 1:
                 self.lp.st(sum(d_coefs[cs.id][j] * self.w[cs.id][j] \
                            for cs in self.cs for j in range(cs.value)) \
-                           - self.y[i] - self.u[cat_nr - 2] \
+                           - self.y[i] + self.yp[i] - self.u[cat_nr - 2] \
                            == 0.00001)
 
         # sum (sum w_it) = 1
@@ -220,8 +230,8 @@ class lp_utadis(object):
             self.lp.st(self.u[i] - self.u[i - 1] >= 0.00001)
 
     def add_objective_glpk(self, aa):
-        self.lp.max(sum(self.x[i] for i in range(len(self.x)))
-                    + sum(self.y[i] for i in range(len(self.y))))
+        self.lp.min(sum(self.xp[i] for i in range(len(self.xp)))
+                    + sum(self.yp[i] for i in range(len(self.yp))))
 
     def solve_glpk(self, aa, pt):
         self.lp.solve()
@@ -342,6 +352,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_performance_table
     from tools.generate_random import generate_random_criteria_functions
     from tools.generate_random import generate_random_categories_values
+    from tools.utils import add_errors_in_affectations
     from tools.utils import display_affectations_and_pt
 
     # Generate an utadis model
@@ -359,6 +370,8 @@ if __name__ == "__main__":
     a = generate_random_alternatives(1000)
     pt = generate_random_performance_table(a, c)
     aa = u.get_assignments(pt)
+    aa_err = aa.copy()
+    aa_erroned = add_errors_in_affectations(aa_err, cat.keys(), 0.2)
 
     print('==============')
     print('Original model')
@@ -370,6 +383,8 @@ if __name__ == "__main__":
     cfs.display()
     print('Categories values:')
     catv.display()
+    print("Errors in alternatives affectations: %g %%" \
+          % (len(aa_erroned) / len(a) * 100))
 
     # Learn the parameters from assignment examples
     gi_worst = alternative_performances('worst', {crit.id: 0 for crit in c})
@@ -381,7 +396,7 @@ if __name__ == "__main__":
         css.append(cs)
 
     lp = lp_utadis(css, cat, gi_worst, gi_best)
-    obj, cvs, cfs, catv = lp.solve(aa, pt)
+    obj, cvs, cfs, catv = lp.solve(aa_err, pt)
 
     print('=============')
     print('Learned model')
@@ -397,17 +412,22 @@ if __name__ == "__main__":
     aa2 = u2.get_assignments(pt)
 
     total = len(a)
-    nok = 0
+    nok = nok_erroned = 0
     anok = []
     for alt in a:
         if aa(alt.id) != aa2(alt.id):
             anok.append(alt)
             nok += 1
+            if alt.id in aa_erroned:
+                nok_erroned += 1
 
     print("Good affectations          : %3g %%" \
           % ((total - nok) / total *100))
     print("Bad affectations           : %3g %%" \
           % ((nok) / total *100))
+    if aa_erroned:
+        print("Bad in erroned affectations: %3g %%" \
+              % (nok_erroned / total * 100))
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
