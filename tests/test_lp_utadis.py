@@ -157,7 +157,7 @@ def run_tests(na, nc, ncat, ns, na_gen, pcerrors, nseeds, filename):
 
     # Perform a summary
     writer.writerow(['', ''])
-    t = results.summary(['na', 'nc', 'ncat', 'na_gen', 'pcerrors'],
+    t = results.summary(['na', 'nc', 'ncat', 'ns', 'na_gen', 'pcerrors'],
                         ['obj', 'ca', 'ca_errors', 'ca2', 'ca2_errors',
                          'ca_gen', 't_total', 't_const', 't_solve'])
     t.tocsv(writer)
