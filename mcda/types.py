@@ -835,7 +835,7 @@ class piecewise_linear(list):
     def y(self, x):
         s = self.find_segment(x)
         if s is None:
-            raise ValueError("No segment found for this value")
+            raise ValueError("No segment found for this value (%g)" % x)
 
         return s.y(x)
 
