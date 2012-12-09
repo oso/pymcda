@@ -235,7 +235,7 @@ if __name__ == "__main__":
 
     while not options.filename:
         dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        default_filename = "data/test_lp_utadis-%s.csv" % dt
+        default_filename = "data/test_lp_utadis_etri-%s.csv" % dt
         options.filename = raw_input("File to save CSV data [%s] ? " \
                                      % default_filename)
         if not options.filename:
