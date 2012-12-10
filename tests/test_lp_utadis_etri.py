@@ -62,7 +62,7 @@ def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
     t1 = time.time()
     lp = lp_utadis(css, cat, gi_worst, gi_best)
     t2 = time.time()
-    obj, cv_l, cfs_l, catv_l = lp.solve(aa, pt)
+    obj, cv_l, cfs_l, catv_l = lp.solve(aa_err, pt)
     t3 = time.time()
 
     model2 = utadis(c, cv_l, cfs_l, catv_l)
