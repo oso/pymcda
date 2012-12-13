@@ -29,6 +29,28 @@ def generate_random_criteria(number, prefix='c'):
 
     return crits
 
+def generate_random_criteria_weights(crits, seed = None, k = 3):
+    if seed is not None:
+        random.seed(seed)
+
+    weights = [ round(random.random(), k) for i in range(len(crits) - 1) ]
+    weights.sort()
+
+    cvals = criteria_values()
+    for i, c in enumerate(crits):
+        cval = criterion_value()
+        cval.id = c.id
+        if i == 0:
+            cval.value = weights[i]
+        elif i == len(crits) - 1:
+            cval.value = 1 - weights[i - 1]
+        else:
+            cval.value = weights[i] - weights[i - 1]
+
+        cvals.append(cval)
+
+    return cvals
+
 def generate_random_criteria_values(crits, seed = None, k = 3,
                                     type = 'float', vmin = 0, vmax = 1):
     if seed is not None:
@@ -176,3 +198,5 @@ if __name__ == "__main__":
     print(pl)
     catv = generate_random_categories_values(cats)
     print(catv)
+    cw = generate_random_criteria_weights(crits)
+    print(cw)
