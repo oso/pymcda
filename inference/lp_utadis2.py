@@ -49,8 +49,8 @@ class lp_utadis(object):
         for ap in pt:
             for cid, v in ap.performances.items():
                 if cid not in self.points:
-                    self.points[cid] = [gi_worst.performances[cid],
-                                        gi_best.performances[cid]]
+                    self.points[cid] = [self.gi_worst.performances[cid],
+                                        self.gi_best.performances[cid]]
 
                 if v not in self.points[cid]:
                     self.points[cid].append(v)
