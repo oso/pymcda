@@ -1,4 +1,5 @@
 from __future__ import print_function
+from __future__ import division
 import csv
 import sys
 import time
@@ -89,7 +90,13 @@ class test_results(list):
         for tr in self:
             tr.set_attributes_order(order)
 
-    def summary(self, unique_fields, average_fields):
+    def summary(self, unique_fields, average_fields, min_fields = None,
+                max_fields = None):
+        if min_fields is None:
+            min_fields = average_fields
+        if max_fields is None:
+            max_fields = average_fields
+
         # Research uniques values for each field
         unique_values = {}
         for uf in unique_fields:
@@ -115,19 +122,25 @@ class test_results(list):
                 if attributes_size[af] > 1:
                     v = zip(*(r[af] for r in l))
                     avg_values = [ sum(x) / len(x) for x in v ]
-                    min_values = [ min(x) for x in v ]
-                    max_values = [ max(x) for x in v ]
                     for i, val in enumerate(avg_values):
                         tr["%s%d_avg" % (af, i)] = val
-                    for i, val in enumerate(min_values):
-                        tr["%s%d_min" % (af, i)] = val
-                    for i, val in enumerate(max_values):
-                        tr["%s%d_max" % (af, i)] = val
+
+                    if af in min_fields:
+                        min_values = [ min(x) for x in v ]
+                        for i, val in enumerate(min_values):
+                            tr["%s%d_min" % (af, i)] = val
+
+                    if af in max_fields:
+                        max_values = [ max(x) for x in v ]
+                        for i, val in enumerate(max_values):
+                            tr["%s%d_max" % (af, i)] = val
                 else:
                     v = [ r[af] for r in l ]
                     tr["%s_avg" % af] = sum(v) / len(v)
-                    tr["%s_min" % af] = min(v)
-                    tr["%s_max" % af] = max(v)
+                    if af in min_fields:
+                        tr["%s_min" % af] = min(v)
+                    if af in max_fields:
+                        tr["%s_max" % af] = max(v)
 
             trs.append(tr)
 
