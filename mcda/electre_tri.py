@@ -68,16 +68,16 @@ class electre_tri:
             den = float(p-q)
             return num/den
 
-    def __concordance(self, x, y, clist, cv, profile_rank):
+    def __concordance(self, x, y, profile_rank):
         wsum = 0
         pjcj = 0
-        for c in clist:
+        for c in self.criteria:
             if c.disabled == 1:
                 continue
 
             cj = self.__partial_concordance(x, y, c, profile_rank)
 
-            cval = cv[c.id]
+            cval = self.cv[c.id]
             weight = cval.value
             wcj = float(weight)*cj
 
@@ -104,12 +104,12 @@ class electre_tri:
             den = float(v-p)
             return num/den
 
-    def credibility(self, x, y, clist, cv, profile_rank):
+    def credibility(self, x, y, profile_rank):
         self.__check_input_params()
-        concordance = self.__concordance(x, y, clist, cv, profile_rank)
+        concordance = self.__concordance(x, y, profile_rank)
 
         sigma = concordance
-        for c in clist:
+        for c in self.criteria:
             if c.disabled == 1:
                 continue
 
@@ -121,9 +121,9 @@ class electre_tri:
 
         return sigma
 
-    def __outrank(self, action_perfs, criteria, cv, profile, profile_rank, lbda):
-        s_ab = self.credibility(action_perfs, profile, criteria, cv, profile_rank)
-        s_ba = self.credibility(profile, action_perfs, criteria, cv, profile_rank)
+    def __outrank(self, action_perfs, criteria, profile, profile_rank, lbda):
+        s_ab = self.credibility(action_perfs, profile, profile_rank)
+        s_ba = self.credibility(profile, action_perfs, profile_rank)
 
         if eq(s_ab, lbda) or s_ab > lbda:
             if s_ba >= lbda:
@@ -145,7 +145,6 @@ class electre_tri:
             cat_rank = len(profiles)
             for i, profile in enumerate(profiles):
                 s_ab = self.credibility(action_perfs, self.bpt[profile],
-                                        self.criteria, self.cv,
                                         i+1)
                 if not eq(s_ab, self.lbda) and s_ab < self.lbda:
                     cat_rank -= 1
@@ -164,7 +163,7 @@ class electre_tri:
         for action_perfs in pt:
             cat_rank = 0
             for i, profile in enumerate(profiles):
-                outr = self.__outrank(action_perfs, self.criteria, self.cv,
+                outr = self.__outrank(action_perfs, self.criteria,
                                       self.bpt[profile], i+1, self.lbda)
                 if outr != "-":
                     cat_rank += 1
@@ -178,14 +177,14 @@ class electre_tri:
 
 class electre_tri_bm(electre_tri):
 
-    def credibility(self, x, y, clist, cv, profile_rank):
+    def credibility(self, x, y, profile_rank):
         w = 0
         wsum = 0
-        for c in clist:
+        for c in self.criteria:
             if c.disabled == 1:
                 continue
 
-            cval = cv[c.id]
+            cval = self.cv[c.id]
             v = self.get_threshold_by_profile(c, 'v', profile_rank)
             diff = (y.performances[c.id]-x.performances[c.id])*c.direction
             if diff <= 0:
