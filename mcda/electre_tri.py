@@ -177,6 +177,18 @@ class electre_tri:
 
 class electre_tri_bm(electre_tri):
 
+    def concordance(self, ap, profile):
+        w = wsum = 0
+        for c in self.criteria:
+            diff = profile.performances[c.id] - ap.performances[c.id]
+            diff *= c.direction
+            if diff <= 0:
+                w += cval.value
+
+            wsum += cval.value
+
+        return w / wsum
+
     def credibility(self, x, y, profile_rank):
         w = 0
         wsum = 0
