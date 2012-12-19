@@ -11,6 +11,9 @@ class sorted_performance_table():
         self.__sort()
         self.__build_index()
 
+    def __getitem__(self, id):
+        return self.pt[id]
+
     def __sort(self):
         self.cids = next(self.pt.itervalues()).performances.keys()
         self.n = len(self.pt)
