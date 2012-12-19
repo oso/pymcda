@@ -183,9 +183,9 @@ class electre_tri_bm(electre_tri):
             diff = profile.performances[c.id] - ap.performances[c.id]
             diff *= c.direction
             if diff <= 0:
-                w += cval.value
+                w += self.cv[c.id].value
 
-            wsum += cval.value
+            wsum += self.cv[c.id].value
 
         return w / wsum
 
