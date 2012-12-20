@@ -40,19 +40,22 @@ def one_loop(crits, lbda_min, coallitions):
     lbda = random.uniform(lbda_min, 1)
 
     t = test_result("")
+    t["ncoallitions"] = 0
+    for i in range(len(crits) + 1):
+        t["%d_criteria" % i] = 0
+
     for coallition in coallitions:
         w = sum_weights(cw, coallition)
         if w >= lbda:
             t[pprint_coallition(coallition)] = 1
-            t["%d_criteria" % len(coallition)] = 1
+            t["ncoallitions"] += 1
+            t["%d_criteria" % len(coallition)] += 1
         else:
             t[pprint_coallition(coallition)] = 0
-            t["%d_criteria" % len(coallition)] = 0
-
 
     return t
 
-def run_test(m, n, lbda_min, filename):
+def run_test(m, n, lbda_min, lbda_max, filename):
     # Create the CSV writer
     f = open(filename, 'wb')
     writer = csv.writer(f)
@@ -70,11 +73,14 @@ def run_test(m, n, lbda_min, filename):
         t['i'] = i
         t['nc'] = n
         t['lbda_min'] = lbda_min
+        t['lbda_max'] = lbda_max
         t['n'] = m
 
         if initialized is False:
-            fields = ['i', 'nc'] + [pprint_coallition(j)
-                                for j in coallitions]
+            fields = ['i', 'nc', 'lbda_min', 'lbda_max'] \
+                      + [pprint_coallition(j) for j in coallitions] \
+                      + ["%d_criteria" % i for i in range(len(c) + 1)] \
+                      + ["ncoallitions"]
             writer.writerow(fields)
             initialized = True
 
@@ -86,13 +92,13 @@ def run_test(m, n, lbda_min, filename):
 
     # Perform a summary
     writer.writerow(['', ''])
-    t = results.summary(['nc', 'lbda_min', 'n'], [pprint_coallition(j)
-                         for j in coallitions] , [], [])
+    t = results.summary(['nc', 'lbda_min', 'lbda_max', 'n'], [pprint_coallition(j)
+                         for j in coallitions], [], [])
     t.tocsv(writer)
 
     writer.writerow(['', ''])
-    t = results.summary(['nc', 'lbda_min', 'n'], ["%d_criteria" % i
-                         for i in range(len(c) + 1)] , [], [])
+    t = results.summary(['nc', 'lbda_min', 'lbda_max', 'n'], ["%d_criteria" % i
+                         for i in range(len(c) + 1)] + ['ncoallitions'] , [], [])
     t.tocsv(writer)
 
 if __name__ == "__main__":
@@ -109,6 +115,9 @@ if __name__ == "__main__":
     parser.add_option("-l", "--lmin", action = "store", type="string",
                       dest = "lbda_min",
                       help = "min value of lambda")
+    parser.add_option("-m", "--lmax", action = "store", type="string",
+                      dest = "lbda_max",
+                      help = "max value of lambda")
     parser.add_option("-f", "--filename", action = "store", type="string",
                       dest = "filename",
                       help = "filename to save csv output")
@@ -127,6 +136,10 @@ if __name__ == "__main__":
         options.lbda_min = raw_input("Min value of lambda ? ")
     options.lbda_min = float(options.lbda_min)
 
+    while not options.lbda_max:
+        options.lbda_max = raw_input("Max value of lambda ? ")
+    options.lbda_max = float(options.lbda_max)
+
     while not options.filename:
         dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         default_filename = "data/test_etri_coallitions-%s.csv" % dt
@@ -138,4 +151,5 @@ if __name__ == "__main__":
     if options.filename[-4:] != ".csv":
         options.filename += ".csv"
 
-    run_test(options.na, options.nc, options.lbda_min, options.filename)
+    run_test(options.na, options.nc, options.lbda_min, options.lbda_max,
+             options.filename)
