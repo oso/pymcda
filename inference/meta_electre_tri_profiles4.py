@@ -1,6 +1,7 @@
 from __future__ import division
 import sys
 sys.path.insert(0, "..")
+from itertools import product
 import math
 import random
 
@@ -35,6 +36,7 @@ class meta_electre_tri_profiles():
         self.aa_by_cat = self.sort_alternative_by_category(aa_ori)
         self.b0 = pt_sorted.get_worst_ap()
         self.bp = pt_sorted.get_best_ap()
+        self.build_concordance_table(aa, self.model.bpt)
 
     def categories_rank(self, cat):
         return { c.id: c.rank for c in cat }
@@ -55,7 +57,7 @@ class meta_electre_tri_profiles():
         return aa_by_cat
 
     def compute_above_histogram(self, aa, cid, profile, above,
-                                cat_b, cat_a, ct):
+                                cat_b, cat_a, ct, f):
         w = self.model.cv[cid].value
         lbda = self.model.lbda
 
@@ -64,7 +66,7 @@ class meta_electre_tri_profiles():
         alts, perfs = self.pt_sorted.get_middle(cid,
                                                 profile.performances[cid],
                                                 above.performances[cid],
-                                                True, True)
+                                                True, False)
 
         for i, a in enumerate(alts):
             conc = ct[a]
@@ -72,14 +74,14 @@ class meta_electre_tri_profiles():
             if self.aa_ori(a) == cat_a:
                 if aa(a) == cat_a and diff < lbda:
                         # --
-                        total += 2
+                        total += 5
                 elif aa(a) == cat_b and diff < lbda:
                         # -
                         total += 1
             elif self.aa_ori(a) == cat_b and aa(a) == cat_a:
                 if diff >= lbda:
                     # +
-                    num += 0.25
+                    num += 0.75
                     total += 1
                     h_above[perfs[i] + 0.00001] = num / total
                 else:
@@ -87,11 +89,16 @@ class meta_electre_tri_profiles():
                     num += 1
                     total += 1
                     h_above[perfs[i] + 0.00001] = num / total
+            elif self.cat[self.aa_ori(a)] < self.cat[cat_b]:
+                num += 0.5
+                total += 1
+                h_above[perfs[i] + 0.00001] = num / total
+#                print self.cat[cat_a]
 
         return h_above
 
     def compute_below_histogram(self, aa, cid, profile, below,
-                                cat_b, cat_a, ct):
+                                cat_b, cat_a, ct, f):
         w = self.model.cv[cid].value
         lbda = self.model.lbda
 
@@ -100,7 +107,7 @@ class meta_electre_tri_profiles():
         alts, perfs = self.pt_sorted.get_middle(cid,
                                                 below.performances[cid],
                                                 profile.performances[cid],
-                                                True, True)
+                                                False, True)
         alts.reverse()
         perfs.reverse()
         for i, a in enumerate(alts):
@@ -114,16 +121,20 @@ class meta_electre_tri_profiles():
                     h_below[perfs[i] - 0.00001] = num / total
                 else:
                     # +
-                    num += 0.25
+                    num += 0.75
                     total += 1
                     h_below[perfs[i] - 0.00001] = num / total
             elif self.aa_ori(a) == cat_b:
                 if aa(a) == cat_b and diff >= lbda:
                     # --
-                    total += 2
+                    total += 5
                 elif aa(a) == cat_a and diff >= lbda:
                     # -
                     total += 1
+            elif self.cat[self.aa_ori(a)] > self.cat[cat_a]:
+                num += 0.5
+                total += 1
+                h_below[perfs[i] - 0.00001] = num / total
 
         return h_below
 
@@ -146,31 +157,46 @@ class meta_electre_tri_profiles():
         for i in val:
             print i,':', h[i]
 
-    def compute_concordance_table(self, aa, profile):
-        ct = dict()
-        for a in aa:
+    def build_concordance_table(self, aa, profiles):
+        self.ct = { profile.alternative_id: dict() for profile in profiles }
+        for a, profile in product(aa, profiles):
             ap = self.pt_sorted[a.alternative_id]
-            ct[a.alternative_id] = self.model.concordance(ap, profile)
-        return ct
+            conc = self.model.concordance(ap, profile)
+            self.ct[profile.alternative_id][a.alternative_id] = conc
+
+    def update_concordance_table(self, profile, cid, old, new):
+        if old > new:
+            down = True
+            w = self.model.cv[cid].value
+        else:
+            down = False
+            w = -self.model.cv[cid].value
+
+        alts, perfs = self.pt_sorted.get_middle(cid, old, new,
+                                                False, down)
+
+        for a in alts:
+            self.ct[profile][a] += w
 
     def compute_histograms(self, aa, f, profile, below, above, cat_b, cat_a):
         criteria = self.model.criteria
         p_perfs = profile.performances
 
-        ct = self.compute_concordance_table(aa, profile)
-
         moved = False
         max_val = 0
 
-        for c in self.model.criteria:
+        cids = self.model.criteria.keys()
+        random.shuffle(cids)
 
-            cid = c.id
+        for cid in cids:
+            ct = self.ct[profile.alternative_id]
+
             h_below = self.compute_below_histogram(aa, cid, profile,
                                                    below, cat_b,
-                                                   cat_a, ct)
+                                                   cat_a, ct, f)
             h_above = self.compute_above_histogram(aa, cid, profile,
                                                    above, cat_b,
-                                                   cat_a, ct)
+                                                   cat_a, ct, f)
             h = h_below
             h.update(h_above)
 
@@ -181,19 +207,19 @@ class meta_electre_tri_profiles():
             i = self.histogram_get_max(h, p_perfs[cid])
 #            print 'move', cid, i, h[i]
 
-            r = random.random()
+            r = random.uniform(0, 1)
 
             if r <= h[i]:
+                self.update_concordance_table(profile.alternative_id, cid,
+                                              p_perfs[cid], i)
                 p_perfs[cid] = i
                 moved = True
-                ct = self.compute_concordance_table(aa, profile)
             elif moved is False and h[i] > max_val:
                 max_val = h[i]
                 max_cid = cid
                 max_move = i
 
         if moved is False and max_val > 0:
-#            print max_cid, i,  max_move
             p_perfs[max_cid] = max_move
 
     def get_below_and_above_profiles(self, i):
@@ -237,11 +263,11 @@ if __name__ == "__main__":
     a = generate_random_alternatives(1000)
 
     c = generate_random_criteria(10)
-    cv = generate_random_criteria_values(c, 0)
+    cv = generate_random_criteria_values(c, 1)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c)
 
-    cat = generate_random_categories(2)
+    cat = generate_random_categories(3)
     cps = generate_random_categories_profiles(cat)
     b = cps.get_ordered_profiles()
     bpt = generate_random_profiles(b, c)
