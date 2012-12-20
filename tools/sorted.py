@@ -79,9 +79,8 @@ class sorted_performance_table():
 
     def get_middle_len(self, cid, val_l, val_r, l=True, r=True):
         if val_l > val_r:
-            tmp = val_r
-            val_r = val_l
-            val_l = tmp
+            val_l, val_r = val_r, val_l
+            l, r = r, l
 
         if l is True:
             i = bisect.bisect_left(self.sorted_values[cid], val_l)
