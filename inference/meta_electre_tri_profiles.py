@@ -65,9 +65,6 @@ class meta_electre_tri_profiles():
             alts = self.pt_sorted.get_middle(cid, intervals[i],
                                              intervals[i+1])[0]
             for a in alts:
-                if aa(a) != cat_a:
-                    continue
-
                 if aa(a) == cat_b and self.aa_ori(a) == cat_a:
                     ok += 1
                 elif aa(a) == cat_a:
