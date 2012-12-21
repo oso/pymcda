@@ -1,5 +1,6 @@
 from __future__ import division
 import random
+from itertools import chain, combinations
 from mcda.types import alternative_performances
 from mcda.types import alternatives_affectations
 
@@ -141,3 +142,19 @@ def get_categories_lower_limits(categories_values):
     for cv in categories_values:
         d[cv.id] = cv.value.lower
     return d
+
+def powerset(iterable):
+    "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
+    s = list(iterable)
+    return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+
+def get_possible_coallitions(weights, lbda):
+    l = []
+    for coallition in powerset(weights.keys()):
+        w = [ weights[cid].value for cid in coallition ]
+        if sum(w) >= lbda:
+            l.append(coallition)
+    return l
+
+def get_number_of_possible_coallitions(weights, lbda):
+    return len(get_possible_coallitions(weights, lbda))
