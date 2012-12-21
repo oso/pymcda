@@ -97,8 +97,10 @@ def run_test(m, n, lbda_min, lbda_max, filename):
     t.tocsv(writer)
 
     writer.writerow(['', ''])
-    t = results.summary(['nc', 'lbda_min', 'lbda_max', 'n'], ["%d_criteria" % i
-                         for i in range(len(c) + 1)] + ['ncoallitions'] , [], [])
+    t = results.summary(['nc', 'lbda_min', 'lbda_max', 'n'],
+                        ["%d_criteria" % i for i in range(len(c) + 1)] \
+                        + ['ncoallitions'], ['ncoallitions'],
+                        ['ncoallitions'])
     t.tocsv(writer)
 
 if __name__ == "__main__":
@@ -153,3 +155,5 @@ if __name__ == "__main__":
 
     run_test(options.na, options.nc, options.lbda_min, options.lbda_max,
              options.filename)
+
+    print("Result saved in '%s'" % options.filename)
