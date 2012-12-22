@@ -1,6 +1,9 @@
 from __future__ import division
+import sys
+sys.path.insert(0, "..")
 import random
 from itertools import chain, combinations
+from math import factorial, ceil
 from mcda.types import alternative_performances
 from mcda.types import alternatives_affectations
 
@@ -158,3 +161,10 @@ def get_possible_coallitions(weights, lbda):
 
 def get_number_of_possible_coallitions(weights, lbda):
     return len(get_possible_coallitions(weights, lbda))
+
+def compute_maximal_number_of_coallitions(n):
+    k = int(ceil(n/2))
+    v = 0
+    for i in range(k, n + 1):
+        v += factorial(n) / (factorial(i) * factorial(n-i))
+    return int(v)
