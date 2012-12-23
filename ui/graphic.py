@@ -1,5 +1,7 @@
+from __future__ import division
 import colorsys
 import sys
+sys.path.insert(0, "..")
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 from tools.utils import get_worst_alternative_performances
@@ -97,7 +99,7 @@ class axis(QtGui.QGraphicsItem):
 class graph_etri(QtGui.QGraphicsScene):
 
     def __init__(self, model, pt, size, criteria_order = None,
-                 parent = None):
+                 worst = None, best = None, parent = None):
         super(QtGui.QGraphicsScene, self).__init__(parent)
         self.model = model
         self.pt = pt
@@ -106,13 +108,18 @@ class graph_etri(QtGui.QGraphicsScene):
         else:
             self.criteria_order = self.model.criteria.keys()
             self.criteria_order.sort()
+        self.worst = worst
+        self.best = best
+
         self.update(size)
 
     def update(self, size):
         self.size = size
-        self.worst = get_worst_alternative_performances(self.pt,
+        if self.worst is None:
+            self.worst = get_worst_alternative_performances(self.pt,
                                                         self.model.criteria)
-        self.best = get_best_alternative_performances(self.pt,
+        if self.best is None:
+            self.best = get_best_alternative_performances(self.pt,
                                                       self.model.criteria)
         self.axis_height = self.size.height()-45
         self.model_height = self.axis_height-25
@@ -124,6 +131,7 @@ class graph_etri(QtGui.QGraphicsScene):
         self.clear()
         self.__plot_axis()
         self.__plot_profiles()
+#        self.plot_alternative_performances(self.pt['a1'])
         self.setSceneRect(self.itemsBoundingRect())
 
     def __plot_axis(self):
@@ -225,3 +233,73 @@ class graph_etri(QtGui.QGraphicsScene):
                 brush.setColor(QtGui.QColor("yellow"))
                 brush.setStyle(QtCore.Qt.SolidPattern)
                 self.addPolygon(u, QtGui.QPen(), brush)
+
+    def plot_alternative_performances(self, ap):
+        axis_unused = self.axis_height - self.model_height
+        limsup = -self.axis_height + axis_unused / 2
+        liminf = -axis_unused / 2
+
+        points = []
+        for i, id in enumerate(self.criteria_order):
+            x = i * self.hspacing
+
+            num = ap.performances[id] - self.worst.performances[id]
+            den = self.best.performances[id] - self.worst.performances[id]
+            y = liminf + num / den * (limsup - liminf)
+
+            point = QtCore.QPointF(x, y)
+
+            points.append(point)
+
+            if i != 0:
+                pen = QtGui.QPen()
+                pen.setBrush(QtGui.QColor("red"))
+                line = QtCore.QLineF(points[i-1], point)
+                item = self.addLine(line, pen)
+
+if __name__ == "__main__":
+    import random
+    from tools.generate_random import generate_random_alternatives
+    from tools.generate_random import generate_random_criteria
+    from tools.generate_random import generate_random_criteria_values
+    from tools.generate_random import generate_random_performance_table
+    from tools.generate_random import generate_random_categories
+    from tools.generate_random import generate_random_profiles
+    from tools.generate_random import generate_random_categories_profiles
+    from tools.utils import normalize_criteria_weights
+    from mcda.electre_tri import electre_tri
+
+    a = generate_random_alternatives(10000)
+    c = generate_random_criteria(5)
+    cv = generate_random_criteria_values(c, 1234)
+    normalize_criteria_weights(cv)
+    pt = generate_random_performance_table(a, c)
+
+    cat = generate_random_categories(3)
+    cps = generate_random_categories_profiles(cat)
+    b = cps.get_ordered_profiles()
+    bpt = generate_random_profiles(b, c)
+
+    lbda = random.uniform(0.5, 1)
+
+    model = electre_tri(c, cv, bpt, lbda, cps)
+
+    app = QtGui.QApplication(sys.argv)
+
+    sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,
+                                   QtGui.QSizePolicy.Expanding);
+    sizePolicy.setHorizontalStretch(1);
+    sizePolicy.setVerticalStretch(0);
+    sizePolicy.setHeightForWidth(sizePolicy.hasHeightForWidth());
+
+    view = mygraphicsview()
+    view.setRenderHint(QtGui.QPainter.Antialiasing)
+    view.setSizePolicy(sizePolicy)
+
+    graph = graph_etri(model, pt, view.size())
+
+    view.setScene(graph)
+    view.show()
+    graph.plot_alternative_performances(pt['a1'])
+
+    app.exec_()
