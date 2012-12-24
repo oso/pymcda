@@ -2,6 +2,7 @@ from __future__ import division
 import colorsys
 import sys
 sys.path.insert(0, "..")
+from itertools import combinations
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 from tools.utils import get_worst_alternative_performances
@@ -40,7 +41,7 @@ def display_electre_tri_models(etri, pt):
     dialog.resize(1024, 768)
 
     for i, m in enumerate(etri):
-        graph = graph_etri(m, pt[i], views[m].size())
+        graph = QGraphicsScene_etri(m, pt[i], views[m].size())
         views[m].setScene(graph)
 
     dialog.show()
@@ -56,109 +57,7 @@ class mygraphicsview(QtGui.QGraphicsView):
         scene.update(self.size())
         self.resetCachedContent()
 
-class axis(QtGui.QGraphicsItem):
-
-    def __init__(self, x1, y1, x2, y2, direction, parent=None):
-        super(QtGui.QGraphicsItem, self).__init__(parent)
-
-        self.x1 = x1
-        self.y1 = y1
-        self.x2 = x2
-        self.y2 = y2
-
-        self.path = QtGui.QPainterPath()
-        self.path.moveTo(x1, y1)
-        self.path.lineTo(x2, y2)
-        self.__set_arrow(direction)
-
-    def boundingRect(self):
-        return self.path.boundingRect()
-
-    def paint(self, painter, option, widget=None):
-        pen = QtGui.QPen()
-        pen.setWidth(2)
-        brush = QtGui.QBrush(QtGui.QColor("black"))
-        painter.setPen(pen)
-        painter.setBrush(brush)
-        painter.drawPath(self.path)
-
-    def __set_arrow(self, direction):
-        if direction == -1:
-            x = self.x1
-            y = self.y1
-        else:
-            x = self.x2
-            y = self.y2
-
-        self.path.moveTo(x, y)
-        self.path.lineTo(x-3, y+direction*6)
-        self.path.lineTo(x+3, y+direction*6)
-        self.path.closeSubpath()
-
-class QGraphicsPathItem_profile(QtGui.QGraphicsPathItem):
-
-    def __init__(self, ap, ymin, ymax, ap_worst, ap_best, criteria_order,
-                 hspacing, parent = None):
-        super(QtGui.QGraphicsPathItem, self).__init__(parent)
-        self.ap = ap
-        self.ap_worst = ap_worst
-        self.ap_best = ap_best
-        self.ymin = ymin
-        self.ymax = ymax
-        self.criteria_order = criteria_order
-        self.hspacing = hspacing
-
-        pen = QtGui.QPen()
-        pen.setBrush(QtGui.QColor("blue"))
-        self.setPen(pen)
-
-        self.__draw_profile()
-
-    def __compute_y(self, id):
-        num = self.ap.performances[id] - self.ap_worst.performances[id]
-        den = self.ap_best.performances[id] - self.ap_worst.performances[id]
-        y = self.ymin + num / den * (self.ymax - self.ymin)
-        return y
-
-    def __draw_profile(self):
-        path = self.path()
-
-        x = 0
-        y = self.__compute_y(self.criteria_order[0])
-        path.moveTo(0, y)
-        for cid in self.criteria_order[1:]:
-            x += self.hspacing
-            y = self.__compute_y(cid)
-            path.lineTo(x, y)
-
-        self.setPath(path)
-
-class QGraphicsPathItem_category(QtGui.QGraphicsPathItem):
-
-    def __init__(self, c_rank, ncategories,  path_below, path_above,
-                 parent = None):
-        super(QtGui.QGraphicsPathItem, self).__init__(parent)
-
-        self.c_rank = c_rank
-        self.ncategories = ncategories
-
-        path = self.path()
-
-        path.addPath(path_above)
-        pathb = path_below.toReversed()
-        path.connectPath(pathb)
-        path.closeSubpath()
-
-        color = self.__get_category_color()
-        self.setBrush(color);
-
-        self.setPath(path)
-
-    def __get_category_color(self):
-        g = 255 - 220 * (self.ncategories - self.c_rank) / self.ncategories
-        return QtGui.QColor(0, g, 0)
-
-class graph_etri(QtGui.QGraphicsScene):
+class QGraphicsScene_etri(QtGui.QGraphicsScene):
 
     def __init__(self, model, pt, size, criteria_order = None,
                  worst = None, best = None, parent = None):
@@ -173,8 +72,6 @@ class graph_etri(QtGui.QGraphicsScene):
         self.worst = worst
         self.best = best
 
-        self.profiles_items = dict()
-
         self.update(size)
 
     def update(self, size):
@@ -185,8 +82,9 @@ class graph_etri(QtGui.QGraphicsScene):
         if self.best is None:
             self.best = get_best_alternative_performances(self.pt,
                                                       self.model.criteria)
-        self.axis_height = self.size.height()-45
-        self.model_height = self.axis_height-25
+        self.axis_height = self.size.height() - 45
+        self.ymax = -self.axis_height + 25 / 2
+        self.ymin = -25 / 2
 
         self.hspacing = size.width()/len(self.model.criteria)
         if self.hspacing < 100:
@@ -196,18 +94,52 @@ class graph_etri(QtGui.QGraphicsScene):
         self.__plot_axis()
         self.__plot_profiles()
         self.__plot_categories()
+        self.__higlight_intersections()
         self.setSceneRect(self.itemsBoundingRect())
 
+    def __create_axis(self, xmin, xmax, ymin, ymax, direction):
+        item = QtGui.QGraphicsPathItem()
+
+        path = item.path()
+        path.moveTo(xmin, ymin)
+        path.lineTo(xmax, ymax)
+
+        if direction == -1:
+            x = xmin
+            y = ymin
+        else:
+            x = xmax
+            y = ymax
+
+        path.moveTo(x, y)
+        path.lineTo(x - 3, y + direction * 6)
+        path.lineTo(x + 3, y + direction * 6)
+        path.closeSubpath()
+
+        pen = QtGui.QPen()
+        pen.setWidth(2)
+        item.setPen(pen)
+
+        brush = QtGui.QBrush(QtGui.QColor("black"))
+        item.setBrush(brush)
+
+        item.setPath(path)
+
+        return item
+
     def __plot_axis(self):
-        self.criteria_text = {}
+        self.axis_text_items = {}
+        self.axis_items = {}
 
         for i, id in enumerate(self.criteria_order):
             criterion = self.model.criteria[id]
-            x = i*self.hspacing
+            x = i * self.hspacing
 
-            line = axis(x, 0, x, -self.axis_height, criterion.direction)
-            line.setZValue(1)
-            self.addItem(line)
+            axis = self.__create_axis(x, x, 0, -self.axis_height,
+                                      criterion.direction)
+            axis.setZValue(1)
+            self.addItem(axis)
+            self.axis_items[id] = axis
 
             if criterion.name:
                 text = self.addText(criterion.name)
@@ -217,64 +149,101 @@ class graph_etri(QtGui.QGraphicsScene):
             font.setBold(True)
             text.setFont(font)
             text.setZValue(1)
-            text.setPos(x-text.boundingRect().width()/2, 0)
+            text.setPos(x - text.boundingRect().width() / 2, 0)
 
-            self.criteria_text[criterion] = text
+            self.axis_text_items[criterion] = text
 
-#    def __profile_get_points(self, ap):
-#        axis_unused = self.axis_height-self.model_height
-#        limsup = -self.axis_height+axis_unused/2
-#        liminf = -axis_unused/2
-#
-#        n = len(self.model.criteria)
-#        points = []
-#        for i, id in enumerate(self.criteria_order):
-#            criterion = self.model.criteria[id]
-#            x = i*self.hspacing
-#
-#            num = ap.performances[criterion.id] - self.worst.performances[criterion.id]
-#            den = self.best.performances[criterion.id] - self.worst.performances[criterion.id]
-#            if den == 0:
-#                p = QtCore.QPointF(x, liminf)
-#            elif num == 0:
-#                p = QtCore.QPointF(x, liminf)
-#            else:
-#                y = liminf+(limsup-liminf)*num/den
-#                p = QtCore.QPointF(x, y)
-#
-#            text = self.addText("%g" % ap.performances[criterion.id])
-#            font = QtGui.QFont()
-#            font.setBold(True)
-#            font.setPointSize(6)
-#            text.setFont(font)
-#            text.setPos(p)
-#            text.setZValue(1)
-#
-#            points.append(p)
-#
-#        return points
+    def __compute_y(self, ap, id):
+        num = ap.performances[id] - self.worst.performances[id]
+        den = self.best.performances[id] - self.worst.performances[id]
+        return self.ymin + num / den * (self.ymax - self.ymin)
 
-    def __add_profile(self, ap):
-        pass
+    def __create_text_value(self, value):
+        item = QtGui.QGraphicsTextItem()
+
+        item.setPlainText(value)
+
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setPointSize(6)
+        item.setFont(font)
+        item.setZValue(1)
+
+        return item
+
+    def __create_profile(self, ap, print_values = False,
+                         color = QtGui.QColor("red")):
+        item = QtGui.QGraphicsPathItem()
+
+        pen = QtGui.QPen()
+        pen.setBrush(color)
+        item.setPen(pen)
+
+        text_items = []
+
+        path = item.path()
+        for i, cid in enumerate(self.criteria_order):
+            y = self.__compute_y(ap, cid)
+            if i == 0:
+                x = 0
+                path.moveTo(0, y)
+            else:
+                x += self.hspacing
+                path.lineTo(x, y)
+
+            if print_values is True:
+                txt = "%g" % ap.performances[cid]
+                txtitem = self.__create_text_value(txt)
+                txtitem.setPos(x, y)
+                text_items.append(txtitem)
+
+        item.setPath(path)
+
+        return item, text_items
 
     def __plot_profiles(self):
-        axis_unused = self.axis_height - self.model_height
-        limsup = -self.axis_height + axis_unused / 2
-        liminf = -axis_unused / 2
+        self.profiles_items = {}
+        self.profiles_text_items = {}
 
         bpt = self.model.bpt
         for profile in self.model.profiles:
-            item = QGraphicsPathItem_profile(bpt[profile], liminf, limsup, self.worst, self.best, self.criteria_order, self.hspacing)
+            item, text_items = self.__create_profile(bpt[profile], True)
             self.addItem(item)
             self.profiles_items[profile] = item
+            self.profiles_text_items[profile] = text_items
+            for txtitem in text_items:
+                self.addItem(txtitem)
 
         for profile in [self.worst, self.best]:
-            item = QGraphicsPathItem_profile(profile, liminf, limsup, self.worst, self.best, self.criteria_order, self.hspacing)
+            item, text_items = self.__create_profile(profile)
             self.addItem(item)
             self.profiles_items[profile.alternative_id] = item
+            self.profiles_text_items[profile.alternative_id] = text_items
+            for txtitem in text_items:
+                self.addItem(txtitem)
+
+    def __get_category_color(self, i):
+        n = len(self.model.categories)
+        g = 255 - 220 * (n - i) / n
+        return QtGui.QColor(0, g, 0)
+
+    def __create_category(self, i, path_below, path_above):
+        item = QtGui.QGraphicsPathItem()
+
+        path = item.path()
+        path.addPath(path_above)
+        path.connectPath(path_below.toReversed())
+        path.closeSubpath()
+
+        color = self.__get_category_color(i)
+        item.setBrush(color);
+
+        item.setPath(path)
+
+        return item
 
     def __plot_categories(self):
-        n = len(self.model.categories)
+        self.category_items = {}
         for i, category in enumerate(self.model.categories):
             if i == 0:
                 lower = self.profiles_items['worst']
@@ -285,16 +254,33 @@ class graph_etri(QtGui.QGraphicsScene):
             else:
                 upper = self.profiles_items[self.model.profiles[i]]
 
-            item = QGraphicsPathItem_category(i, n, lower.path(),
-                                              upper.path())
+            item = self.__create_category(i, lower.path(), upper.path())
             self.addItem(item)
 
-    def plot_alternative_performances(self, ap):
-        axis_unused = self.axis_height - self.model_height
-        limsup = -self.axis_height + axis_unused / 2
-        liminf = -axis_unused / 2
+            self.category_items[category] = item
 
-        item = QGraphicsPathItem_profile(ap, liminf, limsup, self.worst, self.best, self.criteria_order, self.hspacing)
+    def __clear_intersections(self):
+        for item in self.intersection_items:
+            self.removeItem(item)
+        self.intersection_items = []
+
+    def __higlight_intersections(self):
+        self.intersection_items = []
+        combis = list(combinations(self.category_items.values(), r = 2))
+        for combi in combis:
+            a = combi[0].path()
+            b = combi[1].path()
+            c = a.intersected(b)
+
+            item = QtGui.QGraphicsPathItem(c)
+            brush = QtGui.QBrush(QtGui.QColor("yellow"))
+            item.setBrush(brush)
+            self.addItem(item)
+
+            self.intersection_items.append(item)
+
+    def plot_alternative_performances(self, ap):
+        item, text_items = self.__create_profile(ap)
         self.addItem(item)
 
 if __name__ == "__main__":
@@ -319,6 +305,7 @@ if __name__ == "__main__":
     cps = generate_random_categories_profiles(cat)
     b = cps.get_ordered_profiles()
     bpt = generate_random_profiles(b, c)
+    bpt['b2'].performances['c3'] = 0.2
 
     lbda = random.uniform(0.5, 1)
 
@@ -336,7 +323,7 @@ if __name__ == "__main__":
     view.setRenderHint(QtGui.QPainter.Antialiasing)
     view.setSizePolicy(sizePolicy)
 
-    graph = graph_etri(model, pt, view.size())
+    graph = QGraphicsScene_etri(model, pt, view.size())
 
     view.setScene(graph)
     view.show()
