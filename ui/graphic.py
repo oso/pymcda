@@ -95,6 +95,45 @@ class axis(QtGui.QGraphicsItem):
         self.path.lineTo(x+3, y+direction*6)
         self.path.closeSubpath()
 
+class graph_profile(QtGui.QGraphicsPathItem):
+
+    def __init__(self, ap, ymin, ymax, ap_worst, ap_best, criteria_order,
+                 hspacing, parent = None):
+        super(QtGui.QGraphicsPathItem, self).__init__(parent)
+        self.ap = ap
+        self.ap_worst = ap_worst
+        self.ap_best = ap_best
+        self.ymin = ymin
+        self.ymax = ymax
+        self.criteria_order = criteria_order
+        self.hspacing = hspacing
+
+        self.__draw_profile()
+
+    def __compute_y(self, id):
+        num = self.ap.performances[id] - self.ap_worst.performances[id]
+        den = self.ap_best.performances[id] - self.ap_worst.performances[id]
+        y = self.ymin + num / den * (self.ymax - self.ymin)
+        return y
+
+    def __draw_profile(self):
+        path = self.path()
+
+        x = 0
+        y = self.__compute_y(self.criteria_order[0])
+        path.moveTo(0, y)
+        for cid in self.criteria_order[1:]:
+            x += self.hspacing
+            y = self.__compute_y(cid)
+            path.lineTo(x, y)
+
+        self.setPath(path)
+
+    def paint(self, painter, option, widget=None):
+        pen = QtGui.QPen()
+        pen.setBrush(QtGui.QColor("red"))
+        painter.setPen(pen)
+        painter.drawPath(self.path())
 
 class graph_etri(QtGui.QGraphicsScene):
 
@@ -131,7 +170,6 @@ class graph_etri(QtGui.QGraphicsScene):
         self.clear()
         self.__plot_axis()
         self.__plot_profiles()
-#        self.plot_alternative_performances(self.pt['a1'])
         self.setSceneRect(self.itemsBoundingRect())
 
     def __plot_axis(self):
@@ -239,23 +277,8 @@ class graph_etri(QtGui.QGraphicsScene):
         limsup = -self.axis_height + axis_unused / 2
         liminf = -axis_unused / 2
 
-        points = []
-        for i, id in enumerate(self.criteria_order):
-            x = i * self.hspacing
-
-            num = ap.performances[id] - self.worst.performances[id]
-            den = self.best.performances[id] - self.worst.performances[id]
-            y = liminf + num / den * (limsup - liminf)
-
-            point = QtCore.QPointF(x, y)
-
-            points.append(point)
-
-            if i != 0:
-                pen = QtGui.QPen()
-                pen.setBrush(QtGui.QColor("red"))
-                line = QtCore.QLineF(points[i-1], point)
-                item = self.addLine(line, pen)
+        item = graph_profile(ap, liminf, limsup, self.worst, self.best, self.criteria_order, self.hspacing)
+        self.addItem(item)
 
 if __name__ == "__main__":
     import random
