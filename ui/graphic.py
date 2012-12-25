@@ -72,6 +72,8 @@ class QGraphicsScene_etri(QtGui.QGraphicsScene):
         self.worst = worst
         self.best = best
 
+        self.ap_items = {}
+
         self.update(size)
 
     def update(self, size):
@@ -95,6 +97,7 @@ class QGraphicsScene_etri(QtGui.QGraphicsScene):
         self.__plot_profiles()
         self.__plot_categories()
         self.__higlight_intersections()
+        self.__plot_alternatives()
         self.setSceneRect(self.itemsBoundingRect())
 
     def __create_axis(self, xmin, xmax, ymin, ymax, direction):
@@ -279,9 +282,16 @@ class QGraphicsScene_etri(QtGui.QGraphicsScene):
 
             self.intersection_items.append(item)
 
+    def __plot_alternatives(self):
+        for ap, item in self.ap_items.items():
+            item, text_items = self.__create_profile(ap)
+            self.addItem(item)
+
     def plot_alternative_performances(self, ap):
         item, text_items = self.__create_profile(ap)
         self.addItem(item)
+
+        self.ap_items[ap] = item
 
 if __name__ == "__main__":
     import random
