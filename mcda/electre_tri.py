@@ -14,6 +14,7 @@ class electre_tri:
         self.cv = cv
         self.bpt = bpt
         self.lbda = lbda
+        self.categories_profiles = categories_profiles
         if categories_profiles:
             self.categories = categories_profiles.get_ordered_categories()
             self.profiles = categories_profiles.get_ordered_profiles()
