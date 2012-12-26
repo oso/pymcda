@@ -4,6 +4,7 @@ sys.path.insert(0, "..")
 from itertools import product
 import math
 import random
+from mcda.types import alternative_affectation, alternatives_affectations
 
 def get_wrong_assignments(aa, aa_learned):
     l = list()
@@ -36,7 +37,8 @@ class meta_electre_tri_profiles():
         self.aa_by_cat = self.sort_alternative_by_category(aa_ori)
         self.b0 = pt_sorted.get_worst_ap()
         self.bp = pt_sorted.get_best_ap()
-        self.build_concordance_table(aa, self.model.bpt)
+        self.build_concordance_table(aa_ori.keys(), self.model.bpt)
+        self.build_assignments_table()
 
     def categories_rank(self, cat):
         return { c.id: c.rank for c in cat }
@@ -56,8 +58,8 @@ class meta_electre_tri_profiles():
                 aa_by_cat[cat] = [ aid ]
         return aa_by_cat
 
-    def compute_above_histogram(self, aa, cid, profile, above,
-                                cat_b, cat_a, ct, f):
+    def compute_above_histogram(self, cid, profile, above,
+                                cat_b, cat_a, ct):
         w = self.model.cv[cid].value
         lbda = self.model.lbda
 
@@ -66,19 +68,19 @@ class meta_electre_tri_profiles():
         alts, perfs = self.pt_sorted.get_middle(cid,
                                                 profile.performances[cid],
                                                 above.performances[cid],
-                                                True, False)
+                                                True, True)
 
         for i, a in enumerate(alts):
             conc = ct[a]
             diff = conc - w
             if self.aa_ori(a) == cat_a:
-                if aa(a) == cat_a and diff < lbda:
+                if self.aa(a) == cat_a and diff < lbda:
                         # --
-                        total += 5
-                elif aa(a) == cat_b and diff < lbda:
+                        total += 3
+                elif self.aa(a) == cat_b and diff < lbda:
                         # -
                         total += 1
-            elif self.aa_ori(a) == cat_b and aa(a) == cat_a:
+            elif self.aa_ori(a) == cat_b and self.aa(a) == cat_a:
                 if diff >= lbda:
                     # +
                     num += 0.75
@@ -89,16 +91,16 @@ class meta_electre_tri_profiles():
                     num += 1
                     total += 1
                     h_above[perfs[i] + 0.00001] = num / total
-            elif self.cat[self.aa_ori(a)] < self.cat[cat_b]:
-                num += 0.5
+            elif self.aa_ori(a) != self.aa(a) and \
+                 self.cat[self.aa_ori(a)] < self.cat[cat_a]:
+                num += 0.25
                 total += 1
                 h_above[perfs[i] + 0.00001] = num / total
-#                print self.cat[cat_a]
 
         return h_above
 
-    def compute_below_histogram(self, aa, cid, profile, below,
-                                cat_b, cat_a, ct, f):
+    def compute_below_histogram(self, cid, profile, below,
+                                cat_b, cat_a, ct):
         w = self.model.cv[cid].value
         lbda = self.model.lbda
 
@@ -107,13 +109,13 @@ class meta_electre_tri_profiles():
         alts, perfs = self.pt_sorted.get_middle(cid,
                                                 below.performances[cid],
                                                 profile.performances[cid],
-                                                False, True)
+                                                True, True)
         alts.reverse()
         perfs.reverse()
         for i, a in enumerate(alts):
             conc = ct[a]
             diff = conc + w
-            if self.aa_ori(a) == cat_a and aa(a) == cat_b:
+            if self.aa_ori(a) == cat_a and self.aa(a) == cat_b:
                 if diff >= lbda:
                     # ++
                     num += 1
@@ -125,14 +127,15 @@ class meta_electre_tri_profiles():
                     total += 1
                     h_below[perfs[i] - 0.00001] = num / total
             elif self.aa_ori(a) == cat_b:
-                if aa(a) == cat_b and diff >= lbda:
+                if self.aa(a) == cat_b and diff >= lbda:
                     # --
-                    total += 5
-                elif aa(a) == cat_a and diff >= lbda:
+                    total += 3
+                elif self.aa(a) == cat_a and diff >= lbda:
                     # -
                     total += 1
-            elif self.cat[self.aa_ori(a)] > self.cat[cat_a]:
-                num += 0.5
+            elif self.aa_ori(a) != self.aa(a) and \
+                 self.cat[self.aa_ori(a)] > self.cat[cat_b]:
+                num += 0.25
                 total += 1
                 h_below[perfs[i] - 0.00001] = num / total
 
@@ -157,28 +160,43 @@ class meta_electre_tri_profiles():
         for i in val:
             print i,':', h[i]
 
-    def build_concordance_table(self, aa, profiles):
+    def get_alternative_assignment(self, aid):
+        for profile in reversed(self.model.profiles):
+            if self.ct[profile][aid] >= self.model.lbda:
+                return self.model.categories_profiles[profile].value.upper
+
+        return self.model.categories_profiles[profile].value.lower
+
+    def build_assignments_table(self):
+        self.aa = alternatives_affectations()
+        for a in self.aa_ori.keys():
+            cat = self.get_alternative_assignment(a)
+            self.aa.append(alternative_affectation(a, cat))
+
+    def build_concordance_table(self, aids, profiles):
         self.ct = { profile.alternative_id: dict() for profile in profiles }
-        for a, profile in product(aa, profiles):
-            ap = self.pt_sorted[a.alternative_id]
+        for aid, profile in product(aids, profiles):
+            ap = self.pt_sorted[aid]
             conc = self.model.concordance(ap, profile)
-            self.ct[profile.alternative_id][a.alternative_id] = conc
+            self.ct[profile.alternative_id][aid] = conc
 
     def update_concordance_table(self, profile, cid, old, new):
         if old > new:
             down = True
+            up = False
             w = self.model.cv[cid].value
         else:
             down = False
+            up = True
             w = -self.model.cv[cid].value
 
         alts, perfs = self.pt_sorted.get_middle(cid, old, new,
-                                                False, down)
+                                                up, down)
 
         for a in alts:
             self.ct[profile][a] += w
 
-    def compute_histograms(self, aa, f, profile, below, above, cat_b, cat_a):
+    def compute_histograms(self, profile, below, above, cat_b, cat_a):
         criteria = self.model.criteria
         p_perfs = profile.performances
 
@@ -191,12 +209,12 @@ class meta_electre_tri_profiles():
         for cid in cids:
             ct = self.ct[profile.alternative_id]
 
-            h_below = self.compute_below_histogram(aa, cid, profile,
+            h_below = self.compute_below_histogram(cid, profile,
                                                    below, cat_b,
-                                                   cat_a, ct, f)
-            h_above = self.compute_above_histogram(aa, cid, profile,
+                                                   cat_a, ct)
+            h_above = self.compute_above_histogram(cid, profile,
                                                    above, cat_b,
-                                                   cat_a, ct, f)
+                                                   cat_a, ct)
             h = h_below
             h.update(h_above)
 
@@ -219,9 +237,6 @@ class meta_electre_tri_profiles():
                 max_cid = cid
                 max_move = i
 
-        if moved is False and max_val > 0:
-            p_perfs[max_cid] = max_move
-
     def get_below_and_above_profiles(self, i):
         profiles = self.model.profiles
         bpt = self.model.bpt
@@ -238,13 +253,14 @@ class meta_electre_tri_profiles():
 
         return below, above
 
-    def optimize(self, aa, f):
+    def optimize(self):
         profiles = self.model.profiles
         for i, profile in enumerate(profiles):
             pperfs = self.model.bpt[profile]
             below, above = self.get_below_and_above_profiles(i)
             cat_b, cat_a = self.cat_ranked[i], self.cat_ranked[i+1]
-            self.compute_histograms(aa, f, pperfs, below, above, cat_b, cat_a)
+            self.compute_histograms(pperfs, below, above, cat_b, cat_a)
+            self.build_assignments_table()
 
 if __name__ == "__main__":
     from tools.generate_random import generate_random_alternatives
@@ -256,6 +272,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_categories_profiles
     from tools.utils import normalize_criteria_weights
     from tools.utils import display_affectations_and_pt
+    from tools.utils import get_number_of_possible_coallitions
     from tools.sorted import sorted_performance_table
     from mcda.electre_tri import electre_tri_bm
     from ui.graphic import display_electre_tri_models
@@ -263,7 +280,7 @@ if __name__ == "__main__":
     a = generate_random_alternatives(1000)
 
     c = generate_random_criteria(10)
-    cv = generate_random_criteria_values(c, 1)
+    cv = generate_random_criteria_values(c, 9)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c)
 
@@ -284,6 +301,8 @@ if __name__ == "__main__":
     bpt.display(criterion_ids=cids)
     cv.display(criterion_ids=cids)
     print("lambda: %.7s" % lbda)
+    print("number of possible coallitions: %d" %
+          get_number_of_possible_coallitions(cv, lbda))
 
     bpt2 = generate_random_profiles(b, c, 0123)
     model2 = electre_tri_bm(c, cv, bpt2, lbda, cps)
@@ -295,15 +314,16 @@ if __name__ == "__main__":
     meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa)
 
     for i in range(1, 501):
-        aa2 = model2.pessimist(pt)
-
-        f = compute_fitness(aa, aa2)
-        print('%d: fitness: %g' % (i, f))
+        f = compute_fitness(aa, meta.aa)
+        print('%d: fitness: %g %g' % (i, f, compute_fitness(aa, meta.aa)))
         bpt2.display(criterion_ids=cids)
-        if f == 1:
+        if f > 0.999:
             break
 
-        meta.optimize(aa2, f)
+        meta.optimize()
+
+    print meta.b0
+    print meta.bp
 
     print('Learned model')
     print('=============')
@@ -316,7 +336,7 @@ if __name__ == "__main__":
     nok = 0
     anok = []
     for alt in a:
-        if aa(alt.id) != aa2(alt.id):
+        if aa(alt.id) != meta.aa(alt.id):
             anok.append(alt)
             nok += 1
 
@@ -325,6 +345,7 @@ if __name__ == "__main__":
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
-        display_affectations_and_pt(anok, c, [aa, aa2], [pt])
+        display_affectations_and_pt(anok, c, [aa, meta.aa], [pt])
 
-#    display_electre_tri_models([model, model2], [pt, pt])
+    aps = [ pt["%s" % aid] for aid in anok ]
+    display_electre_tri_models([model, model2], [pt, pt])
