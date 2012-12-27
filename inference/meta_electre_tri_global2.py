@@ -123,6 +123,8 @@ if __name__ == "__main__":
     c = generate_random_criteria(9)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
+    worst = alternative_performances("worst", {crit.id: 0 for crit in c})
+    best = alternative_performances("best", {crit.id: 1 for crit in c})
     pt = generate_random_performance_table(a, c,)
 
     cat = generate_random_categories(3)
@@ -203,4 +205,5 @@ if __name__ == "__main__":
 #        print("Alternatives and affectations")
 #        display_affectations_and_pt(anok, c, [aa, aa_learned], [pt])
 
-    display_electre_tri_models([model, m], [pt, pt])
+    display_electre_tri_models([model, model2],
+                               [worst, worst], [best, best])

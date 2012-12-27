@@ -8,7 +8,7 @@ from PyQt4 import QtGui
 from tools.utils import get_worst_alternative_performances
 from tools.utils import get_best_alternative_performances
 
-def display_electre_tri_models(etri, pt, aps = []):
+def display_electre_tri_models(etri, worst = [], best = [], aps = []):
     app = QtGui.QApplication(sys.argv)
 
     sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,
@@ -41,7 +41,7 @@ def display_electre_tri_models(etri, pt, aps = []):
     dialog.resize(1024, 768)
 
     for i, m in enumerate(etri):
-        graph = QGraphicsScene_etri(m, pt[i], views[m].size())
+        graph = QGraphicsScene_etri(m, worst[i], best[i], views[m].size())
         views[m].setScene(graph)
         if aps and aps[i]:
             for ap in aps[i]:
@@ -62,11 +62,10 @@ class mygraphicsview(QtGui.QGraphicsView):
 
 class QGraphicsScene_etri(QtGui.QGraphicsScene):
 
-    def __init__(self, model, pt, size, criteria_order = None,
-                 worst = None, best = None, parent = None):
+    def __init__(self, model, worst, best, size, criteria_order = None,
+                 parent = None):
         super(QtGui.QGraphicsScene, self).__init__(parent)
         self.model = model
-        self.pt = pt
         if criteria_order:
             self.criteria_order = criteria_order
         else:
@@ -81,12 +80,6 @@ class QGraphicsScene_etri(QtGui.QGraphicsScene):
 
     def update(self, size):
         self.size = size
-        if self.worst is None:
-            self.worst = get_worst_alternative_performances(self.pt,
-                                                        self.model.criteria)
-        if self.best is None:
-            self.best = get_best_alternative_performances(self.pt,
-                                                      self.model.criteria)
         self.axis_height = self.size.height() - 45
         self.ymax = -self.axis_height + 25 / 2
         self.ymin = -25 / 2
@@ -190,6 +183,9 @@ class QGraphicsScene_etri(QtGui.QGraphicsScene):
         path = item.path()
         for i, cid in enumerate(self.criteria_order):
             y = self.__compute_y(ap, cid)
+            if y > self.worst.performances[cid]:
+                y = self.worst.performances[cid]
+
             if i == 0:
                 x = 0
                 path.moveTo(0, y)
@@ -307,11 +303,15 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_categories_profiles
     from tools.utils import normalize_criteria_weights
     from mcda.electre_tri import electre_tri
+    from mcda.types import alternative_performances
 
-    a = generate_random_alternatives(10000)
+    a = generate_random_alternatives(1)
     c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 1234)
     normalize_criteria_weights(cv)
+
+    worst = alternative_performances("worst", {crit.id: 0 for crit in c})
+    best = alternative_performances("best", {crit.id: 1 for crit in c})
     pt = generate_random_performance_table(a, c)
 
     cat = generate_random_categories(3)
@@ -336,7 +336,7 @@ if __name__ == "__main__":
     view.setRenderHint(QtGui.QPainter.Antialiasing)
     view.setSizePolicy(sizePolicy)
 
-    graph = QGraphicsScene_etri(model, pt, view.size())
+    graph = QGraphicsScene_etri(model, worst, best, view.size())
 
     view.setScene(graph)
     view.show()

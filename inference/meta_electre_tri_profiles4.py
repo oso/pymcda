@@ -275,13 +275,15 @@ if __name__ == "__main__":
     from tools.utils import get_number_of_possible_coallitions
     from tools.sorted import sorted_performance_table
     from mcda.electre_tri import electre_tri_bm
+    from mcda.types import alternative_performances
     from ui.graphic import display_electre_tri_models
 
     a = generate_random_alternatives(1000)
-
     c = generate_random_criteria(10)
-    cv = generate_random_criteria_values(c, 9)
+    cv = generate_random_criteria_values(c, 11)
     normalize_criteria_weights(cv)
+    worst = alternative_performances("worst", {crit.id: 0 for crit in c})
+    best = alternative_performances("best", {crit.id: 1 for crit in c})
     pt = generate_random_performance_table(a, c)
 
     cat = generate_random_categories(3)
@@ -304,7 +306,7 @@ if __name__ == "__main__":
     print("number of possible coallitions: %d" %
           get_number_of_possible_coallitions(cv, lbda))
 
-    bpt2 = generate_random_profiles(b, c, 0123)
+    bpt2 = generate_random_profiles(b, c)
     model2 = electre_tri_bm(c, cv, bpt2, lbda, cps)
     print('Original random profiles')
     print('========================')
@@ -315,9 +317,9 @@ if __name__ == "__main__":
 
     for i in range(1, 501):
         f = compute_fitness(aa, meta.aa)
-        print('%d: fitness: %g %g' % (i, f, compute_fitness(aa, meta.aa)))
+        print('%d: fitness: %g' % (i, f))
         bpt2.display(criterion_ids=cids)
-        if f > 0.999:
+        if f == 1:
             break
 
         meta.optimize()
@@ -348,4 +350,5 @@ if __name__ == "__main__":
         display_affectations_and_pt(anok, c, [aa, meta.aa], [pt])
 
     aps = [ pt["%s" % aid] for aid in anok ]
-    display_electre_tri_models([model, model2], [pt, pt])
+    display_electre_tri_models([model, model2],
+                               [worst, worst], [best, best])
