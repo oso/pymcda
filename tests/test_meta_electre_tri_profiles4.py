@@ -8,6 +8,7 @@ import random
 from itertools import product
 
 from mcda.types import alternatives_affectations, performance_table
+from mcda.types import alternative_performances
 from mcda.electre_tri import electre_tri_bm
 from inference.meta_electre_tri_profiles4 import meta_electre_tri_profiles
 from tools.utils import compute_ac
@@ -56,7 +57,7 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
     t1 = time.time()
 
     # Run the algorithm
-    meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa_err)
+    meta = meta_electre_tri_profiles(model2, pt_sorted, aa_err)
 
     ca2_iter = [1] * (max_loops + 1)
     aa2 = model2.pessimist(pt)

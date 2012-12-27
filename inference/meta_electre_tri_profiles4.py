@@ -25,15 +25,15 @@ def compute_fitness(aa, aa_learned):
 
 class meta_electre_tri_profiles():
 
-    def __init__(self, model, pt_sorted, cat, aa_ori):
+    def __init__(self, model, pt_sorted, aa_ori):
         self.na = len(aa_ori)
         self.nc = len(model.criteria)
         self.model = model
         self.nprofiles = len(model.profiles)
         self.pt_sorted = pt_sorted
         self.aa_ori = aa_ori
-        self.cat = self.categories_rank(cat)
-        self.cat_ranked = self.rank_categories(cat)
+        self.cat = self.categories_rank(self.model.categories)
+        self.cat_ranked = self.model.categories
         self.aa_by_cat = self.sort_alternative_by_category(aa_ori)
         self.b0 = pt_sorted.get_worst_ap()
         self.bp = pt_sorted.get_best_ap()
@@ -41,11 +41,7 @@ class meta_electre_tri_profiles():
         self.build_assignments_table()
 
     def categories_rank(self, cat):
-        return { c.id: c.rank for c in cat }
-
-    def rank_categories(self, cat):
-        c_rank = { c.id: c.rank for c in cat }
-        return sorted([ cat for (cat, rank) in c_rank.items() ])
+        return { cat: i + 1 for i, cat in enumerate(self.model.categories) }
 
     def sort_alternative_by_category(self, aa):
         aa_by_cat = {}
@@ -180,14 +176,12 @@ class meta_electre_tri_profiles():
             conc = self.model.concordance(ap, profile)
             self.ct[profile.alternative_id][aid] = conc
 
-    def update_concordance_table(self, profile, cid, old, new):
+    def update_tables(self, profile, cid, old, new):
         if old > new:
-            down = True
-            up = False
+            down, up = True, False
             w = self.model.cv[cid].value
         else:
-            down = False
-            up = True
+            down, up = False, True
             w = -self.model.cv[cid].value
 
         alts, perfs = self.pt_sorted.get_middle(cid, old, new,
@@ -195,6 +189,7 @@ class meta_electre_tri_profiles():
 
         for a in alts:
             self.ct[profile][a] += w
+            self.aa[a].category_id = self.get_alternative_assignment(a)
 
     def compute_histograms(self, profile, below, above, cat_b, cat_a):
         criteria = self.model.criteria
@@ -221,15 +216,13 @@ class meta_electre_tri_profiles():
             if not h:
                 continue
 
-#            self.print_histo(h)
             i = self.histogram_get_max(h, p_perfs[cid])
-#            print 'move', cid, i, h[i]
 
             r = random.uniform(0, 1)
 
             if r <= h[i]:
-                self.update_concordance_table(profile.alternative_id, cid,
-                                              p_perfs[cid], i)
+                self.update_tables(profile.alternative_id, cid,
+                                   p_perfs[cid], i)
                 p_perfs[cid] = i
                 moved = True
             elif moved is False and h[i] > max_val:
@@ -260,7 +253,6 @@ class meta_electre_tri_profiles():
             below, above = self.get_below_and_above_profiles(i)
             cat_b, cat_a = self.cat_ranked[i], self.cat_ranked[i+1]
             self.compute_histograms(pperfs, below, above, cat_b, cat_a)
-            self.build_assignments_table()
 
 if __name__ == "__main__":
     from tools.generate_random import generate_random_alternatives
@@ -276,11 +268,12 @@ if __name__ == "__main__":
     from tools.sorted import sorted_performance_table
     from mcda.electre_tri import electre_tri_bm
     from mcda.types import alternative_performances
+    from mcda.types import performance_table
     from ui.graphic import display_electre_tri_models
 
     a = generate_random_alternatives(1000)
     c = generate_random_criteria(10)
-    cv = generate_random_criteria_values(c, 11)
+    cv = generate_random_criteria_values(c, 20)
     normalize_criteria_weights(cv)
     worst = alternative_performances("worst", {crit.id: 0 for crit in c})
     best = alternative_performances("best", {crit.id: 1 for crit in c})
@@ -313,7 +306,7 @@ if __name__ == "__main__":
     bpt2.display(criterion_ids=cids)
 
     pt_sorted = sorted_performance_table(pt)
-    meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa)
+    meta = meta_electre_tri_profiles(model2, pt_sorted, aa)
 
     for i in range(1, 501):
         f = compute_fitness(aa, meta.aa)
@@ -323,9 +316,6 @@ if __name__ == "__main__":
             break
 
         meta.optimize()
-
-    print meta.b0
-    print meta.bp
 
     print('Learned model')
     print('=============')
