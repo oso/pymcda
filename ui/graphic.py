@@ -8,7 +8,7 @@ from PyQt4 import QtGui
 from tools.utils import get_worst_alternative_performances
 from tools.utils import get_best_alternative_performances
 
-def display_electre_tri_models(etri, pt):
+def display_electre_tri_models(etri, pt, aps = []):
     app = QtGui.QApplication(sys.argv)
 
     sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,
@@ -43,6 +43,9 @@ def display_electre_tri_models(etri, pt):
     for i, m in enumerate(etri):
         graph = QGraphicsScene_etri(m, pt[i], views[m].size())
         views[m].setScene(graph)
+        if aps and aps[i]:
+            for ap in aps[i]:
+                graph.plot_alternative_performances(ap)
 
     dialog.show()
     app.exec_()
