@@ -8,7 +8,7 @@ import random
 from itertools import product
 
 from mcda.types import alternatives_affectations, performance_table
-from mcda.electre_tri import electre_tri
+from mcda.electre_tri import electre_tri_bm
 from inference.meta_electre_tri_profiles import meta_electre_tri_profiles
 from tools.utils import compute_ac
 from tools.sorted import sorted_performance_table
@@ -39,7 +39,7 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
 
     lbda = random.uniform(0.5, 1)
 
-    model = electre_tri(c, cv, bpt, lbda, cps)
+    model = electre_tri_bm(c, cv, bpt, lbda, cps)
     model2 = model.copy()
     aa = model.pessimist(pt)
 
@@ -59,8 +59,7 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
     meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa_err)
 
     ca2_iter = [1] * (max_loops + 1)
-    aa2 = model2.pessimist(pt)
-    ca2 = compute_ac(aa_err, aa2)
+    ca2 = compute_ac(aa_err, meta.aa)
     ca2_best = ca2
     best_bpt = model2.bpt.copy()
     ca2_iter[0] = ca2
@@ -70,11 +69,10 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
         if ca2_best == 1:
             break
 
-        meta.optimize(aa2, ca2)
+        meta.optimize(meta.aa, ca2)
         nloops += 1
 
-        aa2 = model2.pessimist(pt)
-        ca2 = compute_ac(aa_err, aa2)
+        ca2 = compute_ac(aa_err, meta.aa)
 
         ca2_iter[k + 1] = ca2
 
