@@ -2,6 +2,7 @@ from __future__ import division
 import sys
 sys.path.insert(0, "..")
 import random
+from mcda.electre_tri import electre_tri_bm
 from mcda.types import alternative, alternatives
 from mcda.types import alternative_performances, performance_table
 from mcda.types import criterion, criteria
@@ -11,6 +12,7 @@ from mcda.types import category, categories
 from mcda.types import category_profile, categories_profiles, limits
 from mcda.types import piecewise_linear, point, segment
 from mcda.types import category_value, categories_values, interval
+from tools.utils import normalize_criteria_weights
 
 def generate_random_alternatives(number, prefix='a'):
     alts = alternatives()
@@ -179,6 +181,21 @@ def generate_random_categories_values(cats, k = 3):
 
     return catvs
 
+def generate_random_electre_tri_bm_model(ncrit, ncat, seed = None):
+    if seed:
+        random.seed(seed)
+
+    c = generate_random_criteria(ncrit)
+    cv = generate_random_criteria_values(c, seed)
+    normalize_criteria_weights(cv)
+    cat = generate_random_categories(ncat)
+    cps = generate_random_categories_profiles(cat)
+    b = cps.get_ordered_profiles()
+    bpt = generate_random_profiles(b, c)
+    lbda = random.uniform(0.5, 1)
+
+    return electre_tri_bm(c, cv, bpt, lbda, cps)
+
 if __name__ == "__main__":
     alts = generate_random_alternatives(10)
     print(alts)
@@ -200,3 +217,5 @@ if __name__ == "__main__":
     print(catv)
     cw = generate_random_criteria_weights(crits)
     print(cw)
+    model = generate_random_electre_tri_bm_model(10, 3)
+    print(model)
