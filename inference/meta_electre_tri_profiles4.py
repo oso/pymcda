@@ -255,13 +255,10 @@ class meta_electre_tri_profiles():
             self.optimize_profile(pperfs, below, above, cat_b, cat_a)
 
 if __name__ == "__main__":
+    from tools.generate_random import generate_random_electre_tri_bm_model
     from tools.generate_random import generate_random_alternatives
-    from tools.generate_random import generate_random_criteria
-    from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
-    from tools.generate_random import generate_random_categories
     from tools.generate_random import generate_random_profiles
-    from tools.generate_random import generate_random_categories_profiles
     from tools.utils import normalize_criteria_weights
     from tools.utils import display_affectations_and_pt
     from tools.utils import get_number_of_possible_coallitions
@@ -271,47 +268,40 @@ if __name__ == "__main__":
     from mcda.types import performance_table
     from ui.graphic import display_electre_tri_models
 
+    # Generate a random ELECTRE TRI BM model
+    model = generate_random_electre_tri_bm_model(10, 3, 83)
+    worst = alternative_performances("worst",
+                                     {c.id: 0 for c in model.criteria})
+    best = alternative_performances("best",
+                                    {c.id: 1 for c in model.criteria})
+
+    # Generate a set of alternatives
     a = generate_random_alternatives(1000)
-    c = generate_random_criteria(10)
-    cv = generate_random_criteria_values(c, 92)
-    normalize_criteria_weights(cv)
-    worst = alternative_performances("worst", {crit.id: 0 for crit in c})
-    best = alternative_performances("best", {crit.id: 1 for crit in c})
-    pt = generate_random_performance_table(a, c)
-
-    cat = generate_random_categories(3)
-    cps = generate_random_categories_profiles(cat)
-    b = cps.get_ordered_profiles()
-    bpt = generate_random_profiles(b, c)
-
-#    lbda = 0.75
-    lbda = random.uniform(0.5, 1)
-
-    model = electre_tri_bm(c, cv, bpt, lbda, cps)
+    pt = generate_random_performance_table(a, model.criteria)
     aa = model.pessimist(pt)
 
     print('Original model')
     print('==============')
-    cids = c.keys()
-    bpt.display(criterion_ids=cids)
-    cv.display(criterion_ids=cids)
-    print("lambda: %.7s" % lbda)
+    cids = model.criteria.keys()
+    model.bpt.display(criterion_ids=cids)
+    model.cv.display(criterion_ids=cids)
+    print("lambda: %.7s" % model.lbda)
     print("number of possible coallitions: %d" %
-          get_number_of_possible_coallitions(cv, lbda))
+          get_number_of_possible_coallitions(model.cv, model.lbda))
 
-    bpt2 = generate_random_profiles(b, c)
-    model2 = electre_tri_bm(c, cv, bpt2, lbda, cps)
+    model2 = model.copy()
+    model2.bpt = generate_random_profiles(model.profiles, model.criteria)
     print('Original random profiles')
     print('========================')
-    bpt2.display(criterion_ids=cids)
+    model.bpt.display(criterion_ids = cids)
 
     pt_sorted = sorted_performance_table(pt)
     meta = meta_electre_tri_profiles(model2, pt_sorted, aa)
 
-    for i in range(1, 501):
+    for i in range(1, 1001):
         f = compute_fitness(aa, meta.aa)
         print('%d: fitness: %g' % (i, f))
-        bpt2.display(criterion_ids=cids)
+        model2.bpt.display(criterion_ids=cids)
         if f == 1:
             break
 
@@ -320,9 +310,9 @@ if __name__ == "__main__":
     print('Learned model')
     print('=============')
     print("Number of iterations: %d" % i)
-    bpt2.display(criterion_ids=cids)
-    cv.display(criterion_ids=cids)
-    print("lambda: %.7s" % lbda)
+    model.bpt.display(criterion_ids = cids)
+    model.cv.display(criterion_ids = cids)
+    print("lambda: %.7s" % model.lbda)
 
     total = len(a)
     nok = 0
@@ -337,7 +327,8 @@ if __name__ == "__main__":
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
-        display_affectations_and_pt(anok, c, [aa, meta.aa], [pt])
+        display_affectations_and_pt(anok, model.criteria, [aa, meta.aa],
+                                    [pt])
 
     aps = [ pt["%s" % aid] for aid in anok ]
     display_electre_tri_models([model, model2],
