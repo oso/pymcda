@@ -69,7 +69,7 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
         if ca2_best == 1:
             break
 
-        meta.optimize(meta.aa, ca2)
+        meta.optimize(ca2)
         nloops += 1
 
         ca2 = compute_ac(aa_err, meta.aa)
