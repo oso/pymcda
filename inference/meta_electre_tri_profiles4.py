@@ -72,24 +72,24 @@ class meta_electre_tri_profiles():
             if self.aa_ori(a) == cat_a:
                 if self.aa(a) == cat_a and diff < lbda:
                         # --
-                        total += 3
+                        total += 5
                 elif self.aa(a) == cat_b and diff < lbda:
                         # -
                         total += 1
             elif self.aa_ori(a) == cat_b and self.aa(a) == cat_a:
                 if diff >= lbda:
                     # +
-                    num += 0.75
+                    num += 0.5
                     total += 1
                     h_above[perfs[i] + 0.00001] = num / total
                 else:
                     # ++
-                    num += 1
+                    num += 2
                     total += 1
                     h_above[perfs[i] + 0.00001] = num / total
             elif self.aa_ori(a) != self.aa(a) and \
                  self.cat[self.aa_ori(a)] < self.cat[cat_a]:
-                num += 0.25
+                num += 0.1
                 total += 1
                 h_above[perfs[i] + 0.00001] = num / total
 
@@ -114,24 +114,24 @@ class meta_electre_tri_profiles():
             if self.aa_ori(a) == cat_a and self.aa(a) == cat_b:
                 if diff >= lbda:
                     # ++
-                    num += 1
+                    num += 2
                     total += 1
                     h_below[perfs[i] - 0.00001] = num / total
                 else:
                     # +
-                    num += 0.75
+                    num += 0.5
                     total += 1
                     h_below[perfs[i] - 0.00001] = num / total
             elif self.aa_ori(a) == cat_b:
                 if self.aa(a) == cat_b and diff >= lbda:
                     # --
-                    total += 3
+                    total += 5
                 elif self.aa(a) == cat_a and diff >= lbda:
                     # -
                     total += 1
             elif self.aa_ori(a) != self.aa(a) and \
                  self.cat[self.aa_ori(a)] > self.cat[cat_b]:
-                num += 0.25
+                num += 0.1
                 total += 1
                 h_below[perfs[i] - 0.00001] = num / total
 
@@ -191,7 +191,7 @@ class meta_electre_tri_profiles():
             self.ct[profile][a] += w
             self.aa[a].category_id = self.get_alternative_assignment(a)
 
-    def compute_histograms(self, profile, below, above, cat_b, cat_a):
+    def optimize_profile(self, profile, below, above, cat_b, cat_a):
         criteria = self.model.criteria
         p_perfs = profile.performances
 
@@ -252,7 +252,7 @@ class meta_electre_tri_profiles():
             pperfs = self.model.bpt[profile]
             below, above = self.get_below_and_above_profiles(i)
             cat_b, cat_a = self.cat_ranked[i], self.cat_ranked[i+1]
-            self.compute_histograms(pperfs, below, above, cat_b, cat_a)
+            self.optimize_profile(pperfs, below, above, cat_b, cat_a)
 
 if __name__ == "__main__":
     from tools.generate_random import generate_random_alternatives
@@ -273,7 +273,7 @@ if __name__ == "__main__":
 
     a = generate_random_alternatives(1000)
     c = generate_random_criteria(10)
-    cv = generate_random_criteria_values(c, 20)
+    cv = generate_random_criteria_values(c, 92)
     normalize_criteria_weights(cv)
     worst = alternative_performances("worst", {crit.id: 0 for crit in c})
     best = alternative_performances("best", {crit.id: 1 for crit in c})
