@@ -3,6 +3,8 @@ import sys
 sys.path.insert(0, "..")
 import math
 import random
+from itertools import product
+from mcda.types import alternative_affectation, alternatives_affectations
 
 class meta_electre_tri_profiles():
 
@@ -17,6 +19,8 @@ class meta_electre_tri_profiles():
         self.b0 = pt_sorted.get_worst_ap()
         self.bp = pt_sorted.get_best_ap()
         self.compute_interval_ratios(3)
+        self.build_concordance_table(self.aa_ori.keys(), self.model.bpt)
+        self.build_assignments_table()
 
     def compute_interval_ratios(self, n):
         self.nintervals = n
@@ -53,6 +57,41 @@ class meta_electre_tri_profiles():
             else:
                 aa_by_cat[cat] = [ aid ]
         return aa_by_cat
+
+    def get_alternative_assignment(self, aid):
+        for profile in reversed(self.model.profiles):
+            if self.ct[profile][aid] >= self.model.lbda:
+                return self.model.categories_profiles[profile].value.upper
+
+        return self.model.categories_profiles[profile].value.lower
+
+    def build_assignments_table(self):
+        self.aa = alternatives_affectations()
+        for a in self.aa_ori.keys():
+            cat = self.get_alternative_assignment(a)
+            self.aa.append(alternative_affectation(a, cat))
+
+    def build_concordance_table(self, aids, profiles):
+        self.ct = { profile.alternative_id: dict() for profile in profiles }
+        for aid, profile in product(aids, profiles):
+            ap = self.pt_sorted[aid]
+            conc = self.model.concordance(ap, profile)
+            self.ct[profile.alternative_id][aid] = conc
+
+    def update_tables(self, profile, cid, old, new):
+        if old > new:
+            down, up = True, False
+            w = self.model.cv[cid].value
+        else:
+            down, up = False, True
+            w = -self.model.cv[cid].value
+
+        alts, perfs = self.pt_sorted.get_middle(cid, old, new,
+                                                up, down)
+
+        for a in alts:
+            self.ct[profile][a] += w
+            self.aa[a].category_id = self.get_alternative_assignment(a)
 
     def compute_above_histogram(self, aa, cid, profile, above, cat_b, cat_a):
         h_above = {}
@@ -131,6 +170,9 @@ class meta_electre_tri_profiles():
             if h_below[i_b] > h_above[i_a]:
                 size = (p_perfs[cid] - b_perfs[cid])
                 if r < h_below[i_b]:
+                    self.update_tables(profile.alternative_id, cid,
+                                       p_perfs[cid], i_b)
+
                     p_perfs[cid] = i_b
                     moved = True
                 elif moved is False and h_below[i_b] > max_val:
@@ -140,6 +182,8 @@ class meta_electre_tri_profiles():
             elif h_below[i_b] < h_above[i_a]:
                 size = (a_perfs[cid] - p_perfs[cid])
                 if r < h_above[i_a]:
+                    self.update_tables(profile.alternative_id, cid,
+                                       p_perfs[cid], i_a)
                     p_perfs[cid] = i_a
                     moved = True
                 elif moved is False and h_above[i_a] > max_val:
@@ -150,6 +194,8 @@ class meta_electre_tri_profiles():
                 size = (p_perfs[cid] - b_perfs[cid])
                 r2 = random.random()
                 if r2 < h_below[i_b]:
+                    self.update_tables(profile.alternative_id, cid,
+                                       p_perfs[cid], i_b)
                     p_perfs[cid] = i_b
                     moved = True
                 elif moved is False and h_below[i_b] > max_val:
@@ -160,6 +206,8 @@ class meta_electre_tri_profiles():
                 size = (a_perfs[cid] - p_perfs[cid])
                 r2 = random.random()
                 if r2 < h_above[i_a]:
+                    self.update_tables(profile.alternative_id, cid,
+                                       p_perfs[cid], i_a)
                     p_perfs[cid] = i_a
                     moved = True
                 elif moved is False and h_above[i_a] > max_val:
@@ -168,6 +216,8 @@ class meta_electre_tri_profiles():
                     max_move = i_a
 
         if moved is False and max_val > 0:
+            self.update_tables(profile.alternative_id, max_cid,
+                               p_perfs[max_cid], max_move)
             p_perfs[max_cid] = max_move
 
     def get_below_and_above_profiles(self, i):
@@ -209,6 +259,7 @@ if __name__ == "__main__":
     from tools.utils import compute_ac
     from tools.sorted import sorted_performance_table
     from mcda.types import alternatives_affectations, performance_table
+    from mcda.types import alternative_performances
     from mcda.electre_tri import electre_tri_bm
     from ui.graphic import display_electre_tri_models
 
@@ -258,10 +309,8 @@ if __name__ == "__main__":
 
     best_f = 0
     best_bpt = model2.bpt.copy()
-    for i in range(1, 1001):
-        aa2 = model2.pessimist(pt_learn)
-
-        f = compute_ac(aa_err, aa2)
+    for i in range(1, 501):
+        f = compute_ac(aa_err, meta.aa)
         print('%d: fitness: %g' % (i, f))
         bpt2.display(criterion_ids = cids, alternative_ids = b)
         if f >= best_f:
@@ -271,7 +320,7 @@ if __name__ == "__main__":
         if f == 1:
             break
 
-        meta.optimize(aa2, f)
+        meta.optimize(meta.aa, f)
 
     model2.bpt = best_bpt
     aa2 = model2.pessimist(pt_learn)
