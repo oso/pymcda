@@ -1,6 +1,8 @@
 from __future__ import division
 import sys
 sys.path.insert(0, "..")
+import random
+import time
 from itertools import combinations
 from PyQt4 import QtCore
 from PyQt4 import QtGui
@@ -14,7 +16,6 @@ from inference.meta_electre_tri_profiles4 import meta_electre_tri_profiles
 from ui.graphic import QGraphicsScene_etri
 
 # FIXME
-import time
 from mcda.types import alternative_performances
 
 class qt_thread_algo(QtCore.QThread):
@@ -31,7 +32,7 @@ class qt_thread_algo(QtCore.QThread):
         self.ncat = len(model.categories)
         self.pt = pt
         self.aa = aa
-#        self.moveToThread(self)
+        self.moveToThread(self)
 
     def stop(self):
         try:
@@ -69,11 +70,11 @@ class qt_thread_algo(QtCore.QThread):
             self.fitness.append(f)
             self.results.append(self.model.copy())
             self.emit(QtCore.SIGNAL('update(int)'), i)
-            time.sleep(0.01)
 
             if f == 1:
                 break
 
+#            time.sleep(0.01)
 
 class qt_mainwindow(QtGui.QMainWindow):
 
@@ -117,17 +118,6 @@ class qt_mainwindow(QtGui.QMainWindow):
 
         self.layout_model_params = QtGui.QVBoxLayout(self.groupbox_model_params)
 
-        self.layout_seed = QtGui.QHBoxLayout()
-        self.label_seed = QtGui.QLabel(self.groupbox_model_params)
-        self.label_seed.setText("Seed")
-        self.spinbox_seed = QtGui.QSpinBox(self.groupbox_model_params)
-        self.spinbox_seed.setMinimum(0)
-        self.spinbox_seed.setMaximum(1000000)
-        self.spinbox_seed.setProperty("value", 123)
-        self.layout_seed.addWidget(self.label_seed)
-        self.layout_seed.addWidget(self.spinbox_seed)
-        self.layout_model_params.addLayout(self.layout_seed)
-
         self.layout_criteria = QtGui.QHBoxLayout()
         self.label_criteria = QtGui.QLabel(self.groupbox_model_params)
         self.label_criteria.setText("Criteria")
@@ -150,10 +140,6 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.layout_categories.addWidget(self.spinbox_categories)
         self.layout_model_params.addLayout(self.layout_categories)
 
-        self.button_generate = QtGui.QPushButton(self.centralwidget)
-        self.button_generate.setText("Generate")
-        self.layout_model_params.addWidget(self.button_generate)
-
         # Alternative parameters
         self.groupbox_alt_params = QtGui.QGroupBox(self.centralwidget)
         self.groupbox_alt_params.setTitle("Alternative parameters")
@@ -173,9 +159,20 @@ class qt_mainwindow(QtGui.QMainWindow):
 
         # Metaheuristic parameters
         self.groupbox_meta_params = QtGui.QGroupBox(self.centralwidget)
-        self.groupbox_meta_params.setTitle("Metaheuristic parameters")
+        self.groupbox_meta_params.setTitle("Parameters")
         self.rightlayout.addWidget(self.groupbox_meta_params)
         self.layout_meta_params = QtGui.QVBoxLayout(self.groupbox_meta_params)
+
+        self.layout_seed = QtGui.QHBoxLayout()
+        self.label_seed = QtGui.QLabel(self.groupbox_model_params)
+        self.label_seed.setText("Seed")
+        self.spinbox_seed = QtGui.QSpinBox(self.groupbox_model_params)
+        self.spinbox_seed.setMinimum(0)
+        self.spinbox_seed.setMaximum(1000000)
+        self.spinbox_seed.setProperty("value", 123)
+        self.layout_seed.addWidget(self.label_seed)
+        self.layout_seed.addWidget(self.spinbox_seed)
+        self.layout_meta_params.addLayout(self.layout_seed)
 
         self.layout_nloop = QtGui.QHBoxLayout()
         self.label_nloop = QtGui.QLabel(self.groupbox_meta_params)
@@ -188,54 +185,78 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.layout_nloop.addWidget(self.spinbox_nloop)
         self.layout_meta_params.addLayout(self.layout_nloop)
 
-        self.button_run = QtGui.QPushButton(self.centralwidget)
-        self.button_run.setText("Start")
-        self.layout_meta_params.addWidget(self.button_run)
+        # Initialization
+        self.groupbox_init = QtGui.QGroupBox(self.centralwidget)
+        self.groupbox_init.setTitle("Initialization")
+        self.rightlayout.addWidget(self.groupbox_init)
+        self.layout_init = QtGui.QVBoxLayout(self.groupbox_init)
+
+        self.button_seed = QtGui.QPushButton(self.centralwidget)
+        self.button_seed.setText("Reset seed")
+        self.layout_init.addWidget(self.button_seed)
+
+        self.button_generate = QtGui.QPushButton(self.centralwidget)
+        self.button_generate.setText("Generate model")
+        self.layout_init.addWidget(self.button_generate)
+
+        self.button_generate_alt = QtGui.QPushButton(self.centralwidget)
+        self.button_generate_alt.setText("Generate alternatives")
+        self.layout_init.addWidget(self.button_generate_alt)
 
         # Algorithm
         self.groupbox_algo = QtGui.QGroupBox(self.centralwidget)
         self.groupbox_algo.setTitle("Algorithm")
-        self.groupbox_algo.setVisible(False)
         self.rightlayout.addWidget(self.groupbox_algo)
         self.layout_algo = QtGui.QVBoxLayout(self.groupbox_algo)
 
+        self.button_run = QtGui.QPushButton(self.centralwidget)
+        self.button_run.setText("Start")
+        self.layout_algo.addWidget(self.button_run)
+
+        # Result
+        self.groupbox_result = QtGui.QGroupBox(self.centralwidget)
+        self.groupbox_result.setTitle("Result")
+        self.groupbox_result.setVisible(False)
+        self.rightlayout.addWidget(self.groupbox_result)
+        self.layout_result = QtGui.QVBoxLayout(self.groupbox_result)
+
         self.layout_time = QtGui.QHBoxLayout()
-        self.label_time = QtGui.QLabel(self.groupbox_algo)
+        self.label_time = QtGui.QLabel(self.groupbox_result)
         self.label_time.setText("Time:")
-        self.label_time2 = QtGui.QLabel(self.groupbox_algo)
+        self.label_time2 = QtGui.QLabel(self.groupbox_result)
         self.label_time2.setText("")
         self.layout_time.addWidget(self.label_time)
         self.layout_time.addWidget(self.label_time2)
-        self.layout_algo.addLayout(self.layout_time)
+        self.layout_result.addLayout(self.layout_time)
 
         self.layout_tloop = QtGui.QHBoxLayout()
-        self.label_tloop = QtGui.QLabel(self.groupbox_algo)
+        self.label_tloop = QtGui.QLabel(self.groupbox_result)
         self.label_tloop.setText("Total loop:")
-        self.label_tloop2 = QtGui.QLabel(self.groupbox_algo)
+        self.label_tloop2 = QtGui.QLabel(self.groupbox_result)
         self.label_tloop2.setText("")
         self.layout_tloop.addWidget(self.label_tloop)
         self.layout_tloop.addWidget(self.label_tloop2)
-        self.layout_algo.addLayout(self.layout_tloop)
+        self.layout_result.addLayout(self.layout_tloop)
 
         self.layout_ca = QtGui.QHBoxLayout()
-        self.label_ca = QtGui.QLabel(self.groupbox_algo)
+        self.label_ca = QtGui.QLabel(self.groupbox_result)
         self.label_ca.setText("CA:")
-        self.label_ca2 = QtGui.QLabel(self.groupbox_algo)
+        self.label_ca2 = QtGui.QLabel(self.groupbox_result)
         self.label_ca2.setText("")
         self.layout_ca.addWidget(self.label_ca)
         self.layout_ca.addWidget(self.label_ca2)
-        self.layout_algo.addLayout(self.layout_ca)
+        self.layout_result.addLayout(self.layout_ca)
 
         self.layout_loop = QtGui.QHBoxLayout()
         self.label_loop = QtGui.QLabel(self.groupbox_model_params)
         self.label_loop.setText("Loop")
-        self.spinbox_loop = QtGui.QSpinBox(self.groupbox_algo)
+        self.spinbox_loop = QtGui.QSpinBox(self.groupbox_result)
         self.spinbox_loop.setMinimum(0)
         self.spinbox_loop.setMaximum(0)
         self.spinbox_loop.setProperty("value", 0)
         self.layout_loop.addWidget(self.label_loop)
         self.layout_loop.addWidget(self.spinbox_loop)
-        self.layout_algo.addLayout(self.layout_loop)
+        self.layout_result.addLayout(self.layout_loop)
 
         # Spacer
         self.spacer_item = QtGui.QSpacerItem(20, 20,
@@ -248,9 +269,15 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.setCentralWidget(self.centralwidget)
 
     def setup_connect(self):
+        QtCore.QObject.connect(self.button_seed,
+                               QtCore.SIGNAL('clicked()'),
+                               self.on_button_seed)
         QtCore.QObject.connect(self.button_generate,
                                QtCore.SIGNAL('clicked()'),
                                self.on_button_generate)
+        QtCore.QObject.connect(self.button_generate_alt,
+                               QtCore.SIGNAL('clicked()'),
+                               self.on_button_generate_alt)
         QtCore.QObject.connect(self.button_run,
                                QtCore.SIGNAL('clicked()'),
                                self.on_button_run)
@@ -269,11 +296,14 @@ class qt_mainwindow(QtGui.QMainWindow):
             scene.update(self.graphicv_learned.size())
             self.graphicv_original.resetCachedContent()
 
-    def on_button_generate(self):
+    def on_button_seed(self):
         seed = self.spinbox_seed.value()
+        random.seed(seed)
+
+    def on_button_generate(self):
         ncrit = self.spinbox_criteria.value()
         ncat = self.spinbox_categories.value()
-        self.model = generate_random_electre_tri_bm_model(ncrit, ncat, seed)
+        self.model = generate_random_electre_tri_bm_model(ncrit, ncat)
 
         # FIXME
         self.worst = alternative_performances("worst",
@@ -285,6 +315,20 @@ class qt_mainwindow(QtGui.QMainWindow):
                                               self.worst, self.best,
                                               self.graphicv_original.size())
         self.graphicv_original.setScene(self.graph_model)
+
+    def on_button_generate_alt(self):
+        if not hasattr(self, 'model'):
+            self.on_button_generate()
+
+        ncrit = len(self.model.criteria)
+        ncat = len(self.model.categories)
+        nalt = self.spinbox_nalt.value()
+
+        self.a = generate_random_alternatives(nalt)
+        self.pt = generate_random_performance_table(self.a,
+                                                    self.model.criteria)
+        self.aa = self.model.pessimist(self.pt)
+
 
     def on_spinbox_loop_value_changed(self, value):
         model = self.thread.results[value]
@@ -303,7 +347,7 @@ class qt_mainwindow(QtGui.QMainWindow):
         model = self.thread.results[i]
 
         if i == 0:
-            self.groupbox_algo.setVisible(True)
+            self.groupbox_result.setVisible(True)
 
             self.model2 = model.copy()
             self.graph_model2 = QGraphicsScene_etri(self.model2,
@@ -330,21 +374,15 @@ class qt_mainwindow(QtGui.QMainWindow):
 
         if not hasattr(self, 'model'):
             self.on_button_generate()
+        if not hasattr(self, 'pt'):
+            self.on_button_generate_alt()
 
         self.spinbox_loop.setEnabled(False)
 
         nloop = self.spinbox_nloop.value()
-        ncrit = len(self.model.criteria)
-        ncat = len(self.model.categories)
-        nalt = self.spinbox_nalt.value()
-
-        self.a = generate_random_alternatives(nalt)
-        self.pt = generate_random_performance_table(self.a,
-                                                    self.model.criteria)
-        self.aa = self.model.pessimist(self.pt)
 
         self.thread = qt_thread_algo(nloop, self.model, self.pt,
-                                     self.aa, self)
+                                     self.aa, None)
         self.connect(self.thread, QtCore.SIGNAL("update(int)"),
                      self.update)
         self.connect(self.thread, QtCore.SIGNAL("finished()"),
