@@ -69,7 +69,9 @@ class qt_thread_algo(QtCore.QThread):
 
             self.fitness.append(f)
             self.results.append(self.model.copy())
-            self.emit(QtCore.SIGNAL('update(int)'), i)
+
+            if i % 10 == 0 or f == 1:
+                self.emit(QtCore.SIGNAL('update(int)'), i)
 
             if f == 1:
                 break
@@ -196,12 +198,8 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.layout_init.addWidget(self.button_seed)
 
         self.button_generate = QtGui.QPushButton(self.centralwidget)
-        self.button_generate.setText("Generate model")
+        self.button_generate.setText("Generate model and\n performance table")
         self.layout_init.addWidget(self.button_generate)
-
-        self.button_generate_alt = QtGui.QPushButton(self.centralwidget)
-        self.button_generate_alt.setText("Generate alternatives")
-        self.layout_init.addWidget(self.button_generate_alt)
 
         # Algorithm
         self.groupbox_algo = QtGui.QGroupBox(self.centralwidget)
@@ -275,9 +273,6 @@ class qt_mainwindow(QtGui.QMainWindow):
         QtCore.QObject.connect(self.button_generate,
                                QtCore.SIGNAL('clicked()'),
                                self.on_button_generate)
-        QtCore.QObject.connect(self.button_generate_alt,
-                               QtCore.SIGNAL('clicked()'),
-                               self.on_button_generate_alt)
         QtCore.QObject.connect(self.button_run,
                                QtCore.SIGNAL('clicked()'),
                                self.on_button_run)
@@ -301,6 +296,10 @@ class qt_mainwindow(QtGui.QMainWindow):
         random.seed(seed)
 
     def on_button_generate(self):
+        self.generate_model()
+        self.generate_alt()
+
+    def generate_model(self):
         ncrit = self.spinbox_criteria.value()
         ncat = self.spinbox_categories.value()
         self.model = generate_random_electre_tri_bm_model(ncrit, ncat)
@@ -316,10 +315,7 @@ class qt_mainwindow(QtGui.QMainWindow):
                                               self.graphicv_original.size())
         self.graphicv_original.setScene(self.graph_model)
 
-    def on_button_generate_alt(self):
-        if not hasattr(self, 'model'):
-            self.on_button_generate()
-
+    def generate_alt(self):
         ncrit = len(self.model.criteria)
         ncat = len(self.model.categories)
         nalt = self.spinbox_nalt.value()
@@ -374,8 +370,6 @@ class qt_mainwindow(QtGui.QMainWindow):
 
         if not hasattr(self, 'model'):
             self.on_button_generate()
-        if not hasattr(self, 'pt'):
-            self.on_button_generate_alt()
 
         self.spinbox_loop.setEnabled(False)
 
