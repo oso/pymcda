@@ -32,7 +32,7 @@ class qt_thread_algo(QtCore.QThread):
         self.ncat = len(model.categories)
         self.pt = pt
         self.aa = aa
-        self.moveToThread(self)
+#        self.moveToThread(self)
 
     def stop(self):
         try:
@@ -75,6 +75,8 @@ class qt_thread_algo(QtCore.QThread):
 
             if f == 1:
                 break
+
+            QtGui.QApplication.processEvents()
 
 #            time.sleep(0.01)
 
