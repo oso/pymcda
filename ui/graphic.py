@@ -153,7 +153,12 @@ class QGraphicsScene_etri(QtGui.QGraphicsScene):
             self.axis_text_items[criterion] = text
 
     def __compute_y(self, ap, id):
-        num = ap.performances[id] - self.worst.performances[id]
+        p = ap.performances[id]
+        if p > self.best.performances[id]:
+            p = self.best.performances[id]
+        elif p < self.worst.performances[id]:
+            p = self.worst.performances[id]
+        num = p - self.worst.performances[id]
         den = self.best.performances[id] - self.worst.performances[id]
         return self.ymin + num / den * (self.ymax - self.ymin)
 
@@ -183,8 +188,6 @@ class QGraphicsScene_etri(QtGui.QGraphicsScene):
         path = item.path()
         for i, cid in enumerate(self.criteria_order):
             y = self.__compute_y(ap, cid)
-            if y > self.worst.performances[cid]:
-                y = self.worst.performances[cid]
 
             if i == 0:
                 x = 0
@@ -340,8 +343,6 @@ class QGraphicsScene_etri(QtGui.QGraphicsScene):
 
         for i, cid in enumerate(self.criteria_order):
             y = self.__compute_y(ap, cid)
-            if y > self.worst.performances[cid]:
-                y = self.worst.performances[cid]
 
             if i == 0:
                 x = 0
