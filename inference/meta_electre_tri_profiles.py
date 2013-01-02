@@ -8,8 +8,7 @@ from mcda.types import alternative_affectation, alternatives_affectations
 
 class meta_electre_tri_profiles():
 
-    # FIXME: remove cat from args
-    def __init__(self, model, pt_sorted, cat, aa_ori):
+    def __init__(self, model, pt_sorted, aa_ori):
         self.model = model
         self.nprofiles = len(model.profiles)
         self.pt_sorted = pt_sorted
@@ -306,7 +305,7 @@ if __name__ == "__main__":
     bpt2.display(criterion_ids = cids, alternative_ids = b)
 
     pt_sorted = sorted_performance_table(pt_learn)
-    meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa_err)
+    meta = meta_electre_tri_profiles(model2, pt_sorted, aa_err)
 
     best_f = 0
     best_bpt = model2.bpt.copy()

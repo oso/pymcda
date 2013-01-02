@@ -42,7 +42,7 @@ class meta_electre_tri_global():
         self.model = self.init_random_model()
         self.lp = lp_electre_tri_weights(self.model, self.pt, self.aa, cps)
         self.meta = meta_electre_tri_profiles(self.model, self.pt_sorted,
-                                              cat, aa)
+                                              aa)
 
     def init_random_model(self):
         model = electre_tri()

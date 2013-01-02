@@ -46,8 +46,7 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
     t1 = time.time()
 
     # Run the algorithm
-    meta = meta_electre_tri_profiles(model2, pt_sorted, model.categories,
-                                     aa_err)
+    meta = meta_electre_tri_profiles(model2, pt_sorted, aa_err)
 
     ca2_iter = [1] * (max_loops + 1)
     ca2 = compute_ac(aa_err, meta.aa)
