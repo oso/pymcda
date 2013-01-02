@@ -8,19 +8,23 @@ from mcda.types import alternative_affectation, alternatives_affectations
 
 class meta_electre_tri_profiles():
 
+    # FIXME: remove cat from args
     def __init__(self, model, pt_sorted, cat, aa_ori):
         self.model = model
         self.nprofiles = len(model.profiles)
         self.pt_sorted = pt_sorted
         self.aa_ori = aa_ori
-        self.cat = self.categories_rank(cat)
-        self.cat_ranked = self.rank_categories(cat)
+        self.cat = self.categories_rank(self.model.categories)
+        self.cat_ranked = self.model.categories
         self.aa_by_cat = self.sort_alternative_by_category(aa_ori)
         self.b0 = pt_sorted.get_worst_ap()
         self.bp = pt_sorted.get_best_ap()
         self.compute_interval_ratios(3)
         self.build_concordance_table(self.aa_ori.keys(), self.model.bpt)
         self.build_assignments_table()
+
+    def categories_rank(self, cat):
+        return { cat: i + 1 for i, cat in enumerate(self.model.categories) }
 
     def compute_interval_ratios(self, n):
         self.nintervals = n
@@ -39,9 +43,6 @@ class meta_electre_tri_profiles():
             self.compute_interval_ratios(5)
         else:
             self.compute_interval_ratios(4)
-
-    def categories_rank(self, cat):
-        return { c.id: c.rank for c in cat }
 
     def rank_categories(self, cat):
         c_rank = { c.id: c.rank for c in cat }
