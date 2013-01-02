@@ -13,12 +13,9 @@ from inference.meta_electre_tri_profiles import meta_electre_tri_profiles
 from tools.utils import compute_ac
 from tools.sorted import sorted_performance_table
 from tools.generate_random import generate_random_alternatives
-from tools.generate_random import generate_random_criteria
-from tools.generate_random import generate_random_criteria_values
+from tools.generate_random import generate_random_electre_tri_bm_model
 from tools.generate_random import generate_random_performance_table
-from tools.generate_random import generate_random_categories
 from tools.generate_random import generate_random_profiles
-from tools.generate_random import generate_random_categories_profiles
 from tools.utils import normalize_criteria_weights
 from tools.utils import add_errors_in_affectations
 from test_utils import test_result, test_results
@@ -26,29 +23,22 @@ from test_utils import test_result, test_results
 def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
                                    max_loops):
     # Generate an ELECTRE TRI model and assignment examples
-    a = generate_random_alternatives(na)
-    c = generate_random_criteria(nc)
-    cv = generate_random_criteria_values(c, seed)
-    normalize_criteria_weights(cv)
-    pt = generate_random_performance_table(a, c)
-
-    cat = generate_random_categories(ncat)
-    cps = generate_random_categories_profiles(cat)
-    b = cps.get_ordered_profiles()
-    bpt = generate_random_profiles(b, c)
-
-    lbda = random.uniform(0.5, 1)
-
-    model = electre_tri_bm(c, cv, bpt, lbda, cps)
+    model = generate_random_electre_tri_bm_model(nc, ncat, seed)
     model2 = model.copy()
+
+    # Generate a first set of alternatives
+    a = generate_random_alternatives(na)
+    pt = generate_random_performance_table(a, model.criteria)
+
     aa = model.pessimist(pt)
 
     # Initiate model with random profiles
-    model2.bpt = generate_random_profiles(b, c)
+    model2.bpt = generate_random_profiles(model.profiles, model.criteria)
 
     # Add errors in assignment examples
     aa_err = aa.copy()
-    aa_erroned = add_errors_in_affectations(aa_err, cat.keys(), pcerrors)
+    aa_erroned = add_errors_in_affectations(aa_err, model.categories,
+                                            pcerrors)
 
     # Sort the performance table
     pt_sorted = sorted_performance_table(pt)
@@ -56,7 +46,8 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
     t1 = time.time()
 
     # Run the algorithm
-    meta = meta_electre_tri_profiles(model2, pt_sorted, cat, aa_err)
+    meta = meta_electre_tri_profiles(model2, pt_sorted, model.categories,
+                                     aa_err)
 
     ca2_iter = [1] * (max_loops + 1)
     ca2 = compute_ac(aa_err, meta.aa)
@@ -103,7 +94,7 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
 
     # Generate alternatives for the generalization
     a_gen = generate_random_alternatives(na_gen)
-    pt_gen = generate_random_performance_table(a_gen, c)
+    pt_gen = generate_random_performance_table(a_gen, model.criteria)
     aa_gen = model.pessimist(pt_gen)
     aa_gen2 = model2.pessimist(pt_gen)
     ca_gen = compute_ac(aa_gen, aa_gen2)
