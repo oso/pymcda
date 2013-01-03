@@ -255,13 +255,13 @@ class meta_electre_tri_profiles():
 
         return below, above
 
-    def optimize(self, fitness):
+    def optimize(self):
         profiles = self.model.profiles
         for i, profile in enumerate(profiles):
             pperfs = self.model.bpt[profile]
             below, above = self.get_below_and_above_profiles(i)
             cat_b, cat_a = self.cat_ranked[i], self.cat_ranked[i+1]
-            self.update_intervals(fitness)
+            self.update_intervals(self.good / self.na)
             self.optimize_profile(pperfs, below, above, cat_b, cat_a)
 
         return self.good / self.na
@@ -285,7 +285,7 @@ if __name__ == "__main__":
     from ui.graphic import display_electre_tri_models
 
     a = generate_random_alternatives(10000)
-    c = generate_random_criteria(9)
+    c = generate_random_criteria(10)
     cv = generate_random_criteria_values(c, 456)
     normalize_criteria_weights(cv)
     worst = alternative_performances("worst", {crit.id: 0 for crit in c})
@@ -341,7 +341,7 @@ if __name__ == "__main__":
         if f == 1:
             break
 
-        f = meta.optimize(f)
+        f = meta.optimize()
 
     model2.bpt = best_bpt
     aa2 = model2.pessimist(pt_learn)

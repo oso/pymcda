@@ -78,7 +78,7 @@ class meta_electre_tri_global():
 #        print 'optimizing profiles...'
         old_profiles = self.model.bpt.copy()
         for i in range(nmeta):
-            self.meta.optimize(aa, f)
+            self.meta.optimize()
             aa = self.model.pessimist(self.pt)
             f = compute_ac(aa, self.aa)
 #            print i, ':fitness:', f
