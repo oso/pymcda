@@ -180,12 +180,13 @@ class meta_electre_tri_profiles():
             self.ct[profile][a] += w
             old_cat = self.aa[a].category_id
             new_cat = self.get_alternative_assignment(a)
+            ori_cat = self.aa_ori[a].category_id
 
             if old_cat == new_cat:
                 continue
-            elif old_cat == self.aa_ori[a].category_id:
+            elif old_cat == ori_cat:
                 self.good -= 1
-            else:
+            elif new_cat == ori_cat:
                 self.good += 1
 
             self.aa[a].category_id = new_cat
