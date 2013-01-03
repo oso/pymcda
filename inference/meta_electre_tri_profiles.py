@@ -9,6 +9,7 @@ from mcda.types import alternative_affectation, alternatives_affectations
 class meta_electre_tri_profiles():
 
     def __init__(self, model, pt_sorted, aa_ori):
+        self.na = len(aa_ori)
         self.model = model
         self.nprofiles = len(model.profiles)
         self.pt_sorted = pt_sorted
@@ -66,10 +67,16 @@ class meta_electre_tri_profiles():
         return self.model.categories_profiles[profile].value.lower
 
     def build_assignments_table(self):
+        self.good = 0
         self.aa = alternatives_affectations()
-        for a in self.aa_ori.keys():
-            cat = self.get_alternative_assignment(a)
-            self.aa.append(alternative_affectation(a, cat))
+        for aa in self.aa_ori.values():
+            aid = aa.alternative_id
+            cat = self.get_alternative_assignment(aid)
+            self.aa.append(alternative_affectation(aid, cat))
+
+            cat_ori = aa.category_id
+            if cat == cat_ori:
+                self.good += 1
 
     def build_concordance_table(self, aids, profiles):
         self.ct = { profile.alternative_id: dict() for profile in profiles }
@@ -91,7 +98,19 @@ class meta_electre_tri_profiles():
 
         for a in alts:
             self.ct[profile][a] += w
-            self.aa[a].category_id = self.get_alternative_assignment(a)
+
+            old_cat = self.aa[a].category_id
+            new_cat = self.get_alternative_assignment(a)
+            ori_cat = self.aa_ori[a].category_id
+
+            if old_cat == new_cat:
+                continue
+            elif old_cat == ori_cat:
+                self.good -= 1
+            elif new_cat == ori_cat:
+                self.good += 1
+
+            self.aa[a].category_id = new_cat
 
     def compute_above_histogram(self, cid, profile, above, cat_b, cat_a):
         h_above = {}
@@ -245,6 +264,8 @@ class meta_electre_tri_profiles():
             self.update_intervals(fitness)
             self.optimize_profile(pperfs, below, above, cat_b, cat_a)
 
+        return self.good / self.na
+
 if __name__ == "__main__":
     from tools.generate_random import generate_random_alternatives
     from tools.generate_random import generate_random_criteria
@@ -307,10 +328,10 @@ if __name__ == "__main__":
     pt_sorted = sorted_performance_table(pt_learn)
     meta = meta_electre_tri_profiles(model2, pt_sorted, aa_err)
 
-    best_f = 0
+    f = meta.good / meta.na
+    best_f = f
     best_bpt = model2.bpt.copy()
-    for i in range(1, 501):
-        f = compute_ac(aa_err, meta.aa)
+    for i in range(0, 501):
         print('%d: fitness: %g' % (i, f))
         bpt2.display(criterion_ids = cids, alternative_ids = b)
         if f >= best_f:
@@ -320,7 +341,7 @@ if __name__ == "__main__":
         if f == 1:
             break
 
-        meta.optimize(f)
+        f = meta.optimize(f)
 
     model2.bpt = best_bpt
     aa2 = model2.pessimist(pt_learn)
