@@ -71,7 +71,7 @@ class qt_thread_algo(QtCore.QThread):
             self.mutex.unlock()
 
     def run(self):
-        parent_pipe, child_pipe = Pipe()
+        parent_pipe, child_pipe = Pipe(False)
         p = Process(target = run_metaheuristic,
                     args = (child_pipe, self.model, self.pt, self.aa,
                             self.n))
