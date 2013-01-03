@@ -14,9 +14,32 @@ from tools.sorted import sorted_performance_table
 from tools.utils import compute_ac
 from inference.meta_electre_tri_profiles4 import meta_electre_tri_profiles
 from ui.graphic import QGraphicsScene_etri
+from multiprocessing import Process, Pipe
 
 # FIXME
 from mcda.types import alternative_performances
+
+def run_metaheuristic(pipe, model, pt, aa, n):
+
+    model.bpt = generate_random_profiles(model.profiles,
+                                         model.criteria)
+
+    pt_sorted = sorted_performance_table(pt)
+    meta = meta_electre_tri_profiles(model, pt_sorted, aa)
+    f = compute_ac(aa, meta.aa)
+
+    pipe.send([model.copy(), f])
+
+    for i in range(1, n + 1):
+        meta.optimize()
+        f = compute_ac(aa, meta.aa)
+
+        pipe.send([model.copy(), f])
+
+        if f == 1:
+            break
+
+    pipe.close()
 
 class qt_thread_algo(QtCore.QThread):
 
@@ -32,7 +55,6 @@ class qt_thread_algo(QtCore.QThread):
         self.ncat = len(model.categories)
         self.pt = pt
         self.aa = aa
-#        self.moveToThread(self)
 
     def stop(self):
         try:
@@ -49,36 +71,24 @@ class qt_thread_algo(QtCore.QThread):
             self.mutex.unlock()
 
     def run(self):
-        self.model.bpt = generate_random_profiles(self.model.profiles,
-                                                  self.model.criteria)
-        self.results.append(self.model.copy())
+        parent_pipe, child_pipe = Pipe()
+        p = Process(target = run_metaheuristic,
+                    args = (child_pipe, self.model, self.pt, self.aa,
+                            self.n))
+        p.start()
 
-        pt_sorted = sorted_performance_table(self.pt)
-        meta = meta_electre_tri_profiles(self.model, pt_sorted, self.aa)
-        f = compute_ac(self.aa, meta.aa)
-        self.fitness.append(f)
-
-        self.emit(QtCore.SIGNAL('update(int)'), 0)
-
-        for i in range(1, self.n + 1):
-            if self.is_stopped():
+        for i in range(self.n + 1):
+            try:
+                result = parent_pipe.recv()
+            except:
                 break
 
-            meta.optimize()
-            f = compute_ac(self.aa, meta.aa)
+            self.results.append(result[0])
+            self.fitness.append(result[1])
+            self.emit(QtCore.SIGNAL('update(int)'), i)
 
-            self.fitness.append(f)
-            self.results.append(self.model.copy())
-
-            if i % 10 == 0 or f == 1:
-                self.emit(QtCore.SIGNAL('update(int)'), i)
-
-            if f == 1:
-                break
-
-            QtGui.QApplication.processEvents()
-
-#            time.sleep(0.01)
+        parent_pipe.close()
+        p.join()
 
 class qt_mainwindow(QtGui.QMainWindow):
 
