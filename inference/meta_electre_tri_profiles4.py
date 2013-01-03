@@ -56,7 +56,7 @@ class meta_electre_tri_profiles():
                 if self.aa(a) == cat_a and diff < lbda:
                         # --
                         total += 5
-                elif self.aa(a) == cat_b and diff < lbda:
+                elif self.aa(a) == cat_b:
                         # -
                         total += 1
             elif self.aa_ori(a) == cat_b and self.aa(a) == cat_a:
@@ -109,7 +109,7 @@ class meta_electre_tri_profiles():
                 if self.aa(a) == cat_b and diff >= lbda:
                     # --
                     total += 5
-                elif self.aa(a) == cat_a and diff >= lbda:
+                elif self.aa(a) == cat_a:
                     # -
                     total += 1
             elif self.aa_ori(a) != self.aa(a) and \
@@ -132,12 +132,6 @@ class meta_electre_tri_profiles():
                     val = v
                     diff = tmp
         return key
-
-    def print_histo(self, h):
-        val = h.keys()
-        val.sort()
-        for i in val:
-            print i,':', h[i]
 
     def get_alternative_assignment(self, aid):
         for profile in reversed(self.model.profiles):
@@ -271,7 +265,7 @@ if __name__ == "__main__":
     from ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model
-    model = generate_random_electre_tri_bm_model(10, 3, 83)
+    model = generate_random_electre_tri_bm_model(10, 4, 123)
     worst = alternative_performances("worst",
                                      {c.id: 0 for c in model.criteria})
     best = alternative_performances("best",
