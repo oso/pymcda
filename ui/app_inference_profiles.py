@@ -384,6 +384,10 @@ class qt_mainwindow(QtGui.QMainWindow):
             self.on_button_generate()
 
         self.spinbox_loop.setEnabled(False)
+        self.label_tloop2.setText("0")
+        self.spinbox_loop.setMaximum(0)
+        self.spinbox_loop.setProperty("value", 0)
+        self.label_time2.setText("")
 
         nloop = self.spinbox_nloop.value()
 
