@@ -267,13 +267,10 @@ class meta_electre_tri_profiles():
         return self.good / self.na
 
 if __name__ == "__main__":
+    from tools.generate_random import generate_random_electre_tri_bm_model
     from tools.generate_random import generate_random_alternatives
-    from tools.generate_random import generate_random_criteria
-    from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
-    from tools.generate_random import generate_random_categories
     from tools.generate_random import generate_random_profiles
-    from tools.generate_random import generate_random_categories_profiles
     from tools.utils import normalize_criteria_weights
     from tools.utils import display_affectations_and_pt
     from tools.utils import add_errors_in_affectations
@@ -284,46 +281,44 @@ if __name__ == "__main__":
     from mcda.electre_tri import electre_tri_bm
     from ui.graphic import display_electre_tri_models
 
-    a = generate_random_alternatives(10000)
-    c = generate_random_criteria(10)
-    cv = generate_random_criteria_values(c, 456)
-    normalize_criteria_weights(cv)
-    worst = alternative_performances("worst", {crit.id: 0 for crit in c})
-    best = alternative_performances("best", {crit.id: 1 for crit in c})
-    pt = generate_random_performance_table(a, c)
+    # Generate a random ELECTRE TRI BM model
+    model = generate_random_electre_tri_bm_model(10, 3, 83)
+    worst = alternative_performances("worst",
+                                     {c.id: 0 for c in model.criteria})
+    best = alternative_performances("best",
+                                    {c.id: 1 for c in model.criteria})
 
-    cat = generate_random_categories(3)
-    cps = generate_random_categories_profiles(cat)
-    b = cps.get_ordered_profiles()
-    bpt = generate_random_profiles(b, c)
+    # Generate a set of alternatives
+    a = generate_random_alternatives(1000)
+    pt = generate_random_performance_table(a, model.criteria)
+    aa = model.pessimist(pt)
 
-    lbda = random.uniform(0.5, 1)
     errors = 0.0
     nlearn = 1.0
 
-    model = electre_tri_bm(c, cv, bpt, lbda, cps)
-    aa = model.pessimist(pt)
-
-    bpt2 = generate_random_profiles(b, c)
-    model2 = electre_tri_bm(c, cv, bpt2, lbda, cps)
+    model2 = model.copy()
+    model2.bpt = generate_random_profiles(model.profiles, model.criteria)
 
     a_learn = random.sample(a, int(nlearn*len(a)))
     aa_learn = alternatives_affectations([ aa[alt.id] for alt in a_learn ])
     pt_learn = performance_table([ pt[alt.id] for alt in a_learn ])
 
     aa_err = aa_learn.copy()
-    aa_erroned = add_errors_in_affectations(aa_err, cat.keys(), errors)
+    aa_erroned = add_errors_in_affectations(aa_err, model.categories,
+                                            errors)
 
     print('Original model')
     print('==============')
-    cids = c.keys()
-    bpt.display(criterion_ids=cids, alternative_ids = b)
-    cv.display(criterion_ids=cids)
-    print("lambda: %.7s" % lbda)
+    cids = model.criteria.keys()
+    model.bpt.display(criterion_ids = cids,
+                      alternative_ids = model.profiles)
+    model.cv.display(criterion_ids = cids)
+    print("lambda: %.7s" % model.lbda)
 
     print('Original random profiles')
     print('========================')
-    bpt2.display(criterion_ids = cids, alternative_ids = b)
+    model2.bpt.display(criterion_ids = cids,
+                       alternative_ids = model2.profiles)
 
     pt_sorted = sorted_performance_table(pt_learn)
     meta = meta_electre_tri_profiles(model2, pt_sorted, aa_err)
@@ -333,7 +328,8 @@ if __name__ == "__main__":
     best_bpt = model2.bpt.copy()
     for i in range(0, 501):
         print('%d: fitness: %g' % (i, f))
-        bpt2.display(criterion_ids = cids, alternative_ids = b)
+        model2.bpt.display(criterion_ids = cids,
+                           alternative_ids = model2.profiles)
         if f >= best_f:
             best_f = f
             best_bpt = model2.bpt.copy()
@@ -351,9 +347,10 @@ if __name__ == "__main__":
     print('=============')
     print("Number of iterations: %d" % i)
     print("Fitness score: %g %%" % (float(f) * 100))
-    bpt2.display(criterion_ids = cids, alternative_ids = b)
-    cv.display(criterion_ids=cids)
-    print("lambda: %.7s" % lbda)
+    model2.bpt.display(criterion_ids = cids,
+                       alternative_ids = model2.profiles)
+    model2.cv.display(criterion_ids=cids)
+    print("lambda: %.7s" % model2.lbda)
 
     aa2 = model2.pessimist(pt)
     total = len(a)
@@ -376,8 +373,7 @@ if __name__ == "__main__":
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
-        display_affectations_and_pt(anok, c, [aa, aa2], [pt])
+        display_affectations_and_pt(anok, model.criteria, [aa, aa2], [pt])
 
-    aps = [ pt[aid] for aid in anok ]
     display_electre_tri_models([model, model2],
                                [worst, worst], [best, best])
