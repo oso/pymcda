@@ -6,23 +6,6 @@ import math
 import random
 from mcda.types import alternative_affectation, alternatives_affectations
 
-def get_wrong_assignments(aa, aa_learned):
-    l = list()
-    for a in aa:
-        aid = a.alternative_id
-        if aa(aid) != aa_learned(aid):
-            l.append(aid)
-    return l
-
-def compute_fitness(aa, aa_learned):
-    ok = total = 0
-    for a in aa:
-        aid = a.alternative_id
-        if aa(aid) == aa_learned(aid):
-            ok += 1
-        total += 1
-    return ok/total
-
 class meta_electre_tri_profiles():
 
     def __init__(self, model, pt_sorted, aa_ori):
@@ -164,10 +147,16 @@ class meta_electre_tri_profiles():
         return self.model.categories_profiles[profile].value.lower
 
     def build_assignments_table(self):
+        self.good = 0
         self.aa = alternatives_affectations()
-        for a in self.aa_ori.keys():
-            cat = self.get_alternative_assignment(a)
-            self.aa.append(alternative_affectation(a, cat))
+        for aa in self.aa_ori.values():
+            aid = aa.alternative_id
+            cat = self.get_alternative_assignment(aid)
+            self.aa.append(alternative_affectation(aid, cat))
+
+            cat_ori = aa.category_id
+            if cat == cat_ori:
+                self.good += 1
 
     def build_concordance_table(self, aids, profiles):
         self.ct = { profile.alternative_id: dict() for profile in profiles }
@@ -189,7 +178,17 @@ class meta_electre_tri_profiles():
 
         for a in alts:
             self.ct[profile][a] += w
-            self.aa[a].category_id = self.get_alternative_assignment(a)
+            old_cat = self.aa[a].category_id
+            new_cat = self.get_alternative_assignment(a)
+
+            if old_cat == new_cat:
+                continue
+            elif old_cat == self.aa_ori[a].category_id:
+                self.good -= 1
+            else:
+                self.good += 1
+
+            self.aa[a].category_id = new_cat
 
     def optimize_profile(self, profile, below, above, cat_b, cat_a):
         criteria = self.model.criteria
@@ -254,6 +253,8 @@ class meta_electre_tri_profiles():
             cat_b, cat_a = self.cat_ranked[i], self.cat_ranked[i+1]
             self.optimize_profile(pperfs, below, above, cat_b, cat_a)
 
+        return self.good / self.na
+
 if __name__ == "__main__":
     from tools.generate_random import generate_random_electre_tri_bm_model
     from tools.generate_random import generate_random_alternatives
@@ -299,13 +300,13 @@ if __name__ == "__main__":
     meta = meta_electre_tri_profiles(model2, pt_sorted, aa)
 
     for i in range(1, 1001):
-        f = compute_fitness(aa, meta.aa)
+        f = meta.good / meta.na
         print('%d: fitness: %g' % (i, f))
         model2.bpt.display(criterion_ids=cids)
         if f == 1:
             break
 
-        meta.optimize()
+        f = meta.optimize()
 
     print('Learned model')
     print('=============')
