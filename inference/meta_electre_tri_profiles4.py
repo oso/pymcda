@@ -99,12 +99,12 @@ class meta_electre_tri_profiles():
                     # ++
                     num += 2
                     total += 1
-                    h_below[perfs[i] - 0.00001] = num / total
+                    h_below[perfs[i]] = num / total
                 else:
                     # +
                     num += 0.5
                     total += 1
-                    h_below[perfs[i] - 0.00001] = num / total
+                    h_below[perfs[i]] = num / total
             elif self.aa_ori(a) == cat_b:
                 if self.aa(a) == cat_b and diff >= lbda:
                     # --
@@ -116,18 +116,18 @@ class meta_electre_tri_profiles():
                  self.cat[self.aa_ori(a)] > self.cat[cat_b]:
                 num += 0.1
                 total += 1
-                h_below[perfs[i] - 0.00001] = num / total
+                h_below[perfs[i]] = num / total
 
         return h_below
 
-    def histogram_get_max(self, h, current):
-        key = None
-        val = 0
-        diff = 0
+    def histogram_choose(self, h, current):
+        key = random.choice(h.keys())
+        val = h[key]
+        diff = abs(current - key)
         for k, v in h.items():
             if v >= val:
                 tmp = abs(current - k)
-                if tmp >= diff:
+                if tmp > diff:
                     key = k
                     val = v
                     diff = tmp
@@ -210,7 +210,7 @@ class meta_electre_tri_profiles():
             if not h:
                 continue
 
-            i = self.histogram_get_max(h, p_perfs[cid])
+            i = self.histogram_choose(h, p_perfs[cid])
 
             r = random.uniform(0, 1)
 
