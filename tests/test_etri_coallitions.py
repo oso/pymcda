@@ -156,4 +156,4 @@ if __name__ == "__main__":
     run_test(options.na, options.nc, options.lbda_min, options.lbda_max,
              options.filename)
 
-    print("Result saved in '%s'" % options.filename)
+    print("Results saved in '%s'" % options.filename)
