@@ -310,3 +310,5 @@ if __name__ == "__main__":
     run_tests(options.na, options.nc, options.ncat, options.na_gen,
               options.pcerrors, options.nseeds, options.max_loops,
               options.nmodels, options.max_oloops, options.filename)
+
+    print("Results saved in '%s'" % options.filename)
