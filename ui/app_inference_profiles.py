@@ -78,6 +78,11 @@ class qt_thread_algo(QtCore.QThread):
         p.start()
 
         for i in range(self.n + 1):
+            if self.is_stopped() is True:
+                parent_pipe.close()
+                p.terminate()
+                return
+
             try:
                 result = parent_pipe.recv()
             except:
