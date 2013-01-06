@@ -141,14 +141,19 @@ class QGraphicsScene_etri(QtGui.QGraphicsScene):
             self.axis_items[id] = axis
 
             if criterion.name:
-                text = self.addText(criterion.name)
+                txt = "%s\n(%g)" % (criterion.name, self.model.cv[id].value)
             else:
-                text = self.addText(criterion.id)
+                txt = "%s (%g)" % (criterion.id, self.model.cv[id].value)
+
+            text = QtGui.QGraphicsTextItem()
+            text.setHtml("<div align=\"center\">%s</div>" % txt)
+            text.setTextWidth(text.boundingRect().width());
             font = QtGui.QFont()
             font.setBold(True)
             text.setFont(font)
             text.setZValue(1)
             text.setPos(x - text.boundingRect().width() / 2, 0)
+            self.addItem(text)
 
             self.axis_text_items[criterion] = text
 
