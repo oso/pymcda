@@ -155,7 +155,7 @@ if __name__ == "__main__":
     print("Number of coallitions learned: %d"
           % len(coal2))
     print("Number of common coallitions: %d"
-          % len(coal1))
+          % len(coali))
     print("Coallitions in original and not in learned: %s"
           % '; '.join(map(str, coal1e)))
     print("Coallitions in learned and not in original: %s"
