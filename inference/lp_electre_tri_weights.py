@@ -373,6 +373,7 @@ if __name__ == "__main__":
     from tools.utils import normalize_criteria_weights
     from tools.utils import add_errors_in_affectations
     from tools.utils import display_affectations_and_pt
+    from tools.utils import get_possible_coallitions
     from mcda.electre_tri import electre_tri
     from mcda.types import alternatives_affectations, performance_table
 
@@ -417,13 +418,15 @@ if __name__ == "__main__":
     print("delta: %g" % delta)
     #print(aa)
 
+    model2 = model.copy()
     t1 = time.time()
-    lp_weights = lp_electre_tri_weights(model, pt_learn, aa_err, cps, delta)
+    lp_weights = lp_electre_tri_weights(model2, pt_learn, aa_err, cps,
+                                        delta)
     t2 = time.time()
     obj = lp_weights.solve()
     t3 = time.time()
 
-    aa_learned = model.pessimist(pt)
+    aa_learned = model2.pessimist(pt)
 
     print('Learned model')
     print('=============')
@@ -432,9 +435,9 @@ if __name__ == "__main__":
     print("Solving time: %g secs" % (t3-t2))
     print("Objective: %s" % obj)
     cv.display(criterion_ids=cids, name='w')
-    model.cv.display(header=False, criterion_ids=cids, name='w_learned')
+    model2.cv.display(header=False, criterion_ids=cids, name='w_learned')
     print("lambda\t%.7s" % lbda)
-    print("lambda_learned\t%.7s" % model.lbda)
+    print("lambda_learned\t%.7s" % model2.lbda)
     #print(aa_learned)
 
     total = len(a)
@@ -460,3 +463,20 @@ if __name__ == "__main__":
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
         display_affectations_and_pt(anok, c, [aa, aa_learned], [pt])
+
+    coal1 = get_possible_coallitions(model.cv, model.lbda)
+    coal2 = get_possible_coallitions(model2.cv, model2.lbda)
+    coali = list(set(coal1) & set(coal2))
+    coal1e = list(set(coal1) ^ set(coali))
+    coal2e = list(set(coal2) ^ set(coali))
+
+    print("Number of coallitions original: %d"
+          % len(coal1))
+    print("Number of coallitions learned: %d"
+          % len(coal2))
+    print("Number of common coallitions: %d"
+          % len(coal1))
+    print("Coallitions in original and not in learned: %s"
+          % '; '.join(map(str, coal1e)))
+    print("Coallitions in learned and not in original: %s"
+          % '; '.join(map(str, coal2e)))
