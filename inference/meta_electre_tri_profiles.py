@@ -20,7 +20,7 @@ class meta_electre_tri_profiles():
         self.b0 = pt_sorted.get_worst_ap()
         self.bp = pt_sorted.get_best_ap()
         self.compute_interval_ratios(3)
-        self.build_concordance_table(self.aa_ori.keys(), self.model.bpt)
+        self.build_concordance_table()
         self.build_assignments_table()
 
     def categories_rank(self, cat):
@@ -78,12 +78,12 @@ class meta_electre_tri_profiles():
             if cat == cat_ori:
                 self.good += 1
 
-    def build_concordance_table(self, aids, profiles):
-        self.ct = { profile.alternative_id: dict() for profile in profiles }
-        for aid, profile in product(aids, profiles):
+    def build_concordance_table(self):
+        self.ct = { bp.alternative_id: dict() for bp in self.model.bpt }
+        for aid, bp in product(self.aa_ori.keys(), self.model.bpt):
             ap = self.pt_sorted[aid]
-            conc = self.model.concordance(ap, profile)
-            self.ct[profile.alternative_id][aid] = conc
+            conc = self.model.concordance(ap, bp)
+            self.ct[bp.alternative_id][aid] = conc
 
     def update_tables(self, profile, cid, old, new):
         if old > new:
