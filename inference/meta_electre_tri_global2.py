@@ -2,192 +2,135 @@ from __future__ import division
 import sys
 sys.path.insert(0, "..")
 import random
-import logging
 from itertools import product
 
 from mcda.electre_tri import electre_tri
 from mcda.types import alternative_affectation, alternatives_affectations
 from mcda.types import performance_table
 from inference.lp_electre_tri_weights import lp_electre_tri_weights
-from inference.meta_electre_tri_profiles import meta_electre_tri_profiles
+from inference.meta_electre_tri_profiles4 import meta_electre_tri_profiles
 from tools.utils import compute_ac
 from tools.sorted import sorted_performance_table
-from tools.generate_random import generate_random_profiles
+from tools.generate_random import generate_random_electre_tri_bm_model
 from tools.generate_random import generate_random_alternatives
-from tools.generate_random import generate_random_criteria_values
-
-logger = logging.getLogger('meta')
-hdlr = logging.StreamHandler()
-logger.addHandler(hdlr)
-logger.setLevel(logging.INFO)
-
-def info(*args):
-    logger.info(','.join(map(str, args)))
-
-def debug(*args):
-    logger.debug(','.join(map(str, args)))
 
 class meta_electre_tri_global():
 
-    def __init__(self, a, c, cps, pt, cat, aa):
-        self.alternatives = a
-        self.criteria = c
-        self.categories_profiles = cps
-        self.categories = cps.get_ordered_categories()
-        self.profiles = cps.get_ordered_profiles()
-        self.pt = pt
-        self.pt_dict = {ap.alternative_id: ap for ap in self.pt}
-        self.pt_sorted = sorted_performance_table(pt)
-        self.aa = aa
-        self.model = self.init_random_model()
-        self.lp = lp_electre_tri_weights(self.model, self.pt, self.aa, cps)
-        self.meta = meta_electre_tri_profiles(self.model, self.pt_sorted,
-                                              aa)
-
-    def init_random_model(self):
-        model = electre_tri()
-        model.criteria = self.criteria
-        model.categories = self.categories
-        model.profiles = self.profiles
-
-        nprofiles = len(self.categories_profiles)
-        bpt = generate_random_profiles(model.profiles, self.criteria)
-        model.bpt = bpt
-        model.cv = generate_random_criteria_values(self.criteria)
-        model.lbda = random.uniform(0.5, 1)
-
-        return model
+    def __init__(self, model, pt_sorted, aa_ori):
+        self.model = model
+        self.aa_ori = aa_ori
+        self.lp = lp_electre_tri_weights(self.model, pt_sorted.pt,
+                                         self.aa_ori,
+                                         self.model.categories_profiles)
+        self.meta = meta_electre_tri_profiles(self.model, pt_sorted,
+                                              self.aa_ori)
 
     def optimize(self, nmeta):
-#        print 'optimizing weights...'
-        aa = self.model.pessimist(self.pt)
-        f = compute_ac(aa, self.aa)
-#        print 'fitness:', f
-
-        self.lp.update_linear_program(self.aa)
+        self.lp.update_linear_program()
         obj = self.lp.solve()
-        aa = self.model.pessimist(self.pt)
-#        print 'lambda:', self.model.lbda, 'w:', self.model.cv
 
-        aa = self.model.pessimist(self.pt)
-        f = compute_ac(aa, self.aa)
+        self.meta.rebuild_tables()
+        ca = self.meta.good / self.meta.na
+
         best_bpt = self.model.bpt.copy()
-        best_f = f
+        best_ca = ca
 
-#        print 'fitness:', f
-#        print 'optimizing profiles...'
-        old_profiles = self.model.bpt.copy()
         for i in range(nmeta):
-            self.meta.optimize()
-            aa = self.model.pessimist(self.pt)
-            f = compute_ac(aa, self.aa)
-#            print i, ':fitness:', f
-#            self.model.bpt.display()
-            if f > best_f:
-                best_f = f
+            ca = self.meta.optimize()
+            if ca > best_ca:
+                best_ca = ca
                 best_bpt = self.model.bpt.copy()
 
+            if ca == 1:
+                break
+
         self.model.bpt = best_bpt
-        aa = self.model.pessimist(self.pt)
-        f = compute_ac(aa, self.aa)
-#        print 'fitness:', f
-
-#        a = list()
-#        for profile in self.profiles:
-#            for c in self.criteria:
-#                old = old_profiles[profile].performances[c.id]
-#                new = self.model.bpt[profile].performances[c.id]
-#
-#                l = self.pt_sorted.get_middle(c.id, old, new)
-#                a.extend(x for x in l if x not in a)
-
-
-        return self.model, f
+        return best_ca
 
 if __name__ == "__main__":
     import time
     from tools.generate_random import generate_random_alternatives
-    from tools.generate_random import generate_random_criteria
-    from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
-    from tools.generate_random import generate_random_categories
-    from tools.generate_random import generate_random_profiles
-    from tools.generate_random import generate_random_categories_profiles
-    from tools.utils import normalize_criteria_weights
     from tools.utils import display_affectations_and_pt
+    from tools.utils import get_possible_coallitions
+    from mcda.types import alternative_performances
     from mcda.electre_tri import electre_tri
     from ui.graphic import display_electre_tri_models
 
-    # Original Electre Tri model
-    a = generate_random_alternatives(10000)
-    c = generate_random_criteria(9)
-    cv = generate_random_criteria_values(c, 4567)
-    normalize_criteria_weights(cv)
-    worst = alternative_performances("worst", {crit.id: 0 for crit in c})
-    best = alternative_performances("best", {crit.id: 1 for crit in c})
-    pt = generate_random_performance_table(a, c,)
+    # Generate a random ELECTRE TRI BM model
+    model = generate_random_electre_tri_bm_model(10, 3, 123)
+    worst = alternative_performances("worst",
+                                     {c.id: 0 for c in model.criteria})
+    best = alternative_performances("best",
+                                    {c.id: 1 for c in model.criteria})
 
-    cat = generate_random_categories(3)
-    cps = generate_random_categories_profiles(cat)
-    b = cps.get_ordered_profiles()
-    bpt = generate_random_profiles(b, c)
+    # Generate a set of alternatives
+    a = generate_random_alternatives(1000)
+    pt = generate_random_performance_table(a, model.criteria)
+    aa = model.pessimist(pt)
 
-    lbda = 0.75
-
-    nmodels = 6
+    nmodels = 1
     nmeta = 20
     nloops = 50
 
-    model = electre_tri(c, cv, bpt, lbda, cps)
-    aa = model.pessimist(pt)
-
     print('Original model')
     print('==============')
-    cids = c.keys()
-    bpt.display(criterion_ids=cids)
-    cv.display(criterion_ids=cids)
-    print("lambda\t%.7s" % lbda)
-    #print(aa)
+    cids = model.criteria.keys()
+    model.bpt.display(criterion_ids = cids)
+    model.cv.display(criterion_ids = cids)
+    print("lambda\t%.7s" % model.lbda)
 
-    t1 = time.time()
+    ncriteria = len(model.criteria)
+    ncategories = len(model.categories)
+    pt_sorted = sorted_performance_table(pt)
 
     metas = []
     for i in range(nmodels):
-        meta = meta_electre_tri_global(a, c, cps, pt, cat, aa)
+        model_meta = generate_random_electre_tri_bm_model(ncriteria,
+                                                          ncategories)
+
+        meta = meta_electre_tri_global(model_meta, pt_sorted, aa)
         metas.append(meta)
 
+    t1 = time.time()
+
     for i in range(nloops):
-        models_fitness = {}
+        models_ca = {}
         for meta in metas:
-            m, f = meta.optimize(nmeta)
-            models_fitness[m] = f
-            if f == 1:
+            m = meta.model
+            ca = meta.optimize(nmeta)
+            models_ca[m] = ca
+            if ca == 1:
                 break
 
-        models_fitness = sorted(models_fitness.iteritems(),
+        models_ca = sorted(models_ca.iteritems(),
                                 key = lambda (k,v): (v,k),
                                 reverse = True)
 
-        print i, models_fitness
-        if models_fitness[0][1] == 1:
+        if models_ca[0][1] == 1:
             break
 
-        for j in range(int(nmodels / 2), nmodels):
-            metas[j] = meta_electre_tri_global(a, c, cps, pt, cat, aa)
+        print i, ca
+
+        for j in range(int((nmodels + 1) / 2), nmodels):
+            model_meta = generate_random_electre_tri_bm_model(ncriteria,
+                                                              ncategories)
+
+            metas[j] = meta_electre_tri_global(model_meta, pt_sorted, aa)
 
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
 
-    m = models_fitness[0][0]
-    aa_learned = m.pessimist(pt)
+    model2 = models_ca[0][0]
+    aa_learned = model2.pessimist(pt)
 
     print('Learned model')
     print('=============')
     model.bpt.display(criterion_ids=cids)
-    m.bpt.display(header=False, criterion_ids=cids, append='_learned')
+    model2.bpt.display(header=False, criterion_ids=cids, append='_learned')
     model.cv.display(criterion_ids=cids, name='w')
-    m.cv.display(header=False, criterion_ids=cids, name='w_learned')
-    print("lambda\t%.7s" % m.lbda)
+    model2.cv.display(header=False, criterion_ids=cids, name='w_learned')
+    print("lambda\t%.7s" % model2.lbda)
     #print(aa_learned)
 
     total = len(a)
@@ -201,9 +144,22 @@ if __name__ == "__main__":
     print("Good affectations: %g %%" % (float(total-nok)/total*100))
     print("Bad affectations : %g %%" % (float(nok)/total*100))
 
-#    if len(anok) > 0:
-#        print("Alternatives and affectations")
-#        display_affectations_and_pt(anok, c, [aa, aa_learned], [pt])
+    coal1 = get_possible_coallitions(model.cv, model.lbda)
+    coal2 = get_possible_coallitions(model2.cv, model2.lbda)
+    coali = list(set(coal1) & set(coal2))
+    coal1e = list(set(coal1) ^ set(coali))
+    coal2e = list(set(coal2) ^ set(coali))
+
+    print("Number of coallitions original: %d"
+          % len(coal1))
+    print("Number of coallitions learned: %d"
+          % len(coal2))
+    print("Number of common coallitions: %d"
+          % len(coal1))
+    print("Coallitions in original and not in learned: %s"
+          % '; '.join(map(str, coal1e)))
+    print("Coallitions in learned and not in original: %s"
+          % '; '.join(map(str, coal2e)))
 
     display_electre_tri_models([model, model2],
                                [worst, worst], [best, best])

@@ -12,13 +12,9 @@ from mcda.electre_tri import electre_tri
 from inference.meta_electre_tri_global2 import meta_electre_tri_global
 from tools.utils import compute_ac
 from tools.sorted import sorted_performance_table
+from tools.generate_random import generate_random_electre_tri_bm_model
 from tools.generate_random import generate_random_alternatives
-from tools.generate_random import generate_random_criteria
-from tools.generate_random import generate_random_criteria_values
 from tools.generate_random import generate_random_performance_table
-from tools.generate_random import generate_random_categories
-from tools.generate_random import generate_random_profiles
-from tools.generate_random import generate_random_categories_profiles
 from tools.utils import normalize_criteria_weights
 from tools.utils import add_errors_in_affectations
 from test_utils import test_result, test_results
@@ -26,46 +22,50 @@ from test_utils import test_result, test_results
 def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
                                  max_oloops, nmodels, max_loops):
 
-    # Generate an ELECTRE TRI model and assignment examples
+    # Generate a random ELECTRE TRI BM model
+    model = generate_random_electre_tri_bm_model(nc, ncat, seed)
+
+    # Generate a set of alternatives
     a = generate_random_alternatives(na)
-    c = generate_random_criteria(nc)
-    cv = generate_random_criteria_values(c, seed)
-    normalize_criteria_weights(cv)
-    pt = generate_random_performance_table(a, c)
-
-    cat = generate_random_categories(ncat)
-    cps = generate_random_categories_profiles(cat)
-    b = cps.get_ordered_profiles()
-    bpt = generate_random_profiles(b, c)
-
-    lbda = random.uniform(0.5, 1)
-
-    model = electre_tri(c, cv, bpt, lbda, cps)
+    pt = generate_random_performance_table(a, model.criteria)
     aa = model.pessimist(pt)
 
     # Add errors in assignment examples
     aa_err = aa.copy()
-    aa_erroned = add_errors_in_affectations(aa_err, cat.keys(),
+    aa_erroned = add_errors_in_affectations(aa_err, model.categories,
                                             pcerrors)
 
     # Sort the performance table
     pt_sorted = sorted_performance_table(pt)
 
+    # Initialize nmodels meta instances
+    ncriteria = len(model.criteria)
+    ncategories = len(model.categories)
+    pt_sorted = sorted_performance_table(pt)
+    metas = []
+    models_ca = {}
+    for i in range(nmodels):
+        model_meta = generate_random_electre_tri_bm_model(ncriteria,
+                                                          ncategories)
+        meta = meta_electre_tri_global(model_meta, pt_sorted, aa)
+        metas.append(meta)
+        models_ca[meta.model] = meta.meta.good / meta.meta.na
+
+    models_ca = sorted(models_ca.iteritems(),
+                       key = lambda (k,v): (v,k),
+                       reverse = True)
+
     t1 = time.time()
 
-    # Initialize nmodels meta instances
-    metas = []
-    for i in range(nmodels):
-        meta = meta_electre_tri_global(a, c, cps, pt, cat, aa_err)
-        metas.append(meta)
-
     # Perform at max oloops on the set of metas
-    ca2_iter = [0] + [1] * (max_oloops)
+    ca2_iter = [models_ca[0][1]] + [1] * (max_oloops)
     nloops = 0
     for i in range(0, max_oloops):
         models_ca = {}
         for meta in metas:
-            m, ca2 = meta.optimize(max_loops)
+            m = meta.model
+            print m
+            ca2 = meta.optimize(max_loops)
             models_ca[m] = ca2
 
             if ca2 == 1:
@@ -83,9 +83,10 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
         if ca2_best == 1:
             break
 
-        for j in range(int(nmodels / 2), nmodels):
-            metas[j] = meta_electre_tri_global(a, c, cps, pt, cat,
-                                               aa_err)
+        for j in range(int((nmodels + 1) / 2), nmodels):
+            model_meta = generate_random_electre_tri_bm_model(ncriteria,
+                                                              ncategories)
+            metas[j] = meta_electre_tri_global(model_meta, pt_sorted, aa)
 
     t_total = time.time() - t1
 
@@ -111,7 +112,7 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
 
     # Generate alternatives for the generalization
     a_gen = generate_random_alternatives(na_gen)
-    pt_gen = generate_random_performance_table(a_gen, c)
+    pt_gen = generate_random_performance_table(a_gen, model.criteria)
     aa_gen = model.pessimist(pt_gen)
     aa_gen2 = model2.pessimist(pt_gen)
     ca_gen = compute_ac(aa_gen, aa_gen2)
