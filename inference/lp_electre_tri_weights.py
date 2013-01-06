@@ -392,7 +392,7 @@ if __name__ == "__main__":
 
     lbda = random.uniform(0.5, 1)
 #    lbda = 0.75
-    errors = 0.2
+    errors = 0.0
     delta = 0.0001
     nlearn = 1.00
 
