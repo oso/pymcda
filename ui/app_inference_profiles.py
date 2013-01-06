@@ -108,7 +108,7 @@ class qt_mainwindow(QtGui.QMainWindow):
                                self.timeout)
 
     def setup_ui(self):
-        self.resize(800, 600);
+        self.resize(1024, 768);
         self.centralwidget = QtGui.QWidget()
         self.gridlayout = QtGui.QGridLayout(self.centralwidget)
 
