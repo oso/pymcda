@@ -22,7 +22,7 @@ else:
 
 class lp_electre_tri_weights():
 
-    def __init__(self, model, pt, aa, cps, delta=0.0001):
+    def __init__(self, model, pt, aa_ori, cps, delta=0.0001):
         self.model = model
         self.categories = cps.get_ordered_categories()
         self.profiles = cps.get_ordered_profiles()
@@ -30,10 +30,11 @@ class lp_electre_tri_weights():
         self.cat_ranks = { c: i+1 for i, c in enumerate(self.categories) }
         self.pt = { a.alternative_id: a.performances \
                     for a in pt }
-        self.update_linear_program(aa)
+        self.aa_ori = aa_ori
+        self.update_linear_program()
 
-    def update_linear_program(self, aa):
-        self.compute_constraints(aa, self.model.bpt)
+    def update_linear_program(self):
+        self.compute_constraints(self.aa_ori, self.model.bpt)
 
         if solver == 'glpk':
             self.lp = pymprog.model('lp_elecre_tri_weights')
