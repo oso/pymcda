@@ -159,6 +159,10 @@ class meta_electre_tri_profiles():
             conc = self.model.concordance(ap, bp)
             self.ct[bp.alternative_id][aid] = conc
 
+    def rebuild_tables(self):
+        self.build_concordance_table()
+        self.build_assignments_table()
+
     def update_tables(self, profile, cid, old, new):
         if old > new:
             down, up = True, False
