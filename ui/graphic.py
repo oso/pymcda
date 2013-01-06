@@ -80,7 +80,7 @@ class QGraphicsScene_etri(QtGui.QGraphicsScene):
 
     def update(self, size):
         self.size = size
-        self.axis_height = self.size.height() - 45
+        self.axis_height = self.size.height() - 60
         self.ymax = -self.axis_height + 25 / 2
         self.ymin = -25 / 2
 
