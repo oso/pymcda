@@ -94,7 +94,8 @@ def generate_random_categories(number, prefix='cat'):
 
     return cats
 
-def generate_random_profiles(alts, crits, seed=None, k=3):
+def generate_random_profiles(alts, crits, seed = None, k = 3,
+                             worst = None, best = None):
     if seed is not None:
         random.seed(seed)
 
@@ -104,7 +105,12 @@ def generate_random_profiles(alts, crits, seed=None, k=3):
     for c in crits:
         rdom = []
         for i in range(n):
-            rdom.append(round(random.random(), k))
+            if worst is None or best is None:
+                rdom.append(round(random.random(), k))
+            else:
+                rdom.append(round(random.uniform(worst.performances[c.id],
+                                                 best.performances[c.id]),
+                                  k))
         rdom.sort()
 
         crit_random[c.id] = rdom
