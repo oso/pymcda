@@ -8,7 +8,7 @@ from mcda.electre_tri import electre_tri
 from mcda.types import alternative_affectation, alternatives_affectations
 from mcda.types import performance_table
 from inference.lp_electre_tri_weights import lp_electre_tri_weights
-from inference.meta_electre_tri_profiles4 import meta_electre_tri_profiles
+from inference.meta_electre_tri_profiles4 import meta_electre_tri_profiles4
 from tools.utils import compute_ac
 from tools.sorted import sorted_performance_table
 from tools.generate_random import generate_random_electre_tri_bm_model
@@ -22,8 +22,8 @@ class meta_electre_tri_global():
         self.lp = lp_electre_tri_weights(self.model, pt_sorted.pt,
                                          self.aa_ori,
                                          self.model.categories_profiles)
-        self.meta = meta_electre_tri_profiles(self.model, pt_sorted,
-                                              self.aa_ori)
+        self.meta = meta_electre_tri_profiles4(self.model, pt_sorted,
+                                               self.aa_ori)
 
     def optimize(self, nmeta):
         self.lp.update_linear_program()

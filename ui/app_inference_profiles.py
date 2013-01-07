@@ -12,7 +12,7 @@ from tools.generate_random import generate_random_alternatives
 from tools.generate_random import generate_random_performance_table
 from tools.sorted import sorted_performance_table
 from tools.utils import compute_ac
-from inference.meta_electre_tri_profiles4 import meta_electre_tri_profiles
+from inference.meta_electre_tri_profiles4 import meta_electre_tri_profiles4
 from ui.graphic import QGraphicsScene_etri
 from multiprocessing import Process, Pipe
 
@@ -25,7 +25,7 @@ def run_metaheuristic(pipe, model, pt, aa, n):
                                          model.criteria)
 
     pt_sorted = sorted_performance_table(pt)
-    meta = meta_electre_tri_profiles(model, pt_sorted, aa)
+    meta = meta_electre_tri_profiles4(model, pt_sorted, aa)
     f = compute_ac(aa, meta.aa)
 
     pipe.send([model.copy(), f])

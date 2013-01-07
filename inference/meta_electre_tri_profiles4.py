@@ -6,7 +6,7 @@ import math
 import random
 from mcda.types import alternative_affectation, alternatives_affectations
 
-class meta_electre_tri_profiles():
+class meta_electre_tri_profiles4():
 
     def __init__(self, model, pt_sorted, aa_ori):
         self.na = len(aa_ori)
@@ -296,7 +296,7 @@ if __name__ == "__main__":
     model.bpt.display(criterion_ids = cids)
 
     pt_sorted = sorted_performance_table(pt)
-    meta = meta_electre_tri_profiles(model2, pt_sorted, aa)
+    meta = meta_electre_tri_profiles4(model2, pt_sorted, aa)
 
     for i in range(1, 1001):
         f = meta.good / meta.na
