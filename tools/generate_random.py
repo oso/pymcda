@@ -70,7 +70,8 @@ def generate_random_criteria_values(crits, seed = None, k = 3,
 
     return cvals
 
-def generate_random_performance_table(alts, crits, seed=None):
+def generate_random_performance_table(alts, crits, seed = None, k = 3,
+                                      worst = None, best = None):
     if seed is not None:
         random.seed(seed)
 
@@ -78,7 +79,14 @@ def generate_random_performance_table(alts, crits, seed=None):
     for a in alts:
         perfs = {}
         for c in crits:
-            perfs[c.id] = round(random.random(), 3)
+            if worst is None or best is None:
+                rdom = round(random.random(), k)
+            else:
+                rdom = round(random.uniform(worst.performances[c.id],
+                                            best.performances[c.id]), k)
+
+            perfs[c.id] = rdom
+
         ap = alternative_performances(a.id, perfs)
         pt.append(ap)
 
