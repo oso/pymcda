@@ -278,7 +278,7 @@ if __name__ == "__main__":
     from tools.utils import normalize_criteria_weights
     from tools.utils import display_affectations_and_pt
     from tools.utils import add_errors_in_affectations
-    from tools.utils import compute_ac
+    from tools.utils import compute_ca
     from tools.sorted import sorted_performance_table
     from mcda.types import alternatives_affectations, performance_table
     from mcda.types import alternative_performances
@@ -345,7 +345,7 @@ if __name__ == "__main__":
 
     model2.bpt = best_bpt
     aa2 = model2.pessimist(pt_learn)
-    f = compute_ac(aa_err, aa2)
+    f = compute_ca(aa_err, aa2)
 
     print('Learned model')
     print('=============')

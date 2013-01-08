@@ -337,7 +337,7 @@ if __name__ == "__main__":
     from mcda.types import interval
     from mcda.uta import utadis
     from tools.utils import normalize_criteria_weights
-    from tools.utils import compute_ac
+    from tools.utils import compute_ca
     from tools.generate_random import generate_random_alternatives
     from tools.generate_random import generate_random_categories
     from tools.generate_random import generate_random_criteria

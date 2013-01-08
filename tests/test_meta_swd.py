@@ -11,7 +11,7 @@ from tools.generate_random import generate_random_criteria_weights
 from tools.sorted import sorted_performance_table
 from tools.utils import get_worst_alternative_performances
 from tools.utils import get_best_alternative_performances
-from tools.utils import compute_ac
+from tools.utils import compute_ca
 
 cat_profiles = generate_random_categories_profiles(cats)
 worst = get_worst_alternative_performances(pt, c)
@@ -25,7 +25,7 @@ lbda = random.uniform(0.5, 1)
 model = electre_tri_bm(c, cvs, bpt, lbda, cat_profiles)
 aa2 = model.pessimist(pt)
 
-print "CA original:", compute_ac(aa, aa2)
+print "CA original:", compute_ca(aa, aa2)
 
 pt_sorted = sorted_performance_table(pt)
 

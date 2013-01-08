@@ -19,7 +19,7 @@ from tools.generate_random import generate_random_performance_table
 from tools.generate_random import generate_random_categories
 from tools.generate_random import generate_random_categories_values
 from tools.generate_random import generate_random_criteria_functions
-from tools.utils import compute_ac
+from tools.utils import compute_ca
 from tools.utils import normalize_criteria_weights
 from tools.utils import add_errors_in_affectations
 from test_utils import test_result, test_results
@@ -89,7 +89,7 @@ def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
     pt_gen = generate_random_performance_table(a_gen, c)
     aa = model.get_assignments(pt_gen)
     aa2 = model2.get_assignments(pt_gen)
-    ca_gen = compute_ac(aa, aa2)
+    ca_gen = compute_ca(aa, aa2)
 
     # Save all infos in test_result class
     t = test_result("%s-%d-%d-%d-%d-%d-%g" % (seed, na, nc, ncat, ns,

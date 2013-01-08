@@ -10,7 +10,7 @@ from itertools import product
 from mcda.types import alternatives_affectations, performance_table
 from mcda.electre_tri import electre_tri
 from inference.meta_electre_tri_global2 import meta_electre_tri_global
-from tools.utils import compute_ac
+from tools.utils import compute_ca
 from tools.sorted import sorted_performance_table
 from tools.generate_random import generate_random_electre_tri_bm_model
 from tools.generate_random import generate_random_alternatives
@@ -115,7 +115,7 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
     pt_gen = generate_random_performance_table(a_gen, model.criteria)
     aa_gen = model.pessimist(pt_gen)
     aa_gen2 = model2.pessimist(pt_gen)
-    ca_gen = compute_ac(aa_gen, aa_gen2)
+    ca_gen = compute_ca(aa_gen, aa_gen2)
 
     # Save all infos in test_result class
     t = test_result("%s-%d-%d-%d-%d-%g-%d" % (seed, na, nc, ncat, na_gen,

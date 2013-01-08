@@ -11,7 +11,7 @@ from mcda.types import alternatives_affectations, performance_table
 from mcda.types import alternative_performances
 from mcda.electre_tri import electre_tri_bm
 from inference.meta_electre_tri_profiles4 import meta_electre_tri_profiles4
-from tools.utils import compute_ac
+from tools.utils import compute_ca
 from tools.sorted import sorted_performance_table
 from tools.generate_random import generate_random_electre_tri_bm_model
 from tools.generate_random import generate_random_alternatives
@@ -51,7 +51,7 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
 
     ca2_iter = [1] * (max_loops + 1)
     aa2 = model2.pessimist(pt)
-    ca2 = compute_ac(aa_err, aa2)
+    ca2 = compute_ca(aa_err, aa2)
     ca2_best = ca2
     best_bpt = model2.bpt.copy()
     ca2_iter[0] = ca2
@@ -65,7 +65,7 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
         nloops += 1
 
         aa2 = meta.aa
-        ca2 = compute_ac(aa_err, aa2)
+        ca2 = compute_ca(aa_err, aa2)
 
         ca2_iter[k + 1] = ca2
 
@@ -99,7 +99,7 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
     pt_gen = generate_random_performance_table(a_gen, model.criteria)
     aa_gen = model.pessimist(pt_gen)
     aa_gen2 = model2.pessimist(pt_gen)
-    ca_gen = compute_ac(aa_gen, aa_gen2)
+    ca_gen = compute_ca(aa_gen, aa_gen2)
 
     # Save all infos in test_result class
     t = test_result("%s-%d-%d-%d-%d-%g-%d" % (seed, na, nc, ncat, na_gen,

@@ -120,7 +120,7 @@ def display_affectations_and_pt(alternatives, criteria, aas, pts):
                 print("%-6.5f" % perfs[c.id]),
         print('')
 
-def compute_ac(aa, aa2, alist=None):
+def compute_ca(aa, aa2, alist=None):
     if alist is None:
         alist = aa.keys()
 
