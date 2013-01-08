@@ -195,16 +195,17 @@ def generate_random_categories_values(cats, k = 3):
 
     return catvs
 
-def generate_random_electre_tri_bm_model(ncrit, ncat, seed = None):
+def generate_random_electre_tri_bm_model(ncrit, ncat, seed = None, k = 3,
+                                         worst = None, best = None):
     if seed:
         random.seed(seed)
 
     c = generate_random_criteria(ncrit)
-    cv = generate_random_criteria_weights(c, seed)
+    cv = generate_random_criteria_weights(c, seed, k)
     cat = generate_random_categories(ncat)
     cps = generate_random_categories_profiles(cat)
     b = cps.get_ordered_profiles()
-    bpt = generate_random_profiles(b, c)
+    bpt = generate_random_profiles(b, c, None, k, worst, best)
     lbda = random.uniform(0.5, 1)
 
     return electre_tri_bm(c, cv, bpt, lbda, cps)
