@@ -10,6 +10,7 @@ from tools.generate_random import generate_random_electre_tri_bm_model
 from tools.generate_random import generate_random_profiles
 from tools.generate_random import generate_random_alternatives
 from tools.generate_random import generate_random_performance_table
+from tools.generate_random import generate_random_criteria
 from tools.sorted import sorted_performance_table
 from tools.utils import compute_ca
 from inference.meta_electre_tri_profiles4 import meta_electre_tri_profiles4
@@ -19,10 +20,12 @@ from multiprocessing import Process, Pipe
 # FIXME
 from mcda.types import alternative_performances
 
-def run_metaheuristic(pipe, model, pt, aa, n):
+def run_metaheuristic(pipe, model, pt, aa, n, worst = None, best = None):
 
     model.bpt = generate_random_profiles(model.profiles,
-                                         model.criteria)
+                                         model.criteria,
+                                         worst = worst,
+                                         best = best)
 
     pt_sorted = sorted_performance_table(pt)
     meta = meta_electre_tri_profiles4(model, pt_sorted, aa)
@@ -43,7 +46,8 @@ def run_metaheuristic(pipe, model, pt, aa, n):
 
 class qt_thread_algo(QtCore.QThread):
 
-    def __init__(self, n, model, pt, aa, parent = None):
+    def __init__(self, n, model, pt, aa, worst = None, best = None,
+                 parent = None):
         super(qt_thread_algo, self).__init__(parent)
         self.mutex = QtCore.QMutex()
         self.stopped = False
@@ -55,6 +59,8 @@ class qt_thread_algo(QtCore.QThread):
         self.ncat = len(model.categories)
         self.pt = pt
         self.aa = aa
+        self.worst = worst
+        self.best = best
 
     def stop(self):
         try:
@@ -74,7 +80,7 @@ class qt_thread_algo(QtCore.QThread):
         parent_pipe, child_pipe = Pipe(False)
         p = Process(target = run_metaheuristic,
                     args = (child_pipe, self.model, self.pt, self.aa,
-                            self.n))
+                            self.n, self.worst, self.best))
         p.start()
 
         for i in range(self.n + 1):
@@ -319,13 +325,16 @@ class qt_mainwindow(QtGui.QMainWindow):
     def generate_model(self):
         ncrit = self.spinbox_criteria.value()
         ncat = self.spinbox_categories.value()
-        self.model = generate_random_electre_tri_bm_model(ncrit, ncat)
 
         # FIXME
+        crit = generate_random_criteria(ncrit)
         self.worst = alternative_performances("worst",
-                                    {c.id: 0 for c in self.model.criteria})
+                                    {c.id: 0 for c in crit})
         self.best = alternative_performances("best",
-                                    {c.id: 1 for c in self.model.criteria})
+                                    {c.id: 10 for c in crit})
+
+        self.model = generate_random_electre_tri_bm_model(ncrit, ncat,
+                                    worst = self.worst, best = self.best)
 
         self.graph_model = QGraphicsScene_etri(self.model,
                                               self.worst, self.best,
@@ -339,7 +348,9 @@ class qt_mainwindow(QtGui.QMainWindow):
 
         self.a = generate_random_alternatives(nalt)
         self.pt = generate_random_performance_table(self.a,
-                                                    self.model.criteria)
+                                                    self.model.criteria,
+                                                    worst = self.worst,
+                                                    best = self.best)
         self.aa = self.model.pessimist(self.pt)
 
 
@@ -397,7 +408,7 @@ class qt_mainwindow(QtGui.QMainWindow):
         nloop = self.spinbox_nloop.value()
 
         self.thread = qt_thread_algo(nloop, self.model, self.pt,
-                                     self.aa, None)
+                                     self.aa, self.worst, self.best, None)
         self.connect(self.thread, QtCore.SIGNAL("update(int)"),
                      self.update)
         self.connect(self.thread, QtCore.SIGNAL("finished()"),
