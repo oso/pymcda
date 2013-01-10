@@ -1,3 +1,4 @@
+from itertools import product
 from xml.etree import ElementTree
 from copy import deepcopy
 
@@ -349,6 +350,26 @@ class performance_table(dict):
 
     def append(self, ap):
         self[ap.alternative_id] = ap
+
+    def get_best(self, c):
+        perfs = next(self.itervalues()).performances
+        wa = alternative_performances('worst', perfs.copy())
+        for ap, crit in product(self, c):
+            wperf = wa.performances[crit.id] * crit.direction
+            perf = ap.performances[crit.id] * crit.direction
+            if wperf < perf:
+                wa.performances[crit.id] = ap.performances[crit.id]
+        return wa
+
+    def get_worst(self, c):
+        perfs = next(self.itervalues()).performances
+        wa = alternative_performances('worst', perfs.copy())
+        for ap, crit in product(self, c):
+            wperf = wa.performances[crit.id] * crit.direction
+            perf = ap.performances[crit.id] * crit.direction
+            if wperf > perf:
+                wa.performances[crit.id] = ap.performances[crit.id]
+        return wa
 
     def to_xmcda(self):
         root = ElementTree.Element('performanceTable')
