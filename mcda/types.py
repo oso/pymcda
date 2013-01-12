@@ -446,6 +446,27 @@ class performance_table(dict):
 
             print(line, file = out)
 
+    def from_csv(self, csvreader, alt_col, perf_cols):
+        cols = None
+        for row in csvreader:
+            if row[0] == alt_col:
+                cols = {}
+                for i, val in enumerate(row[1:]):
+                    if val not in perf_cols:
+                        continue
+
+                    cols[i + 1] = val
+
+            elif cols:
+                ap = alternative_performances(row[0])
+                for i in cols.keys():
+                    cid = cols[i]
+                    perf = float(row[i])
+                    ap.performances[cid] = perf
+                self.append(ap)
+
+        return self
+
 class alternative_performances(object):
 
     def __init__(self, alternative_id=None, performances=None):
@@ -1351,21 +1372,21 @@ class alternatives_affectations(dict):
 
         # Compute max column length
         cols_max = {"aids": max([len(aid) for aid in alternative_ids]),
-                    "assign": max([len(aa.category_id)
-                                  for aa in self.values()] \
-                                  + [len("assignment")])}
+                    "category": max([len(aa.category_id)
+                                    for aa in self.values()] \
+                                    + [len("category")])}
 
         # Print header
         line = " " * (cols_max["aids"] + 1)
-        line += " " * (cols_max["assign"] - len("assignment")) \
-                + "assignment"
+        line += " " * (cols_max["category"] - len("category")) \
+                + "category"
         print(line)
 
         # Print values
         for aid in alternative_ids:
             category_id = str(self[aid].category_id)
             line = str(aid) + " " * (cols_max["aids"] - len(str(aid)) + 1)
-            line += " " * (cols_max["assign"] - len(category_id)) \
+            line += " " * (cols_max["category"] - len(category_id)) \
                     + category_id
             print(line)
 
@@ -1385,6 +1406,18 @@ class alternatives_affectations(dict):
             aa = alternative_affectation()
             aa.from_xmcda(tag)
             self.append(aa)
+
+        return self
+
+    def from_csv(self, csvreader, alt_col, assign_col):
+        col = None
+        for row in csvreader:
+            if row[0] == alt_col:
+                col = row.index(assign_col)
+            elif col:
+                aa = alternative_affectation(row[0])
+                aa.category_id = row[col]
+                self.append(aa)
 
         return self
 
