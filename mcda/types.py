@@ -1,3 +1,5 @@
+from __future__ import division, print_function
+import sys
 from itertools import product
 from xml.etree import ElementTree
 from copy import deepcopy
@@ -39,11 +41,6 @@ class criteria(dict):
 
     def append(self, c):
         self[c.id] = c
-
-    def display(self, header=True, criterion_ids=None):
-        self[0].display(header)
-        for aa in self[1:]:
-            aa.display(False)
 
     def to_xmcda(self):
         root = ElementTree.Element('criteria')
@@ -189,22 +186,30 @@ class criteria_values(dict):
 
         return self
 
-    def display(self, header=True, criterion_ids=None, name='w'):
+    def display(self, criterion_ids = None, fmt = None, out = sys.stdout):
         if criterion_ids is None:
-            criterion_ids = []
-            for cv in self:
-                criterion_ids.append(cv.id)
+            criterion_ids = self.keys()
+            criterion_ids.sort()
+        if fmt is None:
+            fmt = "%5g"
 
-        if header is True:
-            for cid in criterion_ids:
-                print("\t%.6s" % cid),
-            print('')
-
-        print('%.6s\t' % name),
+        # Compute max column length
+        cols_max = { }
         for cid in criterion_ids:
-            cv = self[cid]
-            print("%-6.5f" % cv.value),
-        print('')
+            cols_max[cid] = max([len(fmt % self[cid].value), len(cid)])
+
+        # Print header
+        line = "  "
+        for cid in criterion_ids:
+            line += " " * (cols_max[cid] - len(cid)) + str(cid) + " "
+        print(line, file = out)
+
+        # Print values
+        line = "w" + " "
+        for cid in criterion_ids:
+            val = fmt % self[cid].value
+            line += " " * (cols_max[cid] - len(val)) + val + " "
+        print(line, file = out)
 
 class criterion_value(object):
 
@@ -407,17 +412,39 @@ class performance_table(dict):
 
         return self
 
-    def display(self, header = True, criterion_ids = None,
-                append = '', alternative_ids = None):
-        show_header = header
+    def display(self, criterion_ids = None, alternative_ids = None,
+                fmt = None, out = sys.stdout):
         if criterion_ids is None:
             criterion_ids = next(self.itervalues()).performances.keys()
+            criterion_ids.sort()
         if alternative_ids is None:
             alternative_ids = self.keys()
+            alternative_ids.sort()
+        if fmt is None:
+            fmt = {cid: "%5g" for cid in criterion_ids}
+
+        # Compute max column length
+        cols_max = { "aids": (max([len(aid) for aid in self.keys()])) }
+        for cid in criterion_ids:
+            cols_max[cid] = max([len(fmt[cid] % ap.performances[cid])
+                                 for ap in self.values()] + [len(cid)])
+
+        # Print header
+        line = " " * (cols_max["aids"] + 1)
+        for cid in criterion_ids:
+            line += " " * (cols_max[cid] - len(cid)) + str(cid) + " "
+        print(line, file = out)
+
+        # Print values
         for aid in alternative_ids:
-            ap = self[aid]
-            ap.display(show_header, criterion_ids, append)
-            show_header = False
+            line = str(aid) \
+                   + " " * (cols_max["aids"] - len(str(aid))) \
+                   + " "
+            for cid in criterion_ids:
+                perf = fmt[cid] % self[aid].performances[cid]
+                line += " " * (cols_max[cid] - len(perf)) + perf + " "
+
+            print(line, file = out)
 
 class alternative_performances(object):
 
@@ -471,20 +498,6 @@ class alternative_performances(object):
 
         return self
 
-    def display(self, header=True, criterion_ids=None, append=''):
-        if criterion_ids is None:
-            criterion_ids = self.performances.keys()
-
-        if header is True:
-            for c in criterion_ids:
-                print("\t%.7s" % c),
-            print('')
-
-        print("%.7s\t" % str(self.alternative_id+append)),
-        for c in criterion_ids:
-            print("%-6.5f" % self.performances[c]),
-        print('')
-
 class categories_values(dict):
 
     def __init__(self, l = []):
@@ -500,15 +513,9 @@ class categories_values(dict):
     def append(self, cv):
         self[cv.id] = cv
 
-    def pprint(self):
-        string = ""
+    def display(self, out = sys.stdout):
         for cv in self:
-            string += cv.pprint() + '\n'
-
-        return string[:-1]
-
-    def display(self):
-        print(self.pprint())
+            cv.display(out)
 
     def to_xmcda(self):
         root = ElementTree.Element('categoriesValues')
@@ -543,8 +550,8 @@ class category_value(object):
     def pprint(self):
         return "%s: %s" % (self.id, self.value.pprint())
 
-    def display(self):
-        print(self.pprint())
+    def display(self, out = sys.stdout):
+        print(self.pprint(), file = out)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('categoryValue')
@@ -579,6 +586,12 @@ class interval(object):
     def __repr__(self):
         return "interval(%s,%s)" % (self.lower, self.upper)
 
+    def pprint(self):
+        return "%s - %s" % (self.lower, self.upper)
+
+    def display(self):
+        print(self.pprint())
+
     def included(self, value):
         if lower and value < lower:
             return False
@@ -587,12 +600,6 @@ class interval(object):
             return False
 
         return True
-
-    def pprint(self):
-        return "%s - %s" % (self.lower, self.upper)
-
-    def display(self):
-        print(self.pprint())
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('interval')
@@ -1337,10 +1344,30 @@ class alternatives_affectations(dict):
     def append(self, aa):
         self[aa.alternative_id] = aa
 
-    def display(self, header=True, criterion_ids=None):
-        self[0].display(header)
-        for aa in self[1:]:
-            aa.display(False)
+    def display(self, alternative_ids = None, out = sys.stdout):
+        if alternative_ids is None:
+            alternative_ids = self.keys()
+            alternative_ids.sort()
+
+        # Compute max column length
+        cols_max = {"aids": max([len(aid) for aid in alternative_ids]),
+                    "assign": max([len(aa.category_id)
+                                  for aa in self.values()] \
+                                  + [len("assignment")])}
+
+        # Print header
+        line = " " * (cols_max["aids"] + 1)
+        line += " " * (cols_max["assign"] - len("assignment")) \
+                + "assignment"
+        print(line)
+
+        # Print values
+        for aid in alternative_ids:
+            category_id = str(self[aid].category_id)
+            line = str(aid) + " " * (cols_max["aids"] - len(str(aid)) + 1)
+            line += " " * (cols_max["assign"] - len(category_id)) \
+                    + category_id
+            print(line)
 
     def to_xmcda(self):
         root = ElementTree.Element('alternativesAffectations')
@@ -1375,12 +1402,6 @@ class alternative_affectation(object):
 
     def copy(self):
         return deepcopy(self)
-
-    def display(self, header=True):
-        if header is True:
-            print('\tcateg.\n')
-
-        print("%-6s\t%-6s" % (self.alternative_id, self.category_id))
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('alternativeAffectation')
