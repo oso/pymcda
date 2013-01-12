@@ -371,6 +371,24 @@ class performance_table(dict):
                 wa.performances[crit.id] = ap.performances[crit.id]
         return wa
 
+    def get_min(self):
+        perfs = next(self.itervalues()).performances
+        a = alternative_performances('min', perfs.copy())
+        for ap, cid in product(self, perfs.keys()):
+            perf = ap.performances[cid]
+            if perf < a.performances[cid]:
+                a.performances[cid] = perf
+        return a
+
+    def get_max(self):
+        perfs = next(self.itervalues()).performances
+        a = alternative_performances('max', perfs.copy())
+        for ap, cid in product(self, perfs.keys()):
+            perf = ap.performances[cid]
+            if perf > a.performances[cid]:
+                a.performances[cid] = perf
+        return a
+
     def to_xmcda(self):
         root = ElementTree.Element('performanceTable')
         for alt_perfs in self:
