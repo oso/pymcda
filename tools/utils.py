@@ -2,7 +2,7 @@ from __future__ import division
 import sys
 sys.path.insert(0, "..")
 import random
-from itertools import chain, combinations
+from itertools import chain, combinations, product
 from math import factorial, ceil
 from mcda.types import alternative_performances
 from mcda.types import alternatives_affectations
@@ -168,3 +168,21 @@ def compute_maximal_number_of_coallitions(n):
     for i in range(k, n + 1):
         v += factorial(n) / (factorial(i) * factorial(n-i))
     return int(v)
+
+def compute_degree_of_extremality(pt):
+    results = { ap.alternative_id: 1 for ap in pt}
+
+    minv = pt.get_min().performances
+    maxv = pt.get_max().performances
+
+    cids = next(pt.itervalues()).performances.keys()
+    for ap, cid in product(pt, cids):
+        down = ap.performances[cid] - minv[cid]
+        up = maxv[cid] - ap.performances[cid]
+
+        if down > up:
+            results[ap.alternative_id] *= down / (maxv[cid] - minv[cid])
+        else:
+            results[ap.alternative_id] *= up / (maxv[cid] - minv[cid])
+
+    return results
