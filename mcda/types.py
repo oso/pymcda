@@ -60,6 +60,30 @@ class criteria(dict):
 
         return self
 
+    def from_csv(self, csvreader, crit_col, name_col = None,
+                 disabled_col = None, direction_col = None):
+        cols = None
+        for row in csvreader:
+            if row[0] == crit_col:
+                cols = {}
+                for i, val in enumerate(row[1:]):
+                    if val == name_col:
+                        cols[i + 1] = "name"
+                    if val == disabled_col:
+                        cols[i + 1] = "disabled"
+                    if val == direction_col:
+                        cols[i + 1] = "direction"
+            elif cols and row[0] == '':
+                break
+            elif cols is not None:
+                c = criterion(row[0])
+                for i in cols.keys():
+                    setattr(c, cols[i], row[i])
+                self.append(c)
+
+        return self
+
+
 class criterion(object):
 
     MINIMIZE = -1
@@ -289,6 +313,27 @@ class alternatives(dict):
 
         return self
 
+    def from_csv(self, csvreader, alt_col, name_col = None,
+                 disabled_col = None):
+        cols = None
+        for row in csvreader:
+            if row[0] == alt_col:
+                cols = {}
+                for i, val in enumerate(row[1:]):
+                    if val == name_col:
+                        cols[i + 1] = "name"
+                    if val == disabled_col:
+                        cols[i + 1] = "disabled"
+            elif cols and row[0] == '':
+                break
+            elif cols is not None:
+                a = alternative(row[0])
+                for i in cols.keys():
+                    setattr(a, cols[i], row[i])
+                self.append(a)
+
+        return self
+
 class alternative(object):
 
     def __init__(self, id=None, name=None, disabled=False):
@@ -456,8 +501,9 @@ class performance_table(dict):
                         continue
 
                     cols[i + 1] = val
-
-            elif cols:
+            elif cols and row[0] == '':
+                break
+            elif cols is not None:
                 ap = alternative_performances(row[0])
                 for i in cols.keys():
                     cid = cols[i]
@@ -1414,7 +1460,9 @@ class alternatives_affectations(dict):
         for row in csvreader:
             if row[0] == alt_col:
                 col = row.index(assign_col)
-            elif col:
+            elif col and row[0] == '':
+                break
+            elif col is not None:
                 aa = alternative_affectation(row[0])
                 aa.category_id = row[col]
                 self.append(aa)
