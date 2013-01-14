@@ -1411,6 +1411,14 @@ class alternatives_assignments(dict):
     def append(self, aa):
         self[aa.alternative_id] = aa
 
+    def get_alternatives_in_category(self, category_id):
+        l = []
+        for aa in self:
+            if aa.is_in_category(category_id):
+                l.append(aa.alternative_id)
+
+        return l
+
     def display(self, alternative_ids = None, out = sys.stdout):
         if alternative_ids is None:
             alternative_ids = self.keys()
@@ -1483,6 +1491,12 @@ class alternative_assignment(object):
 
     def copy(self):
         return deepcopy(self)
+
+    def is_in_category(self, category_id):
+        if self.category_id == category_id:
+            return True
+
+        return False
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('alternativeAffectation')
