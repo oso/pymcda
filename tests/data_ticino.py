@@ -98,7 +98,7 @@ cp1 = category_profile('b1', limits('cat1', 'cat2'))
 cp2 = category_profile('b2', limits('cat2', 'cat3'))
 cps = categories_profiles([cp1, cp2])
 
-# Alternatives affectations
+# Alternatives assignments
 aap1 = alternative_assignment('a1', 'cat2')
 aap2 = alternative_assignment('a2', 'cat1')
 aap3 = alternative_assignment('a3', 'cat2')
