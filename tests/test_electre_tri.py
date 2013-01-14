@@ -3,14 +3,14 @@ sys.path.insert(0, "..")
 from mcda.electre_tri import electre_tri
 import unittest
 
-def compare_assignments(affectations, expected_affectations):
+def compare_assignments(assignments, expected_assignments):
         ok = 1
-        for aa in expected_affectations:
+        for aa in expected_assignments:
             key = aa.alternative_id
-            if expected_affectations(key) != affectations(key):
-                print("Pessimits affectation of %s mismatch (%s <> %s)" %
-                      (str(key), affectations(key),
-                       expected_affectations(key)))
+            if expected_assignments(key) != assignments(key):
+                print("Pessimits assignment of %s mismatch (%s <> %s)" %
+                      (str(key), assignments(key),
+                       expected_assignments(key)))
                 ok=0
 
         return ok
@@ -22,7 +22,7 @@ class electre_tri_tests(unittest.TestCase):
         from data_loulouka import c, cv, ptb, lbda, pt, aap, cps
         etri = electre_tri(c, cv, ptb, lbda, cps).pessimist(pt)
         ok = compare_assignments(etri, aap)
-        self.assertEqual(ok, 1, "One or more affectations were wrongly \
+        self.assertEqual(ok, 1, "One or more alternatives were wrongly \
                          assigned")
 
     def test002_test_pessimist_ticino(self):
@@ -30,7 +30,7 @@ class electre_tri_tests(unittest.TestCase):
         from data_ticino import c, cv, ptb, lbda, pt, aap, cps
         etri = electre_tri(c, cv, ptb, lbda, cps).pessimist(pt)
         ok = compare_assignments(etri, aap)
-        self.assertEqual(ok, 1, "One or more affectations were wrongly \
+        self.assertEqual(ok, 1, "One or more alternatives were wrongly \
                          assigned")
 
 
@@ -39,7 +39,7 @@ class electre_tri_tests(unittest.TestCase):
         from data_loulouka import c, cv, ptb, lbda, pt, aao, cps
         etri = electre_tri(c, cv, ptb, lbda, cps).optimist(pt)
         ok = compare_assignments(etri, aao)
-        self.assertEqual(ok, 1, "One or more affectations were wrongly \
+        self.assertEqual(ok, 1, "One or more alternatives were wrongly \
                          assigned")
 
     def test004_test_optimist_ticino(self):
@@ -47,7 +47,7 @@ class electre_tri_tests(unittest.TestCase):
         from data_ticino import c, cv, ptb, lbda, pt, aao, cps
         etri = electre_tri(c, cv, ptb, lbda, cps).optimist(pt)
         ok = compare_assignments(etri, aao)
-        self.assertEqual(ok, 1, "One or more affectations were wrongly \
+        self.assertEqual(ok, 1, "One or more alternatives were wrongly \
                          assigned")
 
 if __name__ == "__main__":
