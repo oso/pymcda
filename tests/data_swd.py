@@ -1,5 +1,5 @@
-import sys
-sys.path.insert(0, "..")
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 from mcda.types import criterion, criteria
 from mcda.types import alternative, alternatives
 from mcda.types import alternative_performances, performance_table

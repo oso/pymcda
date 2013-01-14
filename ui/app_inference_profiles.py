@@ -1,6 +1,6 @@
 from __future__ import division
-import sys
-sys.path.insert(0, "..")
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/..")
 import random
 import time
 from itertools import combinations

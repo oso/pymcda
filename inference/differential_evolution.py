@@ -1,5 +1,5 @@
-import sys
-sys.path.insert(0, "..")
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import random
 from mcda.types import criterion_value, criteria_values
 from mcda.types import alternatives, alternative

@@ -1,5 +1,5 @@
-import sys
-sys.path.insert(0, "..")
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 from mcda.electre_tri import electre_tri
 import unittest
 

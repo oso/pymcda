@@ -1,8 +1,8 @@
 from __future__ import division
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import csv
 import datetime
-import sys
-sys.path.insert(0, "..")
 import time
 import random
 from itertools import product

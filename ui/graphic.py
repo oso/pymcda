@@ -1,7 +1,7 @@
 from __future__ import division
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import colorsys
-import sys
-sys.path.insert(0, "..")
 from itertools import combinations
 from PyQt4 import QtCore
 from PyQt4 import QtGui

@@ -1,8 +1,7 @@
 from __future__ import division
 import bisect
-import os
-import sys
-sys.path.insert(0, "..")
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 from mcda.types import point, segment, piecewise_linear
 from mcda.types import category_value, categories_values
 from mcda.types import criteria_functions, criterion_function

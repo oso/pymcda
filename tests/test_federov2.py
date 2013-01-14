@@ -1,5 +1,5 @@
-import sys
-sys.path.insert(0, "..")
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import pprint
 import matplotlib.pyplot as plt
 from mcda.types import alternative, alternatives
