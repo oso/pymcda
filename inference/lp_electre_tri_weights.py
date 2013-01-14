@@ -371,7 +371,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_profiles
     from tools.generate_random import generate_random_categories_profiles
     from tools.utils import normalize_criteria_weights
-    from tools.utils import add_errors_in_affectations
+    from tools.utils import add_errors_in_assignments
     from tools.utils import display_affectations_and_pt
     from tools.utils import get_possible_coallitions
     from mcda.electre_tri import electre_tri
@@ -404,7 +404,7 @@ if __name__ == "__main__":
     pt_learn = performance_table([ pt[alt.id] for alt in a_learn ])
 
     aa_err = aa_learn.copy()
-    aa_erroned = add_errors_in_affectations(aa_err, cat.keys(), errors)
+    aa_erroned = add_errors_in_assignments(aa_err, cat.keys(), errors)
 
     print('Original model')
     print('==============')

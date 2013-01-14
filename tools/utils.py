@@ -84,7 +84,7 @@ def normalize_criteria_weights(criteria_values):
     for cv in criteria_values:
         cv.value /= total
 
-def add_errors_in_affectations(aa, category_ids, errors_pc):
+def add_errors_in_assignments(aa, category_ids, errors_pc):
     n = int(len(aa)*errors_pc)
     aa_erroned = random.sample(aa, n)
 

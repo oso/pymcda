@@ -17,7 +17,7 @@ from tools.generate_random import generate_random_electre_tri_bm_model
 from tools.generate_random import generate_random_performance_table
 from tools.generate_random import generate_random_profiles
 from tools.utils import normalize_criteria_weights
-from tools.utils import add_errors_in_affectations
+from tools.utils import add_errors_in_assignments
 from test_utils import test_result, test_results
 
 def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
@@ -37,7 +37,7 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
 
     # Add errors in assignment examples
     aa_err = aa.copy()
-    aa_erroned = add_errors_in_affectations(aa_err, model.categories,
+    aa_erroned = add_errors_in_assignments(aa_err, model.categories,
                                             pcerrors)
 
     # Sort the performance table
