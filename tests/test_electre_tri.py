@@ -3,7 +3,7 @@ sys.path.insert(0, "..")
 from mcda.electre_tri import electre_tri
 import unittest
 
-def compare_affectations(affectations, expected_affectations):
+def compare_assignments(affectations, expected_affectations):
         ok = 1
         for aa in expected_affectations:
             key = aa.alternative_id
@@ -21,7 +21,7 @@ class electre_tri_tests(unittest.TestCase):
         """ Loulouka - Pessimist """
         from data_loulouka import c, cv, ptb, lbda, pt, aap, cps
         etri = electre_tri(c, cv, ptb, lbda, cps).pessimist(pt)
-        ok = compare_affectations(etri, aap)
+        ok = compare_assignments(etri, aap)
         self.assertEqual(ok, 1, "One or more affectations were wrongly \
                          assigned")
 
@@ -29,7 +29,7 @@ class electre_tri_tests(unittest.TestCase):
         """ Ticino - Pessimist """
         from data_ticino import c, cv, ptb, lbda, pt, aap, cps
         etri = electre_tri(c, cv, ptb, lbda, cps).pessimist(pt)
-        ok = compare_affectations(etri, aap)
+        ok = compare_assignments(etri, aap)
         self.assertEqual(ok, 1, "One or more affectations were wrongly \
                          assigned")
 
@@ -38,7 +38,7 @@ class electre_tri_tests(unittest.TestCase):
         """ Loulouka - Optimist """
         from data_loulouka import c, cv, ptb, lbda, pt, aao, cps
         etri = electre_tri(c, cv, ptb, lbda, cps).optimist(pt)
-        ok = compare_affectations(etri, aao)
+        ok = compare_assignments(etri, aao)
         self.assertEqual(ok, 1, "One or more affectations were wrongly \
                          assigned")
 
@@ -46,7 +46,7 @@ class electre_tri_tests(unittest.TestCase):
         """ Ticino - Optimist """
         from data_ticino import c, cv, ptb, lbda, pt, aao, cps
         etri = electre_tri(c, cv, ptb, lbda, cps).optimist(pt)
-        ok = compare_affectations(etri, aao)
+        ok = compare_assignments(etri, aao)
         self.assertEqual(ok, 1, "One or more affectations were wrongly \
                          assigned")
 
