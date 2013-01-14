@@ -1390,7 +1390,7 @@ class category_profile(object):
 
         return self
 
-class alternatives_affectations(dict):
+class alternatives_assignments(dict):
 
     def __init__(self, l=[]):
         for i in l:
@@ -1403,7 +1403,7 @@ class alternatives_affectations(dict):
         return self[id].category_id
 
     def __repr__(self):
-        return "alternatives_affectations(%s)" % self.values()
+        return "alternatives_assignments(%s)" % self.values()
 
     def copy(self):
         return deepcopy(self)
@@ -1445,11 +1445,11 @@ class alternatives_affectations(dict):
 
     def from_xmcda(self, xmcda):
         if xmcda.tag != 'alternativesAffectations':
-            raise TypeError('alternatives_affectations::invalid tag')
+            raise TypeError('alternatives_assignments::invalid tag')
 
         tag_list = xmcda.getiterator('alternativeAffectation')
         for tag in tag_list:
-            aa = alternative_affectation()
+            aa = alternative_assignment()
             aa.from_xmcda(tag)
             self.append(aa)
 
@@ -1463,13 +1463,13 @@ class alternatives_affectations(dict):
             elif col and row[0] == '':
                 break
             elif col is not None:
-                aa = alternative_affectation(row[0])
+                aa = alternative_assignment(row[0])
                 aa.category_id = row[col]
                 self.append(aa)
 
         return self
 
-class alternative_affectation(object):
+class alternative_assignment(object):
 
     def __init__(self, alternative_id=None, category_id=None):
         self.alternative_id = alternative_id

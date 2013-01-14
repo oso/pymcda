@@ -5,7 +5,7 @@ import random
 from itertools import chain, combinations, product
 from math import factorial, ceil
 from mcda.types import alternative_performances
-from mcda.types import alternatives_affectations
+from mcda.types import alternatives_assignments
 
 def get_max_alternative_performance(pt, crit):
     val = None
@@ -88,7 +88,7 @@ def add_errors_in_affectations(aa, category_ids, errors_pc):
     n = int(len(aa)*errors_pc)
     aa_erroned = random.sample(aa, n)
 
-    l = alternatives_affectations([])
+    l = alternatives_assignments([])
     for a in aa_erroned:
         cat = a.category_id
         new_cat = a.category_id

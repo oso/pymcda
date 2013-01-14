@@ -5,7 +5,7 @@ from mcda.types import criterion_value, criteria_values
 from mcda.types import alternative, alternatives
 from mcda.types import alternative_performances, performance_table
 from mcda.types import threshold, thresholds, constant
-from mcda.types import alternative_affectation, alternatives_affectations
+from mcda.types import alternative_assignment, alternatives_assignments
 from mcda.types import category, categories
 from mcda.types import category_profile, categories_profiles, limits
 
@@ -99,20 +99,20 @@ cp2 = category_profile('b2', limits('cat2', 'cat3'))
 cps = categories_profiles([cp1, cp2])
 
 # Alternatives affectations
-aap1 = alternative_affectation('a1', 'cat2')
-aap2 = alternative_affectation('a2', 'cat1')
-aap3 = alternative_affectation('a3', 'cat2')
-aap4 = alternative_affectation('a4', 'cat3')
-aap5 = alternative_affectation('a5', 'cat1')
-aap6 = alternative_affectation('a6', 'cat2')
-aap7 = alternative_affectation('a7', 'cat2')
-aap = alternatives_affectations([aap1, aap2, aap3, aap4, aap5, aap6, aap7])
+aap1 = alternative_assignment('a1', 'cat2')
+aap2 = alternative_assignment('a2', 'cat1')
+aap3 = alternative_assignment('a3', 'cat2')
+aap4 = alternative_assignment('a4', 'cat3')
+aap5 = alternative_assignment('a5', 'cat1')
+aap6 = alternative_assignment('a6', 'cat2')
+aap7 = alternative_assignment('a7', 'cat2')
+aap = alternatives_assignments([aap1, aap2, aap3, aap4, aap5, aap6, aap7])
 
-aao1 = alternative_affectation('a1', 'cat2')
-aao2 = alternative_affectation('a2', 'cat3')
-aao3 = alternative_affectation('a3', 'cat2')
-aao4 = alternative_affectation('a4', 'cat3')
-aao5 = alternative_affectation('a5', 'cat2')
-aao6 = alternative_affectation('a6', 'cat2')
-aao7 = alternative_affectation('a7', 'cat2')
-aao = alternatives_affectations([aao1, aao2, aao3, aao4, aao5, aao6, aao7])
+aao1 = alternative_assignment('a1', 'cat2')
+aao2 = alternative_assignment('a2', 'cat3')
+aao3 = alternative_assignment('a3', 'cat2')
+aao4 = alternative_assignment('a4', 'cat3')
+aao5 = alternative_assignment('a5', 'cat2')
+aao6 = alternative_assignment('a6', 'cat2')
+aao7 = alternative_assignment('a7', 'cat2')
+aao = alternatives_assignments([aao1, aao2, aao3, aao4, aao5, aao6, aao7])

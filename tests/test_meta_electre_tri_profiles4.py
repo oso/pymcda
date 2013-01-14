@@ -7,7 +7,7 @@ import time
 import random
 from itertools import product
 
-from mcda.types import alternatives_affectations, performance_table
+from mcda.types import alternatives_assignments, performance_table
 from mcda.types import alternative_performances
 from mcda.electre_tri import electre_tri_bm
 from inference.meta_electre_tri_profiles4 import meta_electre_tri_profiles4

@@ -7,7 +7,7 @@ import time
 import random
 from itertools import product
 
-from mcda.types import alternatives_affectations, performance_table
+from mcda.types import alternatives_assignments, performance_table
 from mcda.electre_tri import electre_tri
 from inference.meta_electre_tri_global2 import meta_electre_tri_global
 from tools.utils import compute_ca

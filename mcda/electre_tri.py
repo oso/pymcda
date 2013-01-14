@@ -1,6 +1,6 @@
 from __future__ import division
 import math
-from mcda.types import alternative_affectation, alternatives_affectations
+from mcda.types import alternative_assignment, alternatives_assignments
 from copy import deepcopy
 
 def eq(a, b, eps=10e-10):
@@ -141,7 +141,7 @@ class electre_tri:
         self.__check_input_params()
         profiles = self.profiles[:]
         profiles.reverse()
-        affectations = alternatives_affectations([])
+        affectations = alternatives_assignments([])
         for action_perfs in pt:
             cat_rank = len(profiles)
             for i, profile in enumerate(profiles):
@@ -152,7 +152,7 @@ class electre_tri:
 
             cat_id = self.categories[cat_rank]
             alternative_id = action_perfs.alternative_id
-            alt_affect = alternative_affectation(alternative_id, cat_id)
+            alt_affect = alternative_assignment(alternative_id, cat_id)
             affectations.append(alt_affect)
 
         return affectations
@@ -160,7 +160,7 @@ class electre_tri:
     def optimist(self, pt):
         self.__check_input_params()
         profiles = self.profiles
-        affectations = alternatives_affectations([])
+        affectations = alternatives_assignments([])
         for action_perfs in pt:
             cat_rank = 0
             for i, profile in enumerate(profiles):
@@ -171,7 +171,7 @@ class electre_tri:
 
             cat_id = self.categories[cat_rank]
             alternative_id = action_perfs.alternative_id
-            alt_affect = alternative_affectation(alternative_id, cat_id)
+            alt_affect = alternative_assignment(alternative_id, cat_id)
             affectations.append(alt_affect)
 
         return affectations

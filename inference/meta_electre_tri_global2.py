@@ -5,7 +5,7 @@ import random
 from itertools import product
 
 from mcda.electre_tri import electre_tri
-from mcda.types import alternative_affectation, alternatives_affectations
+from mcda.types import alternative_assignment, alternatives_assignments
 from mcda.types import performance_table
 from inference.lp_electre_tri_weights import lp_electre_tri_weights
 from inference.meta_electre_tri_profiles4 import meta_electre_tri_profiles4

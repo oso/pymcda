@@ -7,7 +7,7 @@ import time
 import random
 from itertools import product
 
-from mcda.types import alternatives_affectations, performance_table
+from mcda.types import alternatives_assignments, performance_table
 from mcda.types import alternative_performances
 from mcda.types import criterion_value, criteria_values
 from mcda.uta import utadis

@@ -375,7 +375,7 @@ if __name__ == "__main__":
     from tools.utils import display_affectations_and_pt
     from tools.utils import get_possible_coallitions
     from mcda.electre_tri import electre_tri
-    from mcda.types import alternatives_affectations, performance_table
+    from mcda.types import alternatives_assignments, performance_table
 
     print("Solver used: %s" % solver)
     # Original Electre Tri model
@@ -400,7 +400,7 @@ if __name__ == "__main__":
     aa = model.pessimist(pt)
 
     a_learn = random.sample(a, int(nlearn*len(a)))
-    aa_learn = alternatives_affectations([ aa[alt.id] for alt in a_learn ])
+    aa_learn = alternatives_assignments([ aa[alt.id] for alt in a_learn ])
     pt_learn = performance_table([ pt[alt.id] for alt in a_learn ])
 
     aa_err = aa_learn.copy()

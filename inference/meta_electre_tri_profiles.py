@@ -4,7 +4,7 @@ sys.path.insert(0, "..")
 import math
 import random
 from itertools import product
-from mcda.types import alternative_affectation, alternatives_affectations
+from mcda.types import alternative_assignment, alternatives_assignments
 
 class meta_electre_tri_profiles():
 
@@ -68,11 +68,11 @@ class meta_electre_tri_profiles():
 
     def build_assignments_table(self):
         self.good = 0
-        self.aa = alternatives_affectations()
+        self.aa = alternatives_assignments()
         for aa in self.aa_ori.values():
             aid = aa.alternative_id
             cat = self.get_alternative_assignment(aid)
-            self.aa.append(alternative_affectation(aid, cat))
+            self.aa.append(alternative_assignment(aid, cat))
 
             cat_ori = aa.category_id
             if cat == cat_ori:
@@ -280,7 +280,7 @@ if __name__ == "__main__":
     from tools.utils import add_errors_in_affectations
     from tools.utils import compute_ca
     from tools.sorted import sorted_performance_table
-    from mcda.types import alternatives_affectations, performance_table
+    from mcda.types import alternatives_assignments, performance_table
     from mcda.types import alternative_performances
     from mcda.electre_tri import electre_tri_bm
     from ui.graphic import display_electre_tri_models
@@ -304,7 +304,7 @@ if __name__ == "__main__":
     model2.bpt = generate_random_profiles(model.profiles, model.criteria)
 
     a_learn = random.sample(a, int(nlearn*len(a)))
-    aa_learn = alternatives_affectations([ aa[alt.id] for alt in a_learn ])
+    aa_learn = alternatives_assignments([ aa[alt.id] for alt in a_learn ])
     pt_learn = performance_table([ pt[alt.id] for alt in a_learn ])
 
     aa_err = aa_learn.copy()

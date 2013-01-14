@@ -4,7 +4,7 @@ sys.path.insert(0, "..")
 from itertools import product
 import math
 import random
-from mcda.types import alternative_affectation, alternatives_affectations
+from mcda.types import alternative_assignment, alternatives_assignments
 
 class meta_electre_tri_profiles4():
 
@@ -142,11 +142,11 @@ class meta_electre_tri_profiles4():
 
     def build_assignments_table(self):
         self.good = 0
-        self.aa = alternatives_affectations()
+        self.aa = alternatives_assignments()
         for aa in self.aa_ori.values():
             aid = aa.alternative_id
             cat = self.get_alternative_assignment(aid)
-            self.aa.append(alternative_affectation(aid, cat))
+            self.aa.append(alternative_assignment(aid, cat))
 
             cat_ori = aa.category_id
             if cat == cat_ori:
