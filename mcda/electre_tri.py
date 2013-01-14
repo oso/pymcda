@@ -141,7 +141,7 @@ class electre_tri:
         self.__check_input_params()
         profiles = self.profiles[:]
         profiles.reverse()
-        affectations = alternatives_assignments([])
+        assignments = alternatives_assignments([])
         for action_perfs in pt:
             cat_rank = len(profiles)
             for i, profile in enumerate(profiles):
@@ -153,14 +153,14 @@ class electre_tri:
             cat_id = self.categories[cat_rank]
             alternative_id = action_perfs.alternative_id
             alt_affect = alternative_assignment(alternative_id, cat_id)
-            affectations.append(alt_affect)
+            assignments.append(alt_affect)
 
-        return affectations
+        return assignments
 
     def optimist(self, pt):
         self.__check_input_params()
         profiles = self.profiles
-        affectations = alternatives_assignments([])
+        assignments = alternatives_assignments([])
         for action_perfs in pt:
             cat_rank = 0
             for i, profile in enumerate(profiles):
@@ -172,9 +172,9 @@ class electre_tri:
             cat_id = self.categories[cat_rank]
             alternative_id = action_perfs.alternative_id
             alt_affect = alternative_assignment(alternative_id, cat_id)
-            affectations.append(alt_affect)
+            assignments.append(alt_affect)
 
-        return affectations
+        return assignments
 
 class electre_tri_bm(electre_tri):
 
