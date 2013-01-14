@@ -372,7 +372,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_categories_profiles
     from tools.utils import normalize_criteria_weights
     from tools.utils import add_errors_in_assignments
-    from tools.utils import display_affectations_and_pt
+    from tools.utils import display_assignments_and_pt
     from tools.utils import get_possible_coallitions
     from mcda.electre_tri import electre_tri
     from mcda.types import alternatives_assignments, performance_table
@@ -462,7 +462,7 @@ if __name__ == "__main__":
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
-        display_affectations_and_pt(anok, c, [aa, aa_learned], [pt])
+        display_assignments_and_pt(anok, c, [aa, aa_learned], [pt])
 
     coal1 = get_possible_coallitions(model.cv, model.lbda)
     coal2 = get_possible_coallitions(model2.cv, model2.lbda)

@@ -346,7 +346,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_criteria_functions
     from tools.generate_random import generate_random_categories_values
     from tools.utils import add_errors_in_assignments
-    from tools.utils import display_affectations_and_pt
+    from tools.utils import display_assignments_and_pt
 
     # Generate an utadis model
     c = generate_random_criteria(2)
@@ -419,4 +419,4 @@ if __name__ == "__main__":
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
-        display_affectations_and_pt(anok, c, [aa, aa2], [pt])
+        display_assignments_and_pt(anok, c, [aa, aa2], [pt])

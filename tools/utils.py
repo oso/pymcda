@@ -99,7 +99,7 @@ def add_errors_in_assignments(aa, category_ids, errors_pc):
 
     return l
 
-def display_affectations_and_pt(alternatives, criteria, aas, pts):
+def display_assignments_and_pt(alternatives, criteria, aas, pts):
 
     for i, aa in enumerate(aas):
         print("\taa%d" % i),

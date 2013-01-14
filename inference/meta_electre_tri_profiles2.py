@@ -131,7 +131,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_profiles
     from tools.generate_random import generate_random_categories_profiles
     from tools.utils import normalize_criteria_weights
-    from tools.utils import display_affectations_and_pt
+    from tools.utils import display_assignments_and_pt
     from tools.sorted import sorted_performance_table
     from mcda.electre_tri import electre_tri_bm
     from ui.graphic import display_electre_tri_models
@@ -201,7 +201,7 @@ if __name__ == "__main__":
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
-        display_affectations_and_pt(anok, c, [aa, aa2], [pt])
+        display_assignments_and_pt(anok, c, [aa, aa2], [pt])
 
     display_electre_tri_models([model, model2],
                                [worst, worst], [best, best])

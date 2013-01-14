@@ -260,7 +260,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_performance_table
     from tools.generate_random import generate_random_profiles
     from tools.utils import normalize_criteria_weights
-    from tools.utils import display_affectations_and_pt
+    from tools.utils import display_assignments_and_pt
     from tools.utils import get_number_of_possible_coallitions
     from tools.sorted import sorted_performance_table
     from mcda.electre_tri import electre_tri_bm
@@ -327,7 +327,7 @@ if __name__ == "__main__":
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
-        display_affectations_and_pt(anok, model.criteria, [aa, meta.aa],
+        display_assignments_and_pt(anok, model.criteria, [aa, meta.aa],
                                     [pt])
 
     aps = [ pt["%s" % aid] for aid in anok ]

@@ -51,7 +51,7 @@ if __name__ == "__main__":
     import time
     from tools.generate_random import generate_random_alternatives
     from tools.generate_random import generate_random_performance_table
-    from tools.utils import display_affectations_and_pt
+    from tools.utils import display_assignments_and_pt
     from tools.utils import get_possible_coallitions
     from mcda.types import alternative_performances
     from mcda.electre_tri import electre_tri
