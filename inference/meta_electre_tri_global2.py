@@ -141,8 +141,8 @@ if __name__ == "__main__":
             anok.append(alt)
             nok += 1
 
-    print("Good affectations: %g %%" % (float(total-nok)/total*100))
-    print("Bad affectations : %g %%" % (float(nok)/total*100))
+    print("Good assignments: %g %%" % (float(total-nok)/total*100))
+    print("Bad assignments : %g %%" % (float(nok)/total*100))
 
     coal1 = get_possible_coallitions(model.cv, model.lbda)
     coal2 = get_possible_coallitions(model2.cv, model2.lbda)

@@ -452,9 +452,9 @@ if __name__ == "__main__":
             if alt.id in aa_erroned:
                 nok_erroned += 1
 
-    print("Good affectations          : %3g %%" \
+    print("Good assignments          : %3g %%" \
           % (float(total-nok)/total*100))
-    print("Bad affectations           : %3g %%" \
+    print("Bad assignments           : %3g %%" \
           % (float(nok)/total*100))
     if aa_erroned:
         print("Bad in erroned affectations: %3g %%" \

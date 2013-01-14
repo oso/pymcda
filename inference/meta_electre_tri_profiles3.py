@@ -248,8 +248,8 @@ if __name__ == "__main__":
             anok.append(alt)
             nok += 1
 
-    print("Good affectations: %3g %%" % (float(total-nok)/total*100))
-    print("Bad affectations : %3g %%" % (float(nok)/total*100))
+    print("Good assignments: %3g %%" % (float(total-nok)/total*100))
+    print("Bad assignments : %3g %%" % (float(nok)/total*100))
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
