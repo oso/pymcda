@@ -383,7 +383,7 @@ if __name__ == "__main__":
     cfs.display()
     print('Categories values:')
     catv.display()
-    print("Errors in alternatives affectations: %g %%" \
+    print("Errors in alternatives assignments: %g %%" \
           % (len(aa_erroned) / len(a) * 100))
 
     # Learn the parameters from assignment examples
@@ -426,7 +426,7 @@ if __name__ == "__main__":
     print("Bad assignments           : %3g %%" \
           % ((nok) / total *100))
     if aa_erroned:
-        print("Bad in erroned affectations: %3g %%" \
+        print("Bad in erroned assignments: %3g %%" \
               % (nok_erroned / total * 100))
 
     if len(anok) > 0:

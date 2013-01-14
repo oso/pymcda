@@ -410,7 +410,7 @@ if __name__ == "__main__":
     print('==============')
     print("Number of alternatives: %d" % len(a))
     print("Number of learning alternatives: %d" % len(aa_learn))
-    print("Errors in alternatives affectations: %g%%" % (errors*100))
+    print("Errors in alternatives assignments: %g%%" % (errors*100))
     cids = c.keys()
     bpt.display(criterion_ids = cids, alternative_ids = b)
     cv.display(criterion_ids = cids)
@@ -457,7 +457,7 @@ if __name__ == "__main__":
     print("Bad assignments           : %3g %%" \
           % (float(nok)/total*100))
     if aa_erroned:
-        print("Bad in erroned affectations: %3g %%" \
+        print("Bad in erroned assignments: %3g %%" \
               % (float(nok_erroned)/total*100))
 
     if len(anok) > 0:

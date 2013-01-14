@@ -372,7 +372,7 @@ if __name__ == "__main__":
     print("Bad assignments           : %3g %%" \
           % (float(nok)/total*100))
     if aa_erroned:
-        print("Bad in erroned affectations: %3g %%" \
+        print("Bad in erroned assignments: %3g %%" \
               % (float(nok_erroned)/total*100))
 
     if len(anok) > 0:
