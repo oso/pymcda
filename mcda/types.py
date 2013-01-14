@@ -439,6 +439,21 @@ class performance_table(dict):
                 a.performances[cid] = perf
         return a
 
+    def get_mean(self):
+        cids = next(self.itervalues()).performances.keys()
+        a = alternative_performances('mean', {cid: 0 for cid in cids})
+        for ap, cid in product(self, cids):
+            perf = ap.performances[cid]
+            a.performances[cid] += perf
+
+        for cid in cids:
+            a.performances[cid] /= len(self)
+
+        return a
+
+    def get_subset(self, alternatives):
+        return performance_table([self[a] for a in alternatives])
+
     def to_xmcda(self):
         root = ElementTree.Element('performanceTable')
         for alt_perfs in self:
