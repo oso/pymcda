@@ -158,13 +158,16 @@ class QGraphicsScene_etri(QtGui.QGraphicsScene):
             self.axis_text_items[criterion] = text
 
     def __compute_y(self, ap, id):
-        p = ap.performances[id]
-        if p > self.best.performances[id]:
-            p = self.best.performances[id]
-        elif p < self.worst.performances[id]:
-            p = self.worst.performances[id]
-        num = p - self.worst.performances[id]
-        den = self.best.performances[id] - self.worst.performances[id]
+        direction = self.model.criteria[id].direction
+        p = ap.performances[id] * direction
+        best = self.best.performances[id] * direction
+        worst = self.worst.performances[id] * direction
+        if p > best:
+            p = best
+        elif p < worst:
+            p = worst
+        num = p - worst
+        den = best - worst
         return self.ymin + num / den * (self.ymax - self.ymin)
 
     def __create_text_value(self, value):
