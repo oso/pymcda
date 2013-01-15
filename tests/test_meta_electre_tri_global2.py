@@ -9,7 +9,7 @@ from itertools import product
 
 from mcda.types import alternatives_assignments, performance_table
 from mcda.electre_tri import electre_tri
-from inference.meta_electre_tri_global2 import meta_electre_tri_global
+from algo.meta_electre_tri_global2 import meta_electre_tri_global
 from tools.utils import compute_ca
 from tools.sorted import sorted_performance_table
 from tools.generate_random import generate_random_electre_tri_bm_model

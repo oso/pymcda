@@ -7,8 +7,8 @@ from itertools import product
 from mcda.electre_tri import electre_tri
 from mcda.types import alternative_assignment, alternatives_assignments
 from mcda.types import performance_table
-from inference.lp_electre_tri_weights import lp_electre_tri_weights
-from inference.meta_electre_tri_profiles4 import meta_electre_tri_profiles4
+from algo.lp_electre_tri_weights import lp_electre_tri_weights
+from algo.meta_electre_tri_profiles4 import meta_electre_tri_profiles4
 from tools.utils import compute_ca
 from tools.sorted import sorted_performance_table
 from tools.generate_random import generate_random_electre_tri_bm_model

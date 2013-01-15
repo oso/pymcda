@@ -13,7 +13,7 @@ from tools.generate_random import generate_random_performance_table
 from tools.generate_random import generate_random_criteria
 from tools.sorted import sorted_performance_table
 from tools.utils import compute_ca
-from inference.meta_electre_tri_profiles4 import meta_electre_tri_profiles4
+from algo.meta_electre_tri_profiles4 import meta_electre_tri_profiles4
 from ui.graphic import QGraphicsScene_etri
 from multiprocessing import Process, Pipe
 

@@ -2,7 +2,7 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import random
 from data_swd import *
-from inference.meta_electre_tri_global2 import meta_electre_tri_global
+from algo.meta_electre_tri_global2 import meta_electre_tri_global
 from mcda.types import criterion_value, criteria_values
 from mcda.electre_tri import electre_tri_bm
 from tools.generate_random import generate_random_categories_profiles

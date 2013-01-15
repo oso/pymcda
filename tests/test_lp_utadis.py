@@ -11,7 +11,7 @@ from mcda.types import alternatives_assignments, performance_table
 from mcda.types import alternative_performances
 from mcda.types import criterion_value, criteria_values
 from mcda.uta import utadis
-from inference.lp_utadis import lp_utadis
+from algo.lp_utadis import lp_utadis
 from tools.generate_random import generate_random_alternatives
 from tools.generate_random import generate_random_criteria
 from tools.generate_random import generate_random_criteria_values
