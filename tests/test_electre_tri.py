@@ -19,7 +19,7 @@ class electre_tri_tests(unittest.TestCase):
 
     def test001_test_pessimist_loulouka(self):
         """ Loulouka - Pessimist """
-        from data_loulouka import c, cv, ptb, lbda, pt, aap, cps
+        from datasets.loulouka import c, cv, ptb, lbda, pt, aap, cps
         etri = electre_tri(c, cv, ptb, lbda, cps).pessimist(pt)
         ok = compare_assignments(etri, aap)
         self.assertEqual(ok, 1, "One or more alternatives were wrongly \
@@ -27,7 +27,7 @@ class electre_tri_tests(unittest.TestCase):
 
     def test002_test_pessimist_ticino(self):
         """ Ticino - Pessimist """
-        from data_ticino import c, cv, ptb, lbda, pt, aap, cps
+        from datasets.ticino import c, cv, ptb, lbda, pt, aap, cps
         etri = electre_tri(c, cv, ptb, lbda, cps).pessimist(pt)
         ok = compare_assignments(etri, aap)
         self.assertEqual(ok, 1, "One or more alternatives were wrongly \
@@ -36,7 +36,7 @@ class electre_tri_tests(unittest.TestCase):
 
     def test003_test_optimist_loulouka(self):
         """ Loulouka - Optimist """
-        from data_loulouka import c, cv, ptb, lbda, pt, aao, cps
+        from datasets.loulouka import c, cv, ptb, lbda, pt, aao, cps
         etri = electre_tri(c, cv, ptb, lbda, cps).optimist(pt)
         ok = compare_assignments(etri, aao)
         self.assertEqual(ok, 1, "One or more alternatives were wrongly \
@@ -44,7 +44,7 @@ class electre_tri_tests(unittest.TestCase):
 
     def test004_test_optimist_ticino(self):
         """ Ticino - Optimist """
-        from data_ticino import c, cv, ptb, lbda, pt, aao, cps
+        from datasets.ticino import c, cv, ptb, lbda, pt, aao, cps
         etri = electre_tri(c, cv, ptb, lbda, cps).optimist(pt)
         ok = compare_assignments(etri, aao)
         self.assertEqual(ok, 1, "One or more alternatives were wrongly \
