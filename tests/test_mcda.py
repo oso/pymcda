@@ -4,6 +4,7 @@ from xml.etree import ElementTree
 from lxml import etree
 from mcda.types import *
 import unittest
+import csv
 
 XMCDA_HEADER = '{http://www.decision-deck.org/2012/XMCDA-2.2.1}XMCDA'
 XMCDA_FILE = 'XMCDA-2.2.1.xsd'
@@ -260,10 +261,38 @@ class tests_piecewise_linear(unittest.TestCase):
         plf = piecewise_linear([s1, s2])
         self.assertRaises(ValueError, plf.y, 1)
 
+from datasets import swd
+class tests_csv(unittest.TestCase):
+
+    def setUp(self):
+        filepath = os.path.dirname(os.path.abspath(__file__)) \
+                    + "/../datasets/swd.csv"
+        csvfile = open(filepath, 'rb')
+        self.csvreader = csv.reader(csvfile, delimiter = ";")
+
+    def test001(self):
+        a = alternatives().from_csv(self.csvreader, "pt")
+        self.assertEqual(a, swd.a)
+
+    def test002(self):
+        c = criteria().from_csv(self.csvreader, "criterion")
+        self.assertEqual(c, swd.c)
+
+    def test003(self):
+        pt = performance_table().from_csv(self.csvreader, "pt",
+                                          ["c%d" % i for i in range(1, 11)])
+        self.assertEqual(pt, swd.pt)
+
+    def test004(self):
+        aa = alternatives_assignments().from_csv(self.csvreader, "pt",
+                                                 "assignment")
+        self.assertEqual(aa, swd.aa)
+
 if __name__ == "__main__":
     suite = []
     suite.append(unittest.TestLoader().loadTestsFromTestCase(tests_xmcda))
     suite.append(unittest.TestLoader().loadTestsFromTestCase(tests_segment))
     suite.append(unittest.TestLoader().loadTestsFromTestCase(tests_piecewise_linear))
+    suite.append(unittest.TestLoader().loadTestsFromTestCase(tests_csv))
     alltests = unittest.TestSuite(suite)
     unittest.TextTestRunner(verbosity=2).run(alltests)
