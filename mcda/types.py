@@ -83,7 +83,7 @@ class criteria(mcda_dict):
                         cols[i + 1] = "disabled"
                     if val == direction_col:
                         cols[i + 1] = "direction"
-            elif cols and row[0] == '':
+            elif cols is not None and row[0] == '':
                 break
             elif cols is not None:
                 c = criterion(row[0])
@@ -296,7 +296,7 @@ class alternatives(mcda_dict):
                         cols[i + 1] = "name"
                     if val == disabled_col:
                         cols[i + 1] = "disabled"
-            elif cols and row[0] == '':
+            elif cols is not None and row[0] == '':
                 break
             elif cols is not None:
                 a = alternative(row[0])
@@ -479,7 +479,7 @@ class performance_table(mcda_dict):
                         continue
 
                     cols[i + 1] = val
-            elif cols and row[0] == '':
+            elif cols is not None and row[0] == '':
                 break
             elif cols is not None:
                 ap = alternative_performances(row[0])
