@@ -24,7 +24,7 @@ def unmarshal(xml):
     m = unmarshallers.get(xml.tag)
     return m(xml)
 
-class criteria(dict):
+class mcda_dict(dict):
 
     def __init__(self, l=[]):
         for i in l:
@@ -33,14 +33,24 @@ class criteria(dict):
     def __iter__(self):
         return self.itervalues()
 
-    def __repr__(self):
-        return "criteria(%s)" % self.values()
-
     def copy(self):
         return deepcopy(self)
 
     def append(self, c):
         self[c.id] = c
+
+class mcda_object(object):
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def copy(self):
+        return deepcopy(self)
+
+class criteria(mcda_dict):
+
+    def __repr__(self):
+        return "criteria(%s)" % self.values()
 
     def to_xmcda(self):
         root = ElementTree.Element('criteria')
@@ -84,7 +94,7 @@ class criteria(dict):
         return self
 
 
-class criterion(object):
+class criterion(mcda_object):
 
     MINIMIZE = -1
     MAXIMIZE = 1
@@ -98,14 +108,8 @@ class criterion(object):
         self.weight = weight
         self.thresholds = thresholds
 
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
     def __repr__(self):
         return "%s" % self.id
-
-    def copy(self):
-        return deepcopy(self)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('criterion')
@@ -174,23 +178,10 @@ class criterion(object):
 
         return self
 
-class criteria_values(dict):
+class criteria_values(mcda_dict):
 
-    def __init__(self, l=[]):
-        for i in l:
-            self[i.id] = i
-
-    def __iter__(self):
-        return self.itervalues()
-
-    def __str__(self):
+    def __repr__(self):
         return "criteria_values(%s)" % self.values()
-
-    def append(self, c):
-        self[c.id] = c
-
-    def copy(self):
-        return deepcopy(self)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('criteriaValues')
@@ -235,20 +226,14 @@ class criteria_values(dict):
             line += " " * (cols_max[cid] - len(val)) + val + " "
         print(line, file = out)
 
-class criterion_value(object):
+class criterion_value(mcda_object):
 
     def __init__(self, id=None, value=None):
         self.id = id
         self.value = value
 
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
     def __repr__(self):
         return "%s: %s" % (self.id, self.value)
-
-    def copy(self):
-        return deepcopy(self)
 
     def to_xmcda(self, id=None):
         xmcda = ElementTree.Element('criterionValue')
@@ -277,23 +262,10 @@ class criterion_value(object):
 
         return self
 
-class alternatives(dict):
-
-    def __init__(self, l=[]):
-        for i in l:
-            self[i.id] = i
-
-    def __iter__(self):
-        return self.itervalues()
+class alternatives(mcda_dict):
 
     def __repr__(self):
         return "alternatives(%s)" % self.values()
-
-    def append(self, a):
-        self[a.id] = a
-
-    def copy(self):
-        return deepcopy(self)
 
     def to_xmcda(self):
         root = ElementTree.Element('alternatives')
@@ -334,21 +306,15 @@ class alternatives(dict):
 
         return self
 
-class alternative(object):
+class alternative(mcda_object):
 
     def __init__(self, id=None, name=None, disabled=False):
         self.id = id
         self.name = name
         self.disabled = disabled
 
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
     def __repr__(self):
         return "%s" % self.id
-
-    def copy(self):
-        return deepcopy(self)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('alternative', id=self.id)
@@ -380,26 +346,23 @@ class alternative(object):
 
         return self
 
-class performance_table(dict):
+class performance_table(mcda_dict):
 
     def __init__(self, l=[]):
         for i in l:
             self[i.alternative_id] = i
-
-    def __iter__(self):
-        return self.itervalues()
-
-    def __call__(self, id):
-        return self[id].performances
-
-    def __repr__(self):
-        return "performance_table(%s)" % self.values()
 
     def copy(self):
         return deepcopy(self)
 
     def append(self, ap):
         self[ap.alternative_id] = ap
+
+    def __call__(self, id):
+        return self[id].performances
+
+    def __repr__(self):
+        return "performance_table(%s)" % self.values()
 
     def get_best(self, c):
         perfs = next(self.itervalues()).performances
@@ -528,7 +491,7 @@ class performance_table(dict):
 
         return self
 
-class alternative_performances(object):
+class alternative_performances(mcda_object):
 
     def __init__(self, alternative_id=None, performances=None):
         self.alternative_id = alternative_id
@@ -537,17 +500,11 @@ class alternative_performances(object):
         else:
             self.performances = performances
 
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
     def __call__(self, criterion_id):
         return self.performances[criterion_id]
 
     def __repr__(self):
         return "%s: %s" % (self.alternative_id, self.performances)
-
-    def copy(self):
-        return deepcopy(self)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('alternativePerformances')
@@ -580,20 +537,10 @@ class alternative_performances(object):
 
         return self
 
-class categories_values(dict):
-
-    def __init__(self, l = []):
-        for i in l:
-            self[i.id] = i
-
-    def __iter__(self):
-        return self.itervalues()
+class categories_values(mcda_dict):
 
     def __repr__(self):
         return "categories_values(%s)" % self.values()
-
-    def append(self, cv):
-        self[cv.id] = cv
 
     def display(self, out = sys.stdout):
         for cv in self:
@@ -617,14 +564,11 @@ class categories_values(dict):
 
         return self
 
-class category_value(object):
+class category_value(mcda_object):
 
     def __init__(self, id = None, value = None):
         self.id = id
         self.value = value
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
 
     def __repr__(self):
         return "%s: %s" % (self.id, self.value)
@@ -656,14 +600,11 @@ class category_value(object):
 
         return self
 
-class interval(object):
+class interval(mcda_object):
 
     def __init__(self, lower = float("-inf"), upper = float("inf")):
         self.lower = lower
         self.upper = upper
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
 
     def __repr__(self):
         return "interval(%s,%s)" % (self.lower, self.upper)
@@ -701,20 +642,10 @@ class interval(object):
         self.upper = unmarshal(upper.getchildren()[0])
         return self
 
-class alternatives_values(dict):
-
-    def __init__(self, l = []):
-        for i in l:
-            self[i.id] = i
-
-    def __iter__(self):
-        return self.itervalues()
+class alternatives_values(mcda_dict):
 
     def __repr__(self):
         return "alternatives_values(%s)" % self.values()
-
-    def append(self, av):
-        self[av.id] = av
 
     def to_xmcda(self):
         root = ElementTree.Element('alternativesValues')
@@ -734,14 +665,11 @@ class alternatives_values(dict):
 
         return self
 
-class alternative_value(object):
+class alternative_value(mcda_object):
 
     def __init__(self, id = None, value = None):
         self.id = id
         self.value = value
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
 
     def __repr__(self):
         return "%s: %s" % (self.id, self.value)
@@ -764,20 +692,10 @@ class alternative_value(object):
 
         return self
 
-class criteria_functions(dict):
-
-    def __init__(self, l=[]):
-        for i in l:
-            self[i.id] = i
-
-    def __iter__(self):
-        return self.itervalues()
+class criteria_functions(mcda_dict):
 
     def __repr__(self):
         return "criteria_functions(%s)" % self.values()
-
-    def append(self, c):
-        self[c.id] = c
 
     def pprint(self, criterion_ids = None):
         if criterion_ids is None:
@@ -813,14 +731,11 @@ class criteria_functions(dict):
 
         return self
 
-class criterion_function(object):
+class criterion_function(mcda_object):
 
     def __init__(self, id, function):
         self.id = id
         self.function = function
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
 
     def __repr__(self):
         return "criterion_function(%s)" % self.function
@@ -876,7 +791,7 @@ class linear(object):
     def x(self, y):
         return (y - self.intercept) / self.slope
 
-class segment(object):
+class segment(mcda_object):
 
     def __init__(self, p1, p2, p1_in = True, p2_in = False):
         if p1.x <= p2.x:
@@ -889,9 +804,6 @@ class segment(object):
             self.ph = p1
             self.pl_in = p2_in
             self.ph_in = p1_in
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
 
     def __repr__(self):
         return "segment(%s,%s)" % (self.pl, self.ph)
@@ -1029,21 +941,15 @@ class points(list):
 
         return self
 
-class point(object):
+class point(mcda_object):
 
     def __init__(self, x, y, id = None):
         self.id = id
         self.x = x
         self.y = y
 
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
     def __repr__(self):
         return "(%g,%g)" % (self.x, self.y)
-
-    def copy(self):
-        return deepcopy(self)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('point')
@@ -1068,20 +974,14 @@ class point(object):
 
         return self
 
-class constant(object):
+class constant(mcda_object):
 
     def __init__(self, id, value):
         self.id = id
         self.value = value
 
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
     def __repr__(self):
         return "%s: %s", (self.id, self.value)
-
-    def copy(self):
-        return deepcopy(self)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('constant')
@@ -1098,23 +998,10 @@ class constant(object):
         self.id = constant.get('id')
         self.value = unmarshal(constant.getchildren()[0])
 
-class thresholds(dict):
-
-    def __init__(self, l=[]):
-        for i in l:
-            self[i.id] = i
-
-    def __iter__(self):
-        return self.itervalues()
+class thresholds(mcda_dict):
 
     def __repr__(self):
         return "thresholds(%s)", self.values()
-
-    def copy(self):
-        return deepcopy(self)
-
-    def append(self, threshold):
-        self[threshold.id] = threshold
 
     def to_xmcda(self):
         root = ElementTree.Element('thresholds')
@@ -1133,21 +1020,15 @@ class thresholds(dict):
             t.from_xmcda(tag)
             self.append(t)
 
-class threshold(object):
+class threshold(mcda_object):
 
     def __init__(self, id, name=None, values=None):
         self.id = id
         self.name = name
         self.values = values
 
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
     def __repr__(self):
         return "%s: %s" % (self.id, self.values)
-
-    def copy(self):
-        return deepcopy(self)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('threshold', id=self.id)
@@ -1170,26 +1051,10 @@ class threshold(object):
             c = constant(None, 0)
             c.from_xmcda(values)
 
-class categories(dict):
-
-    def __init__(self, l=[]):
-        for i in l:
-            self[i.id] = i
-
-    def __iter__(self):
-        return self.itervalues()
+class categories(mcda_dict):
 
     def __repr__(self):
         return "categories(%s)" % self.values()
-
-    def copy(self):
-        return deepcopy(self)
-
-    def append(self, c):
-        self[c.id] = c
-
-    def copy(self):
-        return deepcopy(self)
 
     def get_ids(self):
         return self.keys()
@@ -1217,7 +1082,7 @@ class categories(dict):
 
         return self
 
-class category(object):
+class category(mcda_object):
 
     def __init__(self, id=None, name=None, disabled=False, rank=None):
         self.id = id
@@ -1225,14 +1090,8 @@ class category(object):
         self.disabled = disabled
         self.rank = rank
 
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
     def __repr__(self):
         return "%s: %d" % (self.id, self.rank)
-
-    def copy(self):
-        return deepcopy(self)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('category')
@@ -1269,20 +1128,14 @@ class category(object):
 
         return self
 
-class limits(object):
+class limits(mcda_object):
 
     def __init__(self, lower=None, upper=None):
         self.lower = lower
         self.upper  = upper
 
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
     def __repr__(self):
         return "limits(%s,%s)" % (self.lower, self.upper)
-
-    def copy(self):
-        return deepcopy(self)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('limits')
@@ -1310,14 +1163,7 @@ class limits(object):
 
         return self
 
-class categories_profiles(dict):
-
-    def __init__(self, l=[]):
-        for cp in l:
-            self[cp.id] = cp
-
-    def __iter__(self):
-        return self.itervalues()
+class categories_profiles(mcda_dict):
 
     def __repr__(self):
         return "categories_profiles(%s)" % self.values()
@@ -1370,20 +1216,14 @@ class categories_profiles(dict):
 
         return self
 
-class category_profile(object):
+class category_profile(mcda_object):
 
     def __init__(self, id = None, value = None):
         self.id = id
         self.value = value
 
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
     def __repr__(self):
         return "%s: %s" % (self.id, self.value)
-
-    def copy(self):
-        return deepcopy(self)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('categoryProfile')
@@ -1405,23 +1245,17 @@ class category_profile(object):
 
         return self
 
-class alternatives_assignments(dict):
+class alternatives_assignments(mcda_dict):
 
     def __init__(self, l=[]):
         for i in l:
             self[i.alternative_id] = i
-
-    def __iter__(self):
-        return self.itervalues()
 
     def __call__(self, id):
         return self[id].category_id
 
     def __repr__(self):
         return "alternatives_assignments(%s)" % self.values()
-
-    def copy(self):
-        return deepcopy(self)
 
     def append(self, aa):
         self[aa.alternative_id] = aa
@@ -1492,20 +1326,14 @@ class alternatives_assignments(dict):
 
         return self
 
-class alternative_assignment(object):
+class alternative_assignment(mcda_object):
 
     def __init__(self, alternative_id=None, category_id=None):
         self.alternative_id = alternative_id
         self.category_id = category_id
 
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
     def __repr__(self):
         return "%s: %s" % (self.alternative_id, self.category_id)
-
-    def copy(self):
-        return deepcopy(self)
 
     def is_in_category(self, category_id):
         if self.category_id == category_id:
