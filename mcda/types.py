@@ -366,7 +366,7 @@ class performance_table(mcda_dict):
 
     def get_best(self, c):
         perfs = next(self.itervalues()).performances
-        wa = alternative_performances('worst', perfs.copy())
+        wa = alternative_performances('best', perfs.copy())
         for ap, crit in product(self, c):
             wperf = wa.performances[crit.id] * crit.direction
             perf = ap.performances[crit.id] * crit.direction
