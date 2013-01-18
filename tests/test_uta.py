@@ -143,9 +143,11 @@ class tests_utadis(unittest.TestCase):
         self.assertEquals(assignments["a2"].category_id, "cat1")
         self.assertEquals(assignments["a3"].category_id, "cat3")
 
+test_classes = [tests_uta, tests_utadis]
+
 if __name__ == "__main__":
     suite = []
-    suite.append(unittest.TestLoader().loadTestsFromTestCase(tests_uta))
-    suite.append(unittest.TestLoader().loadTestsFromTestCase(tests_utadis))
+    for tclass in test_classes:
+        suite.append(unittest.TestLoader().loadTestsFromTestCase(tclass))
     alltests = unittest.TestSuite(suite)
     unittest.TextTestRunner(verbosity=2).run(alltests)

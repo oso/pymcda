@@ -50,6 +50,11 @@ class electre_tri_tests(unittest.TestCase):
         self.assertEqual(ok, 1, "One or more alternatives were wrongly \
                          assigned")
 
+test_classes = [electre_tri_tests]
+
 if __name__ == "__main__":
-    suite = unittest.TestLoader().loadTestsFromTestCase(electre_tri_tests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = []
+    for tclass in test_classes:
+        suite.append(unittest.TestLoader().loadTestsFromTestCase(tclass))
+    alltests = unittest.TestSuite(suite)
+    unittest.TextTestRunner(verbosity=2).run(alltests)

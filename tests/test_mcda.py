@@ -288,11 +288,12 @@ class tests_csv(unittest.TestCase):
                                                  "assignment")
         self.assertEqual(aa, swd.aa)
 
+test_classes = [tests_xmcda, tests_segment, tests_piecewise_linear,
+                tests_csv]
+
 if __name__ == "__main__":
     suite = []
-    suite.append(unittest.TestLoader().loadTestsFromTestCase(tests_xmcda))
-    suite.append(unittest.TestLoader().loadTestsFromTestCase(tests_segment))
-    suite.append(unittest.TestLoader().loadTestsFromTestCase(tests_piecewise_linear))
-    suite.append(unittest.TestLoader().loadTestsFromTestCase(tests_csv))
+    for tclass in test_classes:
+        suite.append(unittest.TestLoader().loadTestsFromTestCase(tclass))
     alltests = unittest.TestSuite(suite)
     unittest.TextTestRunner(verbosity=2).run(alltests)
