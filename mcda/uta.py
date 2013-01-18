@@ -25,7 +25,7 @@ class uta(object):
             ui = self.marginal_utility(c.id, ap)
             u += w * ui
 
-        av = alternative_value(ap.alternative_id, u)
+        av = alternative_value(ap.id, u)
 
         return av
 
@@ -56,7 +56,7 @@ class utadis(uta):
             cat = self.cat_limits[-1][0]
         else:
             cat = self.cat_limits[i][0]
-        return alternative_assignment(ap.alternative_id, cat)
+        return alternative_assignment(ap.id, cat)
 
     def get_assignments(self, pt):
         assignments = alternatives_assignments([])

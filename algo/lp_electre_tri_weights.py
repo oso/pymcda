@@ -27,7 +27,7 @@ class lp_electre_tri_weights():
         self.profiles = cps.get_ordered_profiles()
         self.delta = delta
         self.cat_ranks = { c: i+1 for i, c in enumerate(self.categories) }
-        self.pt = { a.alternative_id: a.performances \
+        self.pt = { a.id: a.performances \
                     for a in pt }
         self.aa_ori = aa_ori
         self.update_linear_program()
@@ -61,9 +61,9 @@ class lp_electre_tri_weights():
         m = len(self.pt)
         n = len(self.model.criteria)
 
-        aa = { a.alternative_id: self.cat_ranks[a.category_id] \
+        aa = { a.id: self.cat_ranks[a.category_id] \
                for a in aa }
-        bpt = { a.alternative_id: a.performances \
+        bpt = { a.id: a.performances \
                 for a in bpt }
 
         self.c_xi = dict()
@@ -442,8 +442,8 @@ if __name__ == "__main__":
     total = len(a)
     nok = nok_erroned = 0
     anok = []
-    a_assign = {alt.alternative_id: alt.category_id for alt in aa}
-    a_assign2 = {alt.alternative_id: alt.category_id for alt in aa_learned}
+    a_assign = {alt.id: alt.category_id for alt in aa}
+    a_assign2 = {alt.id: alt.category_id for alt in aa_learned}
     for alt in a:
         if a_assign[alt.id] != a_assign2[alt.id]:
             anok.append(alt)

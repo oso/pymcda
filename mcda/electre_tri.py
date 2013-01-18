@@ -151,8 +151,8 @@ class electre_tri:
                     cat_rank -= 1
 
             cat_id = self.categories[cat_rank]
-            alternative_id = action_perfs.alternative_id
-            alt_affect = alternative_assignment(alternative_id, cat_id)
+            id = action_perfs.id
+            alt_affect = alternative_assignment(id, cat_id)
             assignments.append(alt_affect)
 
         return assignments
@@ -170,8 +170,8 @@ class electre_tri:
                     cat_rank += 1
 
             cat_id = self.categories[cat_rank]
-            alternative_id = action_perfs.alternative_id
-            alt_affect = alternative_assignment(alternative_id, cat_id)
+            id = action_perfs.id
+            alt_affect = alternative_assignment(id, cat_id)
             assignments.append(alt_affect)
 
         return assignments

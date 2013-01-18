@@ -20,7 +20,7 @@ class sorted_performance_table():
         self.sorted_pt = { cid: list() for cid in self.cids }
         for ap in self.pt:
             p = ap.performances
-            aid = ap.alternative_id
+            aid = ap.id
             for cid in self.cids:
                 bisect.insort(self.sorted_pt[cid], (p[cid], aid))
 

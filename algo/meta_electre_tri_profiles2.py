@@ -10,7 +10,7 @@ from tools.sorted import sorted_performance_table
 def get_wrong_assignment(aa, aa_learned):
     l = list()
     for a in aa:
-        aid = a.alternative_id
+        aid = a.id
         if aa(aid) != aa_learned(aid):
             l.append(aid)
     return l
@@ -18,7 +18,7 @@ def get_wrong_assignment(aa, aa_learned):
 def compute_fitness(aa, aa_learned):
     ok = total = 0
     for a in aa:
-        aid = a.alternative_id
+        aid = a.id
         if aa(aid) == aa_learned(aid):
             ok += 1
         total += 1
@@ -30,7 +30,7 @@ class meta_greedy_electre_tri_profiles():
         self.model = model
         self.nprofiles = len(model.profiles)
         self.pt = pt
-        self.pt_dict = { ap.alternative_id: ap for ap in pt}
+        self.pt_dict = { ap.id: ap for ap in pt}
         self.pt_sorted = sorted_performance_table(pt)
         self.nalternatives = len(self.pt)
         self.aa_ori = aa_ori

@@ -57,7 +57,7 @@ def crossover_weights(cr, mc, g, best, h, s):
 def crossover_profiles(cr, mc, crit, profiles, g, b, h, s, ba, wa):
     gnew = performance_table()
     for i, profile in enumerate(profiles):
-        alt_id = g[profile].alternative_id
+        alt_id = g[profile].id
         perfs = g[profile].performances
         bperfs = b[profile].performances
         hperfs = h[profile].performances
@@ -158,7 +158,7 @@ def compute_ca(model_af, dm_af):
     total = len(dm_af)
     ok = float(0)
     for af in dm_af:
-        if model_af(af.alternative_id) == af.category_id:
+        if model_af(af.id) == af.category_id:
             ok += 1
     return ok/total
 
@@ -193,7 +193,7 @@ def compute_auc(model, pt, aa):
         cat_alt[i] = []
 
     for af in aa:
-        cat_alt[af.category_id].append(af.alternative_id)
+        cat_alt[af.category_id].append(af.id)
 
     # Compute auck
     auc = 0

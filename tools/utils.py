@@ -62,10 +62,10 @@ def get_ordered_profile_ids(categories, categories_profiles):
         lower_category_id = cp.value.lower
         if upper_category_id:
             upper_category_rank = cat_rank[upper_category_id]
-            profiles[upper_category_rank] = cp.alternative_id
+            profiles[upper_category_rank] = cp.id
         if lower_category_id:
             lower_category_rank = cat_rank[lower_category_id]
-            profiles[lower_category_id-1] = cp.alternative_id
+            profiles[lower_category_id-1] = cp.id
 
     profiles_rank = profiles.keys()
     profiles_rank.sort()
@@ -170,7 +170,7 @@ def compute_maximal_number_of_coallitions(n):
     return int(v)
 
 def compute_degree_of_extremality(pt):
-    results = { ap.alternative_id: 1 for ap in pt}
+    results = { ap.id: 1 for ap in pt}
 
     minv = pt.get_min().performances
     maxv = pt.get_max().performances
@@ -181,8 +181,8 @@ def compute_degree_of_extremality(pt):
         up = maxv[cid] - ap.performances[cid]
 
         if down > up:
-            results[ap.alternative_id] *= down / (maxv[cid] - minv[cid])
+            results[ap.id] *= down / (maxv[cid] - minv[cid])
         else:
-            results[ap.alternative_id] *= up / (maxv[cid] - minv[cid])
+            results[ap.id] *= up / (maxv[cid] - minv[cid])
 
     return results

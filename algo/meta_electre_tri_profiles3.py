@@ -7,7 +7,7 @@ import random
 def get_wrong_assignments(aa, aa_learned):
     l = list()
     for a in aa:
-        aid = a.alternative_id
+        aid = a.id
         if aa(aid) != aa_learned(aid):
             l.append(aid)
     return l
@@ -15,7 +15,7 @@ def get_wrong_assignments(aa, aa_learned):
 def compute_fitness(aa, aa_learned):
     ok = total = 0
     for a in aa:
-        aid = a.alternative_id
+        aid = a.id
         if aa(aid) == aa_learned(aid):
             ok += 1
         total += 1
@@ -46,7 +46,7 @@ class meta_electre_tri_profiles():
     def sort_alternative_by_category(self, aa):
         aa_by_cat = {}
         for a in aa:
-            aid = a.alternative_id
+            aid = a.id
             cat = self.cat[a.category_id]
             if cat in aa_by_cat:
                 aa_by_cat[cat].append(aid)

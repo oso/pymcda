@@ -51,7 +51,7 @@ class meta_electre_tri_profiles():
     def sort_alternative_by_category(self, aa):
         aa_by_cat = {}
         for a in aa:
-            aid = a.alternative_id
+            aid = a.id
             cat = self.cat[a.category_id]
             if cat in aa_by_cat:
                 aa_by_cat[cat].append(aid)
@@ -70,7 +70,7 @@ class meta_electre_tri_profiles():
         self.good = 0
         self.aa = alternatives_assignments()
         for aa in self.aa_ori.values():
-            aid = aa.alternative_id
+            aid = aa.id
             cat = self.get_alternative_assignment(aid)
             self.aa.append(alternative_assignment(aid, cat))
 
@@ -79,11 +79,11 @@ class meta_electre_tri_profiles():
                 self.good += 1
 
     def build_concordance_table(self):
-        self.ct = { bp.alternative_id: dict() for bp in self.model.bpt }
+        self.ct = { bp.id: dict() for bp in self.model.bpt }
         for aid, bp in product(self.aa_ori.keys(), self.model.bpt):
             ap = self.pt_sorted[aid]
             conc = self.model.concordance(ap, bp)
-            self.ct[bp.alternative_id][aid] = conc
+            self.ct[bp.id][aid] = conc
 
     def rebuild_tables(self):
         self.build_concordance_table()
@@ -193,7 +193,7 @@ class meta_electre_tri_profiles():
             if h_below[i_b] > h_above[i_a]:
                 size = (p_perfs[cid] - b_perfs[cid])
                 if r < h_below[i_b]:
-                    self.update_tables(profile.alternative_id, cid,
+                    self.update_tables(profile.id, cid,
                                        p_perfs[cid], i_b)
 
                     p_perfs[cid] = i_b
@@ -205,7 +205,7 @@ class meta_electre_tri_profiles():
             elif h_below[i_b] < h_above[i_a]:
                 size = (a_perfs[cid] - p_perfs[cid])
                 if r < h_above[i_a]:
-                    self.update_tables(profile.alternative_id, cid,
+                    self.update_tables(profile.id, cid,
                                        p_perfs[cid], i_a)
                     p_perfs[cid] = i_a
                     moved = True
@@ -217,7 +217,7 @@ class meta_electre_tri_profiles():
                 size = (p_perfs[cid] - b_perfs[cid])
                 r2 = random.random()
                 if r2 < h_below[i_b]:
-                    self.update_tables(profile.alternative_id, cid,
+                    self.update_tables(profile.id, cid,
                                        p_perfs[cid], i_b)
                     p_perfs[cid] = i_b
                     moved = True
@@ -229,7 +229,7 @@ class meta_electre_tri_profiles():
                 size = (a_perfs[cid] - p_perfs[cid])
                 r2 = random.random()
                 if r2 < h_above[i_a]:
-                    self.update_tables(profile.alternative_id, cid,
+                    self.update_tables(profile.id, cid,
                                        p_perfs[cid], i_a)
                     p_perfs[cid] = i_a
                     moved = True
@@ -239,7 +239,7 @@ class meta_electre_tri_profiles():
                     max_move = i_a
 
         if moved is False and max_val > 0:
-            self.update_tables(profile.alternative_id, max_cid,
+            self.update_tables(profile.id, max_cid,
                                p_perfs[max_cid], max_move)
             p_perfs[max_cid] = max_move
 

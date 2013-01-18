@@ -6,7 +6,7 @@ import unittest
 def compare_assignments(assignments, expected_assignments):
         ok = 1
         for aa in expected_assignments:
-            key = aa.alternative_id
+            key = aa.id
             if expected_assignments(key) != assignments(key):
                 print("Pessimits assignment of %s mismatch (%s <> %s)" %
                       (str(key), assignments(key),

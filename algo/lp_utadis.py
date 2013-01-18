@@ -115,13 +115,13 @@ class lp_utadis(object):
         l_coefs = [j for i in d_coefs.values() for j in i]
 
         if cat_nr < len(self.cat):
-            constraints.add(names = ['csup' + aa.alternative_id],
+            constraints.add(names = ['csup' + aa.id],
                             lin_expr =
                                 [[
                                  l_vars +
                                   ["u_%d" % cat_nr,
-                                   'x_' + aa.alternative_id,
-                                   'xp_' + aa.alternative_id],
+                                   'x_' + aa.id,
+                                   'xp_' + aa.id],
                                  l_coefs + [-1.0, 1.0, -1.0],
                                 ]],
                             senses = ["E"],
@@ -129,13 +129,13 @@ class lp_utadis(object):
                            )
 
         if cat_nr > 1:
-            constraints.add(names = ['cinf' + aa.alternative_id],
+            constraints.add(names = ['cinf' + aa.id],
                             lin_expr =
                                 [[
                                  l_vars +
                                   ["u_%d" % (cat_nr - 1),
-                                   'y_' + aa.alternative_id,
-                                   'yp_' + aa.alternative_id],
+                                   'y_' + aa.id,
+                                   'yp_' + aa.id],
                                  l_coefs + [-1.0, -1.0, 1.0],
                                 ]],
                             senses = ["E"],
@@ -148,7 +148,7 @@ class lp_utadis(object):
         # sum ((sum w_it) + k * w_it+1) - u_k + x_j - x'_j <= -d1
         # sum ((sum w_it) + k * w_it+1) - u_k - y_j + y'_j >= d2
         for aa in aas:
-            self.encode_constraint_cplex(aa, pt[aa.alternative_id])
+            self.encode_constraint_cplex(aa, pt[aa.id])
 
         # sum (sum w_it) = 1
         constraints = self.lp.linear_constraints
@@ -203,7 +203,7 @@ class lp_utadis(object):
         # sum ((sum w_it) + k * w_it+1) - u_k + x_j <= -d1
         # sum ((sum w_it) + k * w_it+1) - u_k - y_j >= d2
         for i, aa in enumerate(aas):
-            d_coefs = self.compute_constraint(aa, pt[aa.alternative_id])
+            d_coefs = self.compute_constraint(aa, pt[aa.id])
 
             cat_nr = self.cat[aa.category_id]
 

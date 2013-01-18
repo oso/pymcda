@@ -29,7 +29,7 @@ class meta_electre_tri_profiles4():
     def sort_alternative_by_category(self, aa):
         aa_by_cat = {}
         for a in aa:
-            aid = a.alternative_id
+            aid = a.id
             cat = self.cat[a.category_id]
             if cat in aa_by_cat:
                 aa_by_cat[cat].append(aid)
@@ -144,7 +144,7 @@ class meta_electre_tri_profiles4():
         self.good = 0
         self.aa = alternatives_assignments()
         for aa in self.aa_ori.values():
-            aid = aa.alternative_id
+            aid = aa.id
             cat = self.get_alternative_assignment(aid)
             self.aa.append(alternative_assignment(aid, cat))
 
@@ -153,11 +153,11 @@ class meta_electre_tri_profiles4():
                 self.good += 1
 
     def build_concordance_table(self):
-        self.ct = { bp.alternative_id: dict() for bp in self.model.bpt }
+        self.ct = { bp.id: dict() for bp in self.model.bpt }
         for aid, bp in product(self.aa_ori.keys(), self.model.bpt):
             ap = self.pt_sorted[aid]
             conc = self.model.concordance(ap, bp)
-            self.ct[bp.alternative_id][aid] = conc
+            self.ct[bp.id][aid] = conc
 
     def rebuild_tables(self):
         self.build_concordance_table()
@@ -200,7 +200,7 @@ class meta_electre_tri_profiles4():
         random.shuffle(cids)
 
         for cid in cids:
-            ct = self.ct[profile.alternative_id]
+            ct = self.ct[profile.id]
 
             h_below = self.compute_below_histogram(cid, profile,
                                                    below, cat_b,
@@ -219,7 +219,7 @@ class meta_electre_tri_profiles4():
             r = random.uniform(0, 1)
 
             if r <= h[i]:
-                self.update_tables(profile.alternative_id, cid,
+                self.update_tables(profile.id, cid,
                                    p_perfs[cid], i)
                 p_perfs[cid] = i
                 moved = True

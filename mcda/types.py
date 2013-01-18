@@ -350,13 +350,13 @@ class performance_table(mcda_dict):
 
     def __init__(self, l=[]):
         for i in l:
-            self[i.alternative_id] = i
+            self[i.id] = i
 
     def copy(self):
         return deepcopy(self)
 
     def append(self, ap):
-        self[ap.alternative_id] = ap
+        self[ap.id] = ap
 
     def __call__(self, id):
         return self[id].performances
@@ -493,8 +493,8 @@ class performance_table(mcda_dict):
 
 class alternative_performances(mcda_object):
 
-    def __init__(self, alternative_id=None, performances=None):
-        self.alternative_id = alternative_id
+    def __init__(self, id=None, performances=None):
+        self.id = id
         if performances is None:
             self.performances = {}
         else:
@@ -504,12 +504,12 @@ class alternative_performances(mcda_object):
         return self.performances[criterion_id]
 
     def __repr__(self):
-        return "%s: %s" % (self.alternative_id, self.performances)
+        return "%s: %s" % (self.id, self.performances)
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('alternativePerformances')
         altid = ElementTree.SubElement(xmcda, 'alternativeID')
-        altid.text = self.alternative_id
+        altid.text = self.id
 
         for crit_id, val in self.performances.iteritems():
             perf = ElementTree.SubElement(xmcda, 'performance')
@@ -526,7 +526,7 @@ class alternative_performances(mcda_object):
             raise TypeError('alternativePerformances::invalid tag')
 
         altid = xmcda.find('.//alternativeID')
-        self.alternative_id = altid.text
+        self.id = altid.text
 
         tag_list = xmcda.getiterator('performance')
         for tag in tag_list:
@@ -1249,7 +1249,7 @@ class alternatives_assignments(mcda_dict):
 
     def __init__(self, l=[]):
         for i in l:
-            self[i.alternative_id] = i
+            self[i.id] = i
 
     def __call__(self, id):
         return self[id].category_id
@@ -1258,13 +1258,13 @@ class alternatives_assignments(mcda_dict):
         return "alternatives_assignments(%s)" % self.values()
 
     def append(self, aa):
-        self[aa.alternative_id] = aa
+        self[aa.id] = aa
 
     def get_alternatives_in_category(self, category_id):
         l = []
         for aa in self:
             if aa.is_in_category(category_id):
-                l.append(aa.alternative_id)
+                l.append(aa.id)
 
         return l
 
@@ -1328,12 +1328,12 @@ class alternatives_assignments(mcda_dict):
 
 class alternative_assignment(mcda_object):
 
-    def __init__(self, alternative_id=None, category_id=None):
-        self.alternative_id = alternative_id
+    def __init__(self, id=None, category_id=None):
+        self.id = id
         self.category_id = category_id
 
     def __repr__(self):
-        return "%s: %s" % (self.alternative_id, self.category_id)
+        return "%s: %s" % (self.id, self.category_id)
 
     def is_in_category(self, category_id):
         if self.category_id == category_id:
@@ -1344,7 +1344,7 @@ class alternative_assignment(mcda_object):
     def to_xmcda(self):
         xmcda = ElementTree.Element('alternativeAffectation')
         altid = ElementTree.SubElement(xmcda, 'alternativeID')
-        altid.text = self.alternative_id
+        altid.text = self.id
         catid = ElementTree.SubElement(xmcda, 'categoryID')
         catid.text = self.category_id
         return xmcda
@@ -1354,7 +1354,7 @@ class alternative_assignment(mcda_object):
             raise TypeError('alternativeAffectation::invalid tag')
 
         altid = xmcda.find('alternativeID')
-        self.alternative_id = altid.text
+        self.id = altid.text
         catid = xmcda.find('categoryID')
         self.category_id = catid.text
 

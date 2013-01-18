@@ -230,8 +230,8 @@ class QGraphicsScene_etri(QtGui.QGraphicsScene):
         for profile in [self.worst, self.best]:
             item, text_items = self.__create_profile(profile)
             self.addItem(item)
-            self.profiles_items[profile.alternative_id] = item
-            self.profiles_text_items[profile.alternative_id] = text_items
+            self.profiles_items[profile.id] = item
+            self.profiles_text_items[profile.id] = text_items
             for txtitem in text_items:
                 self.addItem(txtitem)
 
