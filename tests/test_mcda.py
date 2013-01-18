@@ -288,6 +288,11 @@ class tests_csv(unittest.TestCase):
                                                  "assignment")
         self.assertEqual(aa, swd.aa)
 
+    def test005(self):
+        cats = categories().from_csv(self.csvreader, "category",
+                                     rank_col = "rank")
+        self.assertEqual(cats, swd.cats)
+
 test_classes = [tests_xmcda, tests_segment, tests_piecewise_linear,
                 tests_csv]
 
