@@ -1079,6 +1079,31 @@ class categories(mcda_dict):
 
         return self
 
+    def from_csv(self, csvreader, cat_col, name_col = None,
+                 rank_col = None, disabled_col = None):
+        cols = None
+        for row in csvreader:
+            if row[0] == cat_col:
+                cols = {}
+                for i, val in enumerate(row[1:]):
+                    if val == rank_col:
+                        cols[i + 1] = "rank"
+                    if val == name_col:
+                        cols[i + 1] = "name"
+                    if val == disabled_col:
+                        cols[i + 1] = "disabled"
+            elif cols is not None and row[0] == '':
+                break
+            elif cols is not None:
+                c = category(row[0])
+                for i in cols.keys():
+                    if cols[i] == 'rank':
+                        setattr(c, cols[i], int(row[i]))
+                    else:
+                        setattr(c, cols[i], row[i])
+                self.append(c)
+        return self
+
 class category(mcda_object):
 
     def __init__(self, id=None, name=None, disabled=False, rank=None):
