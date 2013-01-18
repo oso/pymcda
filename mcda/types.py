@@ -352,9 +352,6 @@ class performance_table(mcda_dict):
         for i in l:
             self[i.id] = i
 
-    def copy(self):
-        return deepcopy(self)
-
     def append(self, ap):
         self[ap.id] = ap
 
@@ -1168,14 +1165,8 @@ class categories_profiles(mcda_dict):
     def __repr__(self):
         return "categories_profiles(%s)" % self.values()
 
-    def copy(self):
-        return deepcopy(self)
-
     def append(self, cp):
         self[cp.id] = cp
-
-    def copy(self):
-        return deepcopy(self)
 
     def get_ordered_profiles(self):
         lower_cat = { cp.value.lower: cp.id for cp in self }
