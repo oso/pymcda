@@ -169,6 +169,32 @@ def compute_maximal_number_of_coallitions(n):
         v += factorial(n) / (factorial(i) * factorial(n-i))
     return int(v)
 
+def display_coallitions(coallitions):
+    # Converting the list to a set remove duplicates
+    crits = list(set([i for c in coallitions for i in c]))
+    crits.sort()
+
+    coallitions.sort()
+
+    clen = {crit: len(crit) + 1 for crit in crits}
+
+    line = ""
+    for crit in crits:
+        line += "%s" % crit + " " * (clen[crit] - len(crit))
+    print(line)
+
+    for coallition in coallitions:
+        line = ""
+        for crit in crits:
+            if crit in coallition:
+                line += "x"
+            else:
+                line += " "
+
+            line += " " * (clen[crit] - 1)
+
+        print(line)
+
 def compute_degree_of_extremality(pt):
     results = { ap.id: 1 for ap in pt}
 
