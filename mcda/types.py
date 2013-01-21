@@ -40,7 +40,7 @@ class mcda_dict(dict):
         self[c.id] = c
 
     def to_list(self):
-        l = [item for item in self.values()]
+        l = self.values()
         l.sort(key = lambda x: x.id)
         return l
 
