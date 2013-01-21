@@ -39,6 +39,11 @@ class mcda_dict(dict):
     def append(self, c):
         self[c.id] = c
 
+    def to_list(self):
+        l = [item for item in self.values()]
+        l.sort(key = lambda x: x.id)
+        return l
+
 class mcda_object(object):
 
     def __eq__(self, other):
