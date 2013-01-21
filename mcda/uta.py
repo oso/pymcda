@@ -1,7 +1,6 @@
 import bisect
 
 from tools.utils import normalize_criteria_weights
-from tools.utils import get_categories_upper_limits
 from mcda.types import alternative_value, alternatives_values
 from mcda.types import alternative_assignment
 from mcda.types import alternatives_assignments
@@ -44,7 +43,7 @@ class utadis(uta):
                  cat_values = None):
         super(utadis, self).__init__(criteria, cvs, cfs)
         self.cat_values = cat_values
-        upper = get_categories_upper_limits(cat_values)
+        upper = cat_values.get_upper_limits()
         self.cat_limits = sorted(upper.iteritems(),
                                  key = lambda (k, v): (v, k))
         self.limits = [ cat_limit[1] for cat_limit in self.cat_limits ]

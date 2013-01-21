@@ -65,18 +65,6 @@ def compute_ca(aa, aa2, alist=None):
 
     return ok / total
 
-def get_categories_upper_limits(categories_values):
-    d = {}
-    for cv in categories_values:
-        d[cv.id] = cv.value.upper
-    return d
-
-def get_categories_lower_limits(categories_values):
-    d = {}
-    for cv in categories_values:
-        d[cv.id] = cv.value.lower
-    return d
-
 def powerset(iterable):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
     s = list(iterable)
