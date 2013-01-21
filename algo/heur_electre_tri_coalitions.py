@@ -47,7 +47,7 @@ class heur_electre_tri_weights():
 
         return tuple(winning), tuple(loosing)
 
-    def run(self, n):
+    def compute_coalitions_probabilities(self, n):
         coalitions = {}
         for i in range(n):
             aid = self.sorted_extrem[i][0]
@@ -66,7 +66,8 @@ class heur_electre_tri_weights():
                              reverse = True)
         return coalitions
 
-    def cut(self, coal_proba, k = 0):
+    def find_coalitions(self, n, k = 0):
+        coal_proba = self.compute_coalitions_probabilities(n)
         coalitions = []
         for c in coal_proba:
             if c[1] > k:
@@ -93,9 +94,8 @@ if __name__ == "__main__":
                                [pt.get_best(m.criteria)],
                                [[pt[aid] for aid in aids[:100]]])
 
-    coal_proba = heur.run(100)
+    coal2 = heur.find_coalitions(100)
     print("List of coalitions found:")
-    coal2 = heur.cut(coal_proba, 0)
     display_coalitions(coal2)
 
     coal_ni = list((set(coal) ^ set(coal2)) & set(coal))
