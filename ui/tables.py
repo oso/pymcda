@@ -9,6 +9,21 @@ COL_NAME = 0
 COL_DIRECTION = 1
 COL_WEIGHT = 2
 
+class float_delegate(QtGui.QItemDelegate):
+
+    def __init__(self, parent=None, columns=None):
+        super(QtGui.QItemDelegate, self).__init__(parent)
+        self.columns = columns
+
+    def createEditor(self, parent, option, index):
+        if self.columns == None or index.column() in self.columns:
+            line = QtGui.QLineEdit(parent)
+            expr = QtCore.QRegExp("[0-9]*\.?[0-9]*")
+            line.setValidator(QtGui.QRegExpValidator(expr, self))
+            return line
+        else:
+            QtGui.QItemDelegate.createEditor(self, parent, option, index)
+
 class qt_criteria_table(QtGui.QTableWidget):
 
     def __init__(self, parent = None):
@@ -121,18 +136,135 @@ class qt_criteria_table(QtGui.QTableWidget):
         for c in cs:
             self.add_criterion(c, cvs[c.id])
 
+class qt_performance_table(QtGui.QTableWidget):
+
+    def __init__(self, crits = None, parent = None):
+        super(QtGui.QTableWidget, self).__init__(parent)
+        self.parent = parent
+        self.col_crit = {}
+        self.row_ap = {}
+
+        self.setItemDelegate(float_delegate(self))
+
+        self.connect(self, QtCore.SIGNAL("cellChanged(int,int)"),
+                     self.__cell_changed)
+
+        if crits is not None:
+            self.add_criteria(crits)
+
+    def __cell_changed(self, row, col):
+        if self.col_crit.has_key(col) is False or   \
+            self.row_ap.has_key(row) is False:
+            return
+
+        ap = self.row_ap[row]
+        crit = self.col_crit[col]
+
+        item = self.cellWidget(row, col)
+        if item == None:
+            return
+
+        try:
+            value = str(item.text())
+            if value.find('.') == -1:
+               ap.performances[crit.id] = int(value)
+            else:
+               ap.performances[crit.id] = float(value)
+        except:
+            QtGui.QMessageBox.warning(self,
+                                      "Alternative [%s] %s"
+                                      % (alt.id, alt.name),
+                                      "Invalid evaluation")
+
+    def reset_table(self):
+        self.clear()
+        self.setRowCount(0)
+        self.setColumnCount(0)
+        self.col_crit = {}
+        self.row_ap = {}
+
+    def add_criterion(self, c):
+        col = self.columnCount()
+        self.insertColumn(col)
+        item = QtGui.QTableWidgetItem()
+        self.setHorizontalHeaderItem(col, item)
+        if c.name:
+            self.horizontalHeaderItem(col).setText(c.name)
+        else:
+            self.horizontalHeaderItem(col).setText(c.id)
+        if c.disabled is True:
+            self.setColumnHidden(col, True)
+        self.col_crit[col] = c
+
+    def add_criteria(self, cs):
+        for c in cs:
+            self.add_criterion(c)
+
+    def add_alternative_performances(self, a, ap):
+        row = self.rowCount()
+        self.insertRow(row)
+
+        item = QtGui.QTableWidgetItem()
+        self.setVerticalHeaderItem(row, item)
+        if a.name:
+            self.verticalHeaderItem(row).setText(a.name)
+        else:
+            self.verticalHeaderItem(row).setText(a.id)
+
+        performances = ap.performances
+        for col, crit in self.col_crit.iteritems():
+            item = QtGui.QTableWidgetItem()
+            if performances.has_key(crit.id):
+                 item.setText(str(performances[crit.id]))
+            self.setItem(row, col, item)
+
+        self.row_ap[row] = ap
+
+    def add_pt(self, alts, pt):
+        for a in alts:
+            self.add_alternative_performances(a, pt[a.id])
+
 if __name__ == "__main__":
     from tools.generate_random import generate_random_criteria
     from tools.generate_random import generate_random_criteria_weights
+    from tools.generate_random import generate_random_alternatives
+    from tools.generate_random import generate_random_performance_table
 
     c = generate_random_criteria(5)
     cw = generate_random_criteria_weights(c)
 
+    a = generate_random_alternatives(100)
+    pt = generate_random_performance_table(a, c)
+
     app = QtGui.QApplication(sys.argv)
 
+    layout = QtGui.QVBoxLayout()
+    tabs = QtGui.QTabWidget()
+    layout.addWidget(tabs)
+
+    # Criteria table
     table = qt_criteria_table()
     table.add_criteria(c, cw)
-    table.resize(640, 480)
-    table.show()
+
+    tab = QtGui.QWidget()
+    layout = QtGui.QVBoxLayout(tab)
+    layout.addWidget(table)
+    tabs.addTab(tab, "Criteria")
+
+    # Performance table
+    table = qt_performance_table(c)
+    table.add_pt(a, pt)
+
+    tab = QtGui.QWidget()
+    layout = QtGui.QVBoxLayout(tab)
+    layout.addWidget(table)
+    tabs.addTab(tab, "Performance table")
+
+    layout = QtGui.QVBoxLayout()
+    layout.addWidget(tabs)
+    dialog = QtGui.QDialog()
+    dialog.setLayout(layout)
+    dialog.resize(640, 480)
+    dialog.show()
 
     app.exec_()
