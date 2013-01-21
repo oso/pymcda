@@ -151,30 +151,30 @@ def powerset(iterable):
     s = list(iterable)
     return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
 
-def get_possible_coallitions(weights, lbda):
+def get_possible_coalitions(weights, lbda):
     l = []
-    for coallition in powerset(weights.keys()):
-        w = [ weights[cid].value for cid in coallition ]
+    for coalition in powerset(weights.keys()):
+        w = [ weights[cid].value for cid in coalition ]
         if sum(w) >= lbda:
-            l.append(coallition)
+            l.append(coalition)
     return l
 
-def get_number_of_possible_coallitions(weights, lbda):
-    return len(get_possible_coallitions(weights, lbda))
+def get_number_of_possible_coalitions(weights, lbda):
+    return len(get_possible_coalitions(weights, lbda))
 
-def compute_maximal_number_of_coallitions(n):
+def compute_maximal_number_of_coalitions(n):
     k = int(ceil(n/2))
     v = 0
     for i in range(k, n + 1):
         v += factorial(n) / (factorial(i) * factorial(n-i))
     return int(v)
 
-def display_coallitions(coallitions):
+def display_coalitions(coalitions):
     # Converting the list to a set remove duplicates
-    crits = list(set([i for c in coallitions for i in c]))
+    crits = list(set([i for c in coalitions for i in c]))
     crits.sort()
 
-    coallitions.sort()
+    coalitions.sort()
 
     clen = {crit: len(crit) + 1 for crit in crits}
 
@@ -183,10 +183,10 @@ def display_coallitions(coallitions):
         line += "%s" % crit + " " * (clen[crit] - len(crit))
     print(line)
 
-    for coallition in coallitions:
+    for coalition in coalitions:
         line = ""
         for crit in crits:
-            if crit in coallition:
+            if crit in coalition:
                 line += "x"
             else:
                 line += " "

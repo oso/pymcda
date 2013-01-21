@@ -261,7 +261,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_profiles
     from tools.utils import normalize_criteria_weights
     from tools.utils import display_assignments_and_pt
-    from tools.utils import get_number_of_possible_coallitions
+    from tools.utils import get_number_of_possible_coalitions
     from tools.sorted import sorted_performance_table
     from mcda.electre_tri import electre_tri_bm
     from mcda.types import alternative_performances
@@ -286,8 +286,8 @@ if __name__ == "__main__":
     model.bpt.display(criterion_ids=cids)
     model.cv.display(criterion_ids=cids)
     print("lambda: %.7s" % model.lbda)
-    print("number of possible coallitions: %d" %
-          get_number_of_possible_coallitions(model.cv, model.lbda))
+    print("number of possible coalitions: %d" %
+          get_number_of_possible_coalitions(model.cv, model.lbda))
 
     model2 = model.copy()
     model2.bpt = generate_random_profiles(model.profiles, model.criteria)

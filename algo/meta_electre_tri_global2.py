@@ -52,7 +52,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_alternatives
     from tools.generate_random import generate_random_performance_table
     from tools.utils import display_assignments_and_pt
-    from tools.utils import get_possible_coallitions
+    from tools.utils import get_possible_coalitions
     from mcda.types import alternative_performances
     from mcda.electre_tri import electre_tri
     from ui.graphic import display_electre_tri_models
@@ -144,17 +144,17 @@ if __name__ == "__main__":
     print("Good assignments: %g %%" % (float(total-nok)/total*100))
     print("Bad assignments : %g %%" % (float(nok)/total*100))
 
-    coal1 = get_possible_coallitions(model.cv, model.lbda)
-    coal2 = get_possible_coallitions(model2.cv, model2.lbda)
+    coal1 = get_possible_coalitions(model.cv, model.lbda)
+    coal2 = get_possible_coalitions(model2.cv, model2.lbda)
     coali = list(set(coal1) & set(coal2))
     coal1e = list(set(coal1) ^ set(coali))
     coal2e = list(set(coal2) ^ set(coali))
 
-    print("Number of coallitions original: %d"
+    print("Number of coalitions original: %d"
           % len(coal1))
-    print("Number of coallitions learned: %d"
+    print("Number of coalitions learned: %d"
           % len(coal2))
-    print("Number of common coallitions: %d"
+    print("Number of common coalitions: %d"
           % len(coali))
     print("Coallitions in original and not in learned: %s"
           % '; '.join(map(str, coal1e)))

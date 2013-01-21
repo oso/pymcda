@@ -15,9 +15,9 @@ def powerset(iterable):
     s = list(iterable)
     return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
 
-def pprint_coallition(coallition):
+def pprint_coalition(coalition):
     string = ""
-    for i in coallition:
+    for i in coalition:
 
         if string[:-1] != '':
             string += '+'
@@ -29,29 +29,29 @@ def pprint_coallition(coallition):
 
     return string
 
-def sum_weights(cw, coallition):
+def sum_weights(cw, coalition):
     w = 0
-    for c in coallition:
+    for c in coalition:
         w += cw[c].value
     return w
 
-def one_loop(crits, lbda_min, coallitions):
+def one_loop(crits, lbda_min, coalitions):
     cw = generate_random_criteria_weights(crits)
     lbda = random.uniform(lbda_min, 1)
 
     t = test_result("")
-    t["ncoallitions"] = 0
+    t["ncoalitions"] = 0
     for i in range(len(crits) + 1):
         t["%d_criteria" % i] = 0
 
-    for coallition in coallitions:
-        w = sum_weights(cw, coallition)
+    for coalition in coalitions:
+        w = sum_weights(cw, coalition)
         if w >= lbda:
-            t[pprint_coallition(coallition)] = 1
-            t["ncoallitions"] += 1
-            t["%d_criteria" % len(coallition)] += 1
+            t[pprint_coalition(coalition)] = 1
+            t["ncoalitions"] += 1
+            t["%d_criteria" % len(coalition)] += 1
         else:
-            t[pprint_coallition(coallition)] = 0
+            t[pprint_coalition(coalition)] = 0
 
     return t
 
@@ -66,9 +66,9 @@ def run_test(m, n, lbda_min, lbda_max, filename):
 
     # Run the algorithm
     c = generate_random_criteria(n)
-    coallitions = [ i for i in powerset(c.keys()) ]
+    coalitions = [ i for i in powerset(c.keys()) ]
     for i in range(m):
-        t = one_loop(c, lbda_min, coallitions)
+        t = one_loop(c, lbda_min, coalitions)
         t.test_name = "%d-%d" % (i, n)
         t['i'] = i
         t['nc'] = n
@@ -78,9 +78,9 @@ def run_test(m, n, lbda_min, lbda_max, filename):
 
         if initialized is False:
             fields = ['i', 'nc', 'lbda_min', 'lbda_max'] \
-                      + [pprint_coallition(j) for j in coallitions] \
+                      + [pprint_coalition(j) for j in coalitions] \
                       + ["%d_criteria" % i for i in range(len(c) + 1)] \
-                      + ["ncoallitions"]
+                      + ["ncoalitions"]
             writer.writerow(fields)
             initialized = True
 
@@ -92,15 +92,15 @@ def run_test(m, n, lbda_min, lbda_max, filename):
 
     # Perform a summary
     writer.writerow(['', ''])
-    t = results.summary(['nc', 'lbda_min', 'lbda_max', 'n'], [pprint_coallition(j)
-                         for j in coallitions], [], [])
+    t = results.summary(['nc', 'lbda_min', 'lbda_max', 'n'], [pprint_coalition(j)
+                         for j in coalitions], [], [])
     t.tocsv(writer)
 
     writer.writerow(['', ''])
     t = results.summary(['nc', 'lbda_min', 'lbda_max', 'n'],
                         ["%d_criteria" % i for i in range(len(c) + 1)] \
-                        + ['ncoallitions'], ['ncoallitions'],
-                        ['ncoallitions'])
+                        + ['ncoalitions'], ['ncoalitions'],
+                        ['ncoalitions'])
     t.tocsv(writer)
 
 if __name__ == "__main__":
@@ -144,7 +144,7 @@ if __name__ == "__main__":
 
     while not options.filename:
         dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        default_filename = "data/test_etri_coallitions-%s.csv" % dt
+        default_filename = "data/test_etri_coalitions-%s.csv" % dt
         options.filename = raw_input("File to save CSV data [%s] ? " \
                                      % default_filename)
         if not options.filename:
