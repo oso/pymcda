@@ -338,7 +338,7 @@ if __name__ == "__main__":
     from tools.utils import normalize_criteria_weights
     from tools.utils import compute_ca
     from tools.generate_random import generate_alternatives
-    from tools.generate_random import generate_random_categories
+    from tools.generate_random import generate_categories
     from tools.generate_random import generate_criteria
     from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
@@ -351,7 +351,7 @@ if __name__ == "__main__":
     c = generate_criteria(2)
     cv = generate_random_criteria_values(c, seed = 6)
     normalize_criteria_weights(cv)
-    cat = generate_random_categories(3)
+    cat = generate_categories(3)
 
     cfs = generate_random_criteria_functions(c, nseg_min = 3, nseg_max = 3)
     catv = generate_random_categories_values(cat)

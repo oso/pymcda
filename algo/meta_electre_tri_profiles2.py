@@ -127,7 +127,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_criteria
     from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
-    from tools.generate_random import generate_random_categories
+    from tools.generate_random import generate_categories
     from tools.generate_random import generate_random_profiles
     from tools.generate_random import generate_random_categories_profiles
     from tools.utils import normalize_criteria_weights
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     best = alternative_performances("best", {crit.id: 1 for crit in c})
     pt = generate_random_performance_table(a, c, 1234)
 
-    cat = generate_random_categories(2)
+    cat = generate_categories(2)
     cps = generate_random_categories_profiles(cat)
     b = cps.get_ordered_profiles()
     bpt = generate_random_profiles(b, c, 2345)

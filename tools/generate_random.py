@@ -92,7 +92,7 @@ def generate_random_performance_table(alts, crits, seed = None, k = 3,
 
     return pt
 
-def generate_random_categories(number, prefix='cat'):
+def generate_categories(number, prefix='cat'):
     cats = categories()
     for i in range(number):
         c = category()
@@ -202,7 +202,7 @@ def generate_random_electre_tri_bm_model(ncrit, ncat, seed = None, k = 3,
 
     c = generate_criteria(ncrit)
     cv = generate_random_criteria_weights(c, seed, k)
-    cat = generate_random_categories(ncat)
+    cat = generate_categories(ncat)
     cps = generate_random_categories_profiles(cat)
     b = cps.get_ordered_profiles()
     bpt = generate_random_profiles(b, c, None, k, worst, best)
@@ -221,7 +221,7 @@ if __name__ == "__main__":
     print(pt)
     bpt = generate_random_profiles(alts, crits)
     print(bpt)
-    cats = generate_random_categories(3)
+    cats = generate_categories(3)
     print(cats)
     cps = generate_random_categories_profiles(cats)
     print(cps)

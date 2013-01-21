@@ -14,7 +14,7 @@ from tools.generate_random import generate_alternatives
 from tools.generate_random import generate_criteria
 from tools.generate_random import generate_random_criteria_values
 from tools.generate_random import generate_random_performance_table
-from tools.generate_random import generate_random_categories
+from tools.generate_random import generate_categories
 from tools.generate_random import generate_random_profiles
 from tools.generate_random import generate_random_categories_profiles
 from tools.utils import compute_ca
@@ -30,7 +30,7 @@ def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c)
 
-    cat = generate_random_categories(ncat)
+    cat = generate_categories(ncat)
     cps = generate_random_categories_profiles(cat)
     b = cps.get_ordered_profiles()
     bpt = generate_random_profiles(b, c)

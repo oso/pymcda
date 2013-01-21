@@ -16,7 +16,7 @@ from tools.generate_random import generate_alternatives
 from tools.generate_random import generate_criteria
 from tools.generate_random import generate_random_criteria_values
 from tools.generate_random import generate_random_performance_table
-from tools.generate_random import generate_random_categories
+from tools.generate_random import generate_categories
 from tools.generate_random import generate_random_categories_values
 from tools.generate_random import generate_random_criteria_functions
 from tools.utils import compute_ca
@@ -29,7 +29,7 @@ def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
     c = generate_criteria(nc)
     cv = generate_random_criteria_values(c, seed)
     normalize_criteria_weights(cv)
-    cat = generate_random_categories(ncat)
+    cat = generate_categories(ncat)
 
     cfs = generate_random_criteria_functions(c, nseg_min = ns,
                                              nseg_max = ns)
