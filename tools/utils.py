@@ -151,7 +151,7 @@ def powerset(iterable):
     s = list(iterable)
     return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
 
-def get_winning_coalitions(weights, lbda):
+def compute_winning_coalitions(weights, lbda):
     l = []
     for coalition in powerset(weights.keys()):
         w = [ weights[cid].value for cid in coalition ]
@@ -159,8 +159,8 @@ def get_winning_coalitions(weights, lbda):
             l.append(coalition)
     return l
 
-def get_number_of_winning_coalitions(weights, lbda):
-    return len(get_winning_coalitions(weights, lbda))
+def compute_number_of_winning_coalitions(weights, lbda):
+    return len(compute_winning_coalitions(weights, lbda))
 
 def compute_maximal_number_of_coalitions(n):
     k = int(ceil(n/2))

@@ -9,7 +9,7 @@ from algo.heur_electre_tri_coalitions import heur_electre_tri_coalitions
 from mcda.generate import generate_random_electre_tri_bm_model
 from mcda.generate import generate_alternatives
 from mcda.generate import generate_random_performance_table
-from tools.utils import get_winning_coalitions
+from tools.utils import compute_winning_coalitions
 from tools.utils import add_errors_in_assignments
 from test_utils import test_result, test_results
 
@@ -30,7 +30,7 @@ def test_heur_etri_coalitions(seed, na, nc, ncat, pcexamples, pcerrors):
     coal2 = heur.find_coalitions(int(na * pcexamples))
 
     # Compute the original winning coallitions
-    coal = get_winning_coalitions(model.cv, model.lbda)
+    coal = compute_winning_coalitions(model.cv, model.lbda)
 
     # Compare orignal and computed coalitions
     coal_ni = list((set(coal) ^ set(coal2)) & set(coal))

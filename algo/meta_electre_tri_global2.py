@@ -52,7 +52,7 @@ if __name__ == "__main__":
     from mcda.generate import generate_alternatives
     from mcda.generate import generate_random_performance_table
     from tools.utils import display_assignments_and_pt
-    from tools.utils import get_winning_coalitions
+    from tools.utils import compute_winning_coalitions
     from mcda.types import alternative_performances
     from mcda.electre_tri import electre_tri
     from ui.graphic import display_electre_tri_models
@@ -144,8 +144,8 @@ if __name__ == "__main__":
     print("Good assignments: %g %%" % (float(total-nok)/total*100))
     print("Bad assignments : %g %%" % (float(nok)/total*100))
 
-    coal1 = get_winning_coalitions(model.cv, model.lbda)
-    coal2 = get_winning_coalitions(model2.cv, model2.lbda)
+    coal1 = compute_winning_coalitions(model.cv, model.lbda)
+    coal2 = compute_winning_coalitions(model2.cv, model2.lbda)
     coali = list(set(coal1) & set(coal2))
     coal1e = list(set(coal1) ^ set(coali))
     coal2e = list(set(coal2) ^ set(coali))
