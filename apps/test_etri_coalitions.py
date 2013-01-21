@@ -6,7 +6,7 @@ import datetime
 import random
 from itertools import chain, combinations, product
 
-from tools.generate_random import generate_random_criteria
+from tools.generate_random import generate_criteria
 from tools.generate_random import generate_random_criteria_weights
 from test_utils import test_result, test_results
 
@@ -65,7 +65,7 @@ def run_test(m, n, lbda_min, lbda_max, filename):
     initialized = False
 
     # Run the algorithm
-    c = generate_random_criteria(n)
+    c = generate_criteria(n)
     coalitions = [ i for i in powerset(c.keys()) ]
     for i in range(m):
         t = one_loop(c, lbda_min, coalitions)

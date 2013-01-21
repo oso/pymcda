@@ -106,12 +106,12 @@ class sorted_performance_table():
 
 if __name__ == "__main__":
     from tools.generate_random import generate_alternatives
-    from tools.generate_random import generate_random_criteria
+    from tools.generate_random import generate_criteria
     from tools.generate_random import generate_random_performance_table
     import time
 
     a = generate_alternatives(500)
-    c = generate_random_criteria(5)
+    c = generate_criteria(5)
     pt = generate_random_performance_table(a, c, 1234)
 
     sorted_pt = sorted_performance_table(pt)

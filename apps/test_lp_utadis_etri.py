@@ -14,7 +14,7 @@ from mcda.uta import utadis
 from mcda.electre_tri import electre_tri
 from algo.lp_utadis import lp_utadis
 from tools.generate_random import generate_alternatives
-from tools.generate_random import generate_random_criteria
+from tools.generate_random import generate_criteria
 from tools.generate_random import generate_random_criteria_values
 from tools.generate_random import generate_random_performance_table
 from tools.generate_random import generate_random_categories
@@ -29,7 +29,7 @@ from test_utils import test_result, test_results
 
 def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
     # Generate a random ELECTRE TRI model and assignment examples
-    c = generate_random_criteria(nc)
+    c = generate_criteria(nc)
     cv = generate_random_criteria_values(c, seed)
     normalize_criteria_weights(cv)
     cat = generate_random_categories(ncat)

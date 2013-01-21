@@ -174,7 +174,7 @@ class meta_electre_tri_profiles():
 
 if __name__ == "__main__":
     from tools.generate_random import generate_alternatives
-    from tools.generate_random import generate_random_criteria
+    from tools.generate_random import generate_criteria
     from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
     from tools.generate_random import generate_random_categories
@@ -189,7 +189,7 @@ if __name__ == "__main__":
 
     a = generate_alternatives(10000)
 
-    c = generate_random_criteria(9)
+    c = generate_criteria(9)
     cv = generate_random_criteria_values(c, 4567)
     normalize_criteria_weights(cv)
     worst = alternative_performances("worst", {crit.id: 0 for crit in c})

@@ -339,7 +339,7 @@ if __name__ == "__main__":
     from tools.utils import compute_ca
     from tools.generate_random import generate_alternatives
     from tools.generate_random import generate_random_categories
-    from tools.generate_random import generate_random_criteria
+    from tools.generate_random import generate_criteria
     from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
     from tools.generate_random import generate_random_criteria_functions
@@ -348,7 +348,7 @@ if __name__ == "__main__":
     from tools.utils import display_assignments_and_pt
 
     # Generate an utadis model
-    c = generate_random_criteria(2)
+    c = generate_criteria(2)
     cv = generate_random_criteria_values(c, seed = 6)
     normalize_criteria_weights(cv)
     cat = generate_random_categories(3)

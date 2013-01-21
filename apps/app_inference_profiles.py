@@ -10,7 +10,7 @@ from tools.generate_random import generate_random_electre_tri_bm_model
 from tools.generate_random import generate_random_profiles
 from tools.generate_random import generate_alternatives
 from tools.generate_random import generate_random_performance_table
-from tools.generate_random import generate_random_criteria
+from tools.generate_random import generate_criteria
 from tools.sorted import sorted_performance_table
 from tools.utils import compute_ca
 from algo.meta_electre_tri_profiles4 import meta_electre_tri_profiles4
@@ -327,7 +327,7 @@ class qt_mainwindow(QtGui.QMainWindow):
         ncat = self.spinbox_categories.value()
 
         # FIXME
-        crit = generate_random_criteria(ncrit)
+        crit = generate_criteria(ncrit)
         self.worst = alternative_performances("worst",
                                     {c.id: 0 for c in crit})
         self.best = alternative_performances("best",

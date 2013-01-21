@@ -23,7 +23,7 @@ def generate_alternatives(number, prefix='a'):
 
     return alts
 
-def generate_random_criteria(number, prefix='c'):
+def generate_criteria(number, prefix='c'):
     crits = criteria()
     for i in range(number):
         c = criterion("%s%d" % (prefix, i+1))
@@ -200,7 +200,7 @@ def generate_random_electre_tri_bm_model(ncrit, ncat, seed = None, k = 3,
     if seed:
         random.seed(seed)
 
-    c = generate_random_criteria(ncrit)
+    c = generate_criteria(ncrit)
     cv = generate_random_criteria_weights(c, seed, k)
     cat = generate_random_categories(ncat)
     cps = generate_random_categories_profiles(cat)
@@ -213,7 +213,7 @@ def generate_random_electre_tri_bm_model(ncrit, ncat, seed = None, k = 3,
 if __name__ == "__main__":
     alts = generate_alternatives(10)
     print(alts)
-    crits = generate_random_criteria(5)
+    crits = generate_criteria(5)
     print(crits)
     cv = generate_random_criteria_values(crits)
     print(cv)

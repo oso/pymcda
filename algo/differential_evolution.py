@@ -325,7 +325,7 @@ def differential_evolution(ngen, pop, mc, cr, c, a, aa, pt, cps):
 
 if __name__ == "__main__":
     from tools.generate_random import generate_alternatives
-    from tools.generate_random import generate_random_criteria
+    from tools.generate_random import generate_criteria
     from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
     from tools.generate_random import generate_random_categories
@@ -335,7 +335,7 @@ if __name__ == "__main__":
 
     # Create an original arbitrary model
     a = generate_alternatives(200)
-    c = generate_random_criteria(5)
+    c = generate_criteria(5)
     cv = generate_random_criteria_values(c, 4567)
     normalize_weights_values(cv)
     pt = generate_random_performance_table(a, c, 1234)

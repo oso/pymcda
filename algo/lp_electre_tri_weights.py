@@ -363,7 +363,7 @@ if __name__ == "__main__":
     import time
     import random
     from tools.generate_random import generate_alternatives
-    from tools.generate_random import generate_random_criteria
+    from tools.generate_random import generate_criteria
     from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
     from tools.generate_random import generate_random_categories
@@ -379,7 +379,7 @@ if __name__ == "__main__":
     print("Solver used: %s" % solver)
     # Original Electre Tri model
     a = generate_alternatives(15000)
-    c = generate_random_criteria(10)
+    c = generate_criteria(10)
     cv = generate_random_criteria_values(c, 890)
     normalize_criteria_weights(cv)
     pt = generate_random_performance_table(a, c)
