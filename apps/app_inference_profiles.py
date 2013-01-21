@@ -11,7 +11,7 @@ from mcda.generate import generate_random_profiles
 from mcda.generate import generate_alternatives
 from mcda.generate import generate_random_performance_table
 from mcda.generate import generate_criteria
-from tools.sorted import sorted_performance_table
+from mcda.pt_sorted import sorted_performance_table
 from tools.utils import compute_ca
 from algo.meta_electre_tri_profiles4 import meta_electre_tri_profiles4
 from ui.graphic import QGraphicsScene_etri

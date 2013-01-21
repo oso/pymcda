@@ -279,7 +279,7 @@ if __name__ == "__main__":
     from tools.utils import display_assignments_and_pt
     from tools.utils import add_errors_in_assignments
     from tools.utils import compute_ca
-    from tools.sorted import sorted_performance_table
+    from mcda.pt_sorted import sorted_performance_table
     from mcda.types import alternatives_assignments, performance_table
     from mcda.types import alternative_performances
     from mcda.electre_tri import electre_tri_bm

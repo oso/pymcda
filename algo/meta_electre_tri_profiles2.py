@@ -5,7 +5,7 @@ import math
 import random
 
 from mcda.types import performance_table
-from tools.sorted import sorted_performance_table
+from mcda.pt_sorted import sorted_performance_table
 
 def get_wrong_assignment(aa, aa_learned):
     l = list()
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     from mcda.generate import generate_categories_profiles
     from tools.utils import normalize_criteria_weights
     from tools.utils import display_assignments_and_pt
-    from tools.sorted import sorted_performance_table
+    from mcda.pt_sorted import sorted_performance_table
     from mcda.electre_tri import electre_tri_bm
     from ui.graphic import display_electre_tri_models
 

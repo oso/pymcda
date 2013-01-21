@@ -262,7 +262,7 @@ if __name__ == "__main__":
     from tools.utils import normalize_criteria_weights
     from tools.utils import display_assignments_and_pt
     from tools.utils import compute_number_of_winning_coalitions
-    from tools.sorted import sorted_performance_table
+    from mcda.pt_sorted import sorted_performance_table
     from mcda.electre_tri import electre_tri_bm
     from mcda.types import alternative_performances
     from mcda.types import performance_table

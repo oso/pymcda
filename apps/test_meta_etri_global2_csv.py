@@ -10,7 +10,7 @@ from mcda.electre_tri import electre_tri_bm
 from mcda.generate import generate_categories_profiles
 from mcda.generate import generate_random_profiles
 from mcda.generate import generate_random_criteria_weights
-from tools.sorted import sorted_performance_table
+from mcda.pt_sorted import sorted_performance_table
 from tools.utils import get_worst_alternative_performances
 from tools.utils import get_best_alternative_performances
 from tools.utils import compute_ca
