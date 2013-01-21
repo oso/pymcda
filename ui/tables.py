@@ -39,6 +39,32 @@ class qt_criteria_table(QtGui.QTableWidget):
         self.verticalHeader().setSortIndicatorShown(False)
         self.horizontalHeader().setHighlightSections(False)
 
+        self.connect(self, QtCore.SIGNAL("cellChanged(int,int)"),
+                     self.__cell_changed)
+        self.setItemDelegate(float_delegate(self, [COL_WEIGHT]))
+
+    def __cell_changed(self, row, col):
+        if col == COL_WEIGHT:
+            if self.row_crit.has_key(row) is False:
+                return
+
+            c, cv = self.row_crit[row]
+            item = self.cellWidget(row, col)
+            if item == None:
+                return
+
+            try:
+                value = str(item.text())
+                if value.find('.') == -1:
+                    cv.value = int(value)
+                else:
+                    cv.value = float(value)
+            except:
+                QtGui.QMessageBox.warning(self,
+                                          "Criterion [%s] %s"
+                                          % (c.id, c.name),
+                                          "Invalid weight value")
+
     def reset_table(self):
         self.clearContents()
         self.setRowCount(0)
