@@ -20,7 +20,6 @@ from mcda.generate import generate_categories
 from mcda.generate import generate_random_categories_values
 from mcda.generate import generate_random_criteria_functions
 from tools.utils import compute_ca
-from tools.utils import normalize_criteria_weights
 from tools.utils import add_errors_in_assignments
 from test_utils import test_result, test_results
 
@@ -28,7 +27,7 @@ def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
     # Generate a random ELECTRE TRI model and assignment examples
     c = generate_criteria(nc)
     cv = generate_random_criteria_values(c, seed)
-    normalize_criteria_weights(cv)
+    cv.normalize()
     cat = generate_categories(ncat)
 
     cfs = generate_random_criteria_functions(c, nseg_min = ns,

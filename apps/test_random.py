@@ -3,7 +3,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 from mcda.generate import generate_criteria
 from mcda.generate import generate_random_criteria_weights
 from mcda.generate import generate_random_criteria_values
-from tools.utils import normalize_criteria_weights
 
 n = 10000
 
@@ -26,7 +25,7 @@ f = open('data/random_2.txt', 'wb')
 
 for i in range(n):
     cw = generate_random_criteria_values(c)
-    normalize_criteria_weights(cw)
+    cw.normalize()
     for cid in cids:
         f.write(str(cw[cid].value) + "\t")
     f.write("\n")

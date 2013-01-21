@@ -383,14 +383,13 @@ if __name__ == "__main__":
     from mcda.generate import generate_categories
     from mcda.generate import generate_random_profiles
     from mcda.generate import generate_categories_profiles
-    from tools.utils import normalize_criteria_weights
     from mcda.electre_tri import electre_tri
     from mcda.types import alternative_performances
 
     a = generate_alternatives(1)
     c = generate_criteria(5)
     cv = generate_random_criteria_values(c, 1234)
-    normalize_criteria_weights(cv)
+    cv.normalize()
 
     worst = alternative_performances("worst", {crit.id: 0 for crit in c})
     best = alternative_performances("best", {crit.id: 1 for crit in c})

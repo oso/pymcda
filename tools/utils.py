@@ -7,14 +7,6 @@ from math import factorial, ceil
 from mcda.types import alternative_performances
 from mcda.types import alternatives_assignments
 
-def normalize_criteria_weights(criteria_values):
-    total = float()
-    for cv in criteria_values:
-        total += cv.value
-
-    for cv in criteria_values:
-        cv.value /= total
-
 def add_errors_in_assignments(aa, category_ids, errors_pc):
     n = int(len(aa)*errors_pc)
     aa_erroned = random.sample(aa, n)

@@ -335,7 +335,6 @@ if __name__ == "__main__":
     from mcda.types import category_value, categories_values
     from mcda.types import interval
     from mcda.uta import utadis
-    from tools.utils import normalize_criteria_weights
     from tools.utils import compute_ca
     from mcda.generate import generate_alternatives
     from mcda.generate import generate_categories
@@ -350,7 +349,7 @@ if __name__ == "__main__":
     # Generate an utadis model
     c = generate_criteria(2)
     cv = generate_random_criteria_values(c, seed = 6)
-    normalize_criteria_weights(cv)
+    cv.normalize()
     cat = generate_categories(3)
 
     cfs = generate_random_criteria_functions(c, nseg_min = 3, nseg_max = 3)

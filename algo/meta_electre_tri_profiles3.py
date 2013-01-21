@@ -180,7 +180,6 @@ if __name__ == "__main__":
     from mcda.generate import generate_categories
     from mcda.generate import generate_random_profiles
     from mcda.generate import generate_categories_profiles
-    from tools.utils import normalize_criteria_weights
     from tools.utils import display_assignments_and_pt
     from mcda.pt_sorted import sorted_performance_table
     from mcda.types import alternative_performances
@@ -191,7 +190,7 @@ if __name__ == "__main__":
 
     c = generate_criteria(9)
     cv = generate_random_criteria_values(c, 4567)
-    normalize_criteria_weights(cv)
+    cv.normalize()
     worst = alternative_performances("worst", {crit.id: 0 for crit in c})
     best = alternative_performances("best", {crit.id: 1 for crit in c})
     pt = generate_random_performance_table(a, c, 1234)

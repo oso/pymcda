@@ -369,7 +369,6 @@ if __name__ == "__main__":
     from mcda.generate import generate_categories
     from mcda.generate import generate_random_profiles
     from mcda.generate import generate_categories_profiles
-    from tools.utils import normalize_criteria_weights
     from tools.utils import add_errors_in_assignments
     from tools.utils import display_assignments_and_pt
     from tools.utils import compute_winning_coalitions
@@ -381,7 +380,7 @@ if __name__ == "__main__":
     a = generate_alternatives(15000)
     c = generate_criteria(10)
     cv = generate_random_criteria_values(c, 890)
-    normalize_criteria_weights(cv)
+    cv.normalize()
     pt = generate_random_performance_table(a, c)
 
     cat = generate_categories(5)

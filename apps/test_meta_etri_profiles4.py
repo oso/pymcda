@@ -17,7 +17,6 @@ from mcda.generate import generate_random_electre_tri_bm_model
 from mcda.generate import generate_alternatives
 from mcda.generate import generate_random_performance_table
 from mcda.generate import generate_random_profiles
-from tools.utils import normalize_criteria_weights
 from tools.utils import add_errors_in_assignments
 from test_utils import test_result, test_results
 

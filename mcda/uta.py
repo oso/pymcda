@@ -1,6 +1,5 @@
 import bisect
 
-from tools.utils import normalize_criteria_weights
 from mcda.types import alternative_value, alternatives_values
 from mcda.types import alternative_assignment
 from mcda.types import alternatives_assignments

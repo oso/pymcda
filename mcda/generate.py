@@ -12,7 +12,6 @@ from mcda.types import category, categories
 from mcda.types import category_profile, categories_profiles, limits
 from mcda.types import piecewise_linear, point, segment
 from mcda.types import category_value, categories_values, interval
-from tools.utils import normalize_criteria_weights
 
 def generate_alternatives(number, prefix='a'):
     alts = alternatives()
