@@ -372,7 +372,7 @@ if __name__ == "__main__":
     from tools.utils import normalize_criteria_weights
     from tools.utils import add_errors_in_assignments
     from tools.utils import display_assignments_and_pt
-    from tools.utils import get_possible_coalitions
+    from tools.utils import get_winning_coalitions
     from mcda.electre_tri import electre_tri
     from mcda.types import alternatives_assignments, performance_table
 
@@ -463,8 +463,8 @@ if __name__ == "__main__":
         print("Alternatives wrongly assigned:")
         display_assignments_and_pt(anok, c, [aa, aa_learned], [pt])
 
-    coal1 = get_possible_coalitions(model.cv, model.lbda)
-    coal2 = get_possible_coalitions(model2.cv, model2.lbda)
+    coal1 = get_winning_coalitions(model.cv, model.lbda)
+    coal2 = get_winning_coalitions(model2.cv, model2.lbda)
     coali = list(set(coal1) & set(coal2))
     coal1e = list(set(coal1) ^ set(coali))
     coal2e = list(set(coal2) ^ set(coali))
