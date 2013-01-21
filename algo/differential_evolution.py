@@ -4,7 +4,7 @@ import random
 from mcda.types import criterion_value, criteria_values
 from mcda.types import alternatives, alternative
 from mcda.types import alternative_performances, performance_table
-from tools.generate_random import generate_random_criteria_values
+from mcda.generate import generate_random_criteria_values
 from tools.utils import get_best_alternative_performances
 from tools.utils import get_worst_alternative_performances
 
@@ -324,13 +324,13 @@ def differential_evolution(ngen, pop, mc, cr, c, a, aa, pt, cps):
     return best
 
 if __name__ == "__main__":
-    from tools.generate_random import generate_alternatives
-    from tools.generate_random import generate_criteria
-    from tools.generate_random import generate_random_criteria_values
-    from tools.generate_random import generate_random_performance_table
-    from tools.generate_random import generate_categories
-    from tools.generate_random import generate_random_profiles
-    from tools.generate_random import generate_categories_profiles
+    from mcda.generate import generate_alternatives
+    from mcda.generate import generate_criteria
+    from mcda.generate import generate_random_criteria_values
+    from mcda.generate import generate_random_performance_table
+    from mcda.generate import generate_categories
+    from mcda.generate import generate_random_profiles
+    from mcda.generate import generate_categories_profiles
     from mcda.electre_tri import electre_tri
 
     # Create an original arbitrary model

@@ -10,13 +10,13 @@ from itertools import product
 from mcda.types import alternatives_assignments, performance_table
 from mcda.electre_tri import electre_tri
 from algo.lp_electre_tri_weights import lp_electre_tri_weights
-from tools.generate_random import generate_alternatives
-from tools.generate_random import generate_criteria
-from tools.generate_random import generate_random_criteria_values
-from tools.generate_random import generate_random_performance_table
-from tools.generate_random import generate_categories
-from tools.generate_random import generate_random_profiles
-from tools.generate_random import generate_categories_profiles
+from mcda.generate import generate_alternatives
+from mcda.generate import generate_criteria
+from mcda.generate import generate_random_criteria_values
+from mcda.generate import generate_random_performance_table
+from mcda.generate import generate_categories
+from mcda.generate import generate_random_profiles
+from mcda.generate import generate_categories_profiles
 from tools.utils import compute_ca
 from tools.utils import normalize_criteria_weights
 from tools.utils import add_errors_in_assignments

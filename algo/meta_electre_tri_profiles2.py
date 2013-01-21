@@ -123,13 +123,13 @@ class meta_greedy_electre_tri_profiles():
         return models_aa[m], models_fitness[m]
 
 if __name__ == "__main__":
-    from tools.generate_random import generate_alternatives
-    from tools.generate_random import generate_criteria
-    from tools.generate_random import generate_random_criteria_values
-    from tools.generate_random import generate_random_performance_table
-    from tools.generate_random import generate_categories
-    from tools.generate_random import generate_random_profiles
-    from tools.generate_random import generate_categories_profiles
+    from mcda.generate import generate_alternatives
+    from mcda.generate import generate_criteria
+    from mcda.generate import generate_random_criteria_values
+    from mcda.generate import generate_random_performance_table
+    from mcda.generate import generate_categories
+    from mcda.generate import generate_random_profiles
+    from mcda.generate import generate_categories_profiles
     from tools.utils import normalize_criteria_weights
     from tools.utils import display_assignments_and_pt
     from tools.sorted import sorted_performance_table

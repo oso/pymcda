@@ -378,13 +378,13 @@ class QGraphicsScene_etri(QtGui.QGraphicsScene):
 
 if __name__ == "__main__":
     import random
-    from tools.generate_random import generate_alternatives
-    from tools.generate_random import generate_criteria
-    from tools.generate_random import generate_random_criteria_values
-    from tools.generate_random import generate_random_performance_table
-    from tools.generate_random import generate_categories
-    from tools.generate_random import generate_random_profiles
-    from tools.generate_random import generate_categories_profiles
+    from mcda.generate import generate_alternatives
+    from mcda.generate import generate_criteria
+    from mcda.generate import generate_random_criteria_values
+    from mcda.generate import generate_random_performance_table
+    from mcda.generate import generate_categories
+    from mcda.generate import generate_random_profiles
+    from mcda.generate import generate_categories_profiles
     from tools.utils import normalize_criteria_weights
     from mcda.electre_tri import electre_tri
     from mcda.types import alternative_performances

@@ -251,10 +251,10 @@ class qt_performance_table(QtGui.QTableWidget):
             self.add_alternative_performances(a, pt[a.id])
 
 if __name__ == "__main__":
-    from tools.generate_random import generate_criteria
-    from tools.generate_random import generate_random_criteria_weights
-    from tools.generate_random import generate_alternatives
-    from tools.generate_random import generate_random_performance_table
+    from mcda.generate import generate_criteria
+    from mcda.generate import generate_random_criteria_weights
+    from mcda.generate import generate_alternatives
+    from mcda.generate import generate_random_performance_table
 
     c = generate_criteria(5)
     cw = generate_random_criteria_weights(c)

@@ -12,13 +12,13 @@ from mcda.types import alternative_performances
 from mcda.types import criterion_value, criteria_values
 from mcda.uta import utadis
 from algo.lp_utadis import lp_utadis
-from tools.generate_random import generate_alternatives
-from tools.generate_random import generate_criteria
-from tools.generate_random import generate_random_criteria_values
-from tools.generate_random import generate_random_performance_table
-from tools.generate_random import generate_categories
-from tools.generate_random import generate_random_categories_values
-from tools.generate_random import generate_random_criteria_functions
+from mcda.generate import generate_alternatives
+from mcda.generate import generate_criteria
+from mcda.generate import generate_random_criteria_values
+from mcda.generate import generate_random_performance_table
+from mcda.generate import generate_categories
+from mcda.generate import generate_random_categories_values
+from mcda.generate import generate_random_criteria_functions
 from tools.utils import compute_ca
 from tools.utils import normalize_criteria_weights
 from tools.utils import add_errors_in_assignments

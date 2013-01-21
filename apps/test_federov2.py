@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 from mcda.types import alternative, alternatives
 from mcda.types import criterion, criteria
 from mcda.types import alternative_performances, performance_table
-from tools.generate_random import generate_alternatives
-from tools.generate_random import generate_criteria
-from tools.generate_random import generate_random_performance_table
+from mcda.generate import generate_alternatives
+from mcda.generate import generate_criteria
+from mcda.generate import generate_random_performance_table
 from tools.federov import generate_init_plan, federov
 
 def plot(pt, p_pt):

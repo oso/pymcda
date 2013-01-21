@@ -105,9 +105,9 @@ class sorted_performance_table():
         return a
 
 if __name__ == "__main__":
-    from tools.generate_random import generate_alternatives
-    from tools.generate_random import generate_criteria
-    from tools.generate_random import generate_random_performance_table
+    from mcda.generate import generate_alternatives
+    from mcda.generate import generate_criteria
+    from mcda.generate import generate_random_performance_table
     import time
 
     a = generate_alternatives(500)

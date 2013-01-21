@@ -6,8 +6,8 @@ import datetime
 import random
 from itertools import chain, combinations, product
 
-from tools.generate_random import generate_criteria
-from tools.generate_random import generate_random_criteria_weights
+from mcda.generate import generate_criteria
+from mcda.generate import generate_random_criteria_weights
 from test_utils import test_result, test_results
 
 def powerset(iterable):

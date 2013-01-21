@@ -2,9 +2,9 @@ from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 from collections import defaultdict
-from tools.generate_random import generate_random_electre_tri_bm_model
-from tools.generate_random import generate_random_performance_table
-from tools.generate_random import generate_alternatives
+from mcda.generate import generate_random_electre_tri_bm_model
+from mcda.generate import generate_random_performance_table
+from mcda.generate import generate_alternatives
 from tools.utils import get_winning_coalitions
 from tools.utils import compute_degree_of_extremality
 from tools.utils import get_number_of_winning_coalitions

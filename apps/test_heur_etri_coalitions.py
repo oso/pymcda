@@ -6,9 +6,9 @@ import csv
 from itertools import product
 
 from algo.heur_electre_tri_coalitions import heur_electre_tri_coalitions
-from tools.generate_random import generate_random_electre_tri_bm_model
-from tools.generate_random import generate_alternatives
-from tools.generate_random import generate_random_performance_table
+from mcda.generate import generate_random_electre_tri_bm_model
+from mcda.generate import generate_alternatives
+from mcda.generate import generate_random_performance_table
 from tools.utils import get_winning_coalitions
 from tools.utils import add_errors_in_assignments
 from test_utils import test_result, test_results

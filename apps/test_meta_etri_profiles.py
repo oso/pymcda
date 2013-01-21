@@ -12,10 +12,10 @@ from mcda.electre_tri import electre_tri_bm
 from algo.meta_electre_tri_profiles import meta_electre_tri_profiles
 from tools.utils import compute_ca
 from tools.sorted import sorted_performance_table
-from tools.generate_random import generate_alternatives
-from tools.generate_random import generate_random_electre_tri_bm_model
-from tools.generate_random import generate_random_performance_table
-from tools.generate_random import generate_random_profiles
+from mcda.generate import generate_alternatives
+from mcda.generate import generate_random_electre_tri_bm_model
+from mcda.generate import generate_random_performance_table
+from mcda.generate import generate_random_profiles
 from tools.utils import normalize_criteria_weights
 from tools.utils import add_errors_in_assignments
 from test_utils import test_result, test_results

@@ -7,9 +7,9 @@ from mcda.types import criterion_value, criteria_values
 from mcda.types import alternatives, criteria, performance_table
 from mcda.types import alternatives_assignments, categories
 from mcda.electre_tri import electre_tri_bm
-from tools.generate_random import generate_categories_profiles
-from tools.generate_random import generate_random_profiles
-from tools.generate_random import generate_random_criteria_weights
+from mcda.generate import generate_categories_profiles
+from mcda.generate import generate_random_profiles
+from mcda.generate import generate_random_criteria_weights
 from tools.sorted import sorted_performance_table
 from tools.utils import get_worst_alternative_performances
 from tools.utils import get_best_alternative_performances
