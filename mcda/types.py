@@ -548,6 +548,18 @@ class categories_values(mcda_dict):
         for cv in self:
             cv.display(out)
 
+    def get_upper_limits(self):
+        d = {}
+        for cv in self:
+            d[cv.id] = cv.value.upper
+        return d
+
+    def get_lower_limits(self):
+        d = {}
+        for cv in self:
+            d[cv.id] = cv.value.lower
+        return d
+
     def to_xmcda(self):
         root = ElementTree.Element('categoriesValues')
         for cat_value in self:
