@@ -11,7 +11,7 @@ from tools.utils import get_number_of_winning_coalitions
 from tools.utils import display_coalitions
 from ui.graphic import display_electre_tri_models
 
-class heur_electre_tri_weights():
+class heur_electre_tri_coalitions():
 
     def __init__(self, c, cats, pt, aa):
         self.c = c
@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     aa = m.pessimist(pt)
 
-    heur = heur_electre_tri_weights(m.criteria, m.categories, pt, aa)
+    heur = heur_electre_tri_coalitions(m.criteria, m.categories, pt, aa)
     aids = [aid[0] for aid in heur.sorted_extrem ]
     display_electre_tri_models([m], [pt.get_worst(m.criteria)],
                                [pt.get_best(m.criteria)],
