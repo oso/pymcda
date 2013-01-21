@@ -11,8 +11,6 @@ from mcda.generate import generate_categories_profiles
 from mcda.generate import generate_random_profiles
 from mcda.generate import generate_random_criteria_weights
 from mcda.pt_sorted import sorted_performance_table
-from tools.utils import get_worst_alternative_performances
-from tools.utils import get_best_alternative_performances
 from tools.utils import compute_ca
 
 def load_data(filepath):
@@ -80,8 +78,8 @@ if load_data(sys.argv[1]) is False:
     exit(1)
 
 cat_profiles = generate_categories_profiles(cats)
-worst = get_worst_alternative_performances(pt, c)
-best = get_best_alternative_performances(pt, c)
+worst = pt.get_worst(c)
+best = pt.get_best(c)
 b = ["b%d" % i for i in range(1, len(cats))]
 
 bpt = generate_random_profiles(b, c, worst = worst, best = best, seed = 3)

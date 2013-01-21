@@ -5,8 +5,6 @@ import colorsys
 from itertools import combinations
 from PyQt4 import QtCore
 from PyQt4 import QtGui
-from tools.utils import get_worst_alternative_performances
-from tools.utils import get_best_alternative_performances
 
 def display_electre_tri_models(etri, worst = [], best = [], aps = []):
     app = QtGui.QApplication(sys.argv)

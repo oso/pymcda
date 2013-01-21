@@ -5,8 +5,6 @@ from mcda.types import criterion_value, criteria_values
 from mcda.types import alternatives, alternative
 from mcda.types import alternative_performances, performance_table
 from mcda.generate import generate_random_criteria_values
-from tools.utils import get_best_alternative_performances
-from tools.utils import get_worst_alternative_performances
 
 def get_crossover_indices(models, cr):
     n = len(models)
@@ -266,8 +264,8 @@ def init_one(c, pt, nprofiles, cps):
         bp = alternative_performances(id, {})
         bpt.append(bp)
 
-    worst = get_worst_alternative_performances(pt, c)
-    best = get_best_alternative_performances(pt, c)
+    worst = pt.get_worst(c)
+    best = pt.get_best(c)
     for crit in c:
         worst_perf = worst(crit.id)
         best_perf = best(crit.id)
@@ -297,8 +295,8 @@ def differential_evolution(ngen, pop, mc, cr, c, a, aa, pt, cps):
     models = initialization(pop, c, pt, cps)
 
     # Get worst and best possible alternative
-    ba = get_best_alternative_performances(pt, c)
-    wa = get_worst_alternative_performances(pt, c)
+    ba = pt.get_best(c)
+    wa = pt.get_worst(c)
 
     for i in range(ngen):
         models_fitness = compute_models_fitness(models, pt, aa)
