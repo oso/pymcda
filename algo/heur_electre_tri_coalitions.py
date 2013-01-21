@@ -51,7 +51,8 @@ class heur_electre_tri_coalitions():
         coalitions = {}
         for i in range(n):
             aid = self.sorted_extrem[i][0]
-            winning, loosing = self.identify_coalition(pt[aid], aa[aid])
+            winning, loosing = self.identify_coalition(self.pt[aid],
+                                                       self.aa[aid])
             if winning not in coalitions:
                 coalitions[winning] = self.sorted_extrem[i][1]
             else:
