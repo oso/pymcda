@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 from collections import defaultdict
 from tools.generate_random import generate_random_electre_tri_bm_model
 from tools.generate_random import generate_random_performance_table
-from tools.generate_random import generate_random_alternatives
+from tools.generate_random import generate_alternatives
 from tools.utils import get_winning_coalitions
 from tools.utils import compute_degree_of_extremality
 from tools.utils import get_number_of_winning_coalitions
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     print("List of coalitions:")
     display_coalitions(coal)
 
-    a = generate_random_alternatives(1000)
+    a = generate_alternatives(1000)
     pt = generate_random_performance_table(a, m.criteria)
 
     aa = m.pessimist(pt)

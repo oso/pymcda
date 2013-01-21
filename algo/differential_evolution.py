@@ -324,7 +324,7 @@ def differential_evolution(ngen, pop, mc, cr, c, a, aa, pt, cps):
     return best
 
 if __name__ == "__main__":
-    from tools.generate_random import generate_random_alternatives
+    from tools.generate_random import generate_alternatives
     from tools.generate_random import generate_random_criteria
     from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
@@ -334,7 +334,7 @@ if __name__ == "__main__":
     from mcda.electre_tri import electre_tri
 
     # Create an original arbitrary model
-    a = generate_random_alternatives(200)
+    a = generate_alternatives(200)
     c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 4567)
     normalize_weights_values(cv)

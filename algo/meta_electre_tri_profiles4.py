@@ -256,7 +256,7 @@ class meta_electre_tri_profiles4():
 
 if __name__ == "__main__":
     from tools.generate_random import generate_random_electre_tri_bm_model
-    from tools.generate_random import generate_random_alternatives
+    from tools.generate_random import generate_alternatives
     from tools.generate_random import generate_random_performance_table
     from tools.generate_random import generate_random_profiles
     from tools.utils import normalize_criteria_weights
@@ -276,7 +276,7 @@ if __name__ == "__main__":
                                     {c.id: 1 for c in model.criteria})
 
     # Generate a set of alternatives
-    a = generate_random_alternatives(1000)
+    a = generate_alternatives(1000)
     pt = generate_random_performance_table(a, model.criteria)
     aa = model.pessimist(pt)
 

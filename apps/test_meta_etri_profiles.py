@@ -12,7 +12,7 @@ from mcda.electre_tri import electre_tri_bm
 from algo.meta_electre_tri_profiles import meta_electre_tri_profiles
 from tools.utils import compute_ca
 from tools.sorted import sorted_performance_table
-from tools.generate_random import generate_random_alternatives
+from tools.generate_random import generate_alternatives
 from tools.generate_random import generate_random_electre_tri_bm_model
 from tools.generate_random import generate_random_performance_table
 from tools.generate_random import generate_random_profiles
@@ -27,7 +27,7 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
     model2 = model.copy()
 
     # Generate a first set of alternatives
-    a = generate_random_alternatives(na)
+    a = generate_alternatives(na)
     pt = generate_random_performance_table(a, model.criteria)
 
     aa = model.pessimist(pt)
@@ -92,7 +92,7 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
     ca2_best_errors = ok2_errors / total
 
     # Generate alternatives for the generalization
-    a_gen = generate_random_alternatives(na_gen)
+    a_gen = generate_alternatives(na_gen)
     pt_gen = generate_random_performance_table(a_gen, model.criteria)
     aa_gen = model.pessimist(pt_gen)
     aa_gen2 = model2.pessimist(pt_gen)

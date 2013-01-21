@@ -13,7 +13,7 @@ from algo.meta_electre_tri_global2 import meta_electre_tri_global
 from tools.utils import compute_ca
 from tools.sorted import sorted_performance_table
 from tools.generate_random import generate_random_electre_tri_bm_model
-from tools.generate_random import generate_random_alternatives
+from tools.generate_random import generate_alternatives
 from tools.generate_random import generate_random_performance_table
 from tools.utils import normalize_criteria_weights
 from tools.utils import add_errors_in_assignments
@@ -26,7 +26,7 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
     model = generate_random_electre_tri_bm_model(nc, ncat, seed)
 
     # Generate a set of alternatives
-    a = generate_random_alternatives(na)
+    a = generate_alternatives(na)
     pt = generate_random_performance_table(a, model.criteria)
     aa = model.pessimist(pt)
 
@@ -111,7 +111,7 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
     ca_errors = ok_errors / total
 
     # Generate alternatives for the generalization
-    a_gen = generate_random_alternatives(na_gen)
+    a_gen = generate_alternatives(na_gen)
     pt_gen = generate_random_performance_table(a_gen, model.criteria)
     aa_gen = model.pessimist(pt_gen)
     aa_gen2 = model2.pessimist(pt_gen)

@@ -108,11 +108,11 @@ def federov(a, c, pt, n, p0_a=None, p0_pt=None):
     return (p_a, p_pt)
 
 if __name__ == "__main__":
-    from tools.generate_random import generate_random_alternatives
+    from tools.generate_random import generate_alternatives
     from tools.generate_random import generate_random_criteria
     from tools.generate_random import generate_random_performance_table
 
-    a = generate_random_alternatives(100)
+    a = generate_alternatives(100)
     c = generate_random_criteria(4)
     pt = generate_random_performance_table(a, c)
 

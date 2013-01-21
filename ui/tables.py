@@ -253,13 +253,13 @@ class qt_performance_table(QtGui.QTableWidget):
 if __name__ == "__main__":
     from tools.generate_random import generate_random_criteria
     from tools.generate_random import generate_random_criteria_weights
-    from tools.generate_random import generate_random_alternatives
+    from tools.generate_random import generate_alternatives
     from tools.generate_random import generate_random_performance_table
 
     c = generate_random_criteria(5)
     cw = generate_random_criteria_weights(c)
 
-    a = generate_random_alternatives(100)
+    a = generate_alternatives(100)
     pt = generate_random_performance_table(a, c)
 
     app = QtGui.QApplication(sys.argv)

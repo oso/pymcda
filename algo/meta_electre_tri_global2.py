@@ -12,7 +12,7 @@ from algo.meta_electre_tri_profiles4 import meta_electre_tri_profiles4
 from tools.utils import compute_ca
 from tools.sorted import sorted_performance_table
 from tools.generate_random import generate_random_electre_tri_bm_model
-from tools.generate_random import generate_random_alternatives
+from tools.generate_random import generate_alternatives
 
 class meta_electre_tri_global():
 
@@ -49,7 +49,7 @@ class meta_electre_tri_global():
 
 if __name__ == "__main__":
     import time
-    from tools.generate_random import generate_random_alternatives
+    from tools.generate_random import generate_alternatives
     from tools.generate_random import generate_random_performance_table
     from tools.utils import display_assignments_and_pt
     from tools.utils import get_winning_coalitions
@@ -65,7 +65,7 @@ if __name__ == "__main__":
                                     {c.id: 1 for c in model.criteria})
 
     # Generate a set of alternatives
-    a = generate_random_alternatives(1000)
+    a = generate_alternatives(1000)
     pt = generate_random_performance_table(a, model.criteria)
     aa = model.pessimist(pt)
 

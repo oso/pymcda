@@ -173,7 +173,7 @@ class meta_electre_tri_profiles():
             self.compute_histograms(aa, pperfs, below, above, cat_b, cat_a)
 
 if __name__ == "__main__":
-    from tools.generate_random import generate_random_alternatives
+    from tools.generate_random import generate_alternatives
     from tools.generate_random import generate_random_criteria
     from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
@@ -187,7 +187,7 @@ if __name__ == "__main__":
     from mcda.electre_tri import electre_tri_bm
     from ui.graphic import display_electre_tri_models
 
-    a = generate_random_alternatives(10000)
+    a = generate_alternatives(10000)
 
     c = generate_random_criteria(9)
     cv = generate_random_criteria_values(c, 4567)

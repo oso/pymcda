@@ -7,7 +7,7 @@ from itertools import product
 
 from algo.heur_electre_tri_coalitions import heur_electre_tri_coalitions
 from tools.generate_random import generate_random_electre_tri_bm_model
-from tools.generate_random import generate_random_alternatives
+from tools.generate_random import generate_alternatives
 from tools.generate_random import generate_random_performance_table
 from tools.utils import get_winning_coalitions
 from tools.utils import add_errors_in_assignments
@@ -18,7 +18,7 @@ def test_heur_etri_coalitions(seed, na, nc, ncat, pcexamples, pcerrors):
     model = generate_random_electre_tri_bm_model(nc, ncat, seed)
 
     # Generate a first set of alternatives
-    a = generate_random_alternatives(na)
+    a = generate_alternatives(na)
     pt = generate_random_performance_table(a, model.criteria)
 
     # Compute assignments

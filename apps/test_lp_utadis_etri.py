@@ -13,7 +13,7 @@ from mcda.types import criterion_value, criteria_values
 from mcda.uta import utadis
 from mcda.electre_tri import electre_tri
 from algo.lp_utadis import lp_utadis
-from tools.generate_random import generate_random_alternatives
+from tools.generate_random import generate_alternatives
 from tools.generate_random import generate_random_criteria
 from tools.generate_random import generate_random_criteria_values
 from tools.generate_random import generate_random_performance_table
@@ -40,7 +40,7 @@ def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
 
     lbda = random.uniform(0.5, 1)
 
-    a = generate_random_alternatives(na)
+    a = generate_alternatives(na)
     pt = generate_random_performance_table(a, c)
 
     model = electre_tri(c, cv, bpt, lbda, cps)
@@ -90,7 +90,7 @@ def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
     ca_errors = ok_errors / total
 
     # Perform the generalization
-    a_gen = generate_random_alternatives(na_gen)
+    a_gen = generate_alternatives(na_gen)
     pt_gen = generate_random_performance_table(a_gen, c)
     aa = model.pessimist(pt_gen)
     aa2 = model2.get_assignments(pt_gen)

@@ -14,7 +14,7 @@ from mcda.types import piecewise_linear, point, segment
 from mcda.types import category_value, categories_values, interval
 from tools.utils import normalize_criteria_weights
 
-def generate_random_alternatives(number, prefix='a'):
+def generate_alternatives(number, prefix='a'):
     alts = alternatives()
     for i in range(number):
         a = alternative()
@@ -211,7 +211,7 @@ def generate_random_electre_tri_bm_model(ncrit, ncat, seed = None, k = 3,
     return electre_tri_bm(c, cv, bpt, lbda, cps)
 
 if __name__ == "__main__":
-    alts = generate_random_alternatives(10)
+    alts = generate_alternatives(10)
     print(alts)
     crits = generate_random_criteria(5)
     print(crits)

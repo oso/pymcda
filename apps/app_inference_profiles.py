@@ -8,7 +8,7 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 from tools.generate_random import generate_random_electre_tri_bm_model
 from tools.generate_random import generate_random_profiles
-from tools.generate_random import generate_random_alternatives
+from tools.generate_random import generate_alternatives
 from tools.generate_random import generate_random_performance_table
 from tools.generate_random import generate_random_criteria
 from tools.sorted import sorted_performance_table
@@ -346,7 +346,7 @@ class qt_mainwindow(QtGui.QMainWindow):
         ncat = len(self.model.categories)
         nalt = self.spinbox_nalt.value()
 
-        self.a = generate_random_alternatives(nalt)
+        self.a = generate_alternatives(nalt)
         self.pt = generate_random_performance_table(self.a,
                                                     self.model.criteria,
                                                     worst = self.worst,

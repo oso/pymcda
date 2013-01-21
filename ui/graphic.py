@@ -378,7 +378,7 @@ class QGraphicsScene_etri(QtGui.QGraphicsScene):
 
 if __name__ == "__main__":
     import random
-    from tools.generate_random import generate_random_alternatives
+    from tools.generate_random import generate_alternatives
     from tools.generate_random import generate_random_criteria
     from tools.generate_random import generate_random_criteria_values
     from tools.generate_random import generate_random_performance_table
@@ -389,7 +389,7 @@ if __name__ == "__main__":
     from mcda.electre_tri import electre_tri
     from mcda.types import alternative_performances
 
-    a = generate_random_alternatives(1)
+    a = generate_alternatives(1)
     c = generate_random_criteria(5)
     cv = generate_random_criteria_values(c, 1234)
     normalize_criteria_weights(cv)

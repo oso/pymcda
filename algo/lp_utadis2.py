@@ -337,7 +337,7 @@ if __name__ == "__main__":
     from mcda.uta import utadis
     from tools.utils import normalize_criteria_weights
     from tools.utils import compute_ca
-    from tools.generate_random import generate_random_alternatives
+    from tools.generate_random import generate_alternatives
     from tools.generate_random import generate_random_categories
     from tools.generate_random import generate_random_criteria
     from tools.generate_random import generate_random_criteria_values
@@ -359,7 +359,7 @@ if __name__ == "__main__":
     u = utadis(c, cv, cfs, catv)
 
     # Generate random alternative and compute assignments
-    a = generate_random_alternatives(10)
+    a = generate_alternatives(10)
     pt = generate_random_performance_table(a, c)
     aa = u.get_assignments(pt)
     aa_err = aa.copy()
