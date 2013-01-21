@@ -7,31 +7,6 @@ from math import factorial, ceil
 from mcda.types import alternative_performances
 from mcda.types import alternatives_assignments
 
-def get_ordered_profile_ids(categories, categories_profiles):
-    cat_rank = {}
-    for c in categories:
-        cat_rank[c.id] = c.rank
-
-    profiles = {}
-    for cp in categories_profiles:
-        upper_category_id = cp.value.upper
-        lower_category_id = cp.value.lower
-        if upper_category_id:
-            upper_category_rank = cat_rank[upper_category_id]
-            profiles[upper_category_rank] = cp.id
-        if lower_category_id:
-            lower_category_rank = cat_rank[lower_category_id]
-            profiles[lower_category_id-1] = cp.id
-
-    profiles_rank = profiles.keys()
-    profiles_rank.sort()
-
-    profile_ids = []
-    for pr in profiles_ranks:
-        profile_ids.append(profiles[pr])
-
-    return profile_ids
-
 def normalize_criteria_weights(criteria_values):
     total = float()
     for cv in criteria_values:
