@@ -5,10 +5,10 @@ from collections import defaultdict
 from mcda.generate import generate_random_electre_tri_bm_model
 from mcda.generate import generate_random_performance_table
 from mcda.generate import generate_alternatives
-from tools.utils import compute_winning_coalitions
-from tools.utils import compute_degree_of_extremality
-from tools.utils import compute_number_of_winning_coalitions
-from tools.utils import display_coalitions
+from mcda.utils import compute_winning_coalitions
+from mcda.utils import compute_degree_of_extremality
+from mcda.utils import compute_number_of_winning_coalitions
+from mcda.utils import display_coalitions
 from ui.graphic import display_electre_tri_models
 
 class heur_electre_tri_coalitions():

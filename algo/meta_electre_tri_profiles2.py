@@ -130,7 +130,7 @@ if __name__ == "__main__":
     from mcda.generate import generate_categories
     from mcda.generate import generate_random_profiles
     from mcda.generate import generate_categories_profiles
-    from tools.utils import display_assignments_and_pt
+    from mcda.utils import display_assignments_and_pt
     from mcda.pt_sorted import sorted_performance_table
     from mcda.electre_tri import electre_tri_bm
     from ui.graphic import display_electre_tri_models

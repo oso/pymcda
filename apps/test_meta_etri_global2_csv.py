@@ -11,7 +11,7 @@ from mcda.generate import generate_categories_profiles
 from mcda.generate import generate_random_profiles
 from mcda.generate import generate_random_criteria_weights
 from mcda.pt_sorted import sorted_performance_table
-from tools.utils import compute_ca
+from mcda.utils import compute_ca
 
 def load_data(filepath):
     ok = True

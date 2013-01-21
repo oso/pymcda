@@ -9,8 +9,8 @@ from algo.heur_electre_tri_coalitions import heur_electre_tri_coalitions
 from mcda.generate import generate_random_electre_tri_bm_model
 from mcda.generate import generate_alternatives
 from mcda.generate import generate_random_performance_table
-from tools.utils import compute_winning_coalitions
-from tools.utils import add_errors_in_assignments
+from mcda.utils import compute_winning_coalitions
+from mcda.utils import add_errors_in_assignments
 from test_utils import test_result, test_results
 
 def test_heur_etri_coalitions(seed, na, nc, ncat, pcexamples, pcerrors):

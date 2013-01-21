@@ -369,9 +369,9 @@ if __name__ == "__main__":
     from mcda.generate import generate_categories
     from mcda.generate import generate_random_profiles
     from mcda.generate import generate_categories_profiles
-    from tools.utils import add_errors_in_assignments
-    from tools.utils import display_assignments_and_pt
-    from tools.utils import compute_winning_coalitions
+    from mcda.utils import add_errors_in_assignments
+    from mcda.utils import display_assignments_and_pt
+    from mcda.utils import compute_winning_coalitions
     from mcda.electre_tri import electre_tri
     from mcda.types import alternatives_assignments, performance_table
 

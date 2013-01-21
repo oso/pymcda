@@ -19,8 +19,8 @@ from mcda.generate import generate_random_performance_table
 from mcda.generate import generate_categories
 from mcda.generate import generate_random_categories_values
 from mcda.generate import generate_random_criteria_functions
-from tools.utils import compute_ca
-from tools.utils import add_errors_in_assignments
+from mcda.utils import compute_ca
+from mcda.utils import add_errors_in_assignments
 from test_utils import test_result, test_results
 
 def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):

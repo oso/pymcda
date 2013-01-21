@@ -335,7 +335,7 @@ if __name__ == "__main__":
     from mcda.types import category_value, categories_values
     from mcda.types import interval
     from mcda.uta import utadis
-    from tools.utils import compute_ca
+    from mcda.utils import compute_ca
     from mcda.generate import generate_alternatives
     from mcda.generate import generate_categories
     from mcda.generate import generate_criteria
@@ -343,8 +343,8 @@ if __name__ == "__main__":
     from mcda.generate import generate_random_performance_table
     from mcda.generate import generate_random_criteria_functions
     from mcda.generate import generate_random_categories_values
-    from tools.utils import add_errors_in_assignments
-    from tools.utils import display_assignments_and_pt
+    from mcda.utils import add_errors_in_assignments
+    from mcda.utils import display_assignments_and_pt
 
     # Generate an utadis model
     c = generate_criteria(2)

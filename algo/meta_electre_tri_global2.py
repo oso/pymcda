@@ -9,7 +9,7 @@ from mcda.types import alternative_assignment, alternatives_assignments
 from mcda.types import performance_table
 from algo.lp_electre_tri_weights import lp_electre_tri_weights
 from algo.meta_electre_tri_profiles4 import meta_electre_tri_profiles4
-from tools.utils import compute_ca
+from mcda.utils import compute_ca
 from mcda.pt_sorted import sorted_performance_table
 from mcda.generate import generate_random_electre_tri_bm_model
 from mcda.generate import generate_alternatives
@@ -51,8 +51,8 @@ if __name__ == "__main__":
     import time
     from mcda.generate import generate_alternatives
     from mcda.generate import generate_random_performance_table
-    from tools.utils import display_assignments_and_pt
-    from tools.utils import compute_winning_coalitions
+    from mcda.utils import display_assignments_and_pt
+    from mcda.utils import compute_winning_coalitions
     from mcda.types import alternative_performances
     from mcda.electre_tri import electre_tri
     from ui.graphic import display_electre_tri_models
