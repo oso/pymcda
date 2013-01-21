@@ -7,7 +7,7 @@ from mcda.types import criterion_value, criteria_values
 from mcda.types import alternatives, criteria, performance_table
 from mcda.types import alternatives_assignments, categories
 from mcda.electre_tri import electre_tri_bm
-from tools.generate_random import generate_random_categories_profiles
+from tools.generate_random import generate_categories_profiles
 from tools.generate_random import generate_random_profiles
 from tools.generate_random import generate_random_criteria_weights
 from tools.sorted import sorted_performance_table
@@ -79,7 +79,7 @@ if len(sys.argv) != 2:
 if load_data(sys.argv[1]) is False:
     exit(1)
 
-cat_profiles = generate_random_categories_profiles(cats)
+cat_profiles = generate_categories_profiles(cats)
 worst = get_worst_alternative_performances(pt, c)
 best = get_best_alternative_performances(pt, c)
 b = ["b%d" % i for i in range(1, len(cats))]

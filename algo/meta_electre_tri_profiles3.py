@@ -179,7 +179,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_performance_table
     from tools.generate_random import generate_categories
     from tools.generate_random import generate_random_profiles
-    from tools.generate_random import generate_random_categories_profiles
+    from tools.generate_random import generate_categories_profiles
     from tools.utils import normalize_criteria_weights
     from tools.utils import display_assignments_and_pt
     from tools.sorted import sorted_performance_table
@@ -197,7 +197,7 @@ if __name__ == "__main__":
     pt = generate_random_performance_table(a, c, 1234)
 
     cat = generate_categories(3)
-    cps = generate_random_categories_profiles(cat)
+    cps = generate_categories_profiles(cat)
     b = cps.get_ordered_profiles()
     bpt = generate_random_profiles(b, c, 2345)
 

@@ -384,7 +384,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_performance_table
     from tools.generate_random import generate_categories
     from tools.generate_random import generate_random_profiles
-    from tools.generate_random import generate_random_categories_profiles
+    from tools.generate_random import generate_categories_profiles
     from tools.utils import normalize_criteria_weights
     from mcda.electre_tri import electre_tri
     from mcda.types import alternative_performances
@@ -399,7 +399,7 @@ if __name__ == "__main__":
     pt = generate_random_performance_table(a, c)
 
     cat = generate_categories(3)
-    cps = generate_random_categories_profiles(cat)
+    cps = generate_categories_profiles(cat)
     b = cps.get_ordered_profiles()
     bpt = generate_random_profiles(b, c)
     bpt['b2'].performances['c3'] = 0.2

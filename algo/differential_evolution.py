@@ -330,7 +330,7 @@ if __name__ == "__main__":
     from tools.generate_random import generate_random_performance_table
     from tools.generate_random import generate_categories
     from tools.generate_random import generate_random_profiles
-    from tools.generate_random import generate_random_categories_profiles
+    from tools.generate_random import generate_categories_profiles
     from mcda.electre_tri import electre_tri
 
     # Create an original arbitrary model
@@ -341,7 +341,7 @@ if __name__ == "__main__":
     pt = generate_random_performance_table(a, c, 1234)
 
     cats = generate_categories(2)
-    cps = generate_random_categories_profiles(cats)
+    cps = generate_categories_profiles(cats)
     b = cps.get_ordered_profiles()
     bpt = generate_random_profiles(b, c, 0123)
 

@@ -132,7 +132,7 @@ def generate_random_profiles(alts, crits, seed = None, k = 3,
 
     return pt
 
-def generate_random_categories_profiles(cats, prefix='b'):
+def generate_categories_profiles(cats, prefix='b'):
     cat_ids = cats.get_ordered_categories()
     cps = categories_profiles()
     for i in range(len(cats)-1):
@@ -203,7 +203,7 @@ def generate_random_electre_tri_bm_model(ncrit, ncat, seed = None, k = 3,
     c = generate_criteria(ncrit)
     cv = generate_random_criteria_weights(c, seed, k)
     cat = generate_categories(ncat)
-    cps = generate_random_categories_profiles(cat)
+    cps = generate_categories_profiles(cat)
     b = cps.get_ordered_profiles()
     bpt = generate_random_profiles(b, c, None, k, worst, best)
     lbda = random.uniform(0.5, 1)
@@ -223,7 +223,7 @@ if __name__ == "__main__":
     print(bpt)
     cats = generate_categories(3)
     print(cats)
-    cps = generate_random_categories_profiles(cats)
+    cps = generate_categories_profiles(cats)
     print(cps)
     pl = generate_random_piecewise_linear(0, 5, 3)
     print(pl)
