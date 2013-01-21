@@ -75,28 +75,33 @@ class heur_electre_tri_weights():
         return coallitions
 
 if __name__ == "__main__":
-    m = generate_random_electre_tri_bm_model(5, 2, 123789)
-    print m.lbda
+    m = generate_random_electre_tri_bm_model(5, 2, 123)
 
     coal = get_possible_coallitions(m.cv, m.lbda)
     print("Number of winning coallitions: %d" % len(coal))
     print("List of coallitions:")
     display_coallitions(coal)
 
-    a = generate_random_alternatives(10000)
+    a = generate_random_alternatives(1000)
     pt = generate_random_performance_table(a, m.criteria)
 
-    display_electre_tri_models([m], [pt.get_worst(m.criteria)],
-                               [pt.get_best(m.criteria)])
     aa = m.pessimist(pt)
 
     heur = heur_electre_tri_weights(m.criteria, m.categories, pt, aa)
+    aids = [aid[0] for aid in heur.sorted_extrem ]
+    display_electre_tri_models([m], [pt.get_worst(m.criteria)],
+                               [pt.get_best(m.criteria)],
+                               [[pt[aid] for aid in aids[:100]]])
+
     coal_proba = heur.run(100)
     print("List of coallitions found:")
     coal2 = heur.cut(coal_proba, 0)
     display_coallitions(coal2)
 
-    print("List of coallitions not identified:")
-    display_coallitions(list((set(coal) ^ set(coal2)) & set(coal)))
-    print("List of coallitions added:")
-    display_coallitions(list((set(coal) ^ set(coal2)) & set(coal2)))
+    coal_ni = list((set(coal) ^ set(coal2)) & set(coal))
+    print("List of coallitions not identified (%d):" % len(coal_ni))
+    display_coallitions(coal_ni)
+
+    coal_add = list((set(coal) ^ set(coal2)) & set(coal2))
+    print("List of coallitions added (%s):" % len(coal_add))
+    display_coallitions(coal_add)
