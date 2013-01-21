@@ -188,6 +188,12 @@ class criteria_values(mcda_dict):
     def __repr__(self):
         return "criteria_values(%s)" % self.values()
 
+    def normalize(self):
+        total = sum([cv.value for cv in self])
+
+        for cv in self:
+            cv.value /= total
+
     def to_xmcda(self):
         xmcda = ElementTree.Element('criteriaValues')
         for cval in self:
