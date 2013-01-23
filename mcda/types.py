@@ -1237,6 +1237,13 @@ class categories_profiles(mcda_dict):
             categories.append(self[profile].value.upper)
         return categories
 
+    def to_categories(self):
+        cats = categories()
+        for i, cat in enumerate(self.get_ordered_categories()):
+            cat = category(cat, rank = i + 1)
+            cats.append(cat)
+        return cats
+
     def to_xmcda(self):
         root = ElementTree.Element('categoriesProfiles')
         for cp in self:
