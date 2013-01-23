@@ -32,7 +32,7 @@ class sorted_performance_table():
             self.sorted_altid[cid] = [ r[1] for r in self.sorted_pt[cid] ]
 
     def get_all(self, cid):
-        return self.sorted_altid[cid]
+        return self.sorted_altid[cid], self.sorted_values[cid]
 
     def get_below(self, cid, val, b=True):
         if b is True:
