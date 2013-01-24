@@ -106,11 +106,10 @@ if __name__ == "__main__":
         models_ca = sorted(models_ca.iteritems(),
                                 key = lambda (k,v): (v,k),
                                 reverse = True)
+        print i, models_ca[0][1]
 
         if models_ca[0][1] == 1:
             break
-
-        print i, ca
 
         for j in range(int((nmodels + 1) / 2), nmodels):
             model_meta = generate_random_electre_tri_bm_model(ncriteria,
@@ -126,10 +125,8 @@ if __name__ == "__main__":
 
     print('Learned model')
     print('=============')
-    model.bpt.display(criterion_ids=cids)
-    model2.bpt.display(header=False, criterion_ids=cids, append='_learned')
-    model.cv.display(criterion_ids=cids, name='w')
-    model2.cv.display(header=False, criterion_ids=cids, name='w_learned')
+    model2.bpt.display(criterion_ids = cids)
+    model2.cv.display(criterion_ids = cids)
     print("lambda\t%.7s" % model2.lbda)
     #print(aa_learned)
 
