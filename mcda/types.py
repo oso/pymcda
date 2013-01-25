@@ -1,4 +1,5 @@
 from __future__ import division, print_function
+import random
 import sys
 from itertools import product
 from xml.etree import ElementTree
@@ -47,7 +48,7 @@ class mcda_dict(dict):
     def get_subset(self, ids):
         return type(self)([self[id] for id in ids])
 
-    def split(self, n, proportions = None):
+    def split(self, n, proportions = None, randomize = True):
         if proportions is None:
             proportions = [1 / n for i in range(n)]
         elif len(proportions) == n:
@@ -58,6 +59,10 @@ class mcda_dict(dict):
 
         keys, nkeys = self.keys(), len(self.keys())
         j, subsets = 0, []
+
+        if randomize is True:
+            random.shuffle(keys)
+
         for proportion in proportions:
             j2 = int(j + proportion * nkeys)
             subset = type(self)(self[i] for i in keys[j:j2])
