@@ -13,58 +13,47 @@ from mcda.types import criterion_value, criteria_values
 from mcda.uta import utadis
 from mcda.electre_tri import electre_tri
 from algo.lp_utadis import lp_utadis
+from mcda.generate import generate_random_electre_tri_bm_model
 from mcda.generate import generate_alternatives
-from mcda.generate import generate_criteria
-from mcda.generate import generate_random_criteria_values
 from mcda.generate import generate_random_performance_table
-from mcda.generate import generate_categories
-from mcda.generate import generate_random_categories_values
-from mcda.generate import generate_categories_profiles
-from mcda.generate import generate_random_criteria_functions
-from mcda.generate import generate_random_profiles
 from mcda.utils import compute_ca
 from mcda.utils import add_errors_in_assignments
 from test_utils import test_result, test_results
 
 def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
     # Generate a random ELECTRE TRI model and assignment examples
-    c = generate_criteria(nc)
-    cv = generate_random_criteria_values(c, seed)
-    cv.normalize()
-    cat = generate_categories(ncat)
+    model = generate_random_electre_tri_bm_model(nc, ncat, seed)
 
-    cps = generate_categories_profiles(cat)
-    b = cps.get_ordered_profiles()
-    bpt = generate_random_profiles(b, c)
-
-    lbda = random.uniform(0.5, 1)
-
+    # Generate a first set of alternatives
     a = generate_alternatives(na)
-    pt = generate_random_performance_table(a, c)
+    pt = generate_random_performance_table(a, model.criteria)
 
-    model = electre_tri(c, cv, bpt, lbda, cps)
     aa = model.pessimist(pt)
 
     # Add errors in assignment examples
     aa_err = aa.copy()
-    aa_erroned = add_errors_in_assignments(aa_err, cat.keys(), pcerrors)
+    aa_erroned = add_errors_in_assignments(aa_err, model.categories,
+                                           pcerrors)
 
-    gi_worst = alternative_performances('worst', {crit.id: 0 for crit in c})
-    gi_best = alternative_performances('best', {crit.id: 1 for crit in c})
+    gi_worst = alternative_performances('worst', {c.id: 0
+                                                  for c in model.criteria})
+    gi_best = alternative_performances('best', {c.id: 1
+                                                for c in model.criteria})
 
     css = criteria_values([])
-    for crit in c:
-        cs = criterion_value(crit.id, ns)
+    for c in model.criteria:
+        cs = criterion_value(c.id, ns)
         css.append(cs)
 
     # Run linear program
     t1 = time.time()
-    lp = lp_utadis(css, cat, gi_worst, gi_best)
+    lp = lp_utadis(css, model.categories_profiles.to_categories(),
+                   gi_worst, gi_best)
     t2 = time.time()
     obj, cv_l, cfs_l, catv_l = lp.solve(aa_err, pt)
     t3 = time.time()
 
-    model2 = utadis(c, cv_l, cfs_l, catv_l)
+    model2 = utadis(model.criteria, cv_l, cfs_l, catv_l)
 
     # Compute new assignment and classification accuracy
     aa2 = model2.get_assignments(pt)
@@ -90,7 +79,7 @@ def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
 
     # Perform the generalization
     a_gen = generate_alternatives(na_gen)
-    pt_gen = generate_random_performance_table(a_gen, c)
+    pt_gen = generate_random_performance_table(a_gen, model.criteria)
     aa = model.pessimist(pt_gen)
     aa2 = model2.get_assignments(pt_gen)
     ca_gen = compute_ca(aa, aa2)
