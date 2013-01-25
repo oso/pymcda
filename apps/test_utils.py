@@ -321,6 +321,85 @@ def test_init(l = []):
     else:
         tests.run()
 
+def read_single_integer(variable, question):
+    while not variable:
+        variable = raw_input(question + " ? ")
+    variable = int(variable)
+    return variable
+
+def read_multiple_integer(variable, question):
+    while not variable:
+        variable = raw_input(question + " ? ")
+    variable = variable.split(",")
+    variable = [int(x) for x in variable]
+    return variable
+
+def read_csv_filename(variable, default):
+    while not variable:
+        variable = raw_input("File to save CSV data [%s] ? " % default)
+        if not variable:
+            variable = default
+
+    if variable[-4:] != ".csv":
+        variable += ".csv"
+
+    return variable
+
+def parser_parse_options(*options):
+
+    if "na" in options:
+        parser.add_option("-n", "--na", action = "store", type="string",
+                          dest = "na",
+                          help = "number of assignment examples")
+
+    if "nc" in options:
+        parser.add_option("-c", "--nc", action = "store", type="string",
+                          dest = "nc",
+                          help = "number of criteria")
+
+    if "ncat" in options:
+        parser.add_option("-t", "--ncat", action = "store", type="string",
+                          dest = "ncat",
+                          help = "number of categories")
+
+    if "na_gen" in options:
+        parser.add_option("-g", "--na_gen", action = "store", type="string",
+                          dest = "na_gen",
+                          help = "number of generalization alternatives")
+
+    if "pcerrors" in options:
+        parser.add_option("-e", "--errors", action = "store", type="string",
+                          dest = "pcerrors",
+                      help = "ratio of errors in the learning set")
+
+    if "nseeds" in options:
+        parser.add_option("-s", "--nseeds", action = "store", type="string",
+                          dest = "nseeds",
+                          help = "number of seeds")
+
+    if "max_loops" in options:
+        parser.add_option("-l", "--max-loops", action = "store",
+                          type = "string", dest = "max_loops",
+                          help = "max number of loops for the " \
+                                 "metaheuristic " \
+                                 "used to find the profiles")
+
+    if "nmodels" in options:
+        parser.add_option("-m", "--nmodels", action = "store",
+                          type = "string", dest = "nmodels",
+                          help = "Size of the population (of models)")
+
+    if "max_oloops" in options:
+        parser.add_option("-o", "--max_oloops", action = "store",
+                          type = "string", dest = "max_oloops",
+                          help = "Max number of loops of the whole " \
+                                 "metaheuristic")
+
+    if "filename" in options:
+        parser.add_option("-f", "--filename", action = "store",
+                          type = "string", dest = "filename",
+                          help = "filename to save csv output")
+
 if __name__ == "__main__":
     a = test_list_example()
     tests = test_list([a])
