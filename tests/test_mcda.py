@@ -361,6 +361,20 @@ class tests_mcda_methods(unittest.TestCase):
 
     def test007(self):
         a = generate_alternatives(100)
+        a1, a2 = a.split(2, None, True)
+        a1b, a2b = a.split(2, None, True)
+        self.assertNotEqual(a1, a1b)
+        self.assertNotEqual(a2, a2b)
+
+    def test008(self):
+        a = generate_alternatives(100)
+        a1, a2 = a.split(2, None, False)
+        a1b, a2b = a.split(2, None, False)
+        self.assertEqual(a1, a1b)
+        self.assertEqual(a2, a2b)
+
+    def test009(self):
+        a = generate_alternatives(100)
         a1, a2 = a.split(2)
         a3 = a.get_subset(a1.keys())
         self.assertEqual(a1, a3)
