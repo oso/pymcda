@@ -44,6 +44,31 @@ class mcda_dict(dict):
         l.sort(key = lambda x: x.id)
         return l
 
+    def get_subset(self, ids):
+        return type(self)([self[id] for id in ids])
+
+    def split(self, n, proportions = None):
+        if proportions is None:
+            proportions = [1 / n for i in range(n)]
+        elif len(proportions) == n:
+            t = sum(proportions)
+            proportions = [proportion / t for proportion in proportions]
+        else:
+            raise ValueError('%s::split invalid proportions')
+
+        keys, nkeys = self.keys(), len(self.keys())
+        j, subsets = 0, []
+        for proportion in proportions:
+            j2 = int(j + proportion * nkeys)
+            subset = type(self)(self[i] for i in keys[j:j2])
+            j = j2
+            subsets.append(subset)
+
+        subset = type(self)(self[i] for i in keys[j2:nkeys])
+        subsets[-1].update(subset)
+
+        return tuple(subsets)
+
 class mcda_object(object):
 
     def __eq__(self, other):

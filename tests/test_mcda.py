@@ -3,6 +3,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 from xml.etree import ElementTree
 from lxml import etree
 from mcda.types import *
+from mcda.generate import *
 import unittest
 import csv
 
@@ -293,8 +294,59 @@ class tests_csv(unittest.TestCase):
                                      rank_col = "rank")
         self.assertEqual(cats, swd.cats)
 
+class tests_mcda_methods(unittest.TestCase):
+
+    def test001(self):
+        a = generate_alternatives(100)
+        a1, a2 = a.split(2)
+        a1a2 = [ i for i in a1 if i in a2 ]
+        self.assertEqual(len(a1), 50)
+        self.assertEqual(len(a2), 50)
+        self.assertEqual(len(a1a2), 0)
+
+    def test002(self):
+        a = generate_alternatives(100)
+        a1, a2, a3 = a.split(3)
+        a1a2 = [ i for i in a1 if i in a2 ]
+        a2a3 = [ i for i in a2 if i in a3 ]
+        a1a3 = [ i for i in a1 if i in a3 ]
+        self.assertEqual(len(a1), 33)
+        self.assertEqual(len(a2), 33)
+        self.assertEqual(len(a3), 34)
+        self.assertEqual(len(a1a2), 0)
+        self.assertEqual(len(a2a3), 0)
+        self.assertEqual(len(a1a3), 0)
+
+    def test003(self):
+        a = generate_alternatives(100)
+        a1, a2 = a.split(2, [0.4, 0.6])
+        a1a2 = [ i for i in a1 if i in a2 ]
+        self.assertEqual(len(a1), 40)
+        self.assertEqual(len(a2), 60)
+        self.assertEqual(len(a1a2), 0)
+
+    def test004(self):
+        a = generate_alternatives(100)
+        a1, a2, a3 = a.split(3, [0.33, 0.33, 0.34])
+        a1a2 = [ i for i in a1 if i in a2 ]
+        a2a3 = [ i for i in a2 if i in a3 ]
+        a1a3 = [ i for i in a1 if i in a3 ]
+        self.assertEqual(len(a1), 33)
+        self.assertEqual(len(a2), 33)
+        self.assertEqual(len(a3), 34)
+        self.assertEqual(len(a1a2), 0)
+        self.assertEqual(len(a2a3), 0)
+        self.assertEqual(len(a1a3), 0)
+
+    def test005(self):
+        a = generate_alternatives(100)
+        a1, a2 = a.split(2)
+        a3 = a.get_subset(a1.keys())
+        self.assertEqual(a1, a3)
+
+
 test_classes = [tests_xmcda, tests_segment, tests_piecewise_linear,
-                tests_csv]
+                tests_csv, tests_mcda_methods]
 
 if __name__ == "__main__":
     suite = []
