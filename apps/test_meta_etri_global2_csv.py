@@ -2,7 +2,7 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import csv
 import random
-from algo.meta_electre_tri_global2 import meta_electre_tri_global
+from algo.meta_etri_global2 import meta_etri_global2
 from mcda.types import criterion_value, criteria_values
 from mcda.types import alternatives, criteria, performance_table
 from mcda.types import alternatives_assignments, categories
@@ -93,7 +93,7 @@ print "CA original:", compute_ca(aa, aa2)
 
 pt_sorted = sorted_performance_table(pt)
 
-meta = meta_electre_tri_global(model, pt_sorted, aa)
+meta = meta_etri_global2(model, pt_sorted, aa)
 
 for i in range(20):
     print meta.optimize(20)

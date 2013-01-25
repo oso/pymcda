@@ -9,7 +9,7 @@ from itertools import product
 
 from mcda.types import alternatives_assignments, performance_table
 from mcda.electre_tri import electre_tri
-from algo.meta_electre_tri_global2 import meta_electre_tri_global
+from algo.meta_etri_global2 import meta_etri_global2
 from mcda.utils import compute_ca
 from mcda.pt_sorted import sorted_performance_table
 from mcda.generate import generate_random_electre_tri_bm_model
@@ -46,7 +46,7 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
     for i in range(nmodels):
         model_meta = generate_random_electre_tri_bm_model(ncriteria,
                                                           ncategories)
-        meta = meta_electre_tri_global(model_meta, pt_sorted, aa)
+        meta = meta_etri_global2(model_meta, pt_sorted, aa)
         metas.append(meta)
         models_ca[meta.model] = meta.meta.good / meta.meta.na
 
@@ -85,7 +85,7 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
         for j in range(int((nmodels + 1) / 2), nmodels):
             model_meta = generate_random_electre_tri_bm_model(ncriteria,
                                                               ncategories)
-            metas[j] = meta_electre_tri_global(model_meta, pt_sorted, aa)
+            metas[j] = meta_etri_global2(model_meta, pt_sorted, aa)
 
     t_total = time.time() - t1
 

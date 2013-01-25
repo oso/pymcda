@@ -14,7 +14,7 @@ from mcda.pt_sorted import sorted_performance_table
 from mcda.generate import generate_random_electre_tri_bm_model
 from mcda.generate import generate_alternatives
 
-class meta_electre_tri_global():
+class meta_electre_tri_global2():
 
     def __init__(self, model, pt_sorted, aa_ori):
         self.model = model
