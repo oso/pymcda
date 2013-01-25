@@ -10,7 +10,7 @@ from itertools import product
 from mcda.types import alternatives_assignments, performance_table
 from mcda.types import alternative_performances
 from mcda.electre_tri import electre_tri_bm
-from algo.meta_electre_tri_profiles import meta_electre_tri_profiles
+from algo.meta_etri_profiles3 import meta_etri_profiles3
 from algo.meta_electre_tri_profiles4 import meta_electre_tri_profiles4
 from mcda.utils import compute_ca
 from mcda.pt_sorted import sorted_performance_table
@@ -242,7 +242,7 @@ if __name__ == "__main__":
 
     i = 0
     if options.three is True:
-        algo = meta_electre_tri_profiles
+        algo = meta_etri_profiles3
         i += 1
     if options.fourth is True:
         algo = meta_electre_tri_profiles4
