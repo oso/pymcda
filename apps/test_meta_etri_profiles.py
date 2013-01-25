@@ -8,16 +8,20 @@ import random
 from itertools import product
 
 from mcda.types import alternatives_assignments, performance_table
+from mcda.types import alternative_performances
 from mcda.electre_tri import electre_tri_bm
 from algo.meta_electre_tri_profiles import meta_electre_tri_profiles
+from algo.meta_electre_tri_profiles4 import meta_electre_tri_profiles4
 from mcda.utils import compute_ca
 from mcda.pt_sorted import sorted_performance_table
-from mcda.generate import generate_alternatives
 from mcda.generate import generate_random_electre_tri_bm_model
+from mcda.generate import generate_alternatives
 from mcda.generate import generate_random_performance_table
 from mcda.generate import generate_random_profiles
 from mcda.utils import add_errors_in_assignments
 from test_utils import test_result, test_results
+
+algo = None
 
 def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
                                    max_loops):
@@ -45,10 +49,11 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
     t1 = time.time()
 
     # Run the algorithm
-    meta = meta_electre_tri_profiles(model2, pt_sorted, aa_err)
+    meta = algo(model2, pt_sorted, aa_err)
 
     ca2_iter = [1] * (max_loops + 1)
-    ca2 = compute_ca(aa_err, meta.aa)
+    aa2 = model2.pessimist(pt)
+    ca2 = compute_ca(aa_err, aa2)
     ca2_best = ca2
     best_bpt = model2.bpt.copy()
     ca2_iter[0] = ca2
@@ -61,7 +66,8 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
         meta.optimize()
         nloops += 1
 
-        ca2 = compute_ca(aa_err, meta.aa)
+        aa2 = meta.aa
+        ca2 = compute_ca(aa_err, aa2)
 
         ca2_iter[k + 1] = ca2
 
@@ -129,6 +135,7 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, filename):
     writer = csv.writer(f)
 
     # Write the test options
+    writer.writerow(['algorithm', algo.__name__])
     writer.writerow(['na', na])
     writer.writerow(['nc', nc])
     writer.writerow(['ncat', ncat])
@@ -191,6 +198,12 @@ if __name__ == "__main__":
     from test_utils import read_csv_filename
 
     parser = OptionParser(usage = "python %s [options]" % sys.argv[0])
+    parser.add_option("-3", "--three", action = "store_true",
+                      dest = "three", default = False,
+                      help = "Third algorithm")
+    parser.add_option("-4", "--fourth", action = "store_true",
+                      dest = "fourth", default = False,
+                      help = "Fourth algorithm")
     parser.add_option("-n", "--na", action = "store", type="string",
                       dest = "na",
                       help = "number of assignment examples")
@@ -218,6 +231,26 @@ if __name__ == "__main__":
 
     (options, args) = parser.parse_args()
 
+    while options.three is False and options.fourth is False:
+        print("3. Variable intervals")
+        print("4. Adapted intervals")
+        i = raw_input("Which algorithm ? ")
+        if i == '3':
+            options.three = True
+        elif i == '4':
+            options.fourth = True
+
+    i = 0
+    if options.three is True:
+        algo = meta_electre_tri_profiles
+        i += 1
+    if options.fourth is True:
+        algo = meta_electre_tri_profiles4
+        i += 1
+    if i > 1:
+        print("Cannot select multiple algorithms at the same time")
+        sys.exit(1)
+
     options.na = read_multiple_integer(options.na, "Number of " \
                                        "assignment examples")
     options.nc = read_multiple_integer(options.nc, "Number of criteria")
@@ -232,7 +265,8 @@ if __name__ == "__main__":
     options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
 
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    default_filename = "data/test_meta_electre_tri_profiles-%s.csv" % dt
+    default_filename = "data/test_%s-%s.csv" \
+                       % (algo.__name__, dt)
     options.filename = read_csv_filename(options.filename, default_filename)
 
     run_tests(options.na, options.nc, options.ncat, options.na_gen,
