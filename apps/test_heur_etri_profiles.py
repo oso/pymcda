@@ -14,7 +14,7 @@ from mcda.utils import add_errors_in_assignments
 from mcda.utils import compute_ca
 from algo.heur_etri_profiles import heur_etri_profiles
 from algo.heur_etri_coalitions import heur_etri_coalitions
-from algo.lp_electre_tri_weights import lp_electre_tri_weights
+from algo.lp_etri_weights import lp_etri_weights
 from test_utils import test_result, test_results
 
 def test_heur_etri_profiles(seed, na, nc, ncat, pcerrors):
@@ -43,10 +43,10 @@ def test_heur_etri_profiles(seed, na, nc, ncat, pcerrors):
     # Learn the weights and cut threshold
     cps = model.categories_profiles
 
-    lp_weights = lp_electre_tri_weights(model2, pt, aa, cps)
+    lp_weights = lp_etri_weights(model2, pt, aa, cps)
     lp_weights.solve()
 
-    lp_weights = lp_electre_tri_weights(model3, pt, aa, cps)
+    lp_weights = lp_etri_weights(model3, pt, aa, cps)
     lp_weights.solve()
 
     # Compute the classification accuracy

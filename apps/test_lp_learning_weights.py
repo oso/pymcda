@@ -9,7 +9,7 @@ from itertools import product
 
 from mcda.types import alternatives_assignments, performance_table
 from mcda.electre_tri import electre_tri
-from algo.lp_electre_tri_weights import lp_electre_tri_weights
+from algo.lp_etri_weights import lp_etri_weights
 from mcda.generate import generate_alternatives
 from mcda.generate import generate_random_electre_tri_bm_model
 from mcda.generate import generate_random_performance_table
@@ -35,7 +35,7 @@ def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
 
     # Run linear program
     t1 = time.time()
-    lp_weights = lp_electre_tri_weights(model2, pt, aa_err,
+    lp_weights = lp_etri_weights(model2, pt, aa_err,
                                         model2.categories_profiles, 0.0001)
     t2 = time.time()
     obj = lp_weights.solve()

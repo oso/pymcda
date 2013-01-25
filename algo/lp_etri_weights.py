@@ -19,7 +19,7 @@ elif solver == 'cplex':
 else:
     raise NameError('Invalid solver selected')
 
-class lp_electre_tri_weights():
+class lp_etri_weights():
 
     def __init__(self, model, pt, aa_ori, cps, delta=0.0001):
         self.model = model
@@ -418,7 +418,7 @@ if __name__ == "__main__":
 
     model2 = model.copy()
     t1 = time.time()
-    lp_weights = lp_electre_tri_weights(model2, pt_learn, aa_err, cps,
+    lp_weights = lp_etri_weights(model2, pt_learn, aa_err, cps,
                                         delta)
     t2 = time.time()
     obj = lp_weights.solve()

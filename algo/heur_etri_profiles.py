@@ -86,7 +86,7 @@ if __name__ == "__main__":
     from mcda.utils import compute_ca
     from mcda.utils import compute_winning_coalitions
     from mcda.utils import display_coalitions
-    from algo.lp_electre_tri_weights import lp_electre_tri_weights
+    from algo.lp_etri_weights import lp_etri_weights
     from ui.graphic import display_electre_tri_models
 
     model = generate_random_electre_tri_bm_model(10, 3, 17)
@@ -115,7 +115,7 @@ if __name__ == "__main__":
         b = model.categories_profiles.get_ordered_profiles()
         model2.bpt = generate_random_profiles(b, model2.criteria)
 
-        lp_weights = lp_electre_tri_weights(model2, pt, aa, cps)
+        lp_weights = lp_etri_weights(model2, pt, aa, cps)
         lp_weights.solve()
 
         aa2 = model2.pessimist(pt)
@@ -133,7 +133,7 @@ if __name__ == "__main__":
     model3 = model.copy()
     model3.bpt = learned_bpt
 
-    lp_weights = lp_electre_tri_weights(model3, pt, aa, cps)
+    lp_weights = lp_etri_weights(model3, pt, aa, cps)
     lp_weights.solve()
 
     aa3 = model3.pessimist(pt)

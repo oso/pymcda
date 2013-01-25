@@ -8,7 +8,7 @@ from mcda.electre_tri import electre_tri
 from mcda.types import alternative_assignment, alternatives_assignments
 from mcda.types import performance_table
 from algo.heur_etri_profiles import heur_etri_profiles
-from algo.lp_electre_tri_weights import lp_electre_tri_weights
+from algo.lp_etri_weights import lp_etri_weights
 from algo.meta_etri_profiles4 import meta_etri_profiles4
 from mcda.utils import compute_ca
 from mcda.pt_sorted import sorted_performance_table
@@ -26,7 +26,7 @@ class meta_etri_global3():
                                          aa_ori, cats)
         self.model.bpt = heur.solve()
 
-        self.lp = lp_electre_tri_weights(self.model, pt_sorted.pt,
+        self.lp = lp_etri_weights(self.model, pt_sorted.pt,
                                          self.aa_ori,
                                          self.model.categories_profiles)
         self.meta = meta_etri_profiles4(self.model, pt_sorted,
