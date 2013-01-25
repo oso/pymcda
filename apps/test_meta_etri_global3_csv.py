@@ -64,7 +64,7 @@ def load_data(filepath):
 
     return data
 
-def run_test(seed, data, pclearning, nloop, nmeta):
+def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
     random.seed(seed)
 
     # Separate learning data and test data
@@ -84,8 +84,6 @@ def run_test(seed, data, pclearning, nloop, nmeta):
 
     model = electre_tri_bm(data.c, cvs, bpt, lbda, cat_profiles)
 
-
-
     # Assign learning set with the model
     aa_learning2 = model.pessimist(pt_learning)
 
@@ -93,11 +91,35 @@ def run_test(seed, data, pclearning, nloop, nmeta):
     t1 = time.time()
 
     pt_sorted = sorted_performance_table(pt_learning)
-    meta = meta_etri_global3(model, pt_sorted, aa_learning)
-    for i in range(nloop):
-        ca_learning = meta.optimize(nmeta)
 
-        t_total = time.time() - t1
+    # Init of the metas
+    model_metas = {}
+    for i in range(nmodels):
+        m = model.copy()
+        model_metas[m] = meta_etri_global3(m, pt_sorted, aa_learning)
+
+    # Main loop
+    for i in range(nloop):
+        model_cas = {}
+        for m, meta in model_metas.items():
+            model_cas[m] = meta.optimize(nmeta)
+
+        model_cas = sorted(model_cas.items(), key = lambda (k,v): (v,k),
+                           reverse = True)
+
+        ca_learning = model_cas[0][1]
+        if ca_learning == 1:
+            break
+
+        for model_ca in model_cas[int((nmodels + 1) / 2):]:
+            m = model_ca[0]
+            del model_metas[model_ca[0]]
+            m = model.copy()
+            model_metas[m] = meta_etri_global3(m, pt_sorted, aa_learning)
+
+    model = model_cas[0][0]
+
+    t_total = time.time() - t1
 
     # Compute CA of test setting
     aa_test2 = model.pessimist(data.pt)
@@ -114,6 +136,7 @@ def run_test(seed, data, pclearning, nloop, nmeta):
     t['nc'] = len(data.c)
     t['ncat'] = len(data.cats)
     t['nloop'] = nloop
+    t['nmodels'] = nmodels
     t['nmeta'] = nmeta
     t['pclearning'] = pclearning
     t['na_learning'] = len(aa_learning)
@@ -125,7 +148,7 @@ def run_test(seed, data, pclearning, nloop, nmeta):
 
     return t
 
-def run_tests(nseeds, data, pclearning, nloop, nmeta, filename):
+def run_tests(nseeds, data, pclearning, nloop, nmodels, nmeta, filename):
     # Create the CSV writer
     f = open(filename, 'wb')
     writer = csv.writer(f)
@@ -144,16 +167,17 @@ def run_tests(nseeds, data, pclearning, nloop, nmeta, filename):
 
     # Run the algorithm
     initialized = False
-    for _pclearning, _nloop, _nmeta, seed in product(pclearning, nloop,
-                                                     nmeta, seeds):
+    for _pclearning, _nloop, _nmodels, _nmeta, seed in product(pclearning,
+                                        nloop, nmodels, nmeta, seeds):
         t1 = time.time()
-        t = run_test(seed, data, _pclearning, _nloop, _nmeta)
+        t = run_test(seed, data, _pclearning, _nloop, _nmodels, _nmeta)
         t2 = time.time()
 
         if initialized is False:
             fields = ['seed', 'na', 'nc', 'ncat', 'pclearning',
-                      'na_learning', 'na_test', 'nloop', 'nmeta',
-                      'ca_learning', 'ca_test', 'ca_all', 't_total']
+                      'na_learning', 'na_test', 'nloop', 'nmodels',
+                      'nmeta', 'ca_learning', 'ca_test', 'ca_all',
+                      't_total']
             writer.writerow(fields)
             initialized = True
 
@@ -167,7 +191,7 @@ def run_tests(nseeds, data, pclearning, nloop, nmeta, filename):
     writer.writerow(['', ''])
 
     t = results.summary(['na', 'nc', 'ncat', 'pclearning', 'na_learning',
-                         'na_test', 'nloop', 'nmeta'],
+                         'na_test', 'nloop', 'nmodels', 'nmeta'],
                         ['ca_learning', 'ca_test', 'ca_all', 't_total'])
     t.tocsv(writer)
 
@@ -183,6 +207,9 @@ if __name__ == "__main__":
     parser.add_option("-p", "--pclearning", action = "store", type="string",
                       dest = "pclearning",
                       help = "Percentage of data to use in learning set")
+    parser.add_option("-m", "--nmodels", action = "store", type="string",
+                      dest = "nmodels",
+                      help = "Size of the population (of models)")
     parser.add_option("-l", "--max-loops", action = "store", type="string",
                       dest = "max_loops",
                       help = "Max number of loops of the whole "
@@ -211,6 +238,8 @@ if __name__ == "__main__":
     options.max_oloops = read_multiple_integer(options.max_oloops, "Max " \
                                                "number of loops for " \
                                                "profiles' metaheuristic")
+    options.nmodels = read_multiple_integer(options.nmodels,
+                                            "Population size (models)")
     options.max_loops = read_multiple_integer(options.max_loops, "Max " \
                                               "number of loops for the " \
                                               "whole metaheuristic")
@@ -221,6 +250,6 @@ if __name__ == "__main__":
     options.filename = read_csv_filename(options.filename, default_filename)
 
     run_tests(options.nseeds, data, options.pclearning, options.max_loops,
-              options.max_oloops, options.filename)
+              options.nmodels, options.max_oloops, options.filename)
 
     print("Results saved in '%s'" % options.filename)
