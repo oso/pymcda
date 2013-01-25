@@ -236,15 +236,15 @@ if __name__ == "__main__":
                       help = "number of seeds")
     parser.add_option("-l", "--max-loops", action = "store", type="string",
                       dest = "max_loops",
-                      help = "max number of loops for the metaheuristic " \
-                             "used to find the profiles")
+                      help = "Max number of loops of the whole "
+                             "metaheuristic")
     parser.add_option("-m", "--nmodels", action = "store", type="string",
                       dest = "nmodels",
                       help = "Size of the population (of models)")
     parser.add_option("-o", "--max_oloops", action = "store", type="string",
                       dest = "max_oloops",
-                      help = "Max number of loops of the whole "
-                             "metaheuristic")
+                      help = "max number of loops for the metaheuristic " \
+                             "used to find the profiles")
     parser.add_option("-f", "--filename", action = "store", type="string",
                       dest = "filename",
                       help = "filename to save csv output")
