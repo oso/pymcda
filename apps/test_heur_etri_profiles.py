@@ -12,7 +12,7 @@ from mcda.generate import generate_random_profiles
 from mcda.pt_sorted import sorted_performance_table
 from mcda.utils import add_errors_in_assignments
 from mcda.utils import compute_ca
-from algo.heur_electre_tri_profiles import heur_electre_tri_profiles
+from algo.heur_etri_profiles import heur_etri_profiles
 from algo.heur_etri_coalitions import heur_etri_coalitions
 from algo.lp_electre_tri_weights import lp_electre_tri_weights
 from test_utils import test_result, test_results
@@ -37,7 +37,7 @@ def test_heur_etri_profiles(seed, na, nc, ncat, pcerrors):
     # Run the heuristic
     cats = model.categories_profiles.to_categories()
     pt_sorted = sorted_performance_table(pt)
-    heur = heur_electre_tri_profiles(model3.criteria, pt_sorted, aa, cats)
+    heur = heur_etri_profiles(model3.criteria, pt_sorted, aa, cats)
     model3.bpt = heur.solve()
 
     # Learn the weights and cut threshold

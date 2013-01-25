@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 from mcda.types import alternative_performances
 from mcda.types import performance_table
 
-class heur_electre_tri_profiles():
+class heur_etri_profiles():
 
     def __init__(self, crits, pt_sorted, aa, categories):
         self.crits = crits
@@ -104,7 +104,7 @@ if __name__ == "__main__":
         print("Percentage of alternatives in %s: %g %%" % (cat, pc))
 
     cats = model.categories_profiles.to_categories()
-    heur = heur_electre_tri_profiles(model.criteria, sorted_pt, aa, cats)
+    heur = heur_etri_profiles(model.criteria, sorted_pt, aa, cats)
     learned_bpt = heur.solve()
 
     cps = model.categories_profiles

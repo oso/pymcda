@@ -7,7 +7,7 @@ from itertools import product
 from mcda.electre_tri import electre_tri
 from mcda.types import alternative_assignment, alternatives_assignments
 from mcda.types import performance_table
-from algo.heur_electre_tri_profiles import heur_electre_tri_profiles
+from algo.heur_etri_profiles import heur_etri_profiles
 from algo.lp_electre_tri_weights import lp_electre_tri_weights
 from algo.meta_etri_profiles4 import meta_etri_profiles4
 from mcda.utils import compute_ca
@@ -22,7 +22,7 @@ class meta_etri_global3():
         self.aa_ori = aa_ori
 
         cats = model.categories_profiles.to_categories()
-        heur = heur_electre_tri_profiles(model.criteria, pt_sorted,
+        heur = heur_etri_profiles(model.criteria, pt_sorted,
                                          aa_ori, cats)
         self.model.bpt = heur.solve()
 
