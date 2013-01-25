@@ -11,43 +11,32 @@ from mcda.types import alternatives_assignments, performance_table
 from mcda.electre_tri import electre_tri
 from algo.lp_electre_tri_weights import lp_electre_tri_weights
 from mcda.generate import generate_alternatives
-from mcda.generate import generate_criteria
-from mcda.generate import generate_random_criteria_values
+from mcda.generate import generate_random_electre_tri_bm_model
 from mcda.generate import generate_random_performance_table
-from mcda.generate import generate_categories
-from mcda.generate import generate_random_profiles
-from mcda.generate import generate_categories_profiles
 from mcda.utils import compute_ca
 from mcda.utils import add_errors_in_assignments
 from test_utils import test_result, test_results
 
 def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
-    # Generate a random ELECTRE TRI model and assignment examples
-    a = generate_alternatives(na)
-    c = generate_criteria(nc)
-    cv = generate_random_criteria_values(c, seed)
-    cv.normalize()
-    pt = generate_random_performance_table(a, c)
-
-    cat = generate_categories(ncat)
-    cps = generate_categories_profiles(cat)
-    b = cps.get_ordered_profiles()
-    bpt = generate_random_profiles(b, c)
-
-    lbda = random.uniform(0.5, 1)
-
-    model = electre_tri(c, cv, bpt, lbda, cps)
+    # Generate an ELECTRE TRI model and assignment examples
+    model = generate_random_electre_tri_bm_model(nc, ncat, seed)
     model2 = model.copy()
+
+    # Generate a first set of alternatives
+    a = generate_alternatives(na)
+    pt = generate_random_performance_table(a, model.criteria)
+
     aa = model.pessimist(pt)
 
     # Add errors in assignment examples
     aa_err = aa.copy()
-    aa_erroned = add_errors_in_assignments(aa_err, cat.keys(), pcerrors)
+    aa_erroned = add_errors_in_assignments(aa_err, model.categories,
+                                           pcerrors)
 
     # Run linear program
     t1 = time.time()
-    lp_weights = lp_electre_tri_weights(model2, pt, aa_err, cps,
-        0.0001)
+    lp_weights = lp_electre_tri_weights(model2, pt, aa_err,
+                                        model2.categories_profiles, 0.0001)
     t2 = time.time()
     obj = lp_weights.solve()
     t3 = time.time()
@@ -76,7 +65,7 @@ def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
 
     # Perform the generalization
     a_gen = generate_alternatives(na_gen)
-    pt_gen = generate_random_performance_table(a_gen, c)
+    pt_gen = generate_random_performance_table(a_gen, model.criteria)
     aa = model.pessimist(pt_gen)
     aa2 = model2.pessimist(pt_gen)
     ca_gen = compute_ca(aa, aa2)
