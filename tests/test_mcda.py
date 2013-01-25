@@ -340,10 +340,30 @@ class tests_mcda_methods(unittest.TestCase):
 
     def test005(self):
         a = generate_alternatives(100)
+        a1, a2, a3 = a.split(3, [33, 33, 34])
+        a1a2 = [ i for i in a1 if i in a2 ]
+        a2a3 = [ i for i in a2 if i in a3 ]
+        a1a3 = [ i for i in a1 if i in a3 ]
+        self.assertEqual(len(a1), 33)
+        self.assertEqual(len(a2), 33)
+        self.assertEqual(len(a3), 34)
+        self.assertEqual(len(a1a2), 0)
+        self.assertEqual(len(a2a3), 0)
+        self.assertEqual(len(a1a3), 0)
+
+    def test006(self):
+        a = generate_alternatives(100)
+        a1, a2 = a.split(2, [0.1, 0.1])
+        a1a2 = [ i for i in a1 if i in a2 ]
+        self.assertEqual(len(a1), 50)
+        self.assertEqual(len(a2), 50)
+        self.assertEqual(len(a1a2), 0)
+
+    def test007(self):
+        a = generate_alternatives(100)
         a1, a2 = a.split(2)
         a3 = a.get_subset(a1.keys())
         self.assertEqual(a1, a3)
-
 
 test_classes = [tests_xmcda, tests_segment, tests_piecewise_linear,
                 tests_csv, tests_mcda_methods]
