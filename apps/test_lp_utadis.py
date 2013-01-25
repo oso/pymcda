@@ -163,6 +163,8 @@ def run_tests(na, nc, ncat, ns, na_gen, pcerrors, nseeds, filename):
 
 if __name__ == "__main__":
     from optparse import OptionParser
+    from test_utils import read_single_integer, read_multiple_integer
+    from test_utils import read_csv_filename
 
     parser = OptionParser(usage = "python %s [options]" % sys.argv[0])
     parser.add_option("-n", "--na", action = "store", type="string",
@@ -192,51 +194,22 @@ if __name__ == "__main__":
 
     (options, args) = parser.parse_args()
 
-    while not options.na:
-        options.na = raw_input("Number of assignment examples ? ")
-    options.na = options.na.split(",")
-    options.na = [ int(x) for x in options.na ]
+    options.na = read_multiple_integer(options.na, "Number of " \
+                                       "assignment examples")
+    options.nc = read_multiple_integer(options.nc, "Number of criteria")
+    options.ncat = read_multiple_integer(options.ncat, "Number of " \
+                                         "categories")
+    options.na_gen = read_multiple_integer(options.na_gen, "Number of " \
+                                           "generalization alternatives")
+    options.pcerrors = read_multiple_integer(options.pcerrors,
+                                             "Ratio of errors")
+    options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
+    options.ns = read_multiple_integer(options.ns, "Number of function " \
+                                       "segments")
 
-    while not options.nc:
-        options.nc = raw_input("Number of criteria ? ")
-    options.nc = options.nc.split(",")
-    options.nc = [ int(x) for x in options.nc ]
-
-    while not options.ncat:
-        options.ncat = raw_input("Number of categories ? ")
-    options.ncat = options.ncat.split(",")
-    options.ncat = [ int(x) for x in options.ncat ]
-
-    while not options.ns:
-        options.ns = raw_input("Number of function segments ? ")
-    options.ns = options.ns.split(",")
-    options.ns = [ int(x) for x in options.ns ]
-
-    while not options.na_gen:
-        options.na_gen = raw_input("Number of generalization " \
-                                   "alternatives ? ")
-    options.na_gen = options.na_gen.split(",")
-    options.na_gen = [ int(x) for x in options.na_gen ]
-
-    while not options.pcerrors:
-        options.pcerrors = raw_input("Ratio of errors ? ")
-    options.pcerrors = options.pcerrors.split(",")
-    options.pcerrors = [ float(x) for x in options.pcerrors ]
-
-    while not options.nseeds:
-        options.nseeds = raw_input("Number of seeds ? ")
-    options.nseeds = int(options.nseeds)
-
-    while not options.filename:
-        dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        default_filename = "data/test_lp_utadis-%s.csv" % dt
-        options.filename = raw_input("File to save CSV data [%s] ? " \
-                                     % default_filename)
-        if not options.filename:
-            options.filename = default_filename
-
-    if options.filename[-4:] != ".csv":
-        options.filename += ".csv"
+    dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    default_filename = "data/test_lp_utadis-%s.csv" % dt
+    options.filename = read_csv_filename(options.filename, default_filename)
 
     run_tests(options.na, options.nc, options.ncat, options.ns,
               options.na_gen, options.pcerrors, options.nseeds,
