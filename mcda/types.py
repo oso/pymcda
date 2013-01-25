@@ -447,9 +447,6 @@ class performance_table(mcda_dict):
 
         return a
 
-    def get_subset(self, alternatives):
-        return performance_table([self[a] for a in alternatives])
-
     def to_xmcda(self):
         root = ElementTree.Element('performanceTable')
         for alt_perfs in self:
