@@ -23,21 +23,34 @@ class heur_electre_tri_profiles():
             self.cat_proba[cat] = total - len(aa_cat)
 
     def compute_histogram(self, crit, cat_above, cat_below, above):
-        h = {}
-        val = 0
+        h1 = {}
+        h2 = {}
         below = self.b0.performances[crit.id]
         aids, perfs = self.pt_sorted.get_middle(crit.id, below, above)
+
+        # From smallest to biggest
+        val = 0
         for aid, perf in zip(aids, perfs):
             cat = self.aa[aid].category_id
             if cat == cat_below:
                 val += self.cat_proba[cat]
-                h[perf] = val
+                h1[perf + self.delta] = val
+            elif cat == cat_above:
+                h1[perf] = val
 
+        # From biggest to smallest
+        val = 0
+        aids.reverse()
+        perfs.reverse()
+        for aid, perf in zip(aids, perfs):
+            cat = self.aa[aid].category_id
             if cat == cat_above:
-                val -= self.cat_proba[cat]
-                h[perf + self.delta] = val
+                val += self.cat_proba[cat]
+                h2[perf] = val
+            elif cat == cat_below:
+                h2[perf + self.delta] = val
 
-        return h
+        return { key: h1[key] + h2[key] for key in h1 }
 
     def init_profile(self, profile_id, cat_above, cat_below, pabove):
         ap = alternative_performances(profile_id, {})
