@@ -13,7 +13,7 @@ from mcda.pt_sorted import sorted_performance_table
 from mcda.utils import add_errors_in_assignments
 from mcda.utils import compute_ca
 from algo.heur_electre_tri_profiles import heur_electre_tri_profiles
-from algo.heur_electre_tri_coalitions import heur_electre_tri_coalitions
+from algo.heur_etri_coalitions import heur_etri_coalitions
 from algo.lp_electre_tri_weights import lp_electre_tri_weights
 from test_utils import test_result, test_results
 
