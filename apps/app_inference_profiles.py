@@ -13,7 +13,7 @@ from mcda.generate import generate_random_performance_table
 from mcda.generate import generate_criteria
 from mcda.pt_sorted import sorted_performance_table
 from mcda.utils import compute_ca
-from algo.meta_electre_tri_profiles4 import meta_electre_tri_profiles4
+from algo.meta_etri_profiles4 import meta_etri_profiles4
 from ui.graphic import QGraphicsScene_etri
 from multiprocessing import Process, Pipe
 
@@ -28,7 +28,7 @@ def run_metaheuristic(pipe, model, pt, aa, n, worst = None, best = None):
                                          best = best)
 
     pt_sorted = sorted_performance_table(pt)
-    meta = meta_electre_tri_profiles4(model, pt_sorted, aa)
+    meta = meta_etri_profiles4(model, pt_sorted, aa)
     f = compute_ca(aa, meta.aa)
 
     pipe.send([model.copy(), f])

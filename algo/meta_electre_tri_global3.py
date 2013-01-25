@@ -9,7 +9,7 @@ from mcda.types import alternative_assignment, alternatives_assignments
 from mcda.types import performance_table
 from algo.heur_electre_tri_profiles import heur_electre_tri_profiles
 from algo.lp_electre_tri_weights import lp_electre_tri_weights
-from algo.meta_electre_tri_profiles4 import meta_electre_tri_profiles4
+from algo.meta_etri_profiles4 import meta_etri_profiles4
 from mcda.utils import compute_ca
 from mcda.pt_sorted import sorted_performance_table
 from mcda.generate import generate_random_electre_tri_bm_model
@@ -29,7 +29,7 @@ class meta_electre_tri_global3():
         self.lp = lp_electre_tri_weights(self.model, pt_sorted.pt,
                                          self.aa_ori,
                                          self.model.categories_profiles)
-        self.meta = meta_electre_tri_profiles4(self.model, pt_sorted,
+        self.meta = meta_etri_profiles4(self.model, pt_sorted,
                                                self.aa_ori)
 
     def optimize(self, nmeta):
