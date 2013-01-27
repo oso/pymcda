@@ -107,15 +107,13 @@ if __name__ == "__main__":
     heur = heur_etri_profiles(model.criteria, sorted_pt, aa, cats)
     learned_bpt = heur.solve()
 
-    cps = model.categories_profiles
-
     # Learn the weights with random generated profiles
     for i in range(10):
         model2 = model.copy()
         b = model.categories_profiles.get_ordered_profiles()
         model2.bpt = generate_random_profiles(b, model2.criteria)
 
-        lp_weights = lp_etri_weights(model2, pt, aa, cps)
+        lp_weights = lp_etri_weights(model2, pt, aa)
         lp_weights.solve()
 
         aa2 = model2.pessimist(pt)
@@ -133,7 +131,7 @@ if __name__ == "__main__":
     model3 = model.copy()
     model3.bpt = learned_bpt
 
-    lp_weights = lp_etri_weights(model3, pt, aa, cps)
+    lp_weights = lp_etri_weights(model3, pt, aa)
     lp_weights.solve()
 
     aa3 = model3.pessimist(pt)

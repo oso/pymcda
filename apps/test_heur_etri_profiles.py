@@ -43,10 +43,10 @@ def test_heur_etri_profiles(seed, na, nc, ncat, pcerrors):
     # Learn the weights and cut threshold
     cps = model.categories_profiles
 
-    lp_weights = lp_etri_weights(model2, pt, aa, cps)
+    lp_weights = lp_etri_weights(model2, pt, aa)
     lp_weights.solve()
 
-    lp_weights = lp_etri_weights(model3, pt, aa, cps)
+    lp_weights = lp_etri_weights(model3, pt, aa)
     lp_weights.solve()
 
     # Compute the classification accuracy

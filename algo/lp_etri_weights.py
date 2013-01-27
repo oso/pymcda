@@ -21,10 +21,10 @@ else:
 
 class lp_etri_weights():
 
-    def __init__(self, model, pt, aa_ori, cps, delta=0.0001):
+    def __init__(self, model, pt, aa_ori, delta=0.0001):
         self.model = model
-        self.categories = cps.get_ordered_categories()
-        self.profiles = cps.get_ordered_profiles()
+        self.categories = model.categories_profiles.get_ordered_categories()
+        self.profiles = model.categories_profiles.get_ordered_profiles()
         self.delta = delta
         self.cat_ranks = { c: i+1 for i, c in enumerate(self.categories) }
         self.pt = { a.id: a.performances \
@@ -418,8 +418,7 @@ if __name__ == "__main__":
 
     model2 = model.copy()
     t1 = time.time()
-    lp_weights = lp_etri_weights(model2, pt_learn, aa_err, cps,
-                                        delta)
+    lp_weights = lp_etri_weights(model2, pt_learn, aa_err, delta)
     t2 = time.time()
     obj = lp_weights.solve()
     t3 = time.time()

@@ -26,9 +26,7 @@ class meta_etri_global3():
                                          aa_ori, cats)
         self.model.bpt = heur.solve()
 
-        self.lp = lp_etri_weights(self.model, pt_sorted.pt,
-                                         self.aa_ori,
-                                         self.model.categories_profiles)
+        self.lp = lp_etri_weights(self.model, pt_sorted.pt, self.aa_ori)
         self.meta = meta_etri_profiles4(self.model, pt_sorted,
                                                self.aa_ori)
 

@@ -19,9 +19,7 @@ class meta_etri_global2():
     def __init__(self, model, pt_sorted, aa_ori):
         self.model = model
         self.aa_ori = aa_ori
-        self.lp = lp_etri_weights(self.model, pt_sorted.pt,
-                                         self.aa_ori,
-                                         self.model.categories_profiles)
+        self.lp = lp_etri_weights(self.model, pt_sorted.pt, self.aa_ori)
         self.meta = meta_etri_profiles4(self.model, pt_sorted,
                                                self.aa_ori)
 
