@@ -103,6 +103,8 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
         model_cas = {}
         for m, meta in model_metas.items():
             model_cas[m] = meta.optimize(nmeta)
+            if model_cas[m] == 1:
+                break
 
         model_cas = sorted(model_cas.items(), key = lambda (k,v): (v,k),
                            reverse = True)
@@ -113,7 +115,7 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
 
         for model_ca in model_cas[int((nmodels + 1) / 2):]:
             m = model_ca[0]
-            del model_metas[model_ca[0]]
+            del model_metas[m]
             m = model.copy()
             model_metas[m] = meta_etri_global3(m, pt_sorted, aa_learning)
 
