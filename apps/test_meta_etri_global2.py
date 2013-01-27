@@ -41,55 +41,51 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
     ncriteria = len(model.criteria)
     ncategories = len(model.categories)
     pt_sorted = sorted_performance_table(pt)
-    metas = []
-    models_ca = {}
+    model_metas = {}
+    model_cas = {}
     for i in range(nmodels):
-        model_meta = generate_random_electre_tri_bm_model(ncriteria,
-                                                          ncategories)
-        meta = meta_etri_global2(model_meta, pt_sorted, aa)
-        metas.append(meta)
-        models_ca[meta.model] = meta.meta.good / meta.meta.na
+        m = generate_random_electre_tri_bm_model(ncriteria, ncategories)
+        meta = meta_etri_global2(m, pt_sorted, aa)
+        model_metas[m] = meta
+        model_cas[meta.model] = meta.meta.good / meta.meta.na
 
-    models_ca = sorted(models_ca.iteritems(),
+    model_cas = sorted(model_cas.iteritems(),
                        key = lambda (k,v): (v,k),
                        reverse = True)
 
     t1 = time.time()
 
     # Perform at max oloops on the set of metas
-    ca2_iter = [models_ca[0][1]] + [1] * (max_oloops)
+    ca2_iter = [model_cas[0][1]] + [1] * (max_oloops)
     nloops = 0
     for i in range(0, max_oloops):
-        models_ca = {}
-        for meta in metas:
-            m = meta.model
-            print m
-            ca2 = meta.optimize(max_loops)
-            models_ca[m] = ca2
-
-            if ca2 == 1:
+        model_cas = {}
+        for m, meta in model_metas.items():
+            model_cas[m] = meta.optimize(max_loops)
+            if model_cas[m] == 1:
                 break
 
-        models_ca = sorted(models_ca.iteritems(),
+        model_cas = sorted(model_cas.iteritems(),
                            key = lambda (k,v): (v,k),
                            reverse = True)
 
         nloops += 1
-        ca2_best = models_ca[0][1]
+        ca2_best = model_cas[0][1]
 
         ca2_iter[i + 1] = ca2_best
 
         if ca2_best == 1:
             break
 
-        for j in range(int((nmodels + 1) / 2), nmodels):
-            model_meta = generate_random_electre_tri_bm_model(ncriteria,
-                                                              ncategories)
-            metas[j] = meta_etri_global2(model_meta, pt_sorted, aa)
+        for model_ca in model_cas[int((nmodels + 1) / 2):]:
+            m = model_ca[0]
+            del model_metas[m]
+            m = generate_random_electre_tri_bm_model(ncriteria, ncategories)
+            model_metas[m] = meta_etri_global2(m, pt_sorted, aa)
 
     t_total = time.time() - t1
 
-    model2 = models_ca[0][0]
+    model2 = model_cas[0][0]
 
     # Determine the number of erroned alternatives badly assigned
     aa2 = model2.pessimist(pt)
