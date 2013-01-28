@@ -393,9 +393,6 @@ class performance_table(mcda_dict):
         for i in l:
             self[i.id] = i
 
-    def append(self, ap):
-        self[ap.id] = ap
-
     def __call__(self, id):
         return self[id].performances
 
@@ -1240,9 +1237,6 @@ class categories_profiles(mcda_dict):
     def __repr__(self):
         return "categories_profiles(%s)" % self.values()
 
-    def append(self, cp):
-        self[cp.id] = cp
-
     def get_ordered_profiles(self):
         lower_cat = { cp.value.lower: cp.id for cp in self }
         upper_cat = { cp.value.upper: cp.id for cp in self }
@@ -1329,9 +1323,6 @@ class alternatives_assignments(mcda_dict):
 
     def __repr__(self):
         return "alternatives_assignments(%s)" % self.values()
-
-    def append(self, aa):
-        self[aa.id] = aa
 
     def get_alternatives_in_category(self, category_id):
         l = []
