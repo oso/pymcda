@@ -35,11 +35,13 @@ class mip_etri_global():
         self.add_objective()
 
     def add_variables(self):
-        ap_min = self.pt.get_min()
-        ap_max = self.pt.get_max()
+        self.ap_min = self.pt.get_min()
+        self.ap_max = self.pt.get_max()
+        self.ap_range = self.pt.get_range()
         for c in self.criteria:
-            ap_min.performances[c.id] -= self.epsilon
-            ap_max.performances[c.id] += self.epsilon
+            self.ap_min.performances[c.id] -= self.epsilon
+            self.ap_max.performances[c.id] += self.epsilon
+            self.ap_range.performances[c.id] *= 2
 
         self.lp.variables.add(names = ["a_" + a for a in self.aa.keys()],
                               types = [self.lp.variables.type.binary
@@ -51,12 +53,10 @@ class mip_etri_global():
         self.lp.variables.add(names = ["g_%s_%s" % (profile, c.id)
                                        for profile in self.__profiles
                                        for c in self.criteria],
-                              lb = [0
-#                              lb = [ap_min.performances[c.id]
+                              lb = [self.ap_min.performances[c.id]
                                     for profile in self.__profiles
                                     for c in self.criteria],
-                              ub = [1
-#                              ub = [ap_max.performances[c.id]
+                              ub = [self.ap_max.performances[c.id]
                                     for profile in self.__profiles
                                     for c in self.criteria])
 
@@ -104,6 +104,8 @@ class mip_etri_global():
                        )
 
         for c in self.criteria:
+            bigm = self.ap_range.performances[c.id]
+
             # cinf_j(a_i, b_{h-1}) <= w_j
             constraints.add(names = ["c_cinf_%s_%s" % (aa.id, c.id)],
                             lin_expr =
@@ -147,7 +149,7 @@ class mip_etri_global():
                                 [
                                  [["dinf_%s_%s" % (aa.id, c.id),
                                    "g_%s_%s" % (b, c.id)],
-                                  [1, 1]],
+                                  [bigm, 1]],
                                 ],
                             senses = ["G"],
                             rhs = [self.pt[aa.id].performances[c.id] +
@@ -160,10 +162,10 @@ class mip_etri_global():
                                 [
                                  [["dinf_%s_%s" % (aa.id, c.id),
                                    "g_%s_%s" % (b, c.id)],
-                                  [1, 1]],
+                                  [bigm, 1]],
                                 ],
                             senses = ["L"],
-                            rhs = [self.pt[aa.id].performances[c.id] + 1]
+                            rhs = [self.pt[aa.id].performances[c.id] + bigm]
                            )
 
     def __add_alternative_upper_constraints(self, aa):
@@ -185,6 +187,8 @@ class mip_etri_global():
                        )
 
         for c in self.criteria:
+            bigm = self.ap_range.performances[c.id]
+
             # csup_j(a_i, b_h) <= w_j
             constraints.add(names = ["c_csup_%s_%s" % (aa.id, c.id)],
                             lin_expr =
@@ -228,7 +232,7 @@ class mip_etri_global():
                                 [
                                  [["dsup_%s_%s" % (aa.id, c.id),
                                    "g_%s_%s" % (b, c.id)],
-                                  [1, 1]],
+                                  [bigm, 1]],
                                 ],
                             senses = ["G"],
                             rhs = [self.pt[aa.id].performances[c.id] +
@@ -241,10 +245,10 @@ class mip_etri_global():
                                 [
                                  [["dsup_%s_%s" % (aa.id, c.id),
                                    "g_%s_%s" % (b, c.id)],
-                                  [1, 1]],
+                                  [bigm, 1]],
                                 ],
                             senses = ["L"],
-                            rhs = [self.pt[aa.id].performances[c.id] + 1]
+                            rhs = [self.pt[aa.id].performances[c.id] + bigm]
                            )
 
     def add_alternatives_constraints(self):
@@ -319,7 +323,7 @@ class mip_etri_global():
             ap = alternative_performances(p)
             for c in self.criteria:
                 perf = self.lp.solution.get_values("g_%s_%s" % (p, c.id))
-                ap.performances[c.id] = perf
+                ap.performances[c.id] = round(perf, 5)
             pt.append(ap)
 
         self.model.bpt = pt
@@ -331,17 +335,24 @@ class mip_etri_global():
 if __name__ == "__main__":
     from mcda.generate import generate_random_electre_tri_bm_model
     from mcda.generate import generate_alternatives
+    from mcda.generate import generate_criteria
     from mcda.generate import generate_random_performance_table
     from mcda.utils import compute_ca
     from mcda.utils import display_assignments_and_pt
     from ui.graphic import display_electre_tri_models
 
+    seed = 123
+    ncrit = 5
+    ncat = 3
+
     # Generate a random ELECTRE TRI BM model
-    model = generate_random_electre_tri_bm_model(5, 3, 1)
+    criteria = generate_criteria(ncrit)
     worst = alternative_performances("worst",
-                                     {c.id: 0 for c in model.criteria})
+                                     {c.id: 0 for c in criteria})
     best = alternative_performances("best",
-                                    {c.id: 1 for c in model.criteria})
+                                    {c.id: 10 for c in criteria})
+    model = generate_random_electre_tri_bm_model(ncrit, ncat, seed,
+                                                 worst = worst, best = best)
 
     # Display model parameters
     print('Original model')
@@ -353,7 +364,8 @@ if __name__ == "__main__":
 
     # Generate a set of alternatives
     a = generate_alternatives(100)
-    pt = generate_random_performance_table(a, model.criteria)
+    pt = generate_random_performance_table(a, model.criteria,
+                                           worst = worst, best = best)
     aa = model.pessimist(pt)
 
     # Run the MIP
