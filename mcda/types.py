@@ -1332,6 +1332,14 @@ class alternatives_assignments(mcda_dict):
 
         return l
 
+    def get_alternatives_in_categories(self, *category_ids):
+        l = []
+        for aa, cat in product(self, *category_ids):
+            if aa.is_in_category(cat):
+                l.append(aa.id)
+
+        return l
+
     def display(self, alternative_ids = None, out = sys.stdout):
         if alternative_ids is None:
             alternative_ids = self.keys()
