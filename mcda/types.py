@@ -449,6 +449,17 @@ class performance_table(mcda_dict):
 
         return a
 
+    def get_range(self):
+        ap_min = self.get_min().performances
+        ap_max = self.get_max().performances
+
+        cids = next(self.itervalues()).performances.keys()
+        a = alternative_performances('range')
+        for cid in cids:
+            a.performances[cid] = ap_max[cid] - ap_min[cid]
+
+        return a
+
     def to_xmcda(self):
         root = ElementTree.Element('performanceTable')
         for alt_perfs in self:
