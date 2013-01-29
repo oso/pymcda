@@ -327,8 +327,6 @@ class mip_etri_global():
             pt.append(ap)
 
         self.model.bpt = pt
-        pt.display()
-        print "obj", obj
 
         return obj
 
@@ -341,7 +339,7 @@ if __name__ == "__main__":
     from mcda.utils import display_assignments_and_pt
     from ui.graphic import display_electre_tri_models
 
-    seed = 123
+    seed = 12
     ncrit = 5
     ncat = 3
 
@@ -358,6 +356,7 @@ if __name__ == "__main__":
     print('Original model')
     print('==============')
     cids = model.criteria.keys()
+    cids.sort()
     model.bpt.display(criterion_ids = cids)
     model.cv.display(criterion_ids = cids)
     print("lambda: %.7s" % model.lbda)
