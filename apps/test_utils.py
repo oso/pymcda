@@ -91,11 +91,13 @@ class test_results(list):
             tr.set_attributes_order(order)
 
     def summary(self, unique_fields, average_fields, min_fields = None,
-                max_fields = None):
+                max_fields = None, std_fields = None):
         if min_fields is None:
             min_fields = average_fields
         if max_fields is None:
             max_fields = average_fields
+        if std_fields is None:
+            std_fields = average_fields
 
         # Research uniques values for each field
         unique_values = {}
@@ -125,6 +127,15 @@ class test_results(list):
                     for i, val in enumerate(avg_values):
                         tr["%s%d_avg" % (af, i)] = val
 
+                    if af in std_fields:
+                        std_values = [(1 / len(x) *
+                                      sum((xi - sum(x) / len(x)) ** 2
+                                          for xi in x)
+                                      ) ** 0.5
+                                      for x in v]
+                        for i, val in enumerate(std_values):
+                            tr["%s%d_std" % (af, i)] = val
+
                     if af in min_fields:
                         min_values = [ min(x) for x in v ]
                         for i, val in enumerate(min_values):
@@ -137,6 +148,11 @@ class test_results(list):
                 else:
                     v = [ r[af] for r in l ]
                     tr["%s_avg" % af] = sum(v) / len(v)
+
+                    if af in std_fields:
+                        tr["%s_std" % af] = (1 / len(v) *
+                                             sum((xi - sum(v) / len(v)) ** 2
+                                                 for xi in v)) ** 0.5
                     if af in min_fields:
                         tr["%s_min" % af] = min(v)
                     if af in max_fields:
@@ -181,8 +197,11 @@ class test_results(list):
                     avg_value = sum(col) / len(col)
                     min_value = min(col)
                     max_value = max(col)
+                    std_value = (1 / len(col) * sum((xi - avg_value) ** 2
+                                                    for xi in col)) ** 0.5
 
                     tr["%s_avg" % cf] = avg_value
+                    tr["%s_std" % cf] = std_value
                     tr["%s_min" % cf] = min_value
                     tr["%s_max" % cf] = max_value
 
