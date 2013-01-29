@@ -27,8 +27,11 @@ class meta_etri_global3():
         self.model.bpt = heur.solve()
 
         self.lp = lp_etri_weights(self.model, pt_sorted.pt, self.aa_ori)
-        self.meta = meta_etri_profiles4(self.model, pt_sorted,
-                                               self.aa_ori)
+
+        # Because meta_etri_profiles4 needs weights in initialization
+        self.lp.solve()
+
+        self.meta = meta_etri_profiles4(self.model, pt_sorted, self.aa_ori)
 
     def optimize(self, nmeta):
         self.lp.update_linear_program()
