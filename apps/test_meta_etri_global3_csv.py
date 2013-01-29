@@ -77,15 +77,11 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
     worst = data.pt.get_worst(data.c)
     best = data.pt.get_best(data.c)
     b = generate_alternatives(len(data.cats) - 1, 'b')
-    bpt = generate_random_profiles(b.keys(), data.c, worst = worst,
-                                   best = best)
-    cvs = generate_random_criteria_weights(data.c)
-    lbda = random.uniform(0.5, 1)
+    bpt = None
+    cvs = None
+    lbda = None
 
     model = electre_tri_bm(data.c, cvs, bpt, lbda, cat_profiles)
-
-    # Assign learning set with the model
-    aa_learning2 = model.pessimist(pt_learning)
 
     # Run the metaheuristic
     t1 = time.time()
@@ -131,8 +127,8 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
     aa2 = model.pessimist(data.pt)
     ca = compute_ca(data.aa, aa2)
 
-    t = test_result("%s-%d-%d-%d-%d" % (data.name, seed, nloop, nmeta,
-                                        pclearning))
+    t = test_result("%s-%d-%d-%d-%d-%d" % (data.name, seed, nloop, nmodels,
+                                           nmeta, pclearning))
     t['seed'] = seed
     t['na'] = len(data.a)
     t['nc'] = len(data.c)
@@ -158,6 +154,7 @@ def run_tests(nseeds, data, pclearning, nloop, nmodels, nmeta, filename):
     # Write the test options
     writer.writerow(['data', data.name])
     writer.writerow(['nloop', nloop])
+    writer.writerow(['nmodels', nmodels])
     writer.writerow(['nmeta', nmeta])
     writer.writerow(['pclearning', pclearning])
 
