@@ -118,6 +118,9 @@ class test_results(list):
                 l = l.get(k, params[k])
                 tr[k] = params[k]
 
+            if len(l) == 0:
+                continue
+
             tr["#"] = len(l)
 
             for af in average_fields:
