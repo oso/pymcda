@@ -5,6 +5,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 from mcda.types import criterion_value, criteria_values
 from mcda.types import alternative_performances, performance_table
 
+verbose = False
+
 try:
     solver = os.environ['SOLVER']
 except:
@@ -30,6 +32,11 @@ class mip_etri_global():
         self.__categories = self.cps.get_ordered_categories()
 
         self.lp = cplex.Cplex()
+        if verbose is False:
+            self.lp.set_log_stream(None)
+            self.lp.set_results_stream(None)
+#            self.lp.set_warning_stream(None)
+#            self.lp.set_error_stream(None)
         self.add_variables()
         self.add_constraints()
         self.add_objective()
