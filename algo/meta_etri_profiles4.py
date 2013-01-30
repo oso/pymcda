@@ -18,8 +18,8 @@ class meta_etri_profiles4():
         self.cat = self.categories_rank(self.model.categories)
         self.cat_ranked = self.model.categories
         self.aa_by_cat = self.sort_alternative_by_category(aa_ori)
-        self.b0 = pt_sorted.get_worst_ap()
-        self.bp = pt_sorted.get_best_ap()
+        self.b0 = pt_sorted.pt.get_worst(model.criteria)
+        self.bp = pt_sorted.pt.get_best(model.criteria)
         self.build_concordance_table()
         self.build_assignments_table()
 
@@ -37,16 +37,16 @@ class meta_etri_profiles4():
                 aa_by_cat[cat] = [ aid ]
         return aa_by_cat
 
-    def compute_above_histogram(self, cid, profile, above,
+    def compute_above_histogram(self, cid, perf_profile, perf_above,
                                 cat_b, cat_a, ct):
         w = self.model.cv[cid].value
         lbda = self.model.lbda
+        delta = 0.00001 * self.model.criteria[cid].direction
 
         h_above = {}
         num = total = 0
         alts, perfs = self.pt_sorted.get_middle(cid,
-                                                profile.performances[cid],
-                                                above.performances[cid],
+                                                perf_profile, perf_above,
                                                 True, True)
 
         for i, a in enumerate(alts):
@@ -64,21 +64,21 @@ class meta_etri_profiles4():
                     # +
                     num += 0.5
                     total += 1
-                    h_above[perfs[i] + 0.00001] = num / total
+                    h_above[perfs[i] + delta] = num / total
                 else:
                     # ++
                     num += 2
                     total += 1
-                    h_above[perfs[i] + 0.00001] = num / total
+                    h_above[perfs[i] + delta] = num / total
             elif self.aa_ori(a) != self.aa(a) and \
                  self.cat[self.aa_ori(a)] < self.cat[cat_a]:
                 num += 0.1
                 total += 1
-                h_above[perfs[i] + 0.00001] = num / total
+                h_above[perfs[i] + delta] = num / total
 
         return h_above
 
-    def compute_below_histogram(self, cid, profile, below,
+    def compute_below_histogram(self, cid, perf_profile, perf_below,
                                 cat_b, cat_a, ct):
         w = self.model.cv[cid].value
         lbda = self.model.lbda
@@ -86,9 +86,9 @@ class meta_etri_profiles4():
         h_below = {}
         num = total = 0
         alts, perfs = self.pt_sorted.get_middle(cid,
-                                                profile.performances[cid],
-                                                below.performances[cid],
+                                                perf_profile, perf_below,
                                                 True, True)
+
         for i, a in enumerate(alts):
             conc = ct[a]
             diff = conc + w
@@ -162,15 +162,21 @@ class meta_etri_profiles4():
         self.build_assignments_table()
 
     def update_tables(self, profile, cid, old, new):
+        direction = self.model.criteria[cid].direction
         if old > new:
-            down, up = True, False
-            w = self.model.cv[cid].value
+            if direction == 1:
+                down, up = True, False
+            else:
+                down, up = False, True
+            w = self.model.cv[cid].value * direction
         else:
-            down, up = False, True
-            w = -self.model.cv[cid].value
+            if direction == 1:
+                down, up = False, True
+            else:
+                down, up = True, False
+            w = -self.model.cv[cid].value * direction
 
-        alts, perfs = self.pt_sorted.get_middle(cid, old, new,
-                                                up, down)
+        alts, perfs = self.pt_sorted.get_middle(cid, old, new, up, down)
 
         for a in alts:
             self.ct[profile][a] += w
@@ -191,20 +197,21 @@ class meta_etri_profiles4():
         criteria = self.model.criteria
         p_perfs = profile.performances
 
-        moved = False
-        max_val = 0
-
         cids = self.model.criteria.keys()
         random.shuffle(cids)
 
         for cid in cids:
             ct = self.ct[profile.id]
 
-            h_below = self.compute_below_histogram(cid, profile,
-                                                   below, cat_b,
+            perf_profile = profile.performances[cid]
+            perf_above = above.performances[cid]
+            perf_below = below.performances[cid]
+
+            h_below = self.compute_below_histogram(cid, perf_profile,
+                                                   perf_below, cat_b,
                                                    cat_a, ct)
-            h_above = self.compute_above_histogram(cid, profile,
-                                                   above, cat_b,
+            h_above = self.compute_above_histogram(cid, perf_profile,
+                                                   perf_above, cat_b,
                                                    cat_a, ct)
             h = h_below
             h.update(h_above)
@@ -212,19 +219,14 @@ class meta_etri_profiles4():
             if not h:
                 continue
 
-            i = self.histogram_choose(h, p_perfs[cid])
+            i = self.histogram_choose(h, perf_profile)
 
             r = random.uniform(0, 1)
 
             if r <= h[i]:
                 self.update_tables(profile.id, cid,
-                                   p_perfs[cid], i)
-                p_perfs[cid] = i
-                moved = True
-            elif moved is False and h[i] > max_val:
-                max_val = h[i]
-                max_cid = cid
-                max_move = i
+                                   perf_profile, i)
+                profile.performances[cid] = i
 
     def get_below_and_above_profiles(self, i):
         profiles = self.model.profiles
@@ -257,6 +259,7 @@ if __name__ == "__main__":
     from mcda.generate import generate_alternatives
     from mcda.generate import generate_random_performance_table
     from mcda.generate import generate_random_profiles
+    from mcda.utils import compute_ca
     from mcda.utils import display_assignments_and_pt
     from mcda.utils import compute_number_of_winning_coalitions
     from mcda.pt_sorted import sorted_performance_table
@@ -267,15 +270,18 @@ if __name__ == "__main__":
 
     # Generate a random ELECTRE TRI BM model
     model = generate_random_electre_tri_bm_model(10, 4, 123)
-    worst = alternative_performances("worst",
-                                     {c.id: 0 for c in model.criteria})
-    best = alternative_performances("best",
-                                    {c.id: 1 for c in model.criteria})
+#    worst = alternative_performances("worst",
+#                                     {c.id: 0 for c in model.criteria})
+#    best = alternative_performances("best",
+#                                    {c.id: 1 for c in model.criteria})
 
     # Generate a set of alternatives
     a = generate_alternatives(1000)
     pt = generate_random_performance_table(a, model.criteria)
     aa = model.pessimist(pt)
+
+    worst = pt.get_worst(model.criteria)
+    best = pt.get_best(model.criteria)
 
     print('Original model')
     print('==============')
@@ -295,7 +301,7 @@ if __name__ == "__main__":
     pt_sorted = sorted_performance_table(pt)
     meta = meta_etri_profiles4(model2, pt_sorted, aa)
 
-    for i in range(1, 1001):
+    for i in range(0, 101):
         f = meta.good / meta.na
         print('%d: fitness: %g' % (i, f))
         model2.bpt.display(criterion_ids=cids)
@@ -304,18 +310,25 @@ if __name__ == "__main__":
 
         f = meta.optimize()
 
+    print('%d: fitness: %g' % (i + 1, f))
+    model2.bpt.display(criterion_ids=cids)
+
     print('Learned model')
     print('=============')
     print("Number of iterations: %d" % i)
-    model.bpt.display(criterion_ids = cids)
-    model.cv.display(criterion_ids = cids)
+    model2.bpt.display(criterion_ids = cids)
+    model2.cv.display(criterion_ids = cids)
     print("lambda: %.7s" % model.lbda)
+
+    aa2 = model2.pessimist(pt)
+    if aa2 != meta.aa:
+        print('Error in classification accuracy computation!')
 
     total = len(a)
     nok = 0
     anok = []
     for alt in a:
-        if aa(alt.id) != meta.aa(alt.id):
+        if aa(alt.id) != aa2(alt.id):
             anok.append(alt)
             nok += 1
 
@@ -324,7 +337,7 @@ if __name__ == "__main__":
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
-        display_assignments_and_pt(anok, model.criteria, [aa, meta.aa],
+        display_assignments_and_pt(anok, model.criteria, [aa, aa2],
                                     [pt])
 
     aps = [ pt["%s" % aid] for aid in anok ]
