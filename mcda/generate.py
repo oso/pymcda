@@ -118,7 +118,11 @@ def generate_random_profiles(alts, crits, seed = None, k = 3,
                 rdom.append(round(random.uniform(worst.performances[c.id],
                                                  best.performances[c.id]),
                                   k))
-        rdom.sort()
+
+        if c.direction == -1:
+            rdom.sort(reverse = True)
+        else:
+            rdom.sort()
 
         crit_random[c.id] = rdom
 
