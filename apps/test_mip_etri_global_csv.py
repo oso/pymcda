@@ -96,8 +96,11 @@ def run_test(seed, data, pclearning):
     ca_learning = compute_ca(aa_learning, aa_learning2)
 
     # Compute CA of test setting
-    aa_test2 = model.pessimist(data.pt)
-    ca_test = compute_ca(aa_test, aa_test2)
+    if len(aa_test) > 0:
+        aa_test2 = model.pessimist(pt_test)
+        ca_test = compute_ca(aa_test, aa_test2)
+    else:
+        ca_test = 0
 
     # Compute CA of whole set
     aa2 = model.pessimist(data.pt)
