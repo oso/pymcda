@@ -52,6 +52,9 @@ class sorted_performance_table():
         if val_l > val_r:
             val_l, val_r = val_r, val_l
             l, r = r, l
+            reverse = True
+        else:
+            reverse = False
 
         if l is True:
             i = bisect.bisect_left(self.sorted_values[cid], val_l)
@@ -62,7 +65,14 @@ class sorted_performance_table():
         else:
             i2 = bisect.bisect_left(self.sorted_values[cid], val_r)
 
-        return self.sorted_altid[cid][i:i2], self.sorted_values[cid][i:i2]
+        altids = self.sorted_altid[cid][i:i2]
+        values = self.sorted_values[cid][i:i2]
+
+        if reverse is True:
+            altids.reverse()
+            values.reverse()
+
+        return altids, values
 
     def get_below_len(self, cid, val, r=True):
         if r is True:

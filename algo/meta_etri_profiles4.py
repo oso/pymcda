@@ -86,11 +86,9 @@ class meta_etri_profiles4():
         h_below = {}
         num = total = 0
         alts, perfs = self.pt_sorted.get_middle(cid,
-                                                below.performances[cid],
                                                 profile.performances[cid],
+                                                below.performances[cid],
                                                 True, True)
-        alts.reverse()
-        perfs.reverse()
         for i, a in enumerate(alts):
             conc = ct[a]
             diff = conc + w

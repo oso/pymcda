@@ -150,8 +150,8 @@ class meta_etri_profiles3():
         intervals = [ profile ] + intervals
         ok = nok = 0
         for i in range(self.nintervals):
-            alts = self.pt_sorted.get_middle(cid, intervals[i+1],
-                                             intervals[i])[0]
+            alts = self.pt_sorted.get_middle(cid, intervals[i],
+                                             intervals[i+1])[0]
             for a in alts:
                 if self.aa(a) == cat_a and self.aa_ori(a) == cat_b:
                     ok += 1
