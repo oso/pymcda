@@ -89,33 +89,6 @@ class meta_etri_profiles3():
         self.build_concordance_table()
         self.build_assignments_table()
 
-    def update_tables(self, profile, cid, old, new):
-        if old > new:
-            down, up = True, False
-            w = self.model.cv[cid].value
-        else:
-            down, up = False, True
-            w = -self.model.cv[cid].value
-
-        alts, perfs = self.pt_sorted.get_middle(cid, old, new,
-                                                up, down)
-
-        for a in alts:
-            self.ct[profile][a] += w
-
-            old_cat = self.aa[a].category_id
-            new_cat = self.get_alternative_assignment(a)
-            ori_cat = self.aa_ori[a].category_id
-
-            if old_cat == new_cat:
-                continue
-            elif old_cat == ori_cat:
-                self.good -= 1
-            elif new_cat == ori_cat:
-                self.good += 1
-
-            self.aa[a].category_id = new_cat
-
     def compute_above_histogram(self, cid, profile, above, cat_b, cat_a):
         h_above = {}
         size = above - profile
@@ -193,9 +166,6 @@ class meta_etri_profiles3():
             if h_below[i_b] > h_above[i_a]:
                 size = (p_perfs[cid] - b_perfs[cid])
                 if r < h_below[i_b]:
-                    self.update_tables(profile.id, cid,
-                                       p_perfs[cid], i_b)
-
                     p_perfs[cid] = i_b
                     moved = True
                 elif moved is False and h_below[i_b] > max_val:
@@ -205,8 +175,6 @@ class meta_etri_profiles3():
             elif h_below[i_b] < h_above[i_a]:
                 size = (a_perfs[cid] - p_perfs[cid])
                 if r < h_above[i_a]:
-                    self.update_tables(profile.id, cid,
-                                       p_perfs[cid], i_a)
                     p_perfs[cid] = i_a
                     moved = True
                 elif moved is False and h_above[i_a] > max_val:
@@ -217,8 +185,6 @@ class meta_etri_profiles3():
                 size = (p_perfs[cid] - b_perfs[cid])
                 r2 = random.random()
                 if r2 < h_below[i_b]:
-                    self.update_tables(profile.id, cid,
-                                       p_perfs[cid], i_b)
                     p_perfs[cid] = i_b
                     moved = True
                 elif moved is False and h_below[i_b] > max_val:
@@ -229,8 +195,6 @@ class meta_etri_profiles3():
                 size = (a_perfs[cid] - p_perfs[cid])
                 r2 = random.random()
                 if r2 < h_above[i_a]:
-                    self.update_tables(profile.id, cid,
-                                       p_perfs[cid], i_a)
                     p_perfs[cid] = i_a
                     moved = True
                 elif moved is False and h_above[i_a] > max_val:
@@ -239,8 +203,6 @@ class meta_etri_profiles3():
                     max_move = i_a
 
         if moved is False and max_val > 0:
-            self.update_tables(profile.id, max_cid,
-                               p_perfs[max_cid], max_move)
             p_perfs[max_cid] = max_move
 
     def get_below_and_above_profiles(self, i):
@@ -268,6 +230,8 @@ class meta_etri_profiles3():
             self.update_intervals(self.good / self.na)
             self.optimize_profile(pperfs, below, above, cat_b, cat_a)
 
+        self.rebuild_tables()
+
         return self.good / self.na
 
 if __name__ == "__main__":
@@ -285,7 +249,7 @@ if __name__ == "__main__":
     from ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model
-    model = generate_random_electre_tri_bm_model(10, 3, 83)
+    model = generate_random_electre_tri_bm_model(10, 3, 2)
     worst = alternative_performances("worst",
                                      {c.id: 0 for c in model.criteria})
     best = alternative_performances("best",
