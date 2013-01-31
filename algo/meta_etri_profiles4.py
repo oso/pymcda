@@ -269,11 +269,7 @@ if __name__ == "__main__":
     from ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model
-    model = generate_random_electre_tri_bm_model(10, 4, 123)
-#    worst = alternative_performances("worst",
-#                                     {c.id: 0 for c in model.criteria})
-#    best = alternative_performances("best",
-#                                    {c.id: 1 for c in model.criteria})
+    model = generate_random_electre_tri_bm_model(10, 3, 123)
 
     # Generate a set of alternatives
     a = generate_alternatives(1000)
