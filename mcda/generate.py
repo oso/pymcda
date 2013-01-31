@@ -201,11 +201,12 @@ def generate_random_categories_values(cats, k = 3):
     return catvs
 
 def generate_random_electre_tri_bm_model(ncrit, ncat, seed = None, k = 3,
-                                         worst = None, best = None):
+                                         worst = None, best = None,
+                                         random_direction = False):
     if seed:
         random.seed(seed)
 
-    c = generate_criteria(ncrit, random_direction = True)
+    c = generate_criteria(ncrit, random_direction = random_direction)
     cv = generate_random_criteria_weights(c, seed, k)
     cat = generate_categories(ncat)
     cps = generate_categories_profiles(cat)
