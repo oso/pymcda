@@ -12,7 +12,7 @@ class heur_etri_profiles():
         self.aa = aa
         self.categories = categories
         self.delta = 0.0000001
-        self.b0 = pt_sorted.get_worst_ap()
+        self.b0 = pt_sorted.pt.get_worst(crits)
         self.compute_categories_probabilities()
 
     def compute_categories_probabilities(self):
@@ -28,13 +28,15 @@ class heur_etri_profiles():
         below = self.b0.performances[crit.id]
         aids, perfs = self.pt_sorted.get_middle(crit.id, below, above)
 
+        delta = self.delta * crit.direction
+
         # From smallest to biggest
         val = 0
         for aid, perf in zip(aids, perfs):
             cat = self.aa[aid].category_id
             if cat == cat_below:
                 val += self.cat_proba[cat]
-                h1[perf + self.delta] = val
+                h1[perf + delta] = val
             elif cat == cat_above:
                 h1[perf] = val
 
@@ -48,7 +50,7 @@ class heur_etri_profiles():
                 val += self.cat_proba[cat]
                 h2[perf] = val
             elif cat == cat_below:
-                h2[perf + self.delta] = val
+                h2[perf + delta] = val
 
         return { key: h1[key] + h2[key] for key in h1 }
 
@@ -68,7 +70,7 @@ class heur_etri_profiles():
         cats.reverse()
 
         bpt = performance_table()
-        pabove = self.pt_sorted.get_best_ap()
+        pabove = self.pt_sorted.pt.get_best(self.crits)
         for i in range(len(cats) - 1):
             profile_id = "b%d" % (len(cats) - (i + 1))
             bp = self.init_profile(profile_id, cats[i], cats[i+1], pabove)
