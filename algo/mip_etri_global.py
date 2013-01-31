@@ -37,9 +37,12 @@ class mip_etri_global():
             self.lp.set_results_stream(None)
 #            self.lp.set_warning_stream(None)
 #            self.lp.set_error_stream(None)
+
+        self.pt.update_direction(model.criteria)
         self.add_variables()
         self.add_constraints()
         self.add_objective()
+        self.pt.update_direction(model.criteria)
 
     def add_variables(self):
         self.ap_min = self.pt.get_min()
@@ -334,13 +337,13 @@ class mip_etri_global():
             pt.append(ap)
 
         self.model.bpt = pt
+        self.model.bpt.update_direction(model.criteria)
 
         return obj
 
 if __name__ == "__main__":
     from mcda.generate import generate_random_electre_tri_bm_model
     from mcda.generate import generate_alternatives
-    from mcda.generate import generate_criteria
     from mcda.generate import generate_random_performance_table
     from mcda.utils import compute_ca
     from mcda.utils import display_assignments_and_pt
@@ -351,13 +354,7 @@ if __name__ == "__main__":
     ncat = 3
 
     # Generate a random ELECTRE TRI BM model
-    criteria = generate_criteria(ncrit)
-    worst = alternative_performances("worst",
-                                     {c.id: 0 for c in criteria})
-    best = alternative_performances("best",
-                                    {c.id: 10 for c in criteria})
-    model = generate_random_electre_tri_bm_model(ncrit, ncat, seed,
-                                                 worst = worst, best = best)
+    model = generate_random_electre_tri_bm_model(ncrit, ncat, seed)
 
     # Display model parameters
     print('Original model')
@@ -370,8 +367,12 @@ if __name__ == "__main__":
 
     # Generate a set of alternatives
     a = generate_alternatives(100)
-    pt = generate_random_performance_table(a, model.criteria,
-                                           worst = worst, best = best)
+    pt = generate_random_performance_table(a, model.criteria)
+
+    worst = pt.get_worst(model.criteria)
+    best = pt.get_best(model.criteria)
+
+    # Assign the alternatives
     aa = model.pessimist(pt)
 
     # Run the MIP
