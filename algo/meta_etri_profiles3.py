@@ -17,8 +17,8 @@ class meta_etri_profiles3():
         self.cat = self.categories_rank(self.model.categories)
         self.cat_ranked = self.model.categories
         self.aa_by_cat = self.sort_alternative_by_category(aa_ori)
-        self.b0 = pt_sorted.get_worst_ap()
-        self.bp = pt_sorted.get_best_ap()
+        self.b0 = pt_sorted.pt.get_worst(model.criteria)
+        self.bp = pt_sorted.pt.get_best(model.criteria)
         self.compute_interval_ratios(3)
         self.build_concordance_table()
         self.build_assignments_table()
@@ -249,16 +249,15 @@ if __name__ == "__main__":
     from ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model
-    model = generate_random_electre_tri_bm_model(10, 3, 2)
-    worst = alternative_performances("worst",
-                                     {c.id: 0 for c in model.criteria})
-    best = alternative_performances("best",
-                                    {c.id: 1 for c in model.criteria})
+    model = generate_random_electre_tri_bm_model(10, 3, 123)
 
     # Generate a set of alternatives
     a = generate_alternatives(1000)
     pt = generate_random_performance_table(a, model.criteria)
     aa = model.pessimist(pt)
+
+    worst = pt.get_worst(model.criteria)
+    best = pt.get_best(model.criteria)
 
     errors = 0.0
     nlearn = 1.0
