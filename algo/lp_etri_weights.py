@@ -71,16 +71,16 @@ class lp_etri_weights():
         self.a_c_xi = dict()
         self.a_c_yi = dict()
         for a_id in self.pt.keys():
-            a_perfs = self.pt[a_id]
+            ap = self.pt[a_id]
             cat_rank = aa[a_id]
 
             if cat_rank > 1:
                 lower_profile = self.profiles[cat_rank-2]
-                b_perfs = bpt[lower_profile]
+                bp = bpt[lower_profile]
 
                 dj = str()
                 for c in self.model.criteria:
-                    if a_perfs[c.id] >= b_perfs[c.id]:
+                    if ap[c.id] * c.direction >= bp[c.id] * c.direction:
                         dj += '1'
                     else:
                         dj += '0'
@@ -104,11 +104,11 @@ class lp_etri_weights():
 
             if cat_rank < len(self.categories):
                 upper_profile = self.profiles[cat_rank-1]
-                b_perfs = bpt[upper_profile]
+                bp = bpt[upper_profile]
 
                 dj = str()
                 for c in self.model.criteria:
-                    if a_perfs[c.id] >= b_perfs[c.id]:
+                    if ap[c.id] * c.direction >= bp[c.id] * c.direction:
                         dj += '1'
                     else:
                         dj += '0'
@@ -363,38 +363,27 @@ if __name__ == "__main__":
     import time
     import random
     from mcda.generate import generate_alternatives
-    from mcda.generate import generate_criteria
-    from mcda.generate import generate_random_criteria_values
     from mcda.generate import generate_random_performance_table
-    from mcda.generate import generate_categories
-    from mcda.generate import generate_random_profiles
-    from mcda.generate import generate_categories_profiles
+    from mcda.generate import generate_random_electre_tri_bm_model
     from mcda.utils import add_errors_in_assignments
     from mcda.utils import display_assignments_and_pt
     from mcda.utils import compute_winning_coalitions
-    from mcda.electre_tri import electre_tri
     from mcda.types import alternatives_assignments, performance_table
 
     print("Solver used: %s" % solver)
+
     # Original Electre Tri model
+    model = generate_random_electre_tri_bm_model(10, 5, 890)
+
+    # Generate random alternatives
     a = generate_alternatives(15000)
-    c = generate_criteria(10)
-    cv = generate_random_criteria_values(c, 890)
-    cv.normalize()
-    pt = generate_random_performance_table(a, c)
+    pt = generate_random_performance_table(a, model.criteria)
 
-    cat = generate_categories(5)
-    cps = generate_categories_profiles(cat)
-    b = cps.get_ordered_profiles()
-    bpt = generate_random_profiles(b, c)
-
-    lbda = random.uniform(0.5, 1)
-#    lbda = 0.75
     errors = 0.0
     delta = 0.0001
     nlearn = 1.00
 
-    model = electre_tri(c, cv, bpt, lbda, cps)
+    # Assign the alternative with the model
     aa = model.pessimist(pt)
 
     a_learn = random.sample(a, int(nlearn*len(a)))
@@ -402,17 +391,17 @@ if __name__ == "__main__":
     pt_learn = performance_table([ pt[alt.id] for alt in a_learn ])
 
     aa_err = aa_learn.copy()
-    aa_erroned = add_errors_in_assignments(aa_err, cat.keys(), errors)
+    aa_erroned = add_errors_in_assignments(aa_err, model.categories, errors)
 
     print('Original model')
     print('==============')
     print("Number of alternatives: %d" % len(a))
     print("Number of learning alternatives: %d" % len(aa_learn))
     print("Errors in alternatives assignments: %g%%" % (errors*100))
-    cids = c.keys()
-    bpt.display(criterion_ids = cids, alternative_ids = b)
-    cv.display(criterion_ids = cids)
-    print("lambda\t%.7s" % lbda)
+    cids = model.criteria.keys()
+    model.bpt.display(criterion_ids = cids)
+    model.cv.display(criterion_ids = cids)
+    print("lambda\t%.7s" % model.lbda)
     print("delta: %g" % delta)
     #print(aa)
 
@@ -432,7 +421,7 @@ if __name__ == "__main__":
     print("Solving time: %g secs" % (t3-t2))
     print("Objective: %s" % obj)
     model2.cv.display(criterion_ids=cids)
-    print("lambda\t%.7s" % lbda)
+    print("lambda\t%.7s" % model2.lbda)
     print("lambda_learned\t%.7s" % model2.lbda)
     #print(aa_learned)
 
