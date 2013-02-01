@@ -208,7 +208,7 @@ def generate_random_electre_tri_bm_model(ncrit, ncat, seed = None, k = 3,
         random.seed(seed)
 
     c = generate_criteria(ncrit, random_direction = random_direction)
-    cv = generate_random_criteria_weights(c, seed, k)
+    cv = generate_random_criteria_weights(c, k)
     cat = generate_categories(ncat)
     cps = generate_categories_profiles(cat)
     b = cps.get_ordered_profiles()
