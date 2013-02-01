@@ -86,7 +86,7 @@ def run_test(seed, data, pclearning):
     # Run the linear program
     t1 = time.time()
 
-    mip = mip_etri_global(pt_learning, aa_learning, model)
+    mip = mip_etri_global(model, pt_learning, aa_learning)
     mip.solve()
 
     t_total = time.time() - t1

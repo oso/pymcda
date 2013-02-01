@@ -19,7 +19,7 @@ else:
 
 class mip_etri_global():
 
-    def __init__(self, pt, aa, model, epsilon = 0.0001):
+    def __init__(self, model, pt, aa, epsilon = 0.0001):
         self.pt = pt
         self.aa = aa
         self.model = model
@@ -381,7 +381,7 @@ if __name__ == "__main__":
     model2.bpt = None
     model2.lbda = None
 
-    mip = mip_etri_global(pt, aa, model2)
+    mip = mip_etri_global(model2, pt, aa)
     mip.solve()
 
     # Display learned model parameters
