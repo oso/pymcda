@@ -337,7 +337,7 @@ class mip_etri_global():
             pt.append(ap)
 
         self.model.bpt = pt
-        self.model.bpt.update_direction(model.criteria)
+        self.model.bpt.update_direction(self.model.criteria)
 
         return obj
 
