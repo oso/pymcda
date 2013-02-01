@@ -3,6 +3,7 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import random
 from mcda.electre_tri import electre_tri_bm
+from mcda.uta import utadis
 from mcda.types import alternative, alternatives
 from mcda.types import alternative_performances, performance_table
 from mcda.types import criterion, criteria
@@ -216,6 +217,22 @@ def generate_random_electre_tri_bm_model(ncrit, ncat, seed = None, k = 3,
 
     return electre_tri_bm(c, cv, bpt, lbda, cps)
 
+def generate_random_utadis_model(ncrit, ncat, nseg_min, nseg_max,
+                                 seed = None, k = 3,
+                                 random_direction = False):
+    if seed:
+        random.seed(seed)
+
+    c = generate_criteria(ncrit, random_direction = random_direction)
+    cv = generate_random_criteria_weights(c, k)
+    cat = generate_categories(ncat)
+
+    cfs = generate_random_criteria_functions(c, nseg_min = nseg_min,
+                                             nseg_max = nseg_max)
+    catv = generate_random_categories_values(cat)
+
+    return utadis(c, cv, cfs, catv)
+
 if __name__ == "__main__":
     alts = generate_alternatives(10)
     print(alts)
@@ -238,4 +255,6 @@ if __name__ == "__main__":
     cw = generate_random_criteria_weights(crits)
     print(cw)
     model = generate_random_electre_tri_bm_model(10, 3)
+    print(model)
+    model = generate_random_utadis_model(10, 3, 3, 3)
     print(model)
