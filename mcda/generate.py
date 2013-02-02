@@ -204,11 +204,11 @@ def generate_random_categories_values(cats, k = 3):
 def generate_random_electre_tri_bm_model(ncrit, ncat, seed = None, k = 3,
                                          worst = None, best = None,
                                          random_direction = False):
-    if seed:
-        random.seed(seed)
+    if seed is not None:
+        random.seed(int(seed))
 
     c = generate_criteria(ncrit, random_direction = random_direction)
-    cv = generate_random_criteria_weights(c, k)
+    cv = generate_random_criteria_weights(c, None, k)
     cat = generate_categories(ncat)
     cps = generate_categories_profiles(cat)
     b = cps.get_ordered_profiles()
@@ -220,11 +220,11 @@ def generate_random_electre_tri_bm_model(ncrit, ncat, seed = None, k = 3,
 def generate_random_utadis_model(ncrit, ncat, nseg_min, nseg_max,
                                  seed = None, k = 3,
                                  random_direction = False):
-    if seed:
+    if seed is not None:
         random.seed(seed)
 
     c = generate_criteria(ncrit, random_direction = random_direction)
-    cv = generate_random_criteria_weights(c, k)
+    cv = generate_random_criteria_weights(c, None, k)
     cat = generate_categories(ncat)
 
     cfs = generate_random_criteria_functions(c, nseg_min = nseg_min,
