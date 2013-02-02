@@ -10,6 +10,7 @@ from itertools import product
 from mcda.types import alternatives_assignments, performance_table
 from mcda.electre_tri import electre_tri
 from algo.meta_etri_global2 import meta_etri_global2
+from algo.meta_etri_global3 import meta_etri_global3
 from mcda.utils import compute_ca
 from mcda.pt_sorted import sorted_performance_table
 from mcda.generate import generate_random_electre_tri_bm_model
@@ -45,23 +46,22 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
     model_cas = {}
     for i in range(nmodels):
         m = generate_random_electre_tri_bm_model(ncriteria, ncategories)
-        meta = meta_etri_global2(m, pt_sorted, aa)
+        meta = algo(m, pt_sorted, aa)
         model_metas[m] = meta
         model_cas[meta.model] = meta.meta.good / meta.meta.na
 
     model_cas = sorted(model_cas.iteritems(),
                        key = lambda (k,v): (v,k),
                        reverse = True)
-
     t1 = time.time()
 
     # Perform at max oloops on the set of metas
-    ca2_iter = [model_cas[0][1]] + [1] * (max_oloops)
+    ca2_iter = [model_cas[0][1]] + [1] * (max_loops)
     nloops = 0
-    for i in range(0, max_oloops):
+    for i in range(0, max_loops):
         model_cas = {}
         for m, meta in model_metas.items():
-            model_cas[m] = meta.optimize(max_loops)
+            model_cas[m] = meta.optimize(max_oloops)
             if model_cas[m] == 1:
                 break
 
@@ -81,7 +81,7 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
             m = model_ca[0]
             del model_metas[m]
             m = generate_random_electre_tri_bm_model(ncriteria, ncategories)
-            model_metas[m] = meta_etri_global2(m, pt_sorted, aa)
+            model_metas[m] = algo(m, pt_sorted, aa)
 
     t_total = time.time() - t1
 
@@ -113,8 +113,8 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
     ca_gen = compute_ca(aa_gen, aa_gen2)
 
     # Save all infos in test_result class
-    t = test_result("%s-%d-%d-%d-%d-%g-%d" % (seed, na, nc, ncat, na_gen,
-                    pcerrors, max_loops))
+    t = test_result("%s-%d-%d-%d-%d-%g-%d-%d-%d" % (seed, na, nc, ncat,
+                    na_gen, pcerrors, max_loops, nmodels, max_oloops))
 
     # Input params
     t['seed'] = seed
@@ -146,6 +146,7 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, nmodels,
     writer = csv.writer(open(filename, 'wb'))
 
     # Write the test options
+    writer.writerow(['algorithm', algo.__name__])
     writer.writerow(['na', na])
     writer.writerow(['nc', nc])
     writer.writerow(['ncat', ncat])
@@ -212,6 +213,12 @@ if __name__ == "__main__":
     from test_utils import read_csv_filename
 
     parser = OptionParser(usage = "python %s [options]" % sys.argv[0])
+    parser.add_option("-2", "--second", action = "store_true",
+                      dest = "second", default = False,
+                      help = "Second algorithm")
+    parser.add_option("-3", "--third", action = "store_true",
+                      dest = "third", default = False,
+                      help = "Third algorithm")
     parser.add_option("-n", "--na", action = "store", type="string",
                       dest = "na",
                       help = "number of assignment examples")
@@ -247,6 +254,26 @@ if __name__ == "__main__":
 
     (options, args) = parser.parse_args()
 
+    while options.second is False and options.third is False:
+        print("2. Random population and adapted intervals")
+        print("3. Heurisitc initialized profiles and adapted intervals")
+        i = raw_input("Which algorithm ? ")
+        if i == '2':
+            options.second = True
+        elif i == '3':
+            options.third = True
+
+    i = 0
+    if options.second is True:
+        algo = meta_etri_global2
+        i += 1
+    if options.third is True:
+        algo = meta_etri_global3
+        i += 1
+    if i > 1:
+        print("Cannot select multiple algorithms at the same time")
+        sys.exit(1)
+
     options.na = read_multiple_integer(options.na,
                                        "Number of assignment examples")
     options.nc = read_multiple_integer(options.nc, "Number of criteria")
@@ -266,7 +293,7 @@ if __name__ == "__main__":
     options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
 
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    default_filename = "data/test_meta_electre_tri_global-%s.csv" % dt
+    default_filename = "data/test_%s-%s.csv" % (algo.__name__, dt)
     options.filename = read_csv_filename(options.filename, default_filename)
 
     run_tests(options.na, options.nc, options.ncat, options.na_gen,
