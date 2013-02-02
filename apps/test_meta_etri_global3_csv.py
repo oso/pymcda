@@ -248,7 +248,8 @@ if __name__ == "__main__":
     options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
 
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    default_filename = "data/%s-%s.csv" % (data.name, dt)
+    default_filename = "data/test_meta_etri_global3-%s-%s.csv" \
+                       % (data.name, dt)
     options.filename = read_csv_filename(options.filename, default_filename)
 
     run_tests(options.nseeds, data, options.pclearning, options.max_loops,

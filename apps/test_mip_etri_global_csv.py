@@ -196,7 +196,8 @@ if __name__ == "__main__":
     options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
 
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    default_filename = "data/%s-%s.csv" % (data.name, dt)
+    default_filename = "data/test_mip_etri_global-%s-%s.csv" \
+                       % (data.name, dt)
     options.filename = read_csv_filename(options.filename, default_filename)
 
     run_tests(options.nseeds, data, options.pclearning, options.filename)
