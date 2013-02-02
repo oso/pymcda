@@ -13,6 +13,7 @@ from mcda.generate import generate_random_performance_table
 from mcda.generate import generate_criteria
 from mcda.pt_sorted import sorted_performance_table
 from mcda.utils import compute_ca
+from algo.meta_etri_profiles3 import meta_etri_profiles3
 from algo.meta_etri_profiles4 import meta_etri_profiles4
 from ui.graphic import QGraphicsScene_etri
 from multiprocessing import Process, Pipe
@@ -20,7 +21,8 @@ from multiprocessing import Process, Pipe
 # FIXME
 from mcda.types import alternative_performances
 
-def run_metaheuristic(pipe, model, pt, aa, n, worst = None, best = None):
+def run_metaheuristic(pipe, model, pt, aa, algo, n, worst = None,
+                      best = None):
 
     model.bpt = generate_random_profiles(model.profiles,
                                          model.criteria,
@@ -28,7 +30,16 @@ def run_metaheuristic(pipe, model, pt, aa, n, worst = None, best = None):
                                          best = best)
 
     pt_sorted = sorted_performance_table(pt)
-    meta = meta_etri_profiles4(model, pt_sorted, aa)
+
+    if algo == "Meta 3":
+        meta = meta_etri_profiles3(model, pt_sorted, aa)
+    elif algo == "Meta 4":
+        meta = meta_etri_profiles4(model, pt_sorted, aa)
+    else:
+        print("Invalid algorithm %s" % algo)
+        pipe.close()
+        return
+
     f = compute_ca(aa, meta.aa)
 
     pipe.send([model.copy(), f])
@@ -46,7 +57,7 @@ def run_metaheuristic(pipe, model, pt, aa, n, worst = None, best = None):
 
 class qt_thread_algo(QtCore.QThread):
 
-    def __init__(self, n, model, pt, aa, worst = None, best = None,
+    def __init__(self, n, model, pt, aa, algo, worst = None, best = None,
                  parent = None):
         super(qt_thread_algo, self).__init__(parent)
         self.mutex = QtCore.QMutex()
@@ -61,6 +72,7 @@ class qt_thread_algo(QtCore.QThread):
         self.aa = aa
         self.worst = worst
         self.best = best
+        self.algo = algo
 
     def stop(self):
         try:
@@ -80,7 +92,7 @@ class qt_thread_algo(QtCore.QThread):
         parent_pipe, child_pipe = Pipe(False)
         p = Process(target = run_metaheuristic,
                     args = (child_pipe, self.model, self.pt, self.aa,
-                            self.n, self.worst, self.best))
+                            self.algo, self.n, self.worst, self.best))
         p.start()
 
         for i in range(self.n + 1):
@@ -188,10 +200,21 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.rightlayout.addWidget(self.groupbox_meta_params)
         self.layout_meta_params = QtGui.QVBoxLayout(self.groupbox_meta_params)
 
+        self.layout_algo = QtGui.QHBoxLayout()
+        self.label_algo = QtGui.QLabel(self.groupbox_meta_params)
+        self.label_algo.setText("Strategy")
+        self.combobox_algo = QtGui.QComboBox(self.groupbox_meta_params)
+        self.combobox_algo.addItem("Meta 3")
+        self.combobox_algo.addItem("Meta 4")
+        self.combobox_algo.setCurrentIndex(1)
+        self.layout_algo.addWidget(self.label_algo)
+        self.layout_algo.addWidget(self.combobox_algo)
+        self.layout_meta_params.addLayout(self.layout_algo)
+
         self.layout_seed = QtGui.QHBoxLayout()
-        self.label_seed = QtGui.QLabel(self.groupbox_model_params)
+        self.label_seed = QtGui.QLabel(self.groupbox_meta_params)
         self.label_seed.setText("Seed")
-        self.spinbox_seed = QtGui.QSpinBox(self.groupbox_model_params)
+        self.spinbox_seed = QtGui.QSpinBox(self.groupbox_meta_params)
         self.spinbox_seed.setMinimum(0)
         self.spinbox_seed.setMaximum(1000000)
         self.spinbox_seed.setProperty("value", 123)
@@ -406,9 +429,10 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.label_time2.setText("")
 
         nloop = self.spinbox_nloop.value()
+        algo = self.combobox_algo.currentText()
 
-        self.thread = qt_thread_algo(nloop, self.model, self.pt,
-                                     self.aa, self.worst, self.best, None)
+        self.thread = qt_thread_algo(nloop, self.model, self.pt, self.aa,
+                                     algo, self.worst, self.best, None)
         self.connect(self.thread, QtCore.SIGNAL("update(int)"),
                      self.update)
         self.connect(self.thread, QtCore.SIGNAL("finished()"),
@@ -425,6 +449,9 @@ class qt_mainwindow(QtGui.QMainWindow):
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     app.setApplicationName("ELECTRE TRI profile inference")
+
+    font = QtGui.QFont("Sans Serif", 8)
+    app.setFont(font)
 
     form = qt_mainwindow()
     form.show()
