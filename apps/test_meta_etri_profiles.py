@@ -198,8 +198,8 @@ if __name__ == "__main__":
     from test_utils import read_csv_filename
 
     parser = OptionParser(usage = "python %s [options]" % sys.argv[0])
-    parser.add_option("-3", "--three", action = "store_true",
-                      dest = "three", default = False,
+    parser.add_option("-3", "--third", action = "store_true",
+                      dest = "third", default = False,
                       help = "Third algorithm")
     parser.add_option("-4", "--fourth", action = "store_true",
                       dest = "fourth", default = False,
@@ -231,17 +231,17 @@ if __name__ == "__main__":
 
     (options, args) = parser.parse_args()
 
-    while options.three is False and options.fourth is False:
+    while options.third is False and options.fourth is False:
         print("3. Variable intervals")
         print("4. Adapted intervals")
         i = raw_input("Which algorithm ? ")
         if i == '3':
-            options.three = True
+            options.third = True
         elif i == '4':
             options.fourth = True
 
     i = 0
-    if options.three is True:
+    if options.third is True:
         algo = meta_etri_profiles3
         i += 1
     if options.fourth is True:
