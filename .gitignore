@@ -1,3 +1,4 @@
 build
+pymcda.egg-info
 *.pyc
 *.swp
