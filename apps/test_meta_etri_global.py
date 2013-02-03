@@ -143,7 +143,8 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
 def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, nmodels,
               max_oloops, filename):
     # Create the CSV writer
-    writer = csv.writer(open(filename, 'wb'))
+    f = open(filename, 'wb')
+    writer = csv.writer(f)
 
     # Write the test options
     writer.writerow(['algorithm', algo.__name__])
@@ -186,6 +187,8 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, nmodels,
             initialized = True
 
         t.tocsv(writer, fields)
+        f.flush()
+
         print("%s (%5f seconds)" % (t, t2 - t1))
 
         results.append(t)
