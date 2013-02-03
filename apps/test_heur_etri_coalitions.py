@@ -5,7 +5,7 @@ import time
 import csv
 from itertools import product
 
-from algo.heur_etri_coalitions import heur_etri_coalitions
+from mcda.learning.heur_etri_coalitions import heur_etri_coalitions
 from mcda.generate import generate_random_electre_tri_bm_model
 from mcda.generate import generate_alternatives
 from mcda.generate import generate_random_performance_table

@@ -13,8 +13,8 @@ from mcda.generate import generate_random_performance_table
 from mcda.generate import generate_criteria
 from mcda.pt_sorted import sorted_performance_table
 from mcda.utils import compute_ca
-from algo.meta_etri_profiles3 import meta_etri_profiles3
-from algo.meta_etri_profiles4 import meta_etri_profiles4
+from mcda.learning.meta_etri_profiles3 import meta_etri_profiles3
+from mcda.learning.meta_etri_profiles4 import meta_etri_profiles4
 from ui.graphic import QGraphicsScene_etri
 from multiprocessing import Process, Pipe
 

@@ -1,37 +1,27 @@
 from __future__ import division
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 import random
 from itertools import product
 
 from mcda.electre_tri import electre_tri
 from mcda.types import alternative_assignment, alternatives_assignments
 from mcda.types import performance_table
-from algo.heur_etri_profiles import heur_etri_profiles
-from algo.lp_etri_weights import lp_etri_weights
-from algo.meta_etri_profiles4 import meta_etri_profiles4
 from mcda.utils import compute_ca
 from mcda.pt_sorted import sorted_performance_table
 from mcda.generate import generate_random_electre_tri_bm_model
 from mcda.generate import generate_alternatives
+from lp_etri_weights import lp_etri_weights
+from meta_etri_profiles4 import meta_etri_profiles4
 
-class meta_etri_global3():
+class meta_etri_global2():
 
     def __init__(self, model, pt_sorted, aa_ori):
         self.model = model
         self.aa_ori = aa_ori
-
-        cats = model.categories_profiles.to_categories()
-        heur = heur_etri_profiles(model.criteria, pt_sorted,
-                                         aa_ori, cats)
-        self.model.bpt = heur.solve()
-
         self.lp = lp_etri_weights(self.model, pt_sorted.pt, self.aa_ori)
-
-        # Because meta_etri_profiles4 needs weights in initialization
-        self.lp.solve()
-
-        self.meta = meta_etri_profiles4(self.model, pt_sorted, self.aa_ori)
+        self.meta = meta_etri_profiles4(self.model, pt_sorted,
+                                               self.aa_ori)
 
     def optimize(self, nmeta):
         self.lp.update_linear_program()
@@ -66,7 +56,7 @@ if __name__ == "__main__":
     from ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model
-    model = generate_random_electre_tri_bm_model(10, 3, 1)
+    model = generate_random_electre_tri_bm_model(10, 3, 123)
     worst = alternative_performances("worst",
                                      {c.id: 0 for c in model.criteria})
     best = alternative_performances("best",
@@ -77,8 +67,9 @@ if __name__ == "__main__":
     pt = generate_random_performance_table(a, model.criteria)
     aa = model.pessimist(pt)
 
+    nmodels = 1
     nmeta = 20
-    nloops = 10
+    nloops = 50
 
     print('Original model')
     print('==============')
@@ -91,22 +82,44 @@ if __name__ == "__main__":
     ncategories = len(model.categories)
     pt_sorted = sorted_performance_table(pt)
 
-    model2 = generate_random_electre_tri_bm_model(ncriteria, ncategories)
+    metas = []
+    for i in range(nmodels):
+        model_meta = generate_random_electre_tri_bm_model(ncriteria,
+                                                          ncategories)
+
+        meta = meta_electre_tri_global(model_meta, pt_sorted, aa)
+        metas.append(meta)
 
     t1 = time.time()
 
-    meta = meta_electre_tri_global(model2, pt_sorted, aa)
-
     for i in range(nloops):
-        ca = meta.optimize(nmeta)
+        models_ca = {}
+        for meta in metas:
+            m = meta.model
+            ca = meta.optimize(nmeta)
+            models_ca[m] = ca
+            if ca == 1:
+                break
 
-        print i, ca
+        models_ca = sorted(models_ca.iteritems(),
+                                key = lambda (k,v): (v,k),
+                                reverse = True)
+        print i, models_ca[0][1]
 
-        if ca == 1:
+        if models_ca[0][1] == 1:
             break
+
+        for j in range(int((nmodels + 1) / 2), nmodels):
+            model_meta = generate_random_electre_tri_bm_model(ncriteria,
+                                                              ncategories)
+
+            metas[j] = meta_electre_tri_global(model_meta, pt_sorted, aa)
 
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
+
+    model2 = models_ca[0][0]
+    aa_learned = model2.pessimist(pt)
 
     print('Learned model')
     print('=============')
@@ -114,8 +127,6 @@ if __name__ == "__main__":
     model2.cv.display(criterion_ids = cids)
     print("lambda\t%.7s" % model2.lbda)
     #print(aa_learned)
-
-    aa_learned = model2.pessimist(pt)
 
     total = len(a)
     nok = 0

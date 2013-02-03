@@ -1,6 +1,6 @@
 from __future__ import division
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 from mcda.types import alternative_performances
 from mcda.types import performance_table
 

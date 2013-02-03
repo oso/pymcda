@@ -5,7 +5,7 @@ import datetime
 import random
 import time
 from itertools import product
-from algo.meta_etri_global3 import meta_etri_global3
+from mcda.learning.meta_etri_global3 import meta_etri_global3
 from mcda.types import criterion_value, criteria_values
 from mcda.types import alternatives, criteria, performance_table
 from mcda.types import alternatives_assignments, categories

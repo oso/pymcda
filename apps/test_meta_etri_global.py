@@ -9,8 +9,8 @@ from itertools import product
 
 from mcda.types import alternatives_assignments, performance_table
 from mcda.electre_tri import electre_tri
-from algo.meta_etri_global2 import meta_etri_global2
-from algo.meta_etri_global3 import meta_etri_global3
+from mcda.learning.meta_etri_global2 import meta_etri_global2
+from mcda.learning.meta_etri_global3 import meta_etri_global3
 from mcda.utils import compute_ca
 from mcda.pt_sorted import sorted_performance_table
 from mcda.generate import generate_random_electre_tri_bm_model

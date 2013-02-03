@@ -1,7 +1,7 @@
 from __future__ import division
-import bisect
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
+import bisect
 from mcda.types import point, segment, piecewise_linear
 from mcda.types import category_value, categories_values
 from mcda.types import criteria_functions, criterion_function
@@ -28,11 +28,13 @@ else:
 
 class lp_utadis(object):
 
-    def __init__(self, cat, gi_worst, gi_best):
+    def __init__(self, cs, cat, gi_worst, gi_best):
+        self.cs = cs
         self.cat = { cat: i+1 \
                      for i, cat in enumerate(cat.get_ordered_categories()) }
         self.gi_worst = gi_worst
         self.gi_best = gi_best
+        self.__compute_abscissa()
 
         if solver == 'cplex':
             self.lp = cplex.Cplex()
@@ -43,21 +45,25 @@ class lp_utadis(object):
             self.lp = pymprog.model('lp_utadis')
             self.lp.verb = verbose
 
-    def __compute_abscissa(self, pt):
+    def __compute_abscissa(self):
         self.points = {}
-        for ap in pt:
-            for cid, v in ap.performances.items():
-                if cid not in self.points:
-                    self.points[cid] = [self.gi_worst.performances[cid],
-                                        self.gi_best.performances[cid]]
+        for cs in self.cs:
+            best = self.gi_best.performances[cs.id]
+            worst = self.gi_worst.performances[cs.id]
+            diff = best - worst
 
-                if v not in self.points[cid]:
-                    self.points[cid].append(v)
+            self.points[cs.id] = [ worst ]
+            for i in range(1, cs.value):
+                self.points[cs.id].append(worst + i / cs.value * diff)
+            self.points[cs.id].append(best)
 
-        for points in self.points.values():
-            points.sort()
+    def __get_left_points(self, cid, x):
+        left = bisect.bisect_right(self.points[cid], x) - 1
+        if left == len(self.points[cid]) - 1:
+            left -= 1
+        return left
 
-    def add_variables_cplex(self, aids, pt):
+    def add_variables_cplex(self, aids):
         self.lp.variables.add(names = ['x_' + aid for aid in aids],
                               lb = [0 for aid in aids],
                               ub = [1 for aid in aids])
@@ -71,9 +77,10 @@ class lp_utadis(object):
                               lb = [0 for aid in aids],
                               ub = [1 for aid in aids])
 
-        for cid, points in self.points.items():
-            nseg = len(points) - 1
-            self.lp.variables.add(names = ['w_' + cid + "_%d" % (i + 1)
+        for cs in self.cs:
+            cid = cs.id
+            nseg = cs.value
+            self.lp.variables.add(names = ['w_' + cid + "_%d" % (i+1)
                                            for i in range(nseg)],
                                   lb = [0 for i in range(nseg)],
                                   ub = [1 for i in range(nseg)])
@@ -86,10 +93,14 @@ class lp_utadis(object):
 
     def compute_constraint(self, aa, ap):
         d_coefs = {}
-        for cid in ap.performances.keys():
-            i = self.points[cid].index(ap.performances[cid])
-            w_coefs = [1] * i + [0] * (len(self.points[cid]) - 1 - i)
-            d_coefs[cid] = w_coefs
+        for cs in self.cs:
+            perf = ap.performances[cs.id]
+            left = self.__get_left_points(cs.id, perf)
+            d = self.points[cs.id][left + 1] - self.points[cs.id][left]
+            k = (perf - self.points[cs.id][left]) / d
+
+            w_coefs = [1] * left + [k] + [0] * (cs.value - left - 1)
+            d_coefs[cs.id] = w_coefs
 
         return d_coefs
 
@@ -99,8 +110,8 @@ class lp_utadis(object):
 
         cat_nr = self.cat[aa.category_id]
 
-        l_vars = ['w_' + cid + '_%d' % (j + 1) for cid in d_coefs.keys()
-                  for j in range(len(d_coefs[cid]))]
+        l_vars = ['w_' + cid + '_%d' % j for cid in d_coefs.keys()
+                  for j in range(1, self.cs[cid].value + 1)]
         l_coefs = [j for i in d_coefs.values() for j in i]
 
         if cat_nr < len(self.cat):
@@ -132,7 +143,7 @@ class lp_utadis(object):
                            )
 
     def encode_constraints_cplex(self, aas, pt):
-        self.add_variables_cplex(aas.keys(), pt)
+        self.add_variables_cplex(aas.keys())
 
         # sum ((sum w_it) + k * w_it+1) - u_k + x_j - x'_j <= -d1
         # sum ((sum w_it) + k * w_it+1) - u_k - y_j + y'_j >= d2
@@ -142,9 +153,8 @@ class lp_utadis(object):
         # sum (sum w_it) = 1
         constraints = self.lp.linear_constraints
         w = []
-        for cid, values in self.points.items():
-            w += ['w_' + cid + "_%d" % (i + 1)
-                  for i in range(len(values) - 1)]
+        for cs in self.cs:
+            w += ['w_' + cs.id + "_%d" % (i + 1) for i in range(cs.value)]
 
         constraints.add(names = ['csum'],
                         lin_expr = [[w, [1] * len(w)]],
@@ -171,19 +181,21 @@ class lp_utadis(object):
             self.lp.objective.set_linear('yp_' + aa, 1)
 
     def add_variables_glpk(self, aids):
-        self.x = self.lp.var(xrange(len(aids)), 'x', bounds = (0, 1))
-        self.y = self.lp.var(xrange(len(aids)), 'y', bounds = (0, 1))
-        self.xp = self.lp.var(xrange(len(aids)), 'xp', bounds = (0, 1))
-        self.yp = self.lp.var(xrange(len(aids)), 'yp', bounds = (0, 1))
+        self.x = self.lp.var(xrange(len(aids)), 'x', bounds=(0, 1))
+        self.y = self.lp.var(xrange(len(aids)), 'y', bounds=(0, 1))
+        self.xp = self.lp.var(xrange(len(aids)), 'xp', bounds=(0, 1))
+        self.yp = self.lp.var(xrange(len(aids)), 'yp', bounds=(0, 1))
 
         self.w = {}
-        for cid, points in self.points.items():
-            self.w[cid] = self.lp.var(xrange(len(points) - 1), 'w_' + cid,
-                                      bounds = (0, 1))
+        for cs in self.cs:
+            cid = cs.id
+            self.w[cs.id] = self.lp.var(xrange(cs.value), 'w_' + cid,
+                                        bounds=(0, 1))
+            w_vars = ['w_' + cs.id + "_%d" % i
+                      for i in range(1, cs.value+1)]
 
         ncat = len(self.cat)
-        self.u = self.lp.var(xrange(len(self.cat) - 1), 'u',
-                             bounds = (0, 1))
+        self.u = self.lp.var(xrange(len(self.cat) - 1), 'u', bounds=(0, 1))
 
     def encode_constraints_glpk(self, aas, pt):
         self.add_variables_glpk(aas)
@@ -196,23 +208,20 @@ class lp_utadis(object):
             cat_nr = self.cat[aa.category_id]
 
             if cat_nr < len(self.cat):
-                self.lp.st(sum(d_coefs[cid][j] * self.w[cid][j] \
-                           for cid, points in self.points.items() \
-                           for j in range(len(points) - 1)) \
+                self.lp.st(sum(d_coefs[cs.id][j] * self.w[cs.id][j] \
+                           for cs in self.cs for j in range(cs.value)) \
                            + self.x[i] - self.xp[i] - self.u[cat_nr - 1] \
                            == -0.00001)
 
             if cat_nr > 1:
-                self.lp.st(sum(d_coefs[cid][j] * self.w[cid][j] \
-                           for cid, points in self.points.items() \
-                           for j in range(len(points) - 1)) \
+                self.lp.st(sum(d_coefs[cs.id][j] * self.w[cs.id][j] \
+                           for cs in self.cs for j in range(cs.value)) \
                            - self.y[i] + self.yp[i] - self.u[cat_nr - 2] \
                            == 0.00001)
 
         # sum (sum w_it) = 1
-        self.lp.st(sum(self.w[cid][i] \
-                   for cid, points in self.points.items() \
-                   for i in range(len(points) - 1)) == 1)
+        self.lp.st(sum(self.w[cs.id][i] for cs in self.cs \
+                   for i in range(cs.value)) == 1)
 
         # u_k - u_k-1 >= s
         ncat = len(self.cat)
@@ -234,18 +243,18 @@ class lp_utadis(object):
 
         cfs = criteria_functions()
         cvs = criteria_values()
-        for cid, points in self.points.items():
-            cv = criterion_value(cid, 1)
+        for cs in self.cs:
+            cv = criterion_value(cs.id, 1)
             cvs.append(cv)
 
-            p1 = point(self.points[cid][0], 0)
+            p1 = point(self.points[cs.id][0], 0)
 
             ui = 0
             f = piecewise_linear([])
-            for i in range(len(points) - 1):
-                uivar = 'w_' + cid + "_%d" % (i + 1)
-                ui += self.w[cid][i].primal
-                p2 = point(self.points[cid][i + 1], ui)
+            for i in range(cs.value):
+                uivar = 'w_' + cs.id + "_%d" % (i + 1)
+                ui += self.w[cs.id][i].primal
+                p2 = point(self.points[cs.id][i + 1], ui)
 
                 s = segment(p1, p2)
 
@@ -254,7 +263,7 @@ class lp_utadis(object):
                 p1 = p2
 
             s.ph_in = True
-            cf = criterion_function(cid, f)
+            cf = criterion_function(cs.id, f)
             cfs.append(cf)
 
         cat = {v: k for k, v in self.cat.items()}
@@ -280,18 +289,18 @@ class lp_utadis(object):
 
         cfs = criteria_functions()
         cvs = criteria_values()
-        for cid, points in self.points.items():
-            cv = criterion_value(cid, 1)
+        for cs in self.cs:
+            cv = criterion_value(cs.id, 1)
             cvs.append(cv)
 
-            p1 = point(self.points[cid][0], 0)
+            p1 = point(self.points[cs.id][0], 0)
 
             ui = 0
             f = piecewise_linear([])
-            for i in range(len(points) - 1):
-                uivar = 'w_' + cid + "_%d" % (i + 1)
+            for i in range(cs.value):
+                uivar = 'w_' + cs.id + "_%d" % (i + 1)
                 ui += self.lp.solution.get_values(uivar)
-                p2 = point(self.points[cid][i + 1], ui)
+                p2 = point(self.points[cs.id][i + 1], ui)
 
                 s = segment(p1, p2)
                 f.append(s)
@@ -299,7 +308,7 @@ class lp_utadis(object):
                 p1 = p2
 
             s.ph_in = True
-            cf = criterion_function(cid, f)
+            cf = criterion_function(cs.id, f)
             cfs.append(cf)
 
         cat = {v: k for k, v in self.cat.items()}
@@ -315,8 +324,6 @@ class lp_utadis(object):
         return obj, cvs, cfs, catv
 
     def solve(self, aa, pt):
-        self.__compute_abscissa(pt)
-
         if solver == 'cplex':
             self.encode_constraints_cplex(aa, pt)
             self.add_objective_cplex(aa)
@@ -347,7 +354,7 @@ if __name__ == "__main__":
     from mcda.utils import display_assignments_and_pt
 
     # Generate an utadis model
-    c = generate_criteria(2)
+    c = generate_criteria(7)
     cv = generate_random_criteria_values(c, seed = 6)
     cv.normalize()
     cat = generate_categories(3)
@@ -358,11 +365,11 @@ if __name__ == "__main__":
     u = utadis(c, cv, cfs, catv)
 
     # Generate random alternative and compute assignments
-    a = generate_alternatives(10)
+    a = generate_alternatives(1000)
     pt = generate_random_performance_table(a, c)
     aa = u.get_assignments(pt)
     aa_err = aa.copy()
-    aa_erroned = add_errors_in_assignments(aa_err, cat.keys(), 0.0)
+    aa_erroned = add_errors_in_assignments(aa_err, cat.keys(), 0.2)
 
     print('==============')
     print('Original model')
@@ -381,7 +388,12 @@ if __name__ == "__main__":
     gi_worst = alternative_performances('worst', {crit.id: 0 for crit in c})
     gi_best = alternative_performances('best', {crit.id: 1 for crit in c})
 
-    lp = lp_utadis(cat, gi_worst, gi_best)
+    css = criteria_values([])
+    for cf in cfs:
+        cs = criterion_value(cf.id, len(cf.function))
+        css.append(cs)
+
+    lp = lp_utadis(css, cat, gi_worst, gi_best)
     obj, cvs, cfs, catv = lp.solve(aa_err, pt)
 
     print('=============')

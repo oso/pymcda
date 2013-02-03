@@ -1,7 +1,7 @@
 from __future__ import division
 import os, sys
 from itertools import product
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 from mcda.types import criterion_value, criteria_values
 from mcda.types import alternative_performances, performance_table
 

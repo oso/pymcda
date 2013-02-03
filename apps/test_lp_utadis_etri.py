@@ -12,7 +12,7 @@ from mcda.types import alternative_performances
 from mcda.types import criterion_value, criteria_values
 from mcda.uta import utadis
 from mcda.electre_tri import electre_tri
-from algo.lp_utadis import lp_utadis
+from mcda.learning.lp_utadis import lp_utadis
 from mcda.generate import generate_random_electre_tri_bm_model
 from mcda.generate import generate_alternatives
 from mcda.generate import generate_random_performance_table

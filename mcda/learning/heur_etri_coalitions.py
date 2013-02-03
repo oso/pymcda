@@ -1,6 +1,6 @@
 from __future__ import division
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 from collections import defaultdict
 from mcda.generate import generate_random_electre_tri_bm_model
 from mcda.generate import generate_random_performance_table

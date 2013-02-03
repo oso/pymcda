@@ -9,7 +9,7 @@ from itertools import product
 
 from mcda.types import alternatives_assignments, performance_table
 from mcda.electre_tri import electre_tri
-from algo.lp_etri_weights import lp_etri_weights
+from mcda.learning.lp_etri_weights import lp_etri_weights
 from mcda.generate import generate_alternatives
 from mcda.generate import generate_random_electre_tri_bm_model
 from mcda.generate import generate_random_performance_table

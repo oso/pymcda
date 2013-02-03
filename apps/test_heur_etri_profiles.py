@@ -12,9 +12,9 @@ from mcda.generate import generate_random_profiles
 from mcda.pt_sorted import sorted_performance_table
 from mcda.utils import add_errors_in_assignments
 from mcda.utils import compute_ca
-from algo.heur_etri_profiles import heur_etri_profiles
-from algo.heur_etri_coalitions import heur_etri_coalitions
-from algo.lp_etri_weights import lp_etri_weights
+from mcda.learning.heur_etri_profiles import heur_etri_profiles
+from mcda.learning.heur_etri_coalitions import heur_etri_coalitions
+from mcda.learning.lp_etri_weights import lp_etri_weights
 from test_utils import test_result, test_results
 
 def test_heur_etri_profiles(seed, na, nc, ncat, pcerrors):
