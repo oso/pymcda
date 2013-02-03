@@ -57,13 +57,13 @@ class meta_etri_global3():
 
 if __name__ == "__main__":
     import time
-    from mcda.generate import generate_alternatives
-    from mcda.generate import generate_random_performance_table
-    from mcda.utils import display_assignments_and_pt
-    from mcda.utils import compute_winning_coalitions
-    from mcda.types import alternative_performances
-    from mcda.electre_tri import electre_tri
-    from ui.graphic import display_electre_tri_models
+    from pymcda.generate import generate_alternatives
+    from pymcda.generate import generate_random_performance_table
+    from pymcda.utils import display_assignments_and_pt
+    from pymcda.utils import compute_winning_coalitions
+    from pymcda.types import alternative_performances
+    from pymcda.electre_tri import electre_tri
+    from pymcda.ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model
     model = generate_random_electre_tri_bm_model(10, 3, 1)

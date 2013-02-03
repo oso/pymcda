@@ -336,22 +336,22 @@ class lp_utadis(object):
         return solution
 
 if __name__ == "__main__":
-    from mcda.types import criteria_values, criterion_value
-    from mcda.types import alternative_performances
-    from mcda.types import criteria_functions, criterion_function
-    from mcda.types import category_value, categories_values
-    from mcda.types import interval
-    from mcda.uta import utadis
-    from mcda.utils import compute_ca
-    from mcda.generate import generate_alternatives
-    from mcda.generate import generate_categories
-    from mcda.generate import generate_criteria
-    from mcda.generate import generate_random_criteria_values
-    from mcda.generate import generate_random_performance_table
-    from mcda.generate import generate_random_criteria_functions
-    from mcda.generate import generate_random_categories_values
-    from mcda.utils import add_errors_in_assignments
-    from mcda.utils import display_assignments_and_pt
+    from pymcda.types import criteria_values, criterion_value
+    from pymcda.types import alternative_performances
+    from pymcda.types import criteria_functions, criterion_function
+    from pymcda.types import category_value, categories_values
+    from pymcda.types import interval
+    from pymcda.uta import utadis
+    from pymcda.utils import compute_ca
+    from pymcda.generate import generate_alternatives
+    from pymcda.generate import generate_categories
+    from pymcda.generate import generate_criteria
+    from pymcda.generate import generate_random_criteria_values
+    from pymcda.generate import generate_random_performance_table
+    from pymcda.generate import generate_random_criteria_functions
+    from pymcda.generate import generate_random_categories_values
+    from pymcda.utils import add_errors_in_assignments
+    from pymcda.utils import display_assignments_and_pt
 
     # Generate an utadis model
     c = generate_criteria(7)

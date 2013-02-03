@@ -342,12 +342,12 @@ class mip_etri_global():
         return obj
 
 if __name__ == "__main__":
-    from mcda.generate import generate_random_electre_tri_bm_model
-    from mcda.generate import generate_alternatives
-    from mcda.generate import generate_random_performance_table
-    from mcda.utils import compute_ca
-    from mcda.utils import display_assignments_and_pt
-    from ui.graphic import display_electre_tri_models
+    from pymcda.generate import generate_random_electre_tri_bm_model
+    from pymcda.generate import generate_alternatives
+    from pymcda.generate import generate_random_performance_table
+    from pymcda.utils import compute_ca
+    from pymcda.utils import display_assignments_and_pt
+    from pymcda.ui.graphic import display_electre_tri_models
 
     seed = 12
     ncrit = 5

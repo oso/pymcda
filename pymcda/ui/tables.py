@@ -251,10 +251,10 @@ class qt_performance_table(QtGui.QTableWidget):
             self.add_alternative_performances(a, pt[a.id])
 
 if __name__ == "__main__":
-    from mcda.generate import generate_criteria
-    from mcda.generate import generate_random_criteria_weights
-    from mcda.generate import generate_alternatives
-    from mcda.generate import generate_random_performance_table
+    from pymcda.generate import generate_criteria
+    from pymcda.generate import generate_random_criteria_weights
+    from pymcda.generate import generate_alternatives
+    from pymcda.generate import generate_random_performance_table
 
     c = generate_criteria(5)
     cw = generate_random_criteria_weights(c)

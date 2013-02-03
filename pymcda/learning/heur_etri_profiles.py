@@ -80,16 +80,16 @@ class heur_etri_profiles():
         return bpt
 
 if __name__ == "__main__":
-    from mcda.generate import generate_random_electre_tri_bm_model
-    from mcda.generate import generate_alternatives
-    from mcda.generate import generate_random_performance_table
-    from mcda.generate import generate_random_profiles
-    from mcda.pt_sorted import sorted_performance_table
-    from mcda.utils import compute_ca
-    from mcda.utils import compute_winning_coalitions
-    from mcda.utils import display_coalitions
-    from algo.lp_etri_weights import lp_etri_weights
-    from ui.graphic import display_electre_tri_models
+    from pymcda.generate import generate_random_electre_tri_bm_model
+    from pymcda.generate import generate_alternatives
+    from pymcda.generate import generate_random_performance_table
+    from pymcda.generate import generate_random_profiles
+    from pymcda.pt_sorted import sorted_performance_table
+    from pymcda.utils import compute_ca
+    from pymcda.utils import compute_winning_coalitions
+    from pymcda.utils import display_coalitions
+    from pymcda.learning.lp_etri_weights import lp_etri_weights
+    from pymcda.ui.graphic import display_electre_tri_models
 
     model = generate_random_electre_tri_bm_model(10, 3, 17)
     coal = compute_winning_coalitions(model.cv, model.lbda)

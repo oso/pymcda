@@ -255,18 +255,18 @@ class meta_etri_profiles4():
         return self.good / self.na
 
 if __name__ == "__main__":
-    from mcda.generate import generate_random_electre_tri_bm_model
-    from mcda.generate import generate_alternatives
-    from mcda.generate import generate_random_performance_table
-    from mcda.generate import generate_random_profiles
-    from mcda.utils import compute_ca
-    from mcda.utils import display_assignments_and_pt
-    from mcda.utils import compute_number_of_winning_coalitions
-    from mcda.pt_sorted import sorted_performance_table
-    from mcda.electre_tri import electre_tri_bm
-    from mcda.types import alternative_performances
-    from mcda.types import performance_table
-    from ui.graphic import display_electre_tri_models
+    from pymcda.generate import generate_random_electre_tri_bm_model
+    from pymcda.generate import generate_alternatives
+    from pymcda.generate import generate_random_performance_table
+    from pymcda.generate import generate_random_profiles
+    from pymcda.utils import compute_ca
+    from pymcda.utils import display_assignments_and_pt
+    from pymcda.utils import compute_number_of_winning_coalitions
+    from pymcda.pt_sorted import sorted_performance_table
+    from pymcda.electre_tri import electre_tri_bm
+    from pymcda.types import alternative_performances
+    from pymcda.types import performance_table
+    from pymcda.ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model
     model = generate_random_electre_tri_bm_model(10, 3, 123)

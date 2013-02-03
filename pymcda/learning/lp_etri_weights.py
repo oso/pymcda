@@ -362,13 +362,13 @@ class lp_etri_weights():
 if __name__ == "__main__":
     import time
     import random
-    from mcda.generate import generate_alternatives
-    from mcda.generate import generate_random_performance_table
-    from mcda.generate import generate_random_electre_tri_bm_model
-    from mcda.utils import add_errors_in_assignments
-    from mcda.utils import display_assignments_and_pt
-    from mcda.utils import compute_winning_coalitions
-    from mcda.types import alternatives_assignments, performance_table
+    from pymcda.generate import generate_alternatives
+    from pymcda.generate import generate_random_performance_table
+    from pymcda.generate import generate_random_electre_tri_bm_model
+    from pymcda.utils import add_errors_in_assignments
+    from pymcda.utils import display_assignments_and_pt
+    from pymcda.utils import compute_winning_coalitions
+    from pymcda.types import alternatives_assignments, performance_table
 
     print("Solver used: %s" % solver)
 
