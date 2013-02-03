@@ -15,7 +15,7 @@ from mcda.pt_sorted import sorted_performance_table
 from mcda.utils import compute_ca
 from mcda.learning.meta_etri_profiles3 import meta_etri_profiles3
 from mcda.learning.meta_etri_profiles4 import meta_etri_profiles4
-from ui.graphic import QGraphicsScene_etri
+from mcda.ui.graphic import QGraphicsScene_etri
 from multiprocessing import Process, Pipe
 
 # FIXME

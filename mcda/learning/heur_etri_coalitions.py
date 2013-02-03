@@ -9,7 +9,7 @@ from mcda.utils import compute_winning_coalitions
 from mcda.utils import compute_degree_of_extremality
 from mcda.utils import compute_number_of_winning_coalitions
 from mcda.utils import display_coalitions
-from ui.graphic import display_electre_tri_models
+from mcda.ui.graphic import display_electre_tri_models
 
 class heur_etri_coalitions():
 
