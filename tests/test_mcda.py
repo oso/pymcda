@@ -8,7 +8,7 @@ import unittest
 import csv
 
 XMCDA_HEADER = '{http://www.decision-deck.org/2012/XMCDA-2.2.1}XMCDA'
-XMCDA_FILE = 'XMCDA-2.2.1.xsd'
+XMCDA_FILE = os.path.dirname(os.path.abspath(__file__)) + '/XMCDA-2.2.1.xsd'
 
 class tests_xmcda(unittest.TestCase):
 
