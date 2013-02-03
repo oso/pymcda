@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+from setuptools import setup
 
 setup(name='pymcda',
       version = '1.0',
@@ -10,4 +10,5 @@ setup(name='pymcda',
       url = 'https://github.com/oso/pymcda',
       license = 'GPLv2',
       packages = ['pymcda', 'pymcda.learning', 'pymcda.ui'],
+      test_suite = 'tests',
       )
