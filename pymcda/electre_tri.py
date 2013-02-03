@@ -1,6 +1,6 @@
 from __future__ import division
 import math
-from mcda.types import alternative_assignment, alternatives_assignments
+from pymcda.types import alternative_assignment, alternatives_assignments
 from copy import deepcopy
 
 def eq(a, b, eps=10e-10):

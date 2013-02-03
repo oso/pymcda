@@ -2,9 +2,9 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import pprint
 import matplotlib.pyplot as plt
-from mcda.types import alternative, alternatives
-from mcda.types import criterion, criteria
-from mcda.types import alternative_performances, performance_table
+from pymcda.types import alternative, alternatives
+from pymcda.types import criterion, criteria
+from pymcda.types import alternative_performances, performance_table
 from tools.federov import generate_init_plan, federov
 
 def plot(pt, p_pt):

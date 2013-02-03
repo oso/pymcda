@@ -2,17 +2,17 @@ from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import random
-from mcda.electre_tri import electre_tri_bm
-from mcda.uta import utadis
-from mcda.types import alternative, alternatives
-from mcda.types import alternative_performances, performance_table
-from mcda.types import criterion, criteria
-from mcda.types import criterion_value, criteria_values
-from mcda.types import criterion_function, criteria_functions
-from mcda.types import category, categories
-from mcda.types import category_profile, categories_profiles, limits
-from mcda.types import piecewise_linear, point, segment
-from mcda.types import category_value, categories_values, interval
+from pymcda.electre_tri import electre_tri_bm
+from pymcda.uta import utadis
+from pymcda.types import alternative, alternatives
+from pymcda.types import alternative_performances, performance_table
+from pymcda.types import criterion, criteria
+from pymcda.types import criterion_value, criteria_values
+from pymcda.types import criterion_function, criteria_functions
+from pymcda.types import category, categories
+from pymcda.types import category_profile, categories_profiles, limits
+from pymcda.types import piecewise_linear, point, segment
+from pymcda.types import category_value, categories_values, interval
 
 def generate_alternatives(number, prefix='a'):
     alts = alternatives()

@@ -2,14 +2,14 @@ from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 from collections import defaultdict
-from mcda.generate import generate_random_electre_tri_bm_model
-from mcda.generate import generate_random_performance_table
-from mcda.generate import generate_alternatives
-from mcda.utils import compute_winning_coalitions
-from mcda.utils import compute_degree_of_extremality
-from mcda.utils import compute_number_of_winning_coalitions
-from mcda.utils import display_coalitions
-from mcda.ui.graphic import display_electre_tri_models
+from pymcda.generate import generate_random_electre_tri_bm_model
+from pymcda.generate import generate_random_performance_table
+from pymcda.generate import generate_alternatives
+from pymcda.utils import compute_winning_coalitions
+from pymcda.utils import compute_degree_of_extremality
+from pymcda.utils import compute_number_of_winning_coalitions
+from pymcda.utils import display_coalitions
+from pymcda.ui.graphic import display_electre_tri_models
 
 class heur_etri_coalitions():
 

@@ -1,8 +1,8 @@
 #!/usr/bin/python
 import sys
 sys.path.append("..")
-from mcda.electre_tri import electre_tri
-from mcda.ui.graphic import display_electre_tri_models
+from pymcda.electre_tri import electre_tri
+from pymcda.ui.graphic import display_electre_tri_models
 from datasets import ticino
 from datasets import loulouka
 

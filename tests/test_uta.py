@@ -1,7 +1,7 @@
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
-from mcda.uta import uta, utadis
-from mcda.types import *
+from pymcda.uta import uta, utadis
+from pymcda.types import *
 import unittest
 
 class tests_uta(unittest.TestCase):

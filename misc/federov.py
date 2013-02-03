@@ -3,7 +3,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import random
 import logging
 from numpy import matrix, multiply, transpose, linalg
-from mcda.types import alternatives, performance_table
+from pymcda.types import alternatives, performance_table
 
 FORMAT = '%(asctime)s: %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=FORMAT)

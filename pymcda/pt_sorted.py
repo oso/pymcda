@@ -2,7 +2,7 @@ from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import bisect
-from mcda.types import alternative_performances
+from pymcda.types import alternative_performances
 
 class sorted_performance_table():
 

@@ -6,20 +6,20 @@ import time
 from itertools import combinations
 from PyQt4 import QtCore
 from PyQt4 import QtGui
-from mcda.generate import generate_random_electre_tri_bm_model
-from mcda.generate import generate_random_profiles
-from mcda.generate import generate_alternatives
-from mcda.generate import generate_random_performance_table
-from mcda.generate import generate_criteria
-from mcda.pt_sorted import sorted_performance_table
-from mcda.utils import compute_ca
-from mcda.learning.meta_etri_profiles3 import meta_etri_profiles3
-from mcda.learning.meta_etri_profiles4 import meta_etri_profiles4
-from mcda.ui.graphic import QGraphicsScene_etri
+from pymcda.generate import generate_random_electre_tri_bm_model
+from pymcda.generate import generate_random_profiles
+from pymcda.generate import generate_alternatives
+from pymcda.generate import generate_random_performance_table
+from pymcda.generate import generate_criteria
+from pymcda.pt_sorted import sorted_performance_table
+from pymcda.utils import compute_ca
+from pymcda.learning.meta_etri_profiles3 import meta_etri_profiles3
+from pymcda.learning.meta_etri_profiles4 import meta_etri_profiles4
+from pymcda.ui.graphic import QGraphicsScene_etri
 from multiprocessing import Process, Pipe
 
 # FIXME
-from mcda.types import alternative_performances
+from pymcda.types import alternative_performances
 
 def run_metaheuristic(pipe, model, pt, aa, algo, n, worst = None,
                       best = None):

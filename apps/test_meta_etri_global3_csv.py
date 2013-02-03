@@ -5,17 +5,17 @@ import datetime
 import random
 import time
 from itertools import product
-from mcda.learning.meta_etri_global3 import meta_etri_global3
-from mcda.types import criterion_value, criteria_values
-from mcda.types import alternatives, criteria, performance_table
-from mcda.types import alternatives_assignments, categories
-from mcda.electre_tri import electre_tri_bm
-from mcda.generate import generate_alternatives
-from mcda.generate import generate_categories_profiles
-from mcda.generate import generate_random_profiles
-from mcda.generate import generate_random_criteria_weights
-from mcda.pt_sorted import sorted_performance_table
-from mcda.utils import compute_ca
+from pymcda.learning.meta_etri_global3 import meta_etri_global3
+from pymcda.types import criterion_value, criteria_values
+from pymcda.types import alternatives, criteria, performance_table
+from pymcda.types import alternatives_assignments, categories
+from pymcda.electre_tri import electre_tri_bm
+from pymcda.generate import generate_alternatives
+from pymcda.generate import generate_categories_profiles
+from pymcda.generate import generate_random_profiles
+from pymcda.generate import generate_random_criteria_weights
+from pymcda.pt_sorted import sorted_performance_table
+from pymcda.utils import compute_ca
 from test_utils import test_result, test_results
 
 class dataset(object):

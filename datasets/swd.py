@@ -1,10 +1,10 @@
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
-from mcda.types import criterion, criteria
-from mcda.types import alternative, alternatives
-from mcda.types import alternative_performances, performance_table
-from mcda.types import alternative_assignment, alternatives_assignments
-from mcda.types import category, categories
+from pymcda.types import criterion, criteria
+from pymcda.types import alternative, alternatives
+from pymcda.types import alternative_performances, performance_table
+from pymcda.types import alternative_assignment, alternatives_assignments
+from pymcda.types import category, categories
 
 c1 = criterion('c1')
 c2 = criterion('c2')

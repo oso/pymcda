@@ -1,6 +1,6 @@
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
-from mcda.electre_tri import electre_tri
+from pymcda.electre_tri import electre_tri
 import unittest
 
 def compare_assignments(assignments, expected_assignments):

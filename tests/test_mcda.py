@@ -2,8 +2,8 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 from xml.etree import ElementTree
 from lxml import etree
-from mcda.types import *
-from mcda.generate import *
+from pymcda.types import *
+from pymcda.generate import *
 import unittest
 import csv
 

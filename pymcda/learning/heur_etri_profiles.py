@@ -1,8 +1,8 @@
 from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
-from mcda.types import alternative_performances
-from mcda.types import performance_table
+from pymcda.types import alternative_performances
+from pymcda.types import performance_table
 
 class heur_etri_profiles():
 

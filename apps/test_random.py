@@ -1,8 +1,8 @@
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
-from mcda.generate import generate_criteria
-from mcda.generate import generate_random_criteria_weights
-from mcda.generate import generate_random_criteria_values
+from pymcda.generate import generate_criteria
+from pymcda.generate import generate_random_criteria_weights
+from pymcda.generate import generate_random_criteria_values
 
 n = 10000
 

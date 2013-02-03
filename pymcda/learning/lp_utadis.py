@@ -2,13 +2,13 @@ from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 import bisect
-from mcda.types import point, segment, piecewise_linear
-from mcda.types import category_value, categories_values
-from mcda.types import criteria_functions, criterion_function
-from mcda.types import criteria_values, criterion_value
-from mcda.types import categories_values, categories_values, interval
-from mcda.generate import generate_random_criteria_values
-from mcda.generate import generate_random_criteria_functions
+from pymcda.types import point, segment, piecewise_linear
+from pymcda.types import category_value, categories_values
+from pymcda.types import criteria_functions, criterion_function
+from pymcda.types import criteria_values, criterion_value
+from pymcda.types import categories_values, categories_values, interval
+from pymcda.generate import generate_random_criteria_values
+from pymcda.generate import generate_random_criteria_functions
 
 verbose = False
 

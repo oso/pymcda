@@ -4,16 +4,16 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 import random
 from itertools import product
 
-from mcda.electre_tri import electre_tri
-from mcda.types import alternative_assignment, alternatives_assignments
-from mcda.types import performance_table
-from mcda.learning.heur_etri_profiles import heur_etri_profiles
-from mcda.learning.lp_etri_weights import lp_etri_weights
-from mcda.learning.meta_etri_profiles4 import meta_etri_profiles4
-from mcda.utils import compute_ca
-from mcda.pt_sorted import sorted_performance_table
-from mcda.generate import generate_random_electre_tri_bm_model
-from mcda.generate import generate_alternatives
+from pymcda.electre_tri import electre_tri
+from pymcda.types import alternative_assignment, alternatives_assignments
+from pymcda.types import performance_table
+from pymcda.learning.heur_etri_profiles import heur_etri_profiles
+from pymcda.learning.lp_etri_weights import lp_etri_weights
+from pymcda.learning.meta_etri_profiles4 import meta_etri_profiles4
+from pymcda.utils import compute_ca
+from pymcda.pt_sorted import sorted_performance_table
+from pymcda.generate import generate_random_electre_tri_bm_model
+from pymcda.generate import generate_alternatives
 
 class meta_etri_global3():
 

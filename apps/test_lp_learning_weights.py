@@ -7,14 +7,14 @@ import time
 import random
 from itertools import product
 
-from mcda.types import alternatives_assignments, performance_table
-from mcda.electre_tri import electre_tri
-from mcda.learning.lp_etri_weights import lp_etri_weights
-from mcda.generate import generate_alternatives
-from mcda.generate import generate_random_electre_tri_bm_model
-from mcda.generate import generate_random_performance_table
-from mcda.utils import compute_ca
-from mcda.utils import add_errors_in_assignments
+from pymcda.types import alternatives_assignments, performance_table
+from pymcda.electre_tri import electre_tri
+from pymcda.learning.lp_etri_weights import lp_etri_weights
+from pymcda.generate import generate_alternatives
+from pymcda.generate import generate_random_electre_tri_bm_model
+from pymcda.generate import generate_random_performance_table
+from pymcda.utils import compute_ca
+from pymcda.utils import add_errors_in_assignments
 from test_utils import test_result, test_results
 
 def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):

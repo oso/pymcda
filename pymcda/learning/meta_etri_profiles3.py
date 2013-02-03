@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 import math
 import random
 from itertools import product
-from mcda.types import alternative_assignment, alternatives_assignments
+from pymcda.types import alternative_assignment, alternatives_assignments
 
 class meta_etri_profiles3():
 

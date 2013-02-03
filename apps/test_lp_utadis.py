@@ -7,20 +7,20 @@ import time
 import random
 from itertools import product
 
-from mcda.types import alternatives_assignments, performance_table
-from mcda.types import alternative_performances
-from mcda.types import criterion_value, criteria_values
-from mcda.uta import utadis
-from mcda.learning.lp_utadis import lp_utadis
-from mcda.generate import generate_alternatives
-from mcda.generate import generate_criteria
-from mcda.generate import generate_random_criteria_values
-from mcda.generate import generate_random_performance_table
-from mcda.generate import generate_categories
-from mcda.generate import generate_random_categories_values
-from mcda.generate import generate_random_criteria_functions
-from mcda.utils import compute_ca
-from mcda.utils import add_errors_in_assignments
+from pymcda.types import alternatives_assignments, performance_table
+from pymcda.types import alternative_performances
+from pymcda.types import criterion_value, criteria_values
+from pymcda.uta import utadis
+from pymcda.learning.lp_utadis import lp_utadis
+from pymcda.generate import generate_alternatives
+from pymcda.generate import generate_criteria
+from pymcda.generate import generate_random_criteria_values
+from pymcda.generate import generate_random_performance_table
+from pymcda.generate import generate_categories
+from pymcda.generate import generate_random_categories_values
+from pymcda.generate import generate_random_criteria_functions
+from pymcda.utils import compute_ca
+from pymcda.utils import add_errors_in_assignments
 from test_utils import test_result, test_results
 
 def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
