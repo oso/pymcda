@@ -181,8 +181,8 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, nmodels,
         if initialized is False:
             fields = ['seed', 'na', 'nc', 'ncat', 'na_gen', 'pcerrors',
                       'max_oloops', 'nmodels', 'max_loops', 'ca_best',
-                      'ca_errors', 'ca2_best', 'ca2_errors', 'nloops',
-                      't_total']
+                      'ca_errors', 'ca2_best', 'ca2_errors', 'ca_gen',
+                      'nloops', 't_total']
             writer.writerow(fields)
             initialized = True
 
@@ -199,7 +199,7 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, nmodels,
     t = results.summary(['na', 'nc', 'ncat', 'na_gen', 'pcerrors',
                          'max_oloops', 'nmodels', 'max_loops'],
                          ['ca_best', 'ca_errors', 'ca2_best',
-                          'ca2_errors', 'nloops', 't_total'])
+                          'ca2_errors', 'ca_gen', 'nloops', 't_total'])
     t.tocsv(writer)
 
     # Summary by columns
