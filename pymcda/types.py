@@ -389,10 +389,6 @@ class alternative(mcda_object):
 
 class performance_table(mcda_dict):
 
-    def __init__(self, l=[]):
-        for i in l:
-            self[i.id] = i
-
     def __call__(self, id):
         return self[id].performances
 
