@@ -1329,10 +1329,6 @@ class category_profile(mcda_object):
 
 class alternatives_assignments(mcda_dict):
 
-    def __init__(self, l=[]):
-        for i in l:
-            self[i.id] = i
-
     def __call__(self, id):
         return self[id].category_id
 
