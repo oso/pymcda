@@ -41,7 +41,7 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
     # Add errors in assignment examples
     aa_err = aa.copy()
     aa_erroned = add_errors_in_assignments(aa_err, model.categories,
-                                            pcerrors)
+                                           pcerrors / 100)
 
     # Sort the performance table
     pt_sorted = sorted_performance_table(pt)

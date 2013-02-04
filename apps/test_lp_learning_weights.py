@@ -31,7 +31,7 @@ def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
     # Add errors in assignment examples
     aa_err = aa.copy()
     aa_erroned = add_errors_in_assignments(aa_err, model.categories,
-                                           pcerrors)
+                                           pcerrors / 100)
 
     # Run linear program
     t1 = time.time()

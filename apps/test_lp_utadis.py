@@ -42,7 +42,8 @@ def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
 
     # Add errors in assignment examples
     aa_err = aa.copy()
-    aa_erroned = add_errors_in_assignments(aa_err, cat.keys(), pcerrors)
+    aa_erroned = add_errors_in_assignments(aa_err, cat.keys(),
+                                           pcerrors / 100)
 
     gi_worst = alternative_performances('worst', {crit.id: 0 for crit in c})
     gi_best = alternative_performances('best', {crit.id: 1 for crit in c})
