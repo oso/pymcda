@@ -46,7 +46,7 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
     model_cas = {}
     for i in range(nmodels):
         m = generate_random_electre_tri_bm_model(ncriteria, ncategories)
-        meta = algo(m, pt_sorted, aa)
+        meta = algo(m, pt_sorted, aa_err)
         model_metas[m] = meta
         model_cas[meta.model] = meta.meta.good / meta.meta.na
 
@@ -81,7 +81,7 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
             m = model_ca[0]
             del model_metas[m]
             m = generate_random_electre_tri_bm_model(ncriteria, ncategories)
-            model_metas[m] = algo(m, pt_sorted, aa)
+            model_metas[m] = algo(m, pt_sorted, aa_err)
 
     t_total = time.time() - t1
 
