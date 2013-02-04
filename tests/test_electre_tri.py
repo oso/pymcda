@@ -15,7 +15,7 @@ def compare_assignments(assignments, expected_assignments):
 
         return ok
 
-class electre_tri_tests(unittest.TestCase):
+class tests_electre_tri(unittest.TestCase):
 
     def test001_test_pessimist_loulouka(self):
         """ Loulouka - Pessimist """
@@ -50,7 +50,7 @@ class electre_tri_tests(unittest.TestCase):
         self.assertEqual(ok, 1, "One or more alternatives were wrongly \
                          assigned")
 
-test_classes = [electre_tri_tests]
+test_classes = [tests_electre_tri]
 
 if __name__ == "__main__":
     suite = []
