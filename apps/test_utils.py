@@ -392,7 +392,7 @@ def parser_parse_options(*options):
     if "pcerrors" in options:
         parser.add_option("-e", "--errors", action = "store", type="string",
                           dest = "pcerrors",
-                      help = "percentage of errors in the learning set")
+                          help = "percentage of errors in the learning set")
 
     if "nseeds" in options:
         parser.add_option("-s", "--nseeds", action = "store", type="string",
