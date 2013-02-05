@@ -194,9 +194,6 @@ class meta_etri_profiles4():
             self.aa[a].category_id = new_cat
 
     def optimize_profile(self, profile, below, above, cat_b, cat_a):
-        criteria = self.model.criteria
-        p_perfs = profile.performances
-
         cids = self.model.criteria.keys()
         random.shuffle(cids)
 
@@ -224,8 +221,7 @@ class meta_etri_profiles4():
             r = random.uniform(0, 1)
 
             if r <= h[i]:
-                self.update_tables(profile.id, cid,
-                                   perf_profile, i)
+                self.update_tables(profile.id, cid, perf_profile, i)
                 profile.performances[cid] = i
 
     def get_below_and_above_profiles(self, i):
