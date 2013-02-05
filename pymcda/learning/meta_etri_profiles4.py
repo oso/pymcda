@@ -255,6 +255,7 @@ class meta_etri_profiles4():
         return self.good / self.na
 
 if __name__ == "__main__":
+    import time
     from pymcda.generate import generate_random_electre_tri_bm_model
     from pymcda.generate import generate_alternatives
     from pymcda.generate import generate_random_performance_table
@@ -297,6 +298,8 @@ if __name__ == "__main__":
     pt_sorted = sorted_performance_table(pt)
     meta = meta_etri_profiles4(model2, pt_sorted, aa)
 
+    t1 = time.time()
+
     for i in range(0, 101):
         f = meta.good / meta.na
         print('%d: fitness: %g' % (i, f))
@@ -306,11 +309,14 @@ if __name__ == "__main__":
 
         f = meta.optimize()
 
+    t2 = time.time()
+
     print('%d: fitness: %g' % (i + 1, f))
     model2.bpt.display(criterion_ids=cids)
 
     print('Learned model')
     print('=============')
+    print("Computing time: %d sec" % (t2 - t1))
     print("Number of iterations: %d" % i)
     model2.bpt.display(criterion_ids = cids)
     model2.cv.display(criterion_ids = cids)
