@@ -1,12 +1,13 @@
 from __future__ import division
 import math
 from pymcda.types import alternative_assignment, alternatives_assignments
+from pymcda.types import mcda_object
 from copy import deepcopy
 
 def eq(a, b, eps=10e-10):
     return abs(a-b) <= eps
 
-class electre_tri:
+class electre_tri(mcda_object):
 
     def __init__(self, criteria=None, cv=None, bpt=None, lbda=None,
                  categories_profiles=None):
@@ -18,9 +19,6 @@ class electre_tri:
         if categories_profiles:
             self.categories = categories_profiles.get_ordered_categories()
             self.profiles = categories_profiles.get_ordered_profiles()
-
-    def copy(self):
-        return deepcopy(self)
 
     def __check_input_params(self):
         if self.criteria is None:
