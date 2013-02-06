@@ -25,28 +25,62 @@ def unmarshal(xml):
     m = unmarshallers.get(xml.tag)
     return m(xml)
 
-class mcda_dict(dict):
+class mcda_dict(object):
 
-    def __init__(self, l=[]):
+    def __init__(self, l = []):
+        self._d = dict()
         for i in l:
-            self[i.id] = i
+            self._d[i.id] = i
+
+    def __cmp__(self, mcda_dict):
+        return self._d.__cmp__(mcda_dict._d)
+
+    def __contains__(self, key):
+        return self._d.__contains__(key)
 
     def __iter__(self):
-        return self.itervalues()
+        return self._d.itervalues()
+
+    def __getitem__(self, key):
+        return self._d.__getitem__(key)
+
+    def __len__(self):
+        return self._d.__len__()
+
+    def append(self, mcda_object):
+        self._d[mcda_object.id] = mcda_object
 
     def copy(self):
         return deepcopy(self)
 
-    def append(self, c):
-        self[c.id] = c
+    def has_key(self, key):
+        return self._d.has_key(key)
+
+    def items(self):
+        return self._d.items()
+
+    def iterkeys(self):
+        return self._d.iterkeys()
+
+    def itervalues(self):
+        return self._d.itervalues()
+
+    def keys(self):
+        return self._d.keys()
+
+    def update(self, mcda_dict):
+        self._d.update(mcda_dict)
+
+    def values(self):
+        return self._d.values()
 
     def to_list(self):
-        l = self.values()
+        l = self._d.values()
         l.sort(key = lambda x: x.id)
         return l
 
     def get_subset(self, ids):
-        return type(self)([self[id] for id in ids])
+        return type(self)([self._d[id] for id in ids])
 
     def split(self, n, proportions = None, randomize = True):
         if proportions is None:
@@ -57,7 +91,7 @@ class mcda_dict(dict):
         else:
             raise ValueError('%s::split invalid proportions')
 
-        keys, nkeys = self.keys(), len(self.keys())
+        keys, nkeys = self._d.keys(), len(self._d.keys())
         j, subsets = 0, []
 
         if randomize is True:
@@ -65,11 +99,11 @@ class mcda_dict(dict):
 
         for proportion in proportions:
             j2 = int(j + proportion * nkeys)
-            subset = type(self)(self[i] for i in keys[j:j2])
+            subset = type(self)(self._d[i] for i in keys[j:j2])
             j = j2
             subsets.append(subset)
 
-        subset = type(self)(self[i] for i in keys[j2:nkeys])
+        subset = type(self)(self._d[i] for i in keys[j2:nkeys])
         subsets[-1].update(subset)
 
         return tuple(subsets)
@@ -1330,7 +1364,7 @@ class category_profile(mcda_object):
 class alternatives_assignments(mcda_dict):
 
     def __call__(self, id):
-        return self[id].category_id
+        return self._d[id].category_id
 
     def __repr__(self):
         return "alternatives_assignments(%s)" % self.values()
