@@ -6,7 +6,8 @@ from itertools import combinations
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 
-def display_electre_tri_models(etri, worst = [], best = [], aps = []):
+def display_electre_tri_models(etri, worst = list(), best = list(),
+                               aps = list()):
     app = QtGui.QApplication(sys.argv)
 
     sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,
