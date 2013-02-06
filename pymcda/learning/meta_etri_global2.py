@@ -87,7 +87,7 @@ if __name__ == "__main__":
         model_meta = generate_random_electre_tri_bm_model(ncriteria,
                                                           ncategories)
 
-        meta = meta_electre_tri_global(model_meta, pt_sorted, aa)
+        meta = meta_etri_global2(model_meta, pt_sorted, aa)
         metas.append(meta)
 
     t1 = time.time()
@@ -113,7 +113,7 @@ if __name__ == "__main__":
             model_meta = generate_random_electre_tri_bm_model(ncriteria,
                                                               ncategories)
 
-            metas[j] = meta_electre_tri_global(model_meta, pt_sorted, aa)
+            metas[j] = meta_etri_global2(model_meta, pt_sorted, aa)
 
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
