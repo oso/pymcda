@@ -37,7 +37,7 @@ class lp_etri_weights():
 
         if solver == 'glpk':
             self.lp = pymprog.model('lp_elecre_tri_weights')
-            self.lp.verb=verbose
+            self.lp.verb = verbose
             self.add_variables_glpk()
             self.add_constraints_glpk()
             self.add_objective_glpk()
@@ -58,9 +58,6 @@ class lp_etri_weights():
             self.add_objective_cplex()
 
     def compute_constraints(self, aa, bpt):
-        m = len(self.pt)
-        n = len(self.model.criteria)
-
         aa = { a.id: self.cat_ranks[a.category_id] \
                for a in aa }
         bpt = { a.id: a.performances \
@@ -182,7 +179,7 @@ class lp_etri_weights():
         # sum w_j = 1
         constraints.add(names=['wsum'],
                         lin_expr = [[w_vars,
-                                    [1.0 for i in range(len(w_vars))]],
+                                    [1.0] * len(w_vars)],
                                    ],
                         senses = ["E"],
                         rhs = [1]
@@ -227,7 +224,7 @@ class lp_etri_weights():
                 self.x[dj] = self.lp.variable(lower=0, upper=1)
                 self.xp[dj] = self.lp.variable(lower=0, upper=1)
 
-        if m1 > 0:
+        if m2 > 0:
             self.y = dict((dj, {}) for dj in self.c_yi)
             self.yp = dict((dj, {}) for dj in self.c_yi)
             for dj in self.c_yi:
@@ -237,9 +234,7 @@ class lp_etri_weights():
         self.lbda = self.lp.variable(lower=0.5, upper=1)
 
     def add_constraints_scip(self):
-        n = len(self.model.criteria)
-
-        for i, dj in enumerate(self.c_xi):
+        for dj in self.c_xi:
             coef = list(map(float, list(dj)))
 
             # sum(w_j(a_i,b_h-1) - x_i + x'_i = lbda
@@ -247,7 +242,7 @@ class lp_etri_weights():
                            for j, c in enumerate(self.model.criteria)) \
                            - self.x[dj] + self.xp[dj] == self.lbda
 
-        for i, dj in enumerate(self.c_yi):
+        for dj in self.c_yi:
             coef = list(map(float, list(dj)))
 
             # sum(w_j(a_i,b_h) + y_i - y'_i = lbda - delta
@@ -319,7 +314,6 @@ class lp_etri_weights():
         self.lp.st(sum(self.w[j] for j in range(n)) == 1)
 
     def add_objective_glpk(self):
-        m = len(self.pt)
         self.lp.min(sum([k*self.xp[i]
                          for i, k in enumerate(self.c_xi.values())])
                     + sum([k*self.yp[i]
