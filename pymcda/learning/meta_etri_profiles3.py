@@ -14,7 +14,7 @@ class meta_etri_profiles3():
         self.nprofiles = len(model.profiles)
         self.pt_sorted = pt_sorted
         self.aa_ori = aa_ori
-        self.cat = self.categories_rank(self.model.categories)
+        self.cat = self.categories_rank()
         self.cat_ranked = self.model.categories
         self.aa_by_cat = self.sort_alternative_by_category(aa_ori)
         self.b0 = pt_sorted.pt.get_worst(model.criteria)
@@ -23,7 +23,7 @@ class meta_etri_profiles3():
         self.build_concordance_table()
         self.build_assignments_table()
 
-    def categories_rank(self, cat):
+    def categories_rank(self):
         return { cat: i + 1 for i, cat in enumerate(self.model.categories) }
 
     def compute_interval_ratios(self, n):
@@ -46,7 +46,7 @@ class meta_etri_profiles3():
 
     def rank_categories(self, cat):
         c_rank = { c.id: c.rank for c in cat }
-        return sorted([ cat for (cat, rank) in c_rank.items() ])
+        return sorted([cat for cat  in c_rank.iterkeys()])
 
     def sort_alternative_by_category(self, aa):
         aa_by_cat = {}
@@ -60,6 +60,7 @@ class meta_etri_profiles3():
         return aa_by_cat
 
     def get_alternative_assignment(self, aid):
+        profile = self.model.profiles[0]
         for profile in reversed(self.model.profiles):
             if self.ct[profile][aid] >= self.model.lbda:
                 return self.model.categories_profiles[profile].value.upper
@@ -142,7 +143,6 @@ class meta_etri_profiles3():
         return h_below
 
     def optimize_profile(self, profile, below, above, cat_b, cat_a):
-        criteria = self.model.criteria
         p_perfs = profile.performances
         a_perfs = above.performances
         b_perfs = below.performances
@@ -164,7 +164,6 @@ class meta_etri_profiles3():
             r = random.random()
 
             if h_below[i_b] > h_above[i_a]:
-                size = (p_perfs[cid] - b_perfs[cid])
                 if r < h_below[i_b]:
                     p_perfs[cid] = i_b
                     moved = True
@@ -173,7 +172,6 @@ class meta_etri_profiles3():
                     max_cid = cid
                     max_move = i_b
             elif h_below[i_b] < h_above[i_a]:
-                size = (a_perfs[cid] - p_perfs[cid])
                 if r < h_above[i_a]:
                     p_perfs[cid] = i_a
                     moved = True
@@ -182,7 +180,6 @@ class meta_etri_profiles3():
                     max_cid = cid
                     max_move = i_a
             elif r > 0.5:
-                size = (p_perfs[cid] - b_perfs[cid])
                 r2 = random.random()
                 if r2 < h_below[i_b]:
                     p_perfs[cid] = i_b
@@ -192,7 +189,6 @@ class meta_etri_profiles3():
                     max_cid = cid
                     max_move = i_b
             elif r < 0.5:
-                size = (a_perfs[cid] - p_perfs[cid])
                 r2 = random.random()
                 if r2 < h_above[i_a]:
                     p_perfs[cid] = i_a
@@ -243,9 +239,7 @@ if __name__ == "__main__":
     from pymcda.utils import add_errors_in_assignments
     from pymcda.utils import compute_ca
     from pymcda.pt_sorted import sorted_performance_table
-    from pymcda.types import alternatives_assignments, performance_table
-    from pymcda.types import alternative_performances
-    from pymcda.electre_tri import electre_tri_bm
+    from pymcda.types import performance_table
     from pymcda.ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model
@@ -292,6 +286,7 @@ if __name__ == "__main__":
     f = meta.good / meta.na
     best_f = f
     best_bpt = model2.bpt.copy()
+    i = None
     for i in range(0, 501):
         print('%d: fitness: %g' % (i, f))
         model2.bpt.display(criterion_ids = cids,
