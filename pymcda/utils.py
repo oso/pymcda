@@ -4,7 +4,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import random
 from itertools import chain, combinations, product
 from math import factorial, ceil
-from pymcda.types import alternative_performances
 from pymcda.types import alternatives_assignments
 
 def add_errors_in_assignments(aa, category_ids, errors_pc):
