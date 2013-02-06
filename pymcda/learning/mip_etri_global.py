@@ -262,10 +262,6 @@ class mip_etri_global():
                            )
 
     def add_alternatives_constraints(self):
-        constraints = self.lp.linear_constraints
-
-        profiles = self.cps.get_ordered_profiles()
-
         lower_cat = self.__categories[0]
         upper_cat = self.__categories[-1]
 
@@ -278,6 +274,12 @@ class mip_etri_global():
             if cat != upper_cat:
                 self.__add_alternative_upper_constraints(aa)
 
+    def add_constraints(self):
+        constraints = self.lp.linear_constraints
+
+        self.add_alternatives_constraints()
+
+        profiles = self.cps.get_ordered_profiles()
         for h, c in product(range(len(profiles) - 1), self.criteria):
             # g_j(b_h) <= g_j(b_{h+1})
             constraints.add(names= ["dominance"],
@@ -301,11 +303,6 @@ class mip_etri_global():
                         senses = ["E"],
                         rhs = [1]
                         )
-
-    def add_constraints(self):
-        constraints = self.lp.linear_constraints
-
-        self.add_alternatives_constraints()
 
     def add_objective(self):
         self.lp.objective.set_sense(self.lp.objective.sense.maximize)
@@ -345,7 +342,6 @@ if __name__ == "__main__":
     from pymcda.generate import generate_random_electre_tri_bm_model
     from pymcda.generate import generate_alternatives
     from pymcda.generate import generate_random_performance_table
-    from pymcda.utils import compute_ca
     from pymcda.utils import display_assignments_and_pt
     from pymcda.ui.graphic import display_electre_tri_models
 
