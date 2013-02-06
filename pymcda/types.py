@@ -27,7 +27,7 @@ def unmarshal(xml):
 
 class mcda_dict(object):
 
-    def __init__(self, l = [], id = None):
+    def __init__(self, l = list(), id = None):
         self.id = id
         self._d = dict()
         for i in l:
@@ -85,7 +85,7 @@ class mcda_dict(object):
 
     def split(self, n, proportions = None, randomize = True):
         if proportions is None:
-            proportions = [1 / n for i in range(n)]
+            proportions = [1 / n] * n
         elif len(proportions) == n:
             t = sum(proportions)
             proportions = [proportion / t for proportion in proportions]
@@ -918,15 +918,11 @@ class segment(mcda_object):
 
     def __init__(self, p1, p2, p1_in = True, p2_in = False):
         if p1.x <= p2.x:
-            self.pl = p1
-            self.ph = p2
-            self.pl_in = p1_in
-            self.ph_in = p2_in
+            self.pl, self.ph = p1, p2
+            self.pl_in, self.ph_in = p1_in, p2_in
         else:
-            self.pl = p2
-            self.ph = p1
-            self.pl_in = p2_in
-            self.ph_in = p1_in
+            self.pl, self.ph = p2, p1
+            self.pl_in, self.ph_in = p2_in, p1_in
 
     def __repr__(self):
         return "segment(%s,%s)" % (self.pl, self.ph)
@@ -972,6 +968,11 @@ class segment(mcda_object):
 
         p1 = point().from_xmcda(tag_list[0])
         p2 = point().from_xmcda(tag_list[1])
+
+        if p1.x <= p2.x:
+            self.pl, self.ph = p1, p2
+        else:
+            self.pl, self.ph = p2, p1
 
         return self
 
@@ -1336,7 +1337,7 @@ class categories_profiles(mcda_dict):
         profiles = [ lower_cat[lowest[0]] ]
         for i in range(1, len(self)):
             ucat = self[profiles[-1]].value.upper
-            profiles.append(lower_cat[ucat])
+            profiles.insert(i, lower_cat[ucat])
 
         return profiles
 
@@ -1446,7 +1447,7 @@ class alternatives_assignments(mcda_dict):
         line = " " * (cols_max["aids"] + 1)
         line += " " * (cols_max["category"] - len("category")) \
                 + "category"
-        print(line)
+        print(line, file = out)
 
         # Print values
         for aid in alternative_ids:
@@ -1454,7 +1455,7 @@ class alternatives_assignments(mcda_dict):
             line = str(aid) + " " * (cols_max["aids"] - len(str(aid)) + 1)
             line += " " * (cols_max["category"] - len(category_id)) \
                     + category_id
-            print(line)
+            print(line, file = out)
 
     def to_xmcda(self):
         root = ElementTree.Element('alternativesAffectations')
