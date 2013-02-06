@@ -27,7 +27,8 @@ def unmarshal(xml):
 
 class mcda_dict(object):
 
-    def __init__(self, l = []):
+    def __init__(self, l = [], id = None):
+        self.id = id
         self._d = dict()
         for i in l:
             self._d[i.id] = i
@@ -123,6 +124,10 @@ class criteria(mcda_dict):
 
     def to_xmcda(self):
         root = ElementTree.Element('criteria')
+
+        if self.id is not None:
+            root.set('id', self.id)
+
         for crit in self:
             crit_xmcda = crit.to_xmcda()
             root.append(crit_xmcda)
@@ -131,6 +136,8 @@ class criteria(mcda_dict):
     def from_xmcda(self, xmcda):
         if xmcda.tag != 'criteria':
             raise TypeError('criteria::invalid tag')
+
+        self.id = xmcda.get('id')
 
         tag_list = xmcda.getiterator('criterion')
         for tag in tag_list:
@@ -217,13 +224,8 @@ class criterion(mcda_object):
         if xmcda.tag != 'criterion':
             raise TypeError('criterion::invalid tag')
 
-        c_id = xmcda.get('id')
-        if c_id is not None:
-            self.id = c_id
-
-        name = xmcda.get('name')
-        if name is not None:
-            self.name = name
+        self.id = xmcda.get('id')
+        self.name = xmcda.get('name')
 
         active = xmcda.find('.//active')
         if active is not None:
@@ -259,15 +261,21 @@ class criteria_values(mcda_dict):
             cv.value /= total
 
     def to_xmcda(self):
-        xmcda = ElementTree.Element('criteriaValues')
+        root = ElementTree.Element('criteriaValues')
+
+        if self.id is not None:
+            root.set('id', self.id)
+
         for cval in self:
             cv = cval.to_xmcda()
-            xmcda.append(cv)
-        return xmcda
+            root.append(cv)
+        return root
 
     def from_xmcda(self, xmcda):
         if xmcda.tag != 'criteriaValues':
             raise TypeError('criteriaValues::invalid tag')
+
+        self.id = xmcda.get('id')
 
         tag_list = xmcda.getiterator('criterionValue')
         for tag in tag_list:
@@ -324,9 +332,7 @@ class criterion_value(mcda_object):
         if xmcda.tag != 'criterionValue':
             raise TypeError('criterionValue::invalid tag')
 
-        name = xmcda.get('id')
-        if name is not None:
-            self.id = id
+        self.id = xmcda.get('id')
 
         criterion_id = xmcda.find('.//criterionID')
         self.id = criterion_id.text
@@ -344,6 +350,10 @@ class alternatives(mcda_dict):
 
     def to_xmcda(self):
         root = ElementTree.Element('alternatives')
+
+        if self.id is not None:
+            root.set('id', self.id)
+
         for action in self:
             alt = action.to_xmcda()
             root.append(alt)
@@ -352,6 +362,8 @@ class alternatives(mcda_dict):
     def from_xmcda(self, xmcda):
         if xmcda.tag != 'alternatives':
             raise TypeError('alternatives::invalid tag')
+
+        self.id = xmcda.get('id')
 
         tag_list = xmcda.getiterator('alternative')
         for tag in tag_list:
@@ -409,9 +421,7 @@ class alternative(mcda_object):
             raise TypeError('alternative::invalid tag')
 
         self.id = xmcda.get('id')
-        name = xmcda.get('name')
-        if name:
-            self.name = name
+        self.name = xmcda.get('name')
 
         active = xmcda.find('active')
         if active is not None and active.text == 'false':
@@ -496,6 +506,10 @@ class performance_table(mcda_dict):
 
     def to_xmcda(self):
         root = ElementTree.Element('performanceTable')
+
+        if self.id is not None:
+            root.set('id', self.id)
+
         for alt_perfs in self:
             xmcda = alt_perfs.to_xmcda()
             root.append(xmcda)
@@ -504,6 +518,8 @@ class performance_table(mcda_dict):
     def from_xmcda(self, xmcda):
         if xmcda.tag != 'performanceTable':
             raise TypeError('performanceTable::invalid tag')
+
+        self.id = xmcda.get('id')
 
         tag_list = xmcda.getiterator('alternativePerformances')
         for tag in tag_list:
@@ -641,6 +657,10 @@ class categories_values(mcda_dict):
 
     def to_xmcda(self):
         root = ElementTree.Element('categoriesValues')
+
+        if self.id is not None:
+            root.set('id', self.id)
+
         for cat_value in self:
             xmcda = cat_value.to_xmcda()
             root.append(xmcda)
@@ -649,6 +669,8 @@ class categories_values(mcda_dict):
     def from_xmcda(self, xmcda):
         if xmcda.tag != 'categoriesValues':
             raise TypeError('categoriesValues::invalid tag')
+
+        self.id = xmcda.get('id')
 
         tag_list = xmcda.getiterator('categoryValue')
         for tag in tag_list:
@@ -751,6 +773,8 @@ class alternatives_values(mcda_dict):
         if xmcda.tag != 'alternativesValues':
             raise TypeError('alternativesValues::invalid tag')
 
+        self.id = xmcda.get('id')
+
         tag_list = xmcda.getiterator('alternativeValue')
         for tag in tag_list:
             altp = alternative_value().from_xmcda(tag)
@@ -808,6 +832,10 @@ class criteria_functions(mcda_dict):
 
     def to_xmcda(self):
         root = ElementTree.Element('criteriaFunctions')
+
+        if self.id is not None:
+            root.set('id', self.id)
+
         for a_value in self:
             xmcda = a_value.to_xmcda()
             root.append(xmcda)
@@ -816,6 +844,8 @@ class criteria_functions(mcda_dict):
     def from_xmcda(self, xmcda):
         if xmcda.tag != 'criteriaFunctions':
             raise TypeError('criteria_functions::invalid tag')
+
+        self.id = xmcda.get('id')
 
         tag_list = xmcda.getiterator('criterionFunction')
         for tag in tag_list:
@@ -1056,9 +1086,7 @@ class point(mcda_object):
         if xmcda.tag != 'point':
             raise TypeError('point::invalid tag')
 
-        id = xmcda.get('id')
-        if id is not None:
-            self.id = id
+        self.id = xmcda.get('id')
 
         x = xmcda.find('.//abscissa').getchildren()[0]
         self.x = unmarshal(x)
@@ -1098,6 +1126,10 @@ class thresholds(mcda_dict):
 
     def to_xmcda(self):
         root = ElementTree.Element('thresholds')
+
+        if self.id is not None:
+            root.set('id', self.id)
+
         for t in self:
             xmcda = t.to_xmcda()
             root.append(xmcda)
@@ -1106,6 +1138,8 @@ class thresholds(mcda_dict):
     def from_xmcda(self, xmcda):
         if xmcda.tag != 'thresholds':
             raise TypeError('thresholds::invalid tag')
+
+        self.id = xmcda.get('id')
 
         tag_list = xmcda.getiterator('threshold')
         for tag in tag_list:
@@ -1154,6 +1188,10 @@ class categories(mcda_dict):
 
     def to_xmcda(self):
         root = ElementTree.Element('categories')
+
+        if self.id is not None:
+            root.set('id', self.id)
+
         for c in self:
             xmcda = c.to_xmcda()
             root.append(xmcda)
@@ -1166,6 +1204,8 @@ class categories(mcda_dict):
     def from_xmcda(self, xmcda):
         if xmcda.tag != 'categories':
             raise TypeError('categories::invalid tag')
+
+        self.id = xmcda.get('id')
 
         tag_list = xmcda.getiterator('category')
         for tag in tag_list:
@@ -1316,6 +1356,10 @@ class categories_profiles(mcda_dict):
 
     def to_xmcda(self):
         root = ElementTree.Element('categoriesProfiles')
+
+        if self.id is not None:
+            root.set('id', self.id)
+
         for cp in self:
             xmcda = cp.to_xmcda()
             root.append(xmcda)
@@ -1324,6 +1368,8 @@ class categories_profiles(mcda_dict):
     def from_xmcda(self, xmcda):
         if xmcda.tag != 'categoriesProfiles':
             raise TypeError('categories_profiles::invalid tag')
+
+        self.id = xmcda.get('id')
 
         tag_list = xmcda.getiterator('categoryProfile')
         for tag in tag_list:
@@ -1412,6 +1458,10 @@ class alternatives_assignments(mcda_dict):
 
     def to_xmcda(self):
         root = ElementTree.Element('alternativesAffectations')
+
+        if self.id is not None:
+            root.set('id', self.id)
+
         for aa in self:
             xmcda = aa.to_xmcda()
             root.append(xmcda)
@@ -1420,6 +1470,8 @@ class alternatives_assignments(mcda_dict):
     def from_xmcda(self, xmcda):
         if xmcda.tag != 'alternativesAffectations':
             raise TypeError('alternatives_assignments::invalid tag')
+
+        self.id = xmcda.get('id')
 
         tag_list = xmcda.getiterator('alternativeAffectation')
         for tag in tag_list:
