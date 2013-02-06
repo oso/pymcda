@@ -10,10 +10,10 @@ def display_electre_tri_models(etri, worst = [], best = [], aps = []):
     app = QtGui.QApplication(sys.argv)
 
     sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,
-                                   QtGui.QSizePolicy.Expanding);
-    sizePolicy.setHorizontalStretch(1);
-    sizePolicy.setVerticalStretch(0);
-    sizePolicy.setHeightForWidth(sizePolicy.hasHeightForWidth());
+                                   QtGui.QSizePolicy.Expanding)
+    sizePolicy.setHorizontalStretch(1)
+    sizePolicy.setVerticalStretch(0)
+    sizePolicy.setHeightForWidth(sizePolicy.hasHeightForWidth())
 
     layout = QtGui.QGridLayout()
 
@@ -145,7 +145,7 @@ class QGraphicsScene_etri(QtGui.QGraphicsScene):
 
             text = QtGui.QGraphicsTextItem()
             text.setHtml("<div align=\"center\">%s</div>" % txt)
-            text.setTextWidth(text.boundingRect().width());
+            text.setTextWidth(text.boundingRect().width())
             font = QtGui.QFont()
             font.setBold(True)
             text.setFont(font)
@@ -247,7 +247,7 @@ class QGraphicsScene_etri(QtGui.QGraphicsScene):
         path.closeSubpath()
 
         color = self.__get_category_color(i)
-        item.setBrush(color);
+        item.setBrush(color)
 
         item.setPath(path)
 
@@ -408,10 +408,10 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
 
     sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,
-                                   QtGui.QSizePolicy.Expanding);
-    sizePolicy.setHorizontalStretch(1);
-    sizePolicy.setVerticalStretch(0);
-    sizePolicy.setHeightForWidth(sizePolicy.hasHeightForWidth());
+                                   QtGui.QSizePolicy.Expanding)
+    sizePolicy.setHorizontalStretch(1)
+    sizePolicy.setVerticalStretch(0)
+    sizePolicy.setHeightForWidth(sizePolicy.hasHeightForWidth())
 
     view = mygraphicsview()
     view.setRenderHint(QtGui.QPainter.Antialiasing)
