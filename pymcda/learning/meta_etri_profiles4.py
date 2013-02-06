@@ -2,7 +2,6 @@ from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 from itertools import product
-import math
 import random
 from pymcda.types import alternative_assignment, alternatives_assignments
 
@@ -15,7 +14,7 @@ class meta_etri_profiles4():
         self.nprofiles = len(model.profiles)
         self.pt_sorted = pt_sorted
         self.aa_ori = aa_ori
-        self.cat = self.categories_rank(self.model.categories)
+        self.cat = self.categories_rank()
         self.cat_ranked = self.model.categories
         self.aa_by_cat = self.sort_alternative_by_category(aa_ori)
         self.b0 = pt_sorted.pt.get_worst(model.criteria)
@@ -23,7 +22,7 @@ class meta_etri_profiles4():
         self.build_concordance_table()
         self.build_assignments_table()
 
-    def categories_rank(self, cat):
+    def categories_rank(self):
         return { cat: i + 1 for i, cat in enumerate(self.model.categories) }
 
     def sort_alternative_by_category(self, aa):
@@ -54,11 +53,11 @@ class meta_etri_profiles4():
             diff = conc - w
             if self.aa_ori(a) == cat_a:
                 if self.aa(a) == cat_a and diff < lbda:
-                        # --
-                        total += 5
+                    # --
+                    total += 5
                 elif self.aa(a) == cat_b:
-                        # -
-                        total += 1
+                    # -
+                    total += 1
             elif self.aa_ori(a) == cat_b and self.aa(a) == cat_a:
                 if diff >= lbda:
                     # +
@@ -132,6 +131,7 @@ class meta_etri_profiles4():
         return key
 
     def get_alternative_assignment(self, aid):
+        profile = self.model.profiles[0]
         for profile in reversed(self.model.profiles):
             if self.ct[profile][aid] >= self.model.lbda:
                 return self.model.categories_profiles[profile].value.upper
@@ -256,13 +256,9 @@ if __name__ == "__main__":
     from pymcda.generate import generate_alternatives
     from pymcda.generate import generate_random_performance_table
     from pymcda.generate import generate_random_profiles
-    from pymcda.utils import compute_ca
     from pymcda.utils import display_assignments_and_pt
     from pymcda.utils import compute_number_of_winning_coalitions
     from pymcda.pt_sorted import sorted_performance_table
-    from pymcda.electre_tri import electre_tri_bm
-    from pymcda.types import alternative_performances
-    from pymcda.types import performance_table
     from pymcda.ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model
@@ -296,6 +292,7 @@ if __name__ == "__main__":
 
     t1 = time.time()
 
+    i = 0
     for i in range(0, 101):
         f = meta.good / meta.na
         print('%d: fitness: %g' % (i, f))
