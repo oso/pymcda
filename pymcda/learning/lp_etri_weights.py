@@ -447,7 +447,8 @@ if __name__ == "__main__":
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
-        display_assignments_and_pt(anok, c, [aa, aa_learned], [pt])
+        display_assignments_and_pt(anok, model.criteria, [aa, aa_learned],
+                                   [pt])
 
     coal1 = compute_winning_coalitions(model.cv, model.lbda)
     coal2 = compute_winning_coalitions(model2.cv, model2.lbda)
