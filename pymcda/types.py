@@ -675,10 +675,10 @@ class interval(mcda_object):
         print(self.pprint())
 
     def included(self, value):
-        if lower and value < lower:
+        if self.lower and value < self.lower:
             return False
 
-        if upper and value > upper:
+        if self.upper and value > self.upper:
             return False
 
         return True
@@ -810,13 +810,13 @@ class criterion_function(mcda_object):
 
     def to_xmcda(self):
         root = ElementTree.Element('criterionFunction')
-        critid = ElementTree.SubElement(xmcda, 'criterionID')
+        critid = ElementTree.SubElement(root, 'criterionID')
         critid.text = self.id
         function = self.function.to_xmcda()
         root.append(function)
         return root
 
-    def from_xmcda(self):
+    def from_xmcda(self, xmcda):
         if xmcda.tag != 'criterionFunction':
             raise TypeError('criterion_function::invalid tag')
 
@@ -898,7 +898,7 @@ class segment(mcda_object):
             root.append(xmcda)
         return root
 
-    def from_xmcda(self):
+    def from_xmcda(self, xmcda):
         if xmcda.tag != 'segment':
             raise TypeError('segment::invalid tag')
 
@@ -955,7 +955,7 @@ class piecewise_linear(list):
             root.append(xmcda)
         return root
 
-    def from_xmcda(self):
+    def from_xmcda(self, xmcda):
         if xmcda.tag != 'piecewiseLinear':
             raise TypeError('piecewise_linear::invalid tag')
 
@@ -1012,13 +1012,13 @@ class point(mcda_object):
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('point')
-        abscissa = ElementTree.SubElement('abscissa')
+        abscissa = ElementTree.SubElement(xmcda, 'abscissa')
         abscissa.append(marshal(self.x))
-        ordinate = ElementTree.SubElement('ordinate')
+        ordinate = ElementTree.SubElement(xmcda, 'ordinate')
         ordinate.append(marshal(self.y))
         return xmcda
 
-    def from_xmcda(self):
+    def from_xmcda(self, xmcda):
         if xmcda.tag != 'point':
             raise TypeError('point::invalid tag')
 
@@ -1054,8 +1054,8 @@ class constant(mcda_object):
         if xmcda.tag != 'constant':
             raise TypeError('constant::invalid tag')
 
-        self.id = constant.get('id')
-        self.value = unmarshal(constant.getchildren()[0])
+        self.id = xmcda.get('id')
+        self.value = unmarshal(xmcda.getchildren()[0])
 
 class thresholds(mcda_dict):
 
@@ -1073,7 +1073,7 @@ class thresholds(mcda_dict):
         if xmcda.tag != 'thresholds':
             raise TypeError('thresholds::invalid tag')
 
-        tag_list = thresholds.getiterator('threshold')
+        tag_list = xmcda.getiterator('threshold')
         for tag in tag_list:
             t = threshold(None)
             t.from_xmcda(tag)
@@ -1103,9 +1103,9 @@ class threshold(mcda_object):
         if xmcda.tag != 'threshold':
             raise TypeError('threshold::invalid tag')
 
-        self.id = threshold.get('id')
-        self.name = threshold.get('name')
-        values = threshold.getchildren()[0]
+        self.id = xmcda.get('id')
+        self.name = xmcda.get('name')
+        values = xmcda.getchildren()[0]
         if values.tag == 'constant':
             c = constant(None, 0)
             c.from_xmcda(values)
