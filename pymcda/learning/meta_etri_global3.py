@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
     t1 = time.time()
 
-    meta = meta_electre_tri_global(model2, pt_sorted, aa)
+    meta = meta_etri_global3(model2, pt_sorted, aa)
 
     for i in range(nloops):
         ca = meta.optimize(nmeta)
