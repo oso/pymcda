@@ -37,8 +37,8 @@ def test_heur_etri_profiles(seed, na, nc, ncat, pcerrors):
     # Run the heuristic
     cats = model.categories_profiles.to_categories()
     pt_sorted = sorted_performance_table(pt)
-    heur = heur_etri_profiles(model3.criteria, pt_sorted, aa, cats)
-    model3.bpt = heur.solve()
+    heur = heur_etri_profiles(model3, pt_sorted, aa)
+    heur.solve()
 
     # Learn the weights and cut threshold
     cps = model.categories_profiles
