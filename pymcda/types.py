@@ -440,8 +440,15 @@ class performance_table(mcda_dict):
         return "performance_table(%s)" % self.values()
 
     def update_direction(self, c):
-        for ap in self:
+        for ap in self._d.values():
             ap.update_direction(c)
+
+    def multiply(self, value, cids = None):
+        if cids is None:
+            cids = next(self._d.itervalues()).performances.keys()
+
+        for ap in self._d.values():
+            ap.multiply(value, cids)
 
     def get_best(self, c):
         perfs = next(self.itervalues()).performances
@@ -602,6 +609,13 @@ class alternative_performances(mcda_object):
     def update_direction(self, c):
         for crit in c:
             self.performances[crit.id] *= crit.direction
+
+    def multiply(self, value, cids = None):
+        if cids is None:
+            cids = self.performances.keys()
+
+        for key in self.performances:
+            self.performances[key] *= value
 
     def to_xmcda(self):
         xmcda = ElementTree.Element('alternativePerformances')
