@@ -54,6 +54,7 @@ def load_data(filepath):
     data.pt = load_mcda_data(csvfile, performance_table, "pt",
                              ["c%d" % i
                               for i in range(1, len(data.c) + 1)])
+    data.pt.round()
     data.aa = load_mcda_data(csvfile, alternatives_assignments,
                              "pt", "assignment")
     data.cats = load_mcda_data(csvfile, categories, "category",
