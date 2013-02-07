@@ -1,3 +1,4 @@
+from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 from pymcda.generate import generate_random_electre_tri_bm_model
@@ -7,7 +8,10 @@ from pymcda.generate import generate_random_profiles
 from pymcda.learning.lp_etri_weights import lp_etri_weights
 from pymcda.learning.meta_etri_profiles3 import meta_etri_profiles3
 from pymcda.learning.meta_etri_profiles4 import meta_etri_profiles4
+from pymcda.learning.mip_etri_global import mip_etri_global
 from pymcda.pt_sorted import sorted_performance_table
+from pymcda.utils import compute_ca
+from pymcda.utils import add_errors_in_assignments
 import unittest
 
 class tests_lp_etri_weights(unittest.TestCase):
@@ -151,8 +155,58 @@ class tests_meta_etri_profiles4(unittest.TestCase):
     def test008(self):
         self.one_test(7, 100, 10, 3, 100, 22)
 
+class tests_mip_etri_global(unittest.TestCase):
+
+    def one_test(self, seed, na, nc, ncat, pcerrors):
+        model = generate_random_electre_tri_bm_model(nc, ncat, seed)
+        a = generate_alternatives(na)
+        pt = generate_random_performance_table(a, model.criteria)
+
+        aa = model.pessimist(pt)
+        aa_err = aa.copy()
+        add_errors_in_assignments(aa_err, model.categories, pcerrors / 100)
+
+        model2 = model.copy()
+        bids = model2.categories_profiles.get_ordered_profiles()
+        model2.bpt = generate_random_profiles(bids, model.criteria)
+
+        mip = mip_etri_global(model2, pt, aa_err)
+        obj = mip.solve()
+
+        aa2 = model2.pessimist(pt)
+
+        ca = compute_ca(aa, aa2)
+        ca2 = compute_ca(aa_err, aa2)
+
+        self.assertEqual(ca2, obj / len(a))
+        self.assertLessEqual(pcerrors / 100, ca2)
+
+    def test001(self):
+        self.one_test(0, 20, 5, 3, 0)
+
+    def test002(self):
+        self.one_test(1, 20, 5, 3, 0)
+
+    def test003(self):
+        self.one_test(2, 20, 5, 3, 0)
+
+    def test004(self):
+        self.one_test(3, 20, 5, 3, 0)
+
+    def test005(self):
+        self.one_test(4, 20, 5, 3, 50)
+
+    def test006(self):
+        self.one_test(5, 20, 5, 3, 50)
+
+    def test007(self):
+        self.one_test(6, 20, 5, 3, 50)
+
+    def test008(self):
+        self.one_test(7, 20, 5, 3, 50)
+
 test_classes = [tests_lp_etri_weights, tests_meta_etri_profiles,
-                tests_meta_etri_profiles4]
+                tests_meta_etri_profiles4, tests_mip_etri_global]
 
 if __name__ == "__main__":
     suite = []
