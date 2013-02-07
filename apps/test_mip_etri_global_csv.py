@@ -87,7 +87,7 @@ def run_test(seed, data, pclearning):
     t1 = time.time()
 
     mip = mip_etri_global(model, pt_learning, aa_learning)
-    mip.solve()
+    obj = mip.solve()
 
     t_total = time.time() - t1
 
@@ -114,6 +114,7 @@ def run_test(seed, data, pclearning):
     t['pclearning'] = pclearning
     t['na_learning'] = len(aa_learning)
     t['na_test'] = len(aa_test)
+    t['obj'] = obj
     t['ca_learning'] = ca_learning
     t['ca_test'] = ca_test
     t['ca_all'] = ca
@@ -145,7 +146,7 @@ def run_tests(nseeds, data, pclearning, filename):
 
         if initialized is False:
             fields = ['seed', 'na', 'nc', 'ncat', 'pclearning',
-                      'na_learning', 'na_test', 'ca_learning',
+                      'na_learning', 'na_test', 'obj', 'ca_learning',
                       'ca_test', 'ca_all', 't_total']
             writer.writerow(fields)
             initialized = True
@@ -161,7 +162,8 @@ def run_tests(nseeds, data, pclearning, filename):
 
     t = results.summary(['na', 'nc', 'ncat', 'pclearning', 'na_learning',
                          'na_test'],
-                        ['ca_learning', 'ca_test', 'ca_all', 't_total'])
+                        ['obj', 'ca_learning', 'ca_test', 'ca_all',
+                         't_total'])
     t.tocsv(writer)
 
 if __name__ == "__main__":
