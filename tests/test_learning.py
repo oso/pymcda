@@ -9,6 +9,7 @@ from pymcda.learning.lp_etri_weights import lp_etri_weights
 from pymcda.learning.meta_etri_profiles3 import meta_etri_profiles3
 from pymcda.learning.meta_etri_profiles4 import meta_etri_profiles4
 from pymcda.learning.mip_etri_global import mip_etri_global
+from pymcda.learning.heur_etri_profiles import heur_etri_profiles
 from pymcda.pt_sorted import sorted_performance_table
 from pymcda.utils import compute_ca
 from pymcda.utils import add_errors_in_assignments
@@ -205,8 +206,40 @@ class tests_mip_etri_global(unittest.TestCase):
     def test008(self):
         self.one_test(7, 20, 5, 3, 50)
 
+class tests_heur_etri_profiles(unittest.TestCase):
+
+    def one_test(self, seed, na, nc, ncat, ca_expected):
+        model = generate_random_electre_tri_bm_model(nc, ncat, seed)
+        a = generate_alternatives(na)
+        pt = generate_random_performance_table(a, model.criteria)
+
+        aa = model.pessimist(pt)
+
+        pt_sorted = sorted_performance_table(pt)
+        heur = heur_etri_profiles(model, pt_sorted, aa)
+        heur.solve()
+
+        aa2 = model.pessimist(pt)
+
+        ca = compute_ca(aa, aa2)
+
+        self.assertEqual(ca, ca_expected)
+
+    def test001(self):
+        self.one_test(0, 1000, 10, 3, 0.999)
+
+    def test002(self):
+        self.one_test(1, 1000, 10, 3, 0.736)
+
+    def test003(self):
+        self.one_test(2, 1000, 10, 3, 0.608)
+
+    def test004(self):
+        self.one_test(3, 1000, 10, 3, 0.987)
+
 test_classes = [tests_lp_etri_weights, tests_meta_etri_profiles,
-                tests_meta_etri_profiles4, tests_mip_etri_global]
+                tests_meta_etri_profiles4, tests_mip_etri_global,
+                tests_heur_etri_profiles]
 
 if __name__ == "__main__":
     suite = []
