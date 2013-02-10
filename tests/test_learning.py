@@ -5,7 +5,7 @@ from pymcda.generate import generate_random_electre_tri_bm_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.generate import generate_random_profiles
-from pymcda.learning.lp_etri_weights import lp_etri_weights
+from pymcda.learning.lp_etri_weights import LpEtriWeights
 from pymcda.learning.meta_etri_profiles3 import meta_etri_profiles3
 from pymcda.learning.meta_etri_profiles4 import meta_etri_profiles4
 from pymcda.learning.mip_etri_global import mip_etri_global
@@ -27,7 +27,7 @@ class tests_lp_etri_weights(unittest.TestCase):
         model2 = model.copy()
         model2.cvs = None
 
-        lp_weights = lp_etri_weights(model2, pt, aa)
+        lp_weights = LpEtriWeights(model2, pt, aa)
         lp_weights.solve()
 
         aa2 = model2.pessimist(pt)

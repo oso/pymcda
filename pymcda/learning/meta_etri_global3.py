@@ -8,7 +8,7 @@ from pymcda.electre_tri import ElectreTri
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import PerformanceTable
 from pymcda.learning.heur_etri_profiles import HeurEtriProfiles
-from pymcda.learning.lp_etri_weights import lp_etri_weights
+from pymcda.learning.lp_etri_weights import LpEtriWeights
 from pymcda.learning.meta_etri_profiles4 import meta_etri_profiles4
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
@@ -25,7 +25,7 @@ class meta_etri_global3():
         heur = HeurEtriProfiles(model, pt_sorted, aa_ori)
         heur.solve()
 
-        self.lp = lp_etri_weights(self.model, pt_sorted.pt, self.aa_ori)
+        self.lp = LpEtriWeights(self.model, pt_sorted.pt, self.aa_ori)
 
         # Because meta_etri_profiles4 needs weights in initialization
         self.lp.solve()

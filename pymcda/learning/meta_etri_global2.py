@@ -11,7 +11,7 @@ from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_electre_tri_bm_model
 from pymcda.generate import generate_alternatives
-from lp_etri_weights import lp_etri_weights
+from lp_etri_weights import LpEtriWeights
 from meta_etri_profiles4 import meta_etri_profiles4
 
 class meta_etri_global2():
@@ -19,7 +19,7 @@ class meta_etri_global2():
     def __init__(self, model, pt_sorted, aa_ori):
         self.model = model
         self.aa_ori = aa_ori
-        self.lp = lp_etri_weights(self.model, pt_sorted.pt, self.aa_ori)
+        self.lp = LpEtriWeights(self.model, pt_sorted.pt, self.aa_ori)
         self.meta = meta_etri_profiles4(self.model, pt_sorted,
                                                self.aa_ori)
 
