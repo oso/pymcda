@@ -8,7 +8,7 @@ from pymcda.generate import generate_random_profiles
 from pymcda.learning.lp_etri_weights import LpEtriWeights
 from pymcda.learning.meta_etri_profiles3 import MetaEtriProfiles3
 from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
-from pymcda.learning.mip_etri_global import mip_etri_global
+from pymcda.learning.mip_etri_global import MipEtriGlobal
 from pymcda.learning.heur_etri_profiles import HeurEtriProfiles
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import compute_ca
@@ -171,7 +171,7 @@ class tests_mip_etri_global(unittest.TestCase):
         bids = model2.categories_profiles.get_ordered_profiles()
         model2.bpt = generate_random_profiles(bids, model.criteria)
 
-        mip = mip_etri_global(model2, pt, aa_err)
+        mip = MipEtriGlobal(model2, pt, aa_err)
         obj = mip.solve()
 
         aa2 = model2.pessimist(pt)

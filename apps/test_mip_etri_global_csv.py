@@ -5,7 +5,7 @@ import datetime
 import random
 import time
 from itertools import product
-from pymcda.learning.mip_etri_global import mip_etri_global
+from pymcda.learning.mip_etri_global import MipEtriGlobal
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import Alternatives, Criteria, PerformanceTable
 from pymcda.types import AlternativesAssignments, Categories
@@ -87,7 +87,7 @@ def run_test(seed, data, pclearning):
     # Run the linear program
     t1 = time.time()
 
-    mip = mip_etri_global(model, pt_learning, aa_learning)
+    mip = MipEtriGlobal(model, pt_learning, aa_learning)
     obj = mip.solve()
 
     t_total = time.time() - t1

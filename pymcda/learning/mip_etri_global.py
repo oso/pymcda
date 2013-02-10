@@ -17,7 +17,7 @@ if solver == 'cplex':
 else:
     raise NameError('Invalid solver selected')
 
-class mip_etri_global():
+class MipEtriGlobal():
 
     def __init__(self, model, pt, aa, epsilon = 0.0001):
         self.pt = pt
@@ -377,7 +377,7 @@ if __name__ == "__main__":
     model2.bpt = None
     model2.lbda = None
 
-    mip = mip_etri_global(model2, pt, aa)
+    mip = MipEtriGlobal(model2, pt, aa)
     mip.solve()
 
     # Display learned model parameters
