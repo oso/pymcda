@@ -1,13 +1,13 @@
 from __future__ import division
 import math
-from pymcda.types import alternative_assignment, alternatives_assignments
-from pymcda.types import mcda_object
+from pymcda.types import AlternativeAssignment, AlternativesAssignments
+from pymcda.types import McdaObject
 from copy import deepcopy
 
 def eq(a, b, eps=10e-10):
     return abs(a-b) <= eps
 
-class electre_tri(mcda_object):
+class electre_tri(McdaObject):
 
     def __init__(self, criteria=None, cv=None, bpt=None, lbda=None,
                  categories_profiles=None):
@@ -139,7 +139,7 @@ class electre_tri(mcda_object):
         self.__check_input_params()
         profiles = self.profiles[:]
         profiles.reverse()
-        assignments = alternatives_assignments([])
+        assignments = AlternativesAssignments([])
         for action_perfs in pt:
             cat_rank = len(profiles)
             for i, profile in enumerate(profiles):
@@ -150,7 +150,7 @@ class electre_tri(mcda_object):
 
             cat_id = self.categories[cat_rank]
             id = action_perfs.id
-            alt_affect = alternative_assignment(id, cat_id)
+            alt_affect = AlternativeAssignment(id, cat_id)
             assignments.append(alt_affect)
 
         return assignments
@@ -158,7 +158,7 @@ class electre_tri(mcda_object):
     def optimist(self, pt):
         self.__check_input_params()
         profiles = self.profiles
-        assignments = alternatives_assignments([])
+        assignments = AlternativesAssignments([])
         for action_perfs in pt:
             cat_rank = 0
             for i, profile in enumerate(profiles):
@@ -169,7 +169,7 @@ class electre_tri(mcda_object):
 
             cat_id = self.categories[cat_rank]
             id = action_perfs.id
-            alt_affect = alternative_assignment(id, cat_id)
+            alt_affect = AlternativeAssignment(id, cat_id)
             assignments.append(alt_affect)
 
         return assignments

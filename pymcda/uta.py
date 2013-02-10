@@ -1,8 +1,8 @@
 import bisect
 
-from pymcda.types import alternative_value, alternatives_values
-from pymcda.types import alternative_assignment
-from pymcda.types import alternatives_assignments
+from pymcda.types import AlternativeValue, AlternativesValues
+from pymcda.types import AlternativeAssignment
+from pymcda.types import AlternativesAssignments
 
 class uta(object):
 
@@ -23,12 +23,12 @@ class uta(object):
             ui = self.marginal_utility(c.id, ap)
             u += w * ui
 
-        av = alternative_value(ap.id, u)
+        av = AlternativeValue(ap.id, u)
 
         return av
 
     def global_utilities(self, pt):
-        au = alternatives_values()
+        au = AlternativesValues()
 
         for ap in pt:
             av = self.global_utility(ap)
@@ -54,10 +54,10 @@ class utadis(uta):
             cat = self.cat_limits[-1][0]
         else:
             cat = self.cat_limits[i][0]
-        return alternative_assignment(ap.id, cat)
+        return AlternativeAssignment(ap.id, cat)
 
     def get_assignments(self, pt):
-        assignments = alternatives_assignments([])
+        assignments = AlternativesAssignments([])
         for ap in pt:
             assignments.append(self.get_assignment(ap))
         return assignments

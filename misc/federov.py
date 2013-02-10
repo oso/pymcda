@@ -3,14 +3,14 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import random
 import logging
 from numpy import matrix, multiply, transpose, linalg
-from pymcda.types import alternatives, performance_table
+from pymcda.types import Alternatives, PerformanceTable
 
 FORMAT = '%(asctime)s: %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=FORMAT)
 
 def generate_init_plan(a, pt, n):
-    a_in = alternatives()
-    pt_in = performance_table()
+    a_in = Alternatives()
+    pt_in = PerformanceTable()
     while len(a_in) < n:
         j = random.randint(0, len(a)-1)
         alt = a[j]

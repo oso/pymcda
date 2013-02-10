@@ -2,8 +2,8 @@ from __future__ import division
 import os, sys
 from itertools import product
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
-from pymcda.types import criterion_value, criteria_values
-from pymcda.types import alternative_performances, performance_table
+from pymcda.types import CriterionValue, CriteriaValues
+from pymcda.types import AlternativePerformances, PerformanceTable
 
 verbose = False
 
@@ -314,9 +314,9 @@ class mip_etri_global():
 
         obj = self.lp.solution.get_objective_value()
 
-        cvs = criteria_values()
+        cvs = CriteriaValues()
         for c in self.criteria:
-            cv = criterion_value()
+            cv = CriterionValue()
             cv.id = c.id
             cv.value = self.lp.solution.get_values('w_' + c.id)
             cvs.append(cv)
@@ -325,9 +325,9 @@ class mip_etri_global():
 
         self.model.lbda = self.lp.solution.get_values("lambda")
 
-        pt = performance_table()
+        pt = PerformanceTable()
         for p in self.__profiles:
-            ap = alternative_performances(p)
+            ap = AlternativePerformances(p)
             for c in self.criteria:
                 perf = self.lp.solution.get_values("g_%s_%s" % (p, c.id))
                 ap.performances[c.id] = round(perf, 5)

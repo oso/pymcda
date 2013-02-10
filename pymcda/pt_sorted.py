@@ -2,7 +2,7 @@ from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import bisect
-from pymcda.types import alternative_performances
+from pymcda.types import AlternativePerformances
 
 class sorted_performance_table():
 
@@ -103,13 +103,13 @@ class sorted_performance_table():
         return i2-i
 
     def get_worst_ap(self):
-        a = alternative_performances('worst', {})
+        a = AlternativePerformances('worst', {})
         for cid in self.cids:
             a.performances[cid] = self.sorted_values[cid][0]
         return a
 
     def get_best_ap(self):
-        a = alternative_performances('best', {})
+        a = AlternativePerformances('best', {})
         for cid in self.cids:
             a.performances[cid] = self.sorted_values[cid][-1]
         return a

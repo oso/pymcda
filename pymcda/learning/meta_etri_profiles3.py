@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 import math
 import random
 from itertools import product
-from pymcda.types import alternative_assignment, alternatives_assignments
+from pymcda.types import AlternativeAssignment, AlternativesAssignments
 
 class meta_etri_profiles3():
 
@@ -69,11 +69,11 @@ class meta_etri_profiles3():
 
     def build_assignments_table(self):
         self.good = 0
-        self.aa = alternatives_assignments()
+        self.aa = AlternativesAssignments()
         for aa in self.aa_ori.values():
             aid = aa.id
             cat = self.get_alternative_assignment(aid)
-            self.aa.append(alternative_assignment(aid, cat))
+            self.aa.append(AlternativeAssignment(aid, cat))
 
             cat_ori = aa.category_id
             if cat == cat_ori:
@@ -239,7 +239,7 @@ if __name__ == "__main__":
     from pymcda.utils import add_errors_in_assignments
     from pymcda.utils import compute_ca
     from pymcda.pt_sorted import sorted_performance_table
-    from pymcda.types import performance_table
+    from pymcda.types import PerformanceTable
     from pymcda.ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model
@@ -260,8 +260,8 @@ if __name__ == "__main__":
     model2.bpt = generate_random_profiles(model.profiles, model.criteria)
 
     a_learn = random.sample(a, int(nlearn*len(a)))
-    aa_learn = alternatives_assignments([ aa[alt.id] for alt in a_learn ])
-    pt_learn = performance_table([ pt[alt.id] for alt in a_learn ])
+    aa_learn = AlternativesAssignments([ aa[alt.id] for alt in a_learn ])
+    pt_learn = PerformanceTable([ pt[alt.id] for alt in a_learn ])
 
     aa_err = aa_learn.copy()
     aa_erroned = add_errors_in_assignments(aa_err, model.categories,

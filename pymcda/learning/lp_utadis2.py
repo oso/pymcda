@@ -2,11 +2,11 @@ from __future__ import division
 import bisect
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
-from pymcda.types import point, segment, piecewise_linear
-from pymcda.types import category_value, categories_values
-from pymcda.types import criteria_functions, criterion_function
-from pymcda.types import criteria_values, criterion_value
-from pymcda.types import categories_values, categories_values, interval
+from pymcda.types import Point, Segment, PiecewiseLinear
+from pymcda.types import CategoryValue, CategoriesValues
+from pymcda.types import CriteriaFunctions, CriterionFunction
+from pymcda.types import CriteriaValues, CriterionValue
+from pymcda.types import CategoriesValues, CategoriesValues, Interval
 from pymcda.generate import generate_random_criteria_values
 from pymcda.generate import generate_random_criteria_functions
 
@@ -232,40 +232,40 @@ class lp_utadis(object):
 
         obj = self.lp.vobj()
 
-        cfs = criteria_functions()
-        cvs = criteria_values()
+        cfs = CriteriaFunctions()
+        cvs = CriteriaValues()
         for cid, points in self.points.items():
-            cv = criterion_value(cid, 1)
+            cv = CriterionValue(cid, 1)
             cvs.append(cv)
 
-            p1 = point(self.points[cid][0], 0)
+            p1 = Point(self.points[cid][0], 0)
 
             ui = 0
-            f = piecewise_linear([])
+            f = PiecewiseLinear([])
             for i in range(len(points) - 1):
                 uivar = 'w_' + cid + "_%d" % (i + 1)
                 ui += self.w[cid][i].primal
-                p2 = point(self.points[cid][i + 1], ui)
+                p2 = Point(self.points[cid][i + 1], ui)
 
-                s = segment(p1, p2)
+                s = Segment(p1, p2)
 
                 f.append(s)
 
                 p1 = p2
 
             s.ph_in = True
-            cf = criterion_function(cid, f)
+            cf = CriterionFunction(cid, f)
             cfs.append(cf)
 
         cat = {v: k for k, v in self.cat.items()}
-        catv = categories_values()
+        catv = CategoriesValues()
         ui_a = 0
         for i in range(0, len(cat) - 1):
             ui_b = self.u[i].primal
-            catv.append(category_value(cat[i + 1], interval(ui_a, ui_b)))
+            catv.append(CategoryValue(cat[i + 1], Interval(ui_a, ui_b)))
             ui_a = ui_b
 
-        catv.append(category_value(cat[i + 2], interval(ui_a, 1)))
+        catv.append(CategoryValue(cat[i + 2], Interval(ui_a, 1)))
 
         return obj, cvs, cfs, catv
 
@@ -278,39 +278,39 @@ class lp_utadis(object):
 
         obj = self.lp.solution.get_objective_value()
 
-        cfs = criteria_functions()
-        cvs = criteria_values()
+        cfs = CriteriaFunctions()
+        cvs = CriteriaValues()
         for cid, points in self.points.items():
-            cv = criterion_value(cid, 1)
+            cv = CriterionValue(cid, 1)
             cvs.append(cv)
 
-            p1 = point(self.points[cid][0], 0)
+            p1 = Point(self.points[cid][0], 0)
 
             ui = 0
-            f = piecewise_linear([])
+            f = PiecewiseLinear([])
             for i in range(len(points) - 1):
                 uivar = 'w_' + cid + "_%d" % (i + 1)
                 ui += self.lp.solution.get_values(uivar)
-                p2 = point(self.points[cid][i + 1], ui)
+                p2 = Point(self.points[cid][i + 1], ui)
 
-                s = segment(p1, p2)
+                s = Segment(p1, p2)
                 f.append(s)
 
                 p1 = p2
 
             s.ph_in = True
-            cf = criterion_function(cid, f)
+            cf = CriterionFunction(cid, f)
             cfs.append(cf)
 
         cat = {v: k for k, v in self.cat.items()}
-        catv = categories_values()
+        catv = CategoriesValues()
         ui_a = 0
         for i in range(1, len(cat)):
             ui_b = self.lp.solution.get_values("u_%d" % i)
-            catv.append(category_value(cat[i], interval(ui_a, ui_b)))
+            catv.append(CategoryValue(cat[i], Interval(ui_a, ui_b)))
             ui_a = ui_b
 
-        catv.append(category_value(cat[i + 1], interval(ui_a, 1)))
+        catv.append(CategoryValue(cat[i + 1], Interval(ui_a, 1)))
 
         return obj, cvs, cfs, catv
 
@@ -329,11 +329,11 @@ class lp_utadis(object):
         return solution
 
 if __name__ == "__main__":
-    from pymcda.types import criteria_values, criterion_value
-    from pymcda.types import alternative_performances
-    from pymcda.types import criteria_functions, criterion_function
-    from pymcda.types import category_value, categories_values
-    from pymcda.types import interval
+    from pymcda.types import CriteriaValues, CriterionValue
+    from pymcda.types import AlternativePerformances
+    from pymcda.types import CriteriaFunctions, CriterionFunction
+    from pymcda.types import CategoryValue, CategoriesValues
+    from pymcda.types import Interval
     from pymcda.uta import utadis
     from pymcda.utils import compute_ca
     from pymcda.generate import generate_alternatives
@@ -378,8 +378,8 @@ if __name__ == "__main__":
           % (len(aa_erroned) / len(a) * 100))
 
     # Learn the parameters from assignment examples
-    gi_worst = alternative_performances('worst', {crit.id: 0 for crit in c})
-    gi_best = alternative_performances('best', {crit.id: 1 for crit in c})
+    gi_worst = AlternativePerformances('worst', {crit.id: 0 for crit in c})
+    gi_best = AlternativePerformances('best', {crit.id: 1 for crit in c})
 
     lp = lp_utadis(cat, gi_worst, gi_best)
     obj, cvs, cfs, catv = lp.solve(aa_err, pt)

@@ -22,244 +22,244 @@ class tests_xmcda(unittest.TestCase):
         return schema.validate(etree.fromstring(xml))
 
     def test001(self):
-        c1 = criterion("c1")
-        c2 = criterion("c2")
-        c = criteria([c1, c2])
+        c1 = Criterion("c1")
+        c2 = Criterion("c2")
+        c = Criteria([c1, c2])
         xmcda = c.to_xmcda()
 
         self.assertEqual(self.validate(xmcda), True)
 
-        c_from = criteria().from_xmcda(xmcda)
+        c_from = Criteria().from_xmcda(xmcda)
         self.assertEqual(c, c_from)
 
     def test002(self):
-        a1 = alternative("a1")
-        a2 = alternative("a2")
-        a = alternatives([a1, a2])
+        a1 = Alternative("a1")
+        a2 = Alternative("a2")
+        a = Alternatives([a1, a2])
         xmcda = a.to_xmcda()
 
         self.assertEqual(self.validate(xmcda), True)
 
-        a_from = alternatives().from_xmcda(xmcda)
+        a_from = Alternatives().from_xmcda(xmcda)
         self.assertEqual(a, a_from)
 
     def test003(self):
-        cv1 = criterion_value('c1', 10)
-        cv2 = criterion_value('c2', 20)
-        cv = criteria_values([cv1, cv2])
+        cv1 = CriterionValue('c1', 10)
+        cv2 = CriterionValue('c2', 20)
+        cv = CriteriaValues([cv1, cv2])
         xmcda = cv.to_xmcda()
 
         self.assertEqual(self.validate(xmcda), True)
 
-        cv_from = criteria_values().from_xmcda(xmcda)
+        cv_from = CriteriaValues().from_xmcda(xmcda)
         self.assertEqual(cv, cv_from)
 
     def test004(self):
-        p1 = alternative_performances('a1', {'c1': 120, 'c2':  284})
-        p2 = alternative_performances('a2', {'c1': 150, 'c2':  269})
-        pt = performance_table([p1, p2])
+        p1 = AlternativePerformances('a1', {'c1': 120, 'c2':  284})
+        p2 = AlternativePerformances('a2', {'c1': 150, 'c2':  269})
+        pt = PerformanceTable([p1, p2])
         xmcda = pt.to_xmcda()
 
         self.assertEqual(self.validate(xmcda), True)
 
-        pt_from = performance_table().from_xmcda(xmcda)
+        pt_from = PerformanceTable().from_xmcda(xmcda)
         self.assertEqual(pt, pt_from)
 
     def test005(self):
-        cv1 = category_value('cat1', interval(0, 0.25))
-        cv2 = category_value('cat2', interval(0.25, 0.5))
-        cv = categories_values([cv1, cv2])
+        cv1 = CategoryValue('cat1', Interval(0, 0.25))
+        cv2 = CategoryValue('cat2', Interval(0.25, 0.5))
+        cv = CategoriesValues([cv1, cv2])
         xmcda = cv.to_xmcda()
 
         self.assertEqual(self.validate(xmcda), True)
 
-        cv_from = categories_values().from_xmcda(xmcda)
+        cv_from = CategoriesValues().from_xmcda(xmcda)
         self.assertEqual(cv, cv_from)
 
     def test006(self):
-        av1 = alternative_value('a1', 10)
-        av2 = alternative_value('a2', 20)
-        av = alternatives_values([av1, av2])
+        av1 = AlternativeValue('a1', 10)
+        av2 = AlternativeValue('a2', 20)
+        av = AlternativesValues([av1, av2])
         xmcda = av.to_xmcda()
 
         self.assertEqual(self.validate(xmcda), True)
 
-        av_from = alternatives_values().from_xmcda(xmcda)
+        av_from = AlternativesValues().from_xmcda(xmcda)
         self.assertEqual(av, av_from)
 
     def test007(self):
-        af1 = alternative_assignment('a1', 'cat1')
-        af2 = alternative_assignment('a2', 'cat2')
-        af = alternatives_assignments([af1, af2])
+        af1 = AlternativeAssignment('a1', 'cat1')
+        af2 = AlternativeAssignment('a2', 'cat2')
+        af = AlternativesAssignments([af1, af2])
         xmcda = af.to_xmcda()
 
         self.assertEqual(self.validate(xmcda), True)
 
-        af_from = alternatives_assignments().from_xmcda(xmcda)
+        af_from = AlternativesAssignments().from_xmcda(xmcda)
         self.assertEqual(af, af_from)
 
     def test008(self):
-        cp1 = category_profile('b1', limits('cat1', 'cat2'))
-        cp2 = category_profile('b2', limits('cat2', 'cat3'))
-        cp = categories_profiles([cp1, cp2])
+        cp1 = CategoryProfile('b1', Limits('cat1', 'cat2'))
+        cp2 = CategoryProfile('b2', Limits('cat2', 'cat3'))
+        cp = CategoriesProfiles([cp1, cp2])
         xmcda = cp.to_xmcda()
 
         self.assertEqual(self.validate(xmcda), True)
 
-        cp_from = categories_profiles().from_xmcda(xmcda)
+        cp_from = CategoriesProfiles().from_xmcda(xmcda)
         self.assertEqual(cp, cp_from)
 
     def test009(self):
-        cat1 = category('cat1', rank=1)
-        cat2 = category('cat2', rank=2)
-        cat = categories([cat1, cat2])
+        cat1 = Category('cat1', rank=1)
+        cat2 = Category('cat2', rank=2)
+        cat = Categories([cat1, cat2])
         xmcda = cat.to_xmcda()
 
         self.assertEqual(self.validate(xmcda), True)
 
-        cat_from = categories().from_xmcda(xmcda)
+        cat_from = Categories().from_xmcda(xmcda)
         self.assertEqual(cat, cat_from)
 
-class tests_segment(unittest.TestCase):
+class tests_Segment(unittest.TestCase):
 
     def test001(self):
-        p1 = point(0, 0)
-        p2 = point(5, 5)
-        s = segment(p1, p2)
+        p1 = Point(0, 0)
+        p2 = Point(5, 5)
+        s = Segment(p1, p2)
         self.assertEqual(s.y(2), 2)
 
     def test002(self):
-        p1 = point(0, 0)
-        p2 = point(5, 5)
-        s = segment(p1, p2)
+        p1 = Point(0, 0)
+        p2 = Point(5, 5)
+        s = Segment(p1, p2)
         self.assertRaises(ValueError, s.y, -1)
 
     def test003(self):
-        p1 = point(0, 0)
-        p2 = point(5, 5)
-        s = segment(p1, p2)
+        p1 = Point(0, 0)
+        p2 = Point(5, 5)
+        s = Segment(p1, p2)
         self.assertRaises(ValueError, s.y, 6)
 
     def test004(self):
-        p1 = point(0, 0)
-        p2 = point(5, 5)
-        s = segment(p1, p2)
+        p1 = Point(0, 0)
+        p2 = Point(5, 5)
+        s = Segment(p1, p2)
         self.assertEquals(s.y(0), 0)
 
     def test005(self):
-        p1 = point(0, 0)
-        p2 = point(5, 5)
-        s = segment(p1, p2, False)
+        p1 = Point(0, 0)
+        p2 = Point(5, 5)
+        s = Segment(p1, p2, False)
         self.assertRaises(ValueError, s.y, 0)
 
     def test006(self):
-        p1 = point(0, 0)
-        p2 = point(5, 5)
-        s = segment(p1, p2)
+        p1 = Point(0, 0)
+        p2 = Point(5, 5)
+        s = Segment(p1, p2)
         self.assertRaises(ValueError, s.y, 5)
 
     def test007(self):
-        p1 = point(0, 0)
-        p2 = point(5, 5)
-        s = segment(p1, p2, True, True)
+        p1 = Point(0, 0)
+        p2 = Point(5, 5)
+        s = Segment(p1, p2, True, True)
         self.assertEquals(s.y(5), 5)
 
-class tests_piecewise_linear(unittest.TestCase):
+class tests_PiecewiseLinear(unittest.TestCase):
 
     def test001(self):
-        p1 = point(0, 0)
-        p2 = point(1, 1)
-        s1 = segment(p1, p2)
+        p1 = Point(0, 0)
+        p2 = Point(1, 1)
+        s1 = Segment(p1, p2)
 
-        p3 = point(1, 5)
-        p4 = point(5, 9)
-        s2 = segment(p3, p4)
+        p3 = Point(1, 5)
+        p4 = Point(5, 9)
+        s2 = Segment(p3, p4)
 
-        plf = piecewise_linear([s1, s2])
+        plf = PiecewiseLinear([s1, s2])
         self.assertEquals(plf.y(3), 7)
 
     def test002(self):
-        p1 = point(0, 0)
-        p2 = point(1, 1)
-        s1 = segment(p1, p2)
+        p1 = Point(0, 0)
+        p2 = Point(1, 1)
+        s1 = Segment(p1, p2)
 
-        p3 = point(1, 5)
-        p4 = point(5, 9)
-        s2 = segment(p3, p4)
+        p3 = Point(1, 5)
+        p4 = Point(5, 9)
+        s2 = Segment(p3, p4)
 
-        plf = piecewise_linear([s1, s2])
+        plf = PiecewiseLinear([s1, s2])
         self.assertEquals(plf.y(0.5), 0.5)
 
     def test003(self):
-        p1 = point(0, 0)
-        p2 = point(1, 1)
-        s1 = segment(p1, p2)
+        p1 = Point(0, 0)
+        p2 = Point(1, 1)
+        s1 = Segment(p1, p2)
 
-        p3 = point(1, 5)
-        p4 = point(5, 9)
-        s2 = segment(p3, p4)
+        p3 = Point(1, 5)
+        p4 = Point(5, 9)
+        s2 = Segment(p3, p4)
 
-        plf = piecewise_linear([s1, s2])
+        plf = PiecewiseLinear([s1, s2])
         self.assertEquals(plf.y(0), 0)
 
     def test004(self):
-        p1 = point(0, 0)
-        p2 = point(1, 1)
-        s1 = segment(p1, p2)
+        p1 = Point(0, 0)
+        p2 = Point(1, 1)
+        s1 = Segment(p1, p2)
 
-        p3 = point(1, 5)
-        p4 = point(5, 9)
-        s2 = segment(p3, p4)
+        p3 = Point(1, 5)
+        p4 = Point(5, 9)
+        s2 = Segment(p3, p4)
 
-        plf = piecewise_linear([s1, s2])
+        plf = PiecewiseLinear([s1, s2])
         self.assertEquals(plf.y(1), 5)
 
     def test005(self):
-        p1 = point(0, 0)
-        p2 = point(1, 1)
-        s1 = segment(p1, p2)
+        p1 = Point(0, 0)
+        p2 = Point(1, 1)
+        s1 = Segment(p1, p2)
 
-        p3 = point(1, 5)
-        p4 = point(5, 9)
-        s2 = segment(p3, p4)
+        p3 = Point(1, 5)
+        p4 = Point(5, 9)
+        s2 = Segment(p3, p4)
 
-        plf = piecewise_linear([s1, s2])
+        plf = PiecewiseLinear([s1, s2])
         self.assertEquals(plf.y(0), 0)
 
     def test006(self):
-        p1 = point(0, 0)
-        p2 = point(1, 1)
-        s1 = segment(p1, p2)
+        p1 = Point(0, 0)
+        p2 = Point(1, 1)
+        s1 = Segment(p1, p2)
 
-        p3 = point(1, 5)
-        p4 = point(5, 9)
-        s2 = segment(p3, p4)
+        p3 = Point(1, 5)
+        p4 = Point(5, 9)
+        s2 = Segment(p3, p4)
 
-        plf = piecewise_linear([s1, s2])
+        plf = PiecewiseLinear([s1, s2])
         self.assertRaises(ValueError, plf.y, 5)
 
     def test007(self):
-        p1 = point(0, 0)
-        p2 = point(1, 1)
-        s1 = segment(p1, p2)
+        p1 = Point(0, 0)
+        p2 = Point(1, 1)
+        s1 = Segment(p1, p2)
 
-        p3 = point(3, 7)
-        p4 = point(5, 9)
-        s2 = segment(p3, p4)
+        p3 = Point(3, 7)
+        p4 = Point(5, 9)
+        s2 = Segment(p3, p4)
 
-        plf = piecewise_linear([s1, s2])
+        plf = PiecewiseLinear([s1, s2])
         self.assertRaises(ValueError, plf.y, 2)
 
     def test008(self):
-        p1 = point(0, 0)
-        p2 = point(1, 1)
-        s1 = segment(p1, p2)
+        p1 = Point(0, 0)
+        p2 = Point(1, 1)
+        s1 = Segment(p1, p2)
 
-        p3 = point(3, 7)
-        p4 = point(5, 9)
-        s2 = segment(p3, p4)
+        p3 = Point(3, 7)
+        p4 = Point(5, 9)
+        s2 = Segment(p3, p4)
 
-        plf = piecewise_linear([s1, s2])
+        plf = PiecewiseLinear([s1, s2])
         self.assertRaises(ValueError, plf.y, 1)
 
 from datasets import swd
@@ -272,25 +272,25 @@ class tests_csv(unittest.TestCase):
         self.csvreader = csv.reader(csvfile, delimiter = ";")
 
     def test001(self):
-        a = alternatives().from_csv(self.csvreader, "pt")
+        a = Alternatives().from_csv(self.csvreader, "pt")
         self.assertEqual(a, swd.a)
 
     def test002(self):
-        c = criteria().from_csv(self.csvreader, "criterion")
+        c = Criteria().from_csv(self.csvreader, "criterion")
         self.assertEqual(c, swd.c)
 
     def test003(self):
-        pt = performance_table().from_csv(self.csvreader, "pt",
+        pt = PerformanceTable().from_csv(self.csvreader, "pt",
                                           ["c%d" % i for i in range(1, 11)])
         self.assertEqual(pt, swd.pt)
 
     def test004(self):
-        aa = alternatives_assignments().from_csv(self.csvreader, "pt",
+        aa = AlternativesAssignments().from_csv(self.csvreader, "pt",
                                                  "assignment")
         self.assertEqual(aa, swd.aa)
 
     def test005(self):
-        cats = categories().from_csv(self.csvreader, "category",
+        cats = Categories().from_csv(self.csvreader, "category",
                                      rank_col = "rank")
         self.assertEqual(cats, swd.cats)
 
@@ -379,7 +379,7 @@ class tests_mcda_methods(unittest.TestCase):
         a3 = a.get_subset(a1.keys())
         self.assertEqual(a1, a3)
 
-test_classes = [tests_xmcda, tests_segment, tests_piecewise_linear,
+test_classes = [tests_xmcda, tests_Segment, tests_PiecewiseLinear,
                 tests_csv, tests_mcda_methods]
 
 if __name__ == "__main__":

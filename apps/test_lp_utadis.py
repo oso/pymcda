@@ -7,9 +7,9 @@ import time
 import random
 from itertools import product
 
-from pymcda.types import alternatives_assignments, performance_table
-from pymcda.types import alternative_performances
-from pymcda.types import criterion_value, criteria_values
+from pymcda.types import AlternativesAssignments, PerformanceTable
+from pymcda.types import AlternativePerformances
+from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.uta import utadis
 from pymcda.learning.lp_utadis import lp_utadis
 from pymcda.generate import generate_alternatives
@@ -45,12 +45,12 @@ def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
     aa_erroned = add_errors_in_assignments(aa_err, cat.keys(),
                                            pcerrors / 100)
 
-    gi_worst = alternative_performances('worst', {crit.id: 0 for crit in c})
-    gi_best = alternative_performances('best', {crit.id: 1 for crit in c})
+    gi_worst = AlternativePerformances('worst', {crit.id: 0 for crit in c})
+    gi_best = AlternativePerformances('best', {crit.id: 1 for crit in c})
 
-    css = criteria_values([])
+    css = CriteriaValues([])
     for cf in cfs:
-        cs = criterion_value(cf.id, len(cf.function))
+        cs = CriterionValue(cf.id, len(cf.function))
         css.append(cs)
 
     # Run linear program

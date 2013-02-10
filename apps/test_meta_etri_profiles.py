@@ -7,8 +7,8 @@ import time
 import random
 from itertools import product
 
-from pymcda.types import alternatives_assignments, performance_table
-from pymcda.types import alternative_performances
+from pymcda.types import AlternativesAssignments, PerformanceTable
+from pymcda.types import AlternativePerformances
 from pymcda.electre_tri import electre_tri_bm
 from pymcda.learning.meta_etri_profiles3 import meta_etri_profiles3
 from pymcda.learning.meta_etri_profiles4 import meta_etri_profiles4

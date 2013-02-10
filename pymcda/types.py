@@ -25,7 +25,7 @@ def unmarshal(xml):
     m = unmarshallers.get(xml.tag)
     return m(xml)
 
-class mcda_dict(object):
+class McdaDict(object):
 
     def __init__(self, l = list(), id = None):
         self.id = id
@@ -109,7 +109,7 @@ class mcda_dict(object):
 
         return tuple(subsets)
 
-class mcda_object(object):
+class McdaObject(object):
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -117,7 +117,7 @@ class mcda_object(object):
     def copy(self):
         return deepcopy(self)
 
-class criteria(mcda_dict):
+class Criteria(McdaDict):
 
     def __repr__(self):
         return "criteria(%s)" % self.values()
@@ -141,7 +141,7 @@ class criteria(mcda_dict):
 
         tag_list = xmcda.getiterator('criterion')
         for tag in tag_list:
-            c = criterion().from_xmcda(tag)
+            c = Criterion().from_xmcda(tag)
             self.append(c)
 
         return self
@@ -162,7 +162,7 @@ class criteria(mcda_dict):
             elif cols is not None and row[0] == '':
                 break
             elif cols is not None:
-                c = criterion(row[0])
+                c = Criterion(row[0])
                 for i in cols.keys():
                     setattr(c, cols[i], row[i])
                 self.append(c)
@@ -170,7 +170,7 @@ class criteria(mcda_dict):
         return self
 
 
-class criterion(mcda_object):
+class Criterion(McdaObject):
 
     MINIMIZE = -1
     MAXIMIZE = 1
@@ -249,7 +249,7 @@ class criterion(mcda_object):
 
         return self
 
-class criteria_values(mcda_dict):
+class CriteriaValues(McdaDict):
 
     def __repr__(self):
         return "criteria_values(%s)" % self.values()
@@ -279,7 +279,7 @@ class criteria_values(mcda_dict):
 
         tag_list = xmcda.getiterator('criterionValue')
         for tag in tag_list:
-            cv = criterion_value().from_xmcda(tag)
+            cv = CriterionValue().from_xmcda(tag)
             self.append(cv)
 
         return self
@@ -309,7 +309,7 @@ class criteria_values(mcda_dict):
             line += " " * (cols_max[cid] - len(val)) + val + " "
         print(line, file = out)
 
-class criterion_value(mcda_object):
+class CriterionValue(McdaObject):
 
     def __init__(self, id=None, value=None):
         self.id = id
@@ -343,7 +343,7 @@ class criterion_value(mcda_object):
 
         return self
 
-class alternatives(mcda_dict):
+class Alternatives(McdaDict):
 
     def __repr__(self):
         return "alternatives(%s)" % self.values()
@@ -367,7 +367,7 @@ class alternatives(mcda_dict):
 
         tag_list = xmcda.getiterator('alternative')
         for tag in tag_list:
-            alt = alternative().from_xmcda(tag)
+            alt = Alternative().from_xmcda(tag)
             self.append(alt)
 
         return self
@@ -386,14 +386,14 @@ class alternatives(mcda_dict):
             elif cols is not None and row[0] == '':
                 break
             elif cols is not None:
-                a = alternative(row[0])
+                a = Alternative(row[0])
                 for i in cols.keys():
                     setattr(a, cols[i], row[i])
                 self.append(a)
 
         return self
 
-class alternative(mcda_object):
+class Alternative(McdaObject):
 
     def __init__(self, id=None, name=None, disabled=False):
         self.id = id
@@ -431,7 +431,7 @@ class alternative(mcda_object):
 
         return self
 
-class performance_table(mcda_dict):
+class PerformanceTable(McdaDict):
 
     def __call__(self, id):
         return self[id].performances
@@ -459,7 +459,7 @@ class performance_table(mcda_dict):
 
     def get_best(self, c):
         perfs = next(self.itervalues()).performances
-        wa = alternative_performances('best', perfs.copy())
+        wa = AlternativePerformances('best', perfs.copy())
         for ap, crit in product(self, c):
             wperf = wa.performances[crit.id] * crit.direction
             perf = ap.performances[crit.id] * crit.direction
@@ -469,7 +469,7 @@ class performance_table(mcda_dict):
 
     def get_worst(self, c):
         perfs = next(self.itervalues()).performances
-        wa = alternative_performances('worst', perfs.copy())
+        wa = AlternativePerformances('worst', perfs.copy())
         for ap, crit in product(self, c):
             wperf = wa.performances[crit.id] * crit.direction
             perf = ap.performances[crit.id] * crit.direction
@@ -479,7 +479,7 @@ class performance_table(mcda_dict):
 
     def get_min(self):
         perfs = next(self.itervalues()).performances
-        a = alternative_performances('min', perfs.copy())
+        a = AlternativePerformances('min', perfs.copy())
         for ap, cid in product(self, perfs.keys()):
             perf = ap.performances[cid]
             if perf < a.performances[cid]:
@@ -488,7 +488,7 @@ class performance_table(mcda_dict):
 
     def get_max(self):
         perfs = next(self.itervalues()).performances
-        a = alternative_performances('max', perfs.copy())
+        a = AlternativePerformances('max', perfs.copy())
         for ap, cid in product(self, perfs.keys()):
             perf = ap.performances[cid]
             if perf > a.performances[cid]:
@@ -497,7 +497,7 @@ class performance_table(mcda_dict):
 
     def get_mean(self):
         cids = next(self.itervalues()).performances.keys()
-        a = alternative_performances('mean', {cid: 0 for cid in cids})
+        a = AlternativePerformances('mean', {cid: 0 for cid in cids})
         for ap, cid in product(self, cids):
             perf = ap.performances[cid]
             a.performances[cid] += perf
@@ -512,7 +512,7 @@ class performance_table(mcda_dict):
         ap_max = self.get_max().performances
 
         cids = next(self.itervalues()).performances.keys()
-        a = alternative_performances('range')
+        a = AlternativePerformances('range')
         for cid in cids:
             a.performances[cid] = ap_max[cid] - ap_min[cid]
 
@@ -537,7 +537,7 @@ class performance_table(mcda_dict):
 
         tag_list = xmcda.getiterator('alternativePerformances')
         for tag in tag_list:
-            altp = alternative_performances().from_xmcda(tag)
+            altp = AlternativePerformances().from_xmcda(tag)
             self.append(altp)
 
         return self
@@ -589,7 +589,7 @@ class performance_table(mcda_dict):
             elif cols is not None and row[0] == '':
                 break
             elif cols is not None:
-                ap = alternative_performances(row[0])
+                ap = AlternativePerformances(row[0])
                 for i in cols.keys():
                     cid = cols[i]
                     perf = float(row[i])
@@ -598,7 +598,7 @@ class performance_table(mcda_dict):
 
         return self
 
-class alternative_performances(mcda_object):
+class AlternativePerformances(McdaObject):
 
     def __init__(self, id=None, performances=None):
         self.id = id
@@ -662,7 +662,7 @@ class alternative_performances(mcda_object):
 
         return self
 
-class categories_values(mcda_dict):
+class CategoriesValues(McdaDict):
 
     def __repr__(self):
         return "categories_values(%s)" % self.values()
@@ -702,12 +702,12 @@ class categories_values(mcda_dict):
 
         tag_list = xmcda.getiterator('categoryValue')
         for tag in tag_list:
-            altp = category_value().from_xmcda(tag)
+            altp = CategoryValue().from_xmcda(tag)
             self.append(altp)
 
         return self
 
-class category_value(mcda_object):
+class CategoryValue(McdaObject):
 
     def __init__(self, id = None, value = None):
         self.id = id
@@ -737,13 +737,13 @@ class category_value(mcda_object):
         self.id = xmcda.find('.//categoryID').text
         value = xmcda.find('.//value').getchildren()[0]
         if value.tag == 'interval':
-            self.value = interval().from_xmcda(value)
+            self.value = Interval().from_xmcda(value)
         else:
             self.value = unmarshal(value)
 
         return self
 
-class interval(mcda_object):
+class Interval(McdaObject):
 
     def __init__(self, lower = float("-inf"), upper = float("inf")):
         self.lower = lower
@@ -785,7 +785,7 @@ class interval(mcda_object):
         self.upper = unmarshal(upper.getchildren()[0])
         return self
 
-class alternatives_values(mcda_dict):
+class AlternativesValues(McdaDict):
 
     def __repr__(self):
         return "alternatives_values(%s)" % self.values()
@@ -805,12 +805,12 @@ class alternatives_values(mcda_dict):
 
         tag_list = xmcda.getiterator('alternativeValue')
         for tag in tag_list:
-            altp = alternative_value().from_xmcda(tag)
+            altp = AlternativeValue().from_xmcda(tag)
             self.append(altp)
 
         return self
 
-class alternative_value(mcda_object):
+class AlternativeValue(McdaObject):
 
     def __init__(self, id = None, value = None):
         self.id = id
@@ -837,7 +837,7 @@ class alternative_value(mcda_object):
 
         return self
 
-class criteria_functions(mcda_dict):
+class CriteriaFunctions(McdaDict):
 
     def __repr__(self):
         return "criteria_functions(%s)" % self.values()
@@ -877,12 +877,12 @@ class criteria_functions(mcda_dict):
 
         tag_list = xmcda.getiterator('criterionFunction')
         for tag in tag_list:
-            cf = criterion_function().from_xmcda(tag)
+            cf = CriterionFunction().from_xmcda(tag)
             self.append(cf)
 
         return self
 
-class criterion_function(mcda_object):
+class CriterionFunction(McdaObject):
 
     def __init__(self, id, function):
         self.id = id
@@ -916,15 +916,15 @@ class criterion_function(mcda_object):
 
         value = xmcda.find('.//piecewise_linear')
         if value:
-            self.function = piecewise_linear().from_xmcda(value)
+            self.function = PiecewiseLinear().from_xmcda(value)
 
         value = xmcda.find('.//points')
         if value:
-            self.function = points().from_xmcda(value)
+            self.function = Points().from_xmcda(value)
 
         return self
 
-class linear(object):
+class Linear(object):
 
     def __init__(self, slope, intercept):
         self.slope = slope
@@ -942,7 +942,7 @@ class linear(object):
     def x(self, y):
         return (y - self.intercept) / self.slope
 
-class segment(mcda_object):
+class Segment(McdaObject):
 
     def __init__(self, p1, p2, p1_in = True, p2_in = False):
         if p1.x <= p2.x:
@@ -994,8 +994,8 @@ class segment(mcda_object):
         if tag_list != 2:
             raise ValueError('segment:: invalid number of points')
 
-        p1 = point().from_xmcda(tag_list[0])
-        p2 = point().from_xmcda(tag_list[1])
+        p1 = Point().from_xmcda(tag_list[0])
+        p2 = Point().from_xmcda(tag_list[1])
 
         if p1.x <= p2.x:
             self.pl, self.ph = p1, p2
@@ -1004,7 +1004,7 @@ class segment(mcda_object):
 
         return self
 
-class piecewise_linear(list):
+class PiecewiseLinear(list):
 
     def __repr__(self):
         return "piecewise_linear(%s)" % self[:]
@@ -1054,12 +1054,12 @@ class piecewise_linear(list):
 
         tag_list = xmcda.getiterator('segment')
         for tag in tag_list:
-            s = segment().from_xmcda(tag)
+            s = Segment().from_xmcda(tag)
             self.append(s)
 
         return self
 
-class points(list):
+class Points(list):
 
     def __call__(self, id):
         p = None
@@ -1088,12 +1088,12 @@ class points(list):
 
         tag_list = xmcda.getiterator('point')
         for tag in tag_list:
-            p = point().from_xmcda(tag)
+            p = Point().from_xmcda(tag)
             self.append(p)
 
         return self
 
-class point(mcda_object):
+class Point(McdaObject):
 
     def __init__(self, x, y, id = None):
         self.id = id
@@ -1124,7 +1124,7 @@ class point(mcda_object):
 
         return self
 
-class constant(mcda_object):
+class Constant(McdaObject):
 
     def __init__(self, id, value):
         self.id = id
@@ -1148,7 +1148,7 @@ class constant(mcda_object):
         self.id = xmcda.get('id')
         self.value = unmarshal(xmcda.getchildren()[0])
 
-class thresholds(mcda_dict):
+class Thresholds(McdaDict):
 
     def __repr__(self):
         return "thresholds(%s)", self.values()
@@ -1172,11 +1172,11 @@ class thresholds(mcda_dict):
 
         tag_list = xmcda.getiterator('threshold')
         for tag in tag_list:
-            t = threshold(None)
+            t = Threshold(None)
             t.from_xmcda(tag)
             self.append(t)
 
-class threshold(mcda_object):
+class Threshold(McdaObject):
 
     def __init__(self, id, name=None, values=None):
         self.id = id
@@ -1204,10 +1204,10 @@ class threshold(mcda_object):
         self.name = xmcda.get('name')
         values = xmcda.getchildren()[0]
         if values.tag == 'constant':
-            c = constant(None, 0)
+            c = Constant(None, 0)
             c.from_xmcda(values)
 
-class categories(mcda_dict):
+class Categories(McdaDict):
 
     def __repr__(self):
         return "categories(%s)" % self.values()
@@ -1238,7 +1238,7 @@ class categories(mcda_dict):
 
         tag_list = xmcda.getiterator('category')
         for tag in tag_list:
-            c = category()
+            c = Category()
             c.from_xmcda(tag)
             self.append(c)
 
@@ -1260,7 +1260,7 @@ class categories(mcda_dict):
             elif cols is not None and row[0] == '':
                 break
             elif cols is not None:
-                c = category(row[0])
+                c = Category(row[0])
                 for i in cols.keys():
                     if cols[i] == 'rank':
                         setattr(c, cols[i], int(row[i]))
@@ -1269,7 +1269,7 @@ class categories(mcda_dict):
                 self.append(c)
         return self
 
-class category(mcda_object):
+class Category(McdaObject):
 
     def __init__(self, id=None, name=None, disabled=False, rank=None):
         self.id = id
@@ -1315,7 +1315,7 @@ class category(mcda_object):
 
         return self
 
-class limits(mcda_object):
+class Limits(McdaObject):
 
     def __init__(self, lower=None, upper=None):
         self.lower = lower
@@ -1350,7 +1350,7 @@ class limits(mcda_object):
 
         return self
 
-class categories_profiles(mcda_dict):
+class CategoriesProfiles(McdaDict):
 
     def __repr__(self):
         return "categories_profiles(%s)" % self.values()
@@ -1377,9 +1377,9 @@ class categories_profiles(mcda_dict):
         return categories
 
     def to_categories(self):
-        cats = categories()
+        cats = Categories()
         for i, cat in enumerate(self.get_ordered_categories()):
-            cat = category(cat, rank = i + 1)
+            cat = Category(cat, rank = i + 1)
             cats.append(cat)
         return cats
 
@@ -1402,12 +1402,12 @@ class categories_profiles(mcda_dict):
 
         tag_list = xmcda.getiterator('categoryProfile')
         for tag in tag_list:
-            catp = category_profile().from_xmcda(tag)
+            catp = CategoryProfile().from_xmcda(tag)
             self.append(catp)
 
         return self
 
-class category_profile(mcda_object):
+class CategoryProfile(McdaObject):
 
     def __init__(self, id = None, value = None):
         self.id = id
@@ -1432,11 +1432,11 @@ class category_profile(mcda_object):
 
         value = xmcda.find('.//limits')
         if value is not None:
-            self.value = limits().from_xmcda(value)
+            self.value = Limits().from_xmcda(value)
 
         return self
 
-class alternatives_assignments(mcda_dict):
+class AlternativesAssignments(McdaDict):
 
     def __call__(self, id):
         return self._d[id].category_id
@@ -1504,7 +1504,7 @@ class alternatives_assignments(mcda_dict):
 
         tag_list = xmcda.getiterator('alternativeAffectation')
         for tag in tag_list:
-            aa = alternative_assignment()
+            aa = AlternativeAssignment()
             aa.from_xmcda(tag)
             self.append(aa)
 
@@ -1518,13 +1518,13 @@ class alternatives_assignments(mcda_dict):
             elif col and row[0] == '':
                 break
             elif col is not None:
-                aa = alternative_assignment(row[0])
+                aa = AlternativeAssignment(row[0])
                 aa.category_id = row[col]
                 self.append(aa)
 
         return self
 
-class alternative_assignment(mcda_object):
+class AlternativeAssignment(McdaObject):
 
     def __init__(self, id=None, category_id=None):
         self.id = id

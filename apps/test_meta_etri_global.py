@@ -7,7 +7,7 @@ import time
 import random
 from itertools import product
 
-from pymcda.types import alternatives_assignments, performance_table
+from pymcda.types import AlternativesAssignments, PerformanceTable
 from pymcda.electre_tri import electre_tri
 from pymcda.learning.meta_etri_global2 import meta_etri_global2
 from pymcda.learning.meta_etri_global3 import meta_etri_global3

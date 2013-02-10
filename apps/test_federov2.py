@@ -2,9 +2,9 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import pprint
 import matplotlib.pyplot as plt
-from pymcda.types import alternative, alternatives
-from pymcda.types import criterion, criteria
-from pymcda.types import alternative_performances, performance_table
+from pymcda.types import Alternative, Alternatives
+from pymcda.types import Criterion, Criteria
+from pymcda.types import AlternativePerformances, PerformanceTable
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_criteria
 from pymcda.generate import generate_random_performance_table
@@ -34,7 +34,7 @@ a = generate_alternatives(100)
 
 # Criteria
 c = generate_criteria(2)
-#c.append(criterion('c3', weight=1))
+#c.append(Criterion('c3', weight=1))
 
 # Alternative performances
 pt = generate_random_performance_table(a, c)

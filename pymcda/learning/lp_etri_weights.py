@@ -1,7 +1,7 @@
 from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
-from pymcda.types import criterion_value, criteria_values
+from pymcda.types import CriterionValue, CriteriaValues
 
 verbose = False
 
@@ -197,9 +197,9 @@ class lp_etri_weights():
 
         obj = self.lp.solution.get_objective_value()
 
-        cvs = criteria_values()
+        cvs = CriteriaValues()
         for c in self.model.criteria:
-            cv = criterion_value()
+            cv = CriterionValue()
             cv.id = c.id
             cv.value = self.lp.solution.get_values('w'+c.id)
             cvs.append(cv)
@@ -267,9 +267,9 @@ class lp_etri_weights():
 
         obj = solution.objective
 
-        cvs = criteria_values()
+        cvs = CriteriaValues()
         for c in self.model.criteria:
-            cv = criterion_value()
+            cv = CriterionValue()
             cv.id = c.id
             cv.value = solution[self.w[c.id]]
             cvs.append(cv)
@@ -329,9 +329,9 @@ class lp_etri_weights():
         #print(self.lp.reportKKT())
         obj = self.lp.vobj()
 
-        cvs = criteria_values()
+        cvs = CriteriaValues()
         for j, c in enumerate(self.model.criteria):
-            cv = criterion_value()
+            cv = CriterionValue()
             cv.id = c.id
             cv.value = float(self.w[j].primal)
             cvs.append(cv)
@@ -362,7 +362,7 @@ if __name__ == "__main__":
     from pymcda.utils import add_errors_in_assignments
     from pymcda.utils import display_assignments_and_pt
     from pymcda.utils import compute_winning_coalitions
-    from pymcda.types import alternatives_assignments, performance_table
+    from pymcda.types import AlternativesAssignments, PerformanceTable
 
     print("Solver used: %s" % solver)
 
@@ -381,8 +381,8 @@ if __name__ == "__main__":
     aa = model.pessimist(pt)
 
     a_learn = random.sample(a, int(nlearn*len(a)))
-    aa_learn = alternatives_assignments([ aa[alt.id] for alt in a_learn ])
-    pt_learn = performance_table([ pt[alt.id] for alt in a_learn ])
+    aa_learn = AlternativesAssignments([ aa[alt.id] for alt in a_learn ])
+    pt_learn = PerformanceTable([ pt[alt.id] for alt in a_learn ])
 
     aa_err = aa_learn.copy()
     aa_erroned = add_errors_in_assignments(aa_err, model.categories, errors)

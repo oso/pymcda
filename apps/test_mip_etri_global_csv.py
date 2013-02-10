@@ -6,9 +6,9 @@ import random
 import time
 from itertools import product
 from pymcda.learning.mip_etri_global import mip_etri_global
-from pymcda.types import criterion_value, criteria_values
-from pymcda.types import alternatives, criteria, performance_table
-from pymcda.types import alternatives_assignments, categories
+from pymcda.types import CriterionValue, CriteriaValues
+from pymcda.types import Alternatives, Criteria, PerformanceTable
+from pymcda.types import AlternativesAssignments, Categories
 from pymcda.electre_tri import electre_tri_bm
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_categories_profiles

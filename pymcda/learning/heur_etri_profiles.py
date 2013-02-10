@@ -1,8 +1,8 @@
 from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
-from pymcda.types import alternative_performances
-from pymcda.types import performance_table
+from pymcda.types import AlternativePerformances
+from pymcda.types import PerformanceTable
 
 class heur_etri_profiles():
 
@@ -54,7 +54,7 @@ class heur_etri_profiles():
         return { key: h1[key] + h2[key] for key in h1 }
 
     def init_profile(self, profile_id, cat_above, cat_below, pabove):
-        ap = alternative_performances(profile_id, {})
+        ap = AlternativePerformances(profile_id, {})
         for c in self.model.criteria:
             perf = pabove.performances[c.id]
             h = self.compute_histogram(c, cat_above, cat_below, perf)
@@ -68,7 +68,7 @@ class heur_etri_profiles():
         cats = self.model.categories[:]
         cats.reverse()
 
-        bpt = performance_table()
+        bpt = PerformanceTable()
         pabove = self.pt_sorted.pt.get_best(self.model.criteria)
         for i in range(len(cats) - 1):
             profile_id = "b%d" % (len(cats) - (i + 1))

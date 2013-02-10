@@ -3,7 +3,7 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 from itertools import product
 import random
-from pymcda.types import alternative_assignment, alternatives_assignments
+from pymcda.types import AlternativeAssignment, AlternativesAssignments
 
 class meta_etri_profiles4():
 
@@ -140,11 +140,11 @@ class meta_etri_profiles4():
 
     def build_assignments_table(self):
         self.good = 0
-        self.aa = alternatives_assignments()
+        self.aa = AlternativesAssignments()
         for aa in self.aa_ori.values():
             aid = aa.id
             cat = self.get_alternative_assignment(aid)
-            self.aa.append(alternative_assignment(aid, cat))
+            self.aa.append(AlternativeAssignment(aid, cat))
 
             cat_ori = aa.category_id
             if cat == cat_ori:

@@ -19,7 +19,7 @@ from pymcda.ui.graphic import QGraphicsScene_etri
 from multiprocessing import Process, Pipe
 
 # FIXME
-from pymcda.types import alternative_performances
+from pymcda.types import AlternativePerformances
 
 def run_metaheuristic(pipe, model, pt, aa, algo, n, worst = None,
                       best = None):
@@ -351,9 +351,9 @@ class qt_mainwindow(QtGui.QMainWindow):
 
         # FIXME
         crit = generate_criteria(ncrit)
-        self.worst = alternative_performances("worst",
+        self.worst = AlternativePerformances("worst",
                                     {c.id: 0 for c in crit})
-        self.best = alternative_performances("best",
+        self.best = AlternativePerformances("best",
                                     {c.id: 10 for c in crit})
 
         self.model = generate_random_electre_tri_bm_model(ncrit, ncat,

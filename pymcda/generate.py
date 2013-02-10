@@ -4,29 +4,29 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import random
 from pymcda.electre_tri import electre_tri_bm
 from pymcda.uta import utadis
-from pymcda.types import alternative, alternatives
-from pymcda.types import alternative_performances, performance_table
-from pymcda.types import criterion, criteria
-from pymcda.types import criterion_value, criteria_values
-from pymcda.types import criterion_function, criteria_functions
-from pymcda.types import category, categories
-from pymcda.types import category_profile, categories_profiles, limits
-from pymcda.types import piecewise_linear, point, segment
-from pymcda.types import category_value, categories_values, interval
+from pymcda.types import Alternative, Alternatives
+from pymcda.types import AlternativePerformances, PerformanceTable
+from pymcda.types import Criterion, Criteria
+from pymcda.types import CriterionValue, CriteriaValues
+from pymcda.types import CriterionFunction, CriteriaFunctions
+from pymcda.types import Category, Categories
+from pymcda.types import CategoryProfile, CategoriesProfiles, Limits
+from pymcda.types import PiecewiseLinear, Point, Segment
+from pymcda.types import CategoryValue, CategoriesValues, Interval
 
 def generate_alternatives(number, prefix='a'):
-    alts = alternatives()
+    alts = Alternatives()
     for i in range(number):
-        a = alternative()
+        a = Alternative()
         a.id = "%s%d" % (prefix, i+1)
         alts.append(a)
 
     return alts
 
 def generate_criteria(number, prefix='c', random_direction = False):
-    crits = criteria()
+    crits = Criteria()
     for i in range(number):
-        c = criterion("%s%d" % (prefix, i+1))
+        c = Criterion("%s%d" % (prefix, i+1))
         if random_direction is True:
             c.direction = random.choice([-1, 1])
         crits.append(c)
@@ -40,9 +40,9 @@ def generate_random_criteria_weights(crits, seed = None, k = 3):
     weights = [ round(random.random(), k) for i in range(len(crits) - 1) ]
     weights.sort()
 
-    cvals = criteria_values()
+    cvals = CriteriaValues()
     for i, c in enumerate(crits):
-        cval = criterion_value()
+        cval = CriterionValue()
         cval.id = c.id
         if i == 0:
             cval.value = weights[i]
@@ -60,9 +60,9 @@ def generate_random_criteria_values(crits, seed = None, k = 3,
     if seed is not None:
         random.seed(seed)
 
-    cvals = criteria_values()
+    cvals = CriteriaValues()
     for c in crits:
-        cval = criterion_value()
+        cval = CriterionValue()
         cval.id = c.id
         if type == 'integer':
             cval.value = random.randint(vmin, vmax)
@@ -77,7 +77,7 @@ def generate_random_performance_table(alts, crits, seed = None, k = 3,
     if seed is not None:
         random.seed(seed)
 
-    pt = performance_table()
+    pt = PerformanceTable()
     for a in alts:
         perfs = {}
         for c in crits:
@@ -89,15 +89,15 @@ def generate_random_performance_table(alts, crits, seed = None, k = 3,
 
             perfs[c.id] = rdom
 
-        ap = alternative_performances(a.id, perfs)
+        ap = AlternativePerformances(a.id, perfs)
         pt.append(ap)
 
     return pt
 
 def generate_categories(number, prefix='cat'):
-    cats = categories()
+    cats = Categories()
     for i in range(number):
-        c = category()
+        c = Category()
         c.id = "%s%d" % (prefix, i+1)
         c.rank = i+1
         cats.append(c)
@@ -111,7 +111,7 @@ def generate_random_profiles(alts, crits, seed = None, k = 3,
 
     crit_random = {}
     n = len(alts)
-    pt = performance_table()
+    pt = PerformanceTable()
     for c in crits:
         rdom = []
         for i in range(n):
@@ -133,17 +133,17 @@ def generate_random_profiles(alts, crits, seed = None, k = 3,
         perfs = {}
         for c in crits:
             perfs[c.id] = crit_random[c.id][i]
-        ap = alternative_performances(a, perfs)
+        ap = AlternativePerformances(a, perfs)
         pt.append(ap)
 
     return pt
 
 def generate_categories_profiles(cats, prefix='b'):
     cat_ids = cats.get_ordered_categories()
-    cps = categories_profiles()
+    cps = CategoriesProfiles()
     for i in range(len(cats)-1):
-        l = limits(cat_ids[i], cat_ids[i+1])
-        cp = category_profile("%s%d" % (prefix, i+1), l)
+        l = Limits(cat_ids[i], cat_ids[i+1])
+        cp = CategoryProfile("%s%d" % (prefix, i+1), l)
         cps.append(cp)
     return cps
 
@@ -158,11 +158,11 @@ def generate_random_piecewise_linear(gi_min = 0, gi_max = 1, n_segments = 3,
 
     interval = (gi_max - gi_min) / n_segments
 
-    f = piecewise_linear([])
+    f = PiecewiseLinear([])
     for i in range(n_segments):
-        a = point(gi_min + i * interval, r[i])
-        b = point(gi_min + (i + 1) * interval, r[i + 1])
-        s = segment(a, b)
+        a = Point(gi_min + i * interval, r[i])
+        b = Point(gi_min + (i + 1) * interval, r[i + 1])
+        s = Segment(a, b)
 
         f.append(s)
 
@@ -173,12 +173,12 @@ def generate_random_piecewise_linear(gi_min = 0, gi_max = 1, n_segments = 3,
 def generate_random_criteria_functions(crits, gi_min = 0, gi_max = 1,
                                        nseg_min = 1, nseg_max = 5,
                                        ui_min = 0, ui_max = 1):
-    cfs = criteria_functions()
+    cfs = CriteriaFunctions()
     for crit in crits:
         ns = random.randint(nseg_min, nseg_max)
         f = generate_random_piecewise_linear(gi_min, gi_max, ns, ui_min,
                                              ui_max)
-        cf = criterion_function(crit.id, f)
+        cf = CriterionFunction(crit.id, f)
         cfs.append(cf)
 
     return cfs
@@ -189,13 +189,13 @@ def generate_random_categories_values(cats, k = 3):
     r.sort()
 
     v0 = 0
-    catvs = categories_values()
+    catvs = CategoriesValues()
     for i, cat in enumerate(cats.get_ordered_categories()):
         if i == ncats - 1:
             v1 = 1
         else:
             v1 = r[i]
-        catv = category_value(cat, interval(v0, v1))
+        catv = CategoryValue(cat, Interval(v0, v1))
         catvs.append(catv)
         v0 = v1
 

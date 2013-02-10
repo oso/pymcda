@@ -5,8 +5,8 @@ import random
 from itertools import product
 
 from pymcda.electre_tri import electre_tri
-from pymcda.types import alternative_assignment, alternatives_assignments
-from pymcda.types import performance_table
+from pymcda.types import AlternativeAssignment, AlternativesAssignments
+from pymcda.types import PerformanceTable
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import sorted_performance_table
 from pymcda.generate import generate_random_electre_tri_bm_model
@@ -51,15 +51,15 @@ if __name__ == "__main__":
     from pymcda.generate import generate_random_performance_table
     from pymcda.utils import display_assignments_and_pt
     from pymcda.utils import compute_winning_coalitions
-    from pymcda.types import alternative_performances
+    from pymcda.types import AlternativePerformances
     from pymcda.electre_tri import electre_tri
     from pymcda.ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model
     model = generate_random_electre_tri_bm_model(10, 3, 123)
-    worst = alternative_performances("worst",
+    worst = AlternativePerformances("worst",
                                      {c.id: 0 for c in model.criteria})
-    best = alternative_performances("best",
+    best = AlternativePerformances("best",
                                     {c.id: 1 for c in model.criteria})
 
     # Generate a set of alternatives

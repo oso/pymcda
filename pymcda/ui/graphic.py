@@ -385,15 +385,15 @@ if __name__ == "__main__":
     from pymcda.generate import generate_random_profiles
     from pymcda.generate import generate_categories_profiles
     from pymcda.electre_tri import electre_tri
-    from pymcda.types import alternative_performances
+    from pymcda.types import AlternativePerformances
 
     a = generate_alternatives(1)
     c = generate_criteria(5)
     cv = generate_random_criteria_values(c, 1234)
     cv.normalize()
 
-    worst = alternative_performances("worst", {crit.id: 0 for crit in c})
-    best = alternative_performances("best", {crit.id: 1 for crit in c})
+    worst = AlternativePerformances("worst", {crit.id: 0 for crit in c})
+    best = AlternativePerformances("best", {crit.id: 1 for crit in c})
     pt = generate_random_performance_table(a, c)
 
     cat = generate_categories(3)
