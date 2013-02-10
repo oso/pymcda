@@ -11,7 +11,7 @@ from pymcda.types import AlternativesAssignments, PerformanceTable
 from pymcda.types import AlternativePerformances
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.uta import Utadis
-from pymcda.learning.lp_utadis import lp_utadis
+from pymcda.learning.lp_utadis import LpUtadis
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_criteria
 from pymcda.generate import generate_random_criteria_values
@@ -55,7 +55,7 @@ def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
 
     # Run linear program
     t1 = time.time()
-    lp = lp_utadis(css, cat, gi_worst, gi_best)
+    lp = LpUtadis(css, cat, gi_worst, gi_best)
     t2 = time.time()
     obj, cv_l, cfs_l, catv_l = lp.solve(aa_err, pt)
     t3 = time.time()

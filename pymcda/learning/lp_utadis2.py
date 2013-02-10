@@ -26,7 +26,7 @@ elif solver == 'cplex':
 else:
     raise NameError('Invalid solver selected')
 
-class lp_utadis(object):
+class LpUtadis2(object):
 
     def __init__(self, cat, gi_worst, gi_best):
         self.cat = { cat: i+1 \
@@ -381,7 +381,7 @@ if __name__ == "__main__":
     gi_worst = AlternativePerformances('worst', {crit.id: 0 for crit in c})
     gi_best = AlternativePerformances('best', {crit.id: 1 for crit in c})
 
-    lp = lp_utadis(cat, gi_worst, gi_best)
+    lp = LpUtadis2(cat, gi_worst, gi_best)
     obj, cvs, cfs, catv = lp.solve(aa_err, pt)
 
     print('=============')
