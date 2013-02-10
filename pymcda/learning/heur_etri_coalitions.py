@@ -11,7 +11,7 @@ from pymcda.utils import compute_number_of_winning_coalitions
 from pymcda.utils import display_coalitions
 from pymcda.ui.graphic import display_electre_tri_models
 
-class heur_etri_coalitions():
+class HeurEtriCoalitions():
 
     def __init__(self, c, cats, pt, aa):
         self.c = c
@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     aa = m.pessimist(pt)
 
-    heur = heur_etri_coalitions(m.criteria, m.categories, pt, aa)
+    heur = HeurEtriCoalitions(m.criteria, m.categories, pt, aa)
     aids = [aid[0] for aid in heur.sorted_extrem ]
     display_electre_tri_models([m], [pt.get_worst(m.criteria)],
                                [pt.get_best(m.criteria)],

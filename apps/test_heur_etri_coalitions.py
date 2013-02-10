@@ -5,7 +5,7 @@ import time
 import csv
 from itertools import product
 
-from pymcda.learning.heur_etri_coalitions import heur_etri_coalitions
+from pymcda.learning.heur_etri_coalitions import HeurEtriCoalitions
 from pymcda.generate import generate_random_electre_tri_bm_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
@@ -25,7 +25,7 @@ def test_heur_etri_coalitions(seed, na, nc, ncat, pcexamples, pcerrors):
     aa = model.pessimist(pt)
 
     # Run the heuristic
-    heur = heur_etri_coalitions(model.criteria, model.categories,
+    heur = HeurEtriCoalitions(model.criteria, model.categories,
                                        pt, aa)
     coal2 = heur.find_coalitions(int(na * pcexamples))
 
