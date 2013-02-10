@@ -14,7 +14,7 @@ from pymcda.generate import generate_alternatives
 from lp_etri_weights import LpEtriWeights
 from meta_etri_profiles4 import meta_etri_profiles4
 
-class meta_etri_global2():
+class MetaEtriGlobal2():
 
     def __init__(self, model, pt_sorted, aa_ori):
         self.model = model
@@ -87,7 +87,7 @@ if __name__ == "__main__":
         model_meta = generate_random_electre_tri_bm_model(ncriteria,
                                                           ncategories)
 
-        meta = meta_etri_global2(model_meta, pt_sorted, aa)
+        meta = MetaEtriGlobal2(model_meta, pt_sorted, aa)
         metas.append(meta)
 
     t1 = time.time()
@@ -113,7 +113,7 @@ if __name__ == "__main__":
             model_meta = generate_random_electre_tri_bm_model(ncriteria,
                                                               ncategories)
 
-            metas[j] = meta_etri_global2(model_meta, pt_sorted, aa)
+            metas[j] = MetaEtriGlobal2(model_meta, pt_sorted, aa)
 
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))

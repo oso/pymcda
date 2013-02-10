@@ -9,7 +9,7 @@ from itertools import product
 
 from pymcda.types import AlternativesAssignments, PerformanceTable
 from pymcda.electre_tri import ElectreTri
-from pymcda.learning.meta_etri_global2 import meta_etri_global2
+from pymcda.learning.meta_etri_global2 import MetaEtriGlobal2
 from pymcda.learning.meta_etri_global3 import meta_etri_global3
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
@@ -268,7 +268,7 @@ if __name__ == "__main__":
 
     i = 0
     if options.second is True:
-        algo = meta_etri_global2
+        algo = MetaEtriGlobal2
         i += 1
     if options.third is True:
         algo = meta_etri_global3
