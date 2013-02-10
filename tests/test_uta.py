@@ -1,6 +1,6 @@
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
-from pymcda.uta import uta, utadis
+from pymcda.uta import Uta, Utadis
 from pymcda.types import *
 import unittest
 
@@ -31,7 +31,7 @@ class tests_uta(unittest.TestCase):
         cf3 = CriterionFunction("c3", f3)
         cfs = CriteriaFunctions([cf1, cf2, cf3])
 
-        return uta(c, cvs, cfs)
+        return Uta(c, cvs, cfs)
 
     def test001(self):
         model = self.generate_model()
@@ -88,7 +88,7 @@ class tests_utadis(unittest.TestCase):
 
         catv = CategoriesValues([catv1, catv2, catv3])
 
-        return utadis(c, cvs, cfs, catv)
+        return Utadis(c, cvs, cfs, catv)
 
     def test001(self):
         model = self.generate_model()

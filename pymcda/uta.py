@@ -4,7 +4,7 @@ from pymcda.types import AlternativeValue, AlternativesValues
 from pymcda.types import AlternativeAssignment
 from pymcda.types import AlternativesAssignments
 
-class uta(object):
+class Uta(object):
 
     def __init__(self, criteria = None, cvs = None, cfs = None):
         self.criteria = criteria
@@ -36,11 +36,11 @@ class uta(object):
 
         return au
 
-class utadis(uta):
+class Utadis(Uta):
 
     def __init__(self, criteria = None, cvs = None, cfs = None,
                  cat_values = None):
-        super(utadis, self).__init__(criteria, cvs, cfs)
+        super(Utadis, self).__init__(criteria, cvs, cfs)
         self.cat_values = cat_values
         upper = cat_values.get_upper_limits()
         self.cat_limits = sorted(upper.iteritems(),

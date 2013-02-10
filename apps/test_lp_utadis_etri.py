@@ -10,7 +10,7 @@ from itertools import product
 from pymcda.types import AlternativesAssignments, PerformanceTable
 from pymcda.types import AlternativePerformances
 from pymcda.types import CriterionValue, CriteriaValues
-from pymcda.uta import utadis
+from pymcda.uta import Utadis
 from pymcda.electre_tri import ElectreTri
 from pymcda.learning.lp_utadis import lp_utadis
 from pymcda.generate import generate_random_electre_tri_bm_model
@@ -53,7 +53,7 @@ def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
     obj, cv_l, cfs_l, catv_l = lp.solve(aa_err, pt)
     t3 = time.time()
 
-    model2 = utadis(model.criteria, cv_l, cfs_l, catv_l)
+    model2 = Utadis(model.criteria, cv_l, cfs_l, catv_l)
 
     # Compute new assignment and classification accuracy
     aa2 = model2.get_assignments(pt)

@@ -10,7 +10,7 @@ from itertools import product
 from pymcda.types import AlternativesAssignments, PerformanceTable
 from pymcda.types import AlternativePerformances
 from pymcda.types import CriterionValue, CriteriaValues
-from pymcda.uta import utadis
+from pymcda.uta import Utadis
 from pymcda.learning.lp_utadis import lp_utadis
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_criteria
@@ -37,7 +37,7 @@ def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
     a = generate_alternatives(na)
     pt = generate_random_performance_table(a, c)
 
-    model = utadis(c, cv, cfs, catv)
+    model = Utadis(c, cv, cfs, catv)
     aa = model.get_assignments(pt)
 
     # Add errors in assignment examples
@@ -60,7 +60,7 @@ def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
     obj, cv_l, cfs_l, catv_l = lp.solve(aa_err, pt)
     t3 = time.time()
 
-    model2 = utadis(c, cv_l, cfs_l, catv_l)
+    model2 = Utadis(c, cv_l, cfs_l, catv_l)
 
     # Compute new assignment and classification accuracy
     aa2 = model2.get_assignments(pt)

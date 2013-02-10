@@ -3,7 +3,7 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import random
 from pymcda.electre_tri import ElectreTriBM
-from pymcda.uta import utadis
+from pymcda.uta import Utadis
 from pymcda.types import Alternative, Alternatives
 from pymcda.types import AlternativePerformances, PerformanceTable
 from pymcda.types import Criterion, Criteria
@@ -231,7 +231,7 @@ def generate_random_utadis_model(ncrit, ncat, nseg_min, nseg_max,
                                              nseg_max = nseg_max)
     catv = generate_random_categories_values(cat)
 
-    return utadis(c, cv, cfs, catv)
+    return Utadis(c, cv, cfs, catv)
 
 if __name__ == "__main__":
     alts = generate_alternatives(10)

@@ -334,7 +334,7 @@ if __name__ == "__main__":
     from pymcda.types import CriteriaFunctions, CriterionFunction
     from pymcda.types import CategoryValue, CategoriesValues
     from pymcda.types import Interval
-    from pymcda.uta import utadis
+    from pymcda.uta import Utadis
     from pymcda.utils import compute_ca
     from pymcda.generate import generate_alternatives
     from pymcda.generate import generate_categories
@@ -355,7 +355,7 @@ if __name__ == "__main__":
     cfs = generate_random_criteria_functions(c, nseg_min = 3, nseg_max = 3)
     catv = generate_random_categories_values(cat)
 
-    u = utadis(c, cv, cfs, catv)
+    u = Utadis(c, cv, cfs, catv)
 
     # Generate random alternative and compute assignments
     a = generate_alternatives(10)
@@ -394,7 +394,7 @@ if __name__ == "__main__":
     print('Categories values:')
     catv.display()
 
-    u2 = utadis(c, cvs, cfs, catv)
+    u2 = Utadis(c, cvs, cfs, catv)
     aa2 = u2.get_assignments(pt)
 
     total = len(a)
