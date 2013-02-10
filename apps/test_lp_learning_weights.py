@@ -8,7 +8,7 @@ import random
 from itertools import product
 
 from pymcda.types import AlternativesAssignments, PerformanceTable
-from pymcda.electre_tri import electre_tri
+from pymcda.electre_tri import ElectreTri
 from pymcda.learning.lp_etri_weights import lp_etri_weights
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_electre_tri_bm_model

@@ -384,7 +384,7 @@ if __name__ == "__main__":
     from pymcda.generate import generate_categories
     from pymcda.generate import generate_random_profiles
     from pymcda.generate import generate_categories_profiles
-    from pymcda.electre_tri import electre_tri
+    from pymcda.electre_tri import ElectreTri
     from pymcda.types import AlternativePerformances
 
     a = generate_alternatives(1)
@@ -404,7 +404,7 @@ if __name__ == "__main__":
 
     lbda = random.uniform(0.5, 1)
 
-    model = electre_tri(c, cv, bpt, lbda, cps)
+    model = ElectreTri(c, cv, bpt, lbda, cps)
 
     app = QtGui.QApplication(sys.argv)
 

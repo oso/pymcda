@@ -11,7 +11,7 @@ from pymcda.types import AlternativesAssignments, PerformanceTable
 from pymcda.types import AlternativePerformances
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.uta import utadis
-from pymcda.electre_tri import electre_tri
+from pymcda.electre_tri import ElectreTri
 from pymcda.learning.lp_utadis import lp_utadis
 from pymcda.generate import generate_random_electre_tri_bm_model
 from pymcda.generate import generate_alternatives

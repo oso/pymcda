@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 import random
 from itertools import product
 
-from pymcda.electre_tri import electre_tri
+from pymcda.electre_tri import ElectreTri
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import PerformanceTable
 from pymcda.utils import compute_ca
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     from pymcda.utils import display_assignments_and_pt
     from pymcda.utils import compute_winning_coalitions
     from pymcda.types import AlternativePerformances
-    from pymcda.electre_tri import electre_tri
+    from pymcda.electre_tri import ElectreTri
     from pymcda.ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model

@@ -7,7 +7,7 @@ from copy import deepcopy
 def eq(a, b, eps=10e-10):
     return abs(a-b) <= eps
 
-class electre_tri(McdaObject):
+class ElectreTri(McdaObject):
 
     def __init__(self, criteria=None, cv=None, bpt=None, lbda=None,
                  categories_profiles=None):
@@ -174,7 +174,7 @@ class electre_tri(McdaObject):
 
         return assignments
 
-class electre_tri_bm(electre_tri):
+class ElectreTriBM(ElectreTri):
 
     def concordance(self, ap, profile):
         w = wsum = 0

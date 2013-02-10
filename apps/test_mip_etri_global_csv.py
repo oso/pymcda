@@ -9,7 +9,7 @@ from pymcda.learning.mip_etri_global import mip_etri_global
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import Alternatives, Criteria, PerformanceTable
 from pymcda.types import AlternativesAssignments, Categories
-from pymcda.electre_tri import electre_tri_bm
+from pymcda.electre_tri import ElectreTriBM
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_categories_profiles
 from pymcda.generate import generate_random_profiles
@@ -82,7 +82,7 @@ def run_test(seed, data, pclearning):
     cvs = None
     lbda = None
 
-    model = electre_tri_bm(data.c, cvs, bpt, lbda, cat_profiles)
+    model = ElectreTriBM(data.c, cvs, bpt, lbda, cat_profiles)
 
     # Run the linear program
     t1 = time.time()

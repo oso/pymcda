@@ -1,6 +1,6 @@
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
-from pymcda.electre_tri import electre_tri
+from pymcda.electre_tri import ElectreTri
 import unittest
 
 def compare_assignments(assignments, expected_assignments):
@@ -20,7 +20,7 @@ class tests_electre_tri(unittest.TestCase):
     def test001_test_pessimist_loulouka(self):
         """ Loulouka - Pessimist """
         from datasets.loulouka import c, cv, ptb, lbda, pt, aap, cps
-        etri = electre_tri(c, cv, ptb, lbda, cps).pessimist(pt)
+        etri = ElectreTri(c, cv, ptb, lbda, cps).pessimist(pt)
         ok = compare_assignments(etri, aap)
         self.assertEqual(ok, 1, "One or more alternatives were wrongly \
                          assigned")
@@ -28,7 +28,7 @@ class tests_electre_tri(unittest.TestCase):
     def test002_test_pessimist_ticino(self):
         """ Ticino - Pessimist """
         from datasets.ticino import c, cv, ptb, lbda, pt, aap, cps
-        etri = electre_tri(c, cv, ptb, lbda, cps).pessimist(pt)
+        etri = ElectreTri(c, cv, ptb, lbda, cps).pessimist(pt)
         ok = compare_assignments(etri, aap)
         self.assertEqual(ok, 1, "One or more alternatives were wrongly \
                          assigned")
@@ -37,7 +37,7 @@ class tests_electre_tri(unittest.TestCase):
     def test003_test_optimist_loulouka(self):
         """ Loulouka - Optimist """
         from datasets.loulouka import c, cv, ptb, lbda, pt, aao, cps
-        etri = electre_tri(c, cv, ptb, lbda, cps).optimist(pt)
+        etri = ElectreTri(c, cv, ptb, lbda, cps).optimist(pt)
         ok = compare_assignments(etri, aao)
         self.assertEqual(ok, 1, "One or more alternatives were wrongly \
                          assigned")
@@ -45,7 +45,7 @@ class tests_electre_tri(unittest.TestCase):
     def test004_test_optimist_ticino(self):
         """ Ticino - Optimist """
         from datasets.ticino import c, cv, ptb, lbda, pt, aao, cps
-        etri = electre_tri(c, cv, ptb, lbda, cps).optimist(pt)
+        etri = ElectreTri(c, cv, ptb, lbda, cps).optimist(pt)
         ok = compare_assignments(etri, aao)
         self.assertEqual(ok, 1, "One or more alternatives were wrongly \
                          assigned")

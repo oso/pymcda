@@ -2,7 +2,7 @@ from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import random
-from pymcda.electre_tri import electre_tri_bm
+from pymcda.electre_tri import ElectreTriBM
 from pymcda.uta import utadis
 from pymcda.types import Alternative, Alternatives
 from pymcda.types import AlternativePerformances, PerformanceTable
@@ -215,7 +215,7 @@ def generate_random_electre_tri_bm_model(ncrit, ncat, seed = None, k = 3,
     bpt = generate_random_profiles(b, c, None, k, worst, best)
     lbda = random.uniform(0.5, 1)
 
-    return electre_tri_bm(c, cv, bpt, lbda, cps)
+    return ElectreTriBM(c, cv, bpt, lbda, cps)
 
 def generate_random_utadis_model(ncrit, ncat, nseg_min, nseg_max,
                                  seed = None, k = 3,

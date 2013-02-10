@@ -8,7 +8,7 @@ import random
 from itertools import product
 
 from pymcda.types import AlternativesAssignments, PerformanceTable
-from pymcda.electre_tri import electre_tri
+from pymcda.electre_tri import ElectreTri
 from pymcda.learning.meta_etri_global2 import meta_etri_global2
 from pymcda.learning.meta_etri_global3 import meta_etri_global3
 from pymcda.utils import compute_ca
