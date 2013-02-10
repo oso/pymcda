@@ -6,7 +6,7 @@ import random
 from itertools import product
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 
-class meta_etri_profiles3():
+class MetaEtriProfiles3():
 
     def __init__(self, model, pt_sorted, aa_ori):
         self.na = len(aa_ori)
@@ -281,7 +281,7 @@ if __name__ == "__main__":
                        alternative_ids = model2.profiles)
 
     pt_sorted = SortedPerformanceTable(pt_learn)
-    meta = meta_etri_profiles3(model2, pt_sorted, aa_err)
+    meta = MetaEtriProfiles3(model2, pt_sorted, aa_err)
 
     f = meta.good / meta.na
     best_f = f

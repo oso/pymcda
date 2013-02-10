@@ -6,7 +6,7 @@ from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.generate import generate_random_profiles
 from pymcda.learning.lp_etri_weights import LpEtriWeights
-from pymcda.learning.meta_etri_profiles3 import meta_etri_profiles3
+from pymcda.learning.meta_etri_profiles3 import MetaEtriProfiles3
 from pymcda.learning.meta_etri_profiles4 import meta_etri_profiles4
 from pymcda.learning.mip_etri_global import mip_etri_global
 from pymcda.learning.heur_etri_profiles import HeurEtriProfiles
@@ -69,7 +69,7 @@ class tests_meta_etri_profiles(unittest.TestCase):
 
         pt_sorted = SortedPerformanceTable(pt)
 
-        meta = meta_etri_profiles3(model2, pt_sorted, aa)
+        meta = MetaEtriProfiles3(model2, pt_sorted, aa)
 
         for i in range(1, max_loop + 1):
             ca = meta.optimize()
