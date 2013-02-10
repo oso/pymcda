@@ -8,7 +8,7 @@ from pymcda.electre_tri import electre_tri
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import PerformanceTable
 from pymcda.utils import compute_ca
-from pymcda.pt_sorted import sorted_performance_table
+from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_electre_tri_bm_model
 from pymcda.generate import generate_alternatives
 from lp_etri_weights import lp_etri_weights
@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     ncriteria = len(model.criteria)
     ncategories = len(model.categories)
-    pt_sorted = sorted_performance_table(pt)
+    pt_sorted = SortedPerformanceTable(pt)
 
     metas = []
     for i in range(nmodels):

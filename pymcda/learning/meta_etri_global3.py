@@ -11,7 +11,7 @@ from pymcda.learning.heur_etri_profiles import heur_etri_profiles
 from pymcda.learning.lp_etri_weights import lp_etri_weights
 from pymcda.learning.meta_etri_profiles4 import meta_etri_profiles4
 from pymcda.utils import compute_ca
-from pymcda.pt_sorted import sorted_performance_table
+from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_electre_tri_bm_model
 from pymcda.generate import generate_alternatives
 
@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     ncriteria = len(model.criteria)
     ncategories = len(model.categories)
-    pt_sorted = sorted_performance_table(pt)
+    pt_sorted = SortedPerformanceTable(pt)
 
     model2 = generate_random_electre_tri_bm_model(ncriteria, ncategories)
 

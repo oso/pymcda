@@ -83,7 +83,7 @@ if __name__ == "__main__":
     from pymcda.generate import generate_alternatives
     from pymcda.generate import generate_random_performance_table
     from pymcda.generate import generate_random_profiles
-    from pymcda.pt_sorted import sorted_performance_table
+    from pymcda.pt_sorted import SortedPerformanceTable
     from pymcda.utils import compute_ca
     from pymcda.utils import compute_winning_coalitions
     from pymcda.utils import display_coalitions
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
     a = generate_alternatives(1000)
     pt = generate_random_performance_table(a, model.criteria)
-    sorted_pt = sorted_performance_table(pt)
+    sorted_pt = SortedPerformanceTable(pt)
 
     aa = model.pessimist(pt)
 

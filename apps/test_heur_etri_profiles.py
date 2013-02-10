@@ -9,7 +9,7 @@ from pymcda.generate import generate_random_electre_tri_bm_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.generate import generate_random_profiles
-from pymcda.pt_sorted import sorted_performance_table
+from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import add_errors_in_assignments
 from pymcda.utils import compute_ca
 from pymcda.learning.heur_etri_profiles import heur_etri_profiles
@@ -36,7 +36,7 @@ def test_heur_etri_profiles(seed, na, nc, ncat, pcerrors):
 
     # Run the heuristic
     cats = model.categories_profiles.to_categories()
-    pt_sorted = sorted_performance_table(pt)
+    pt_sorted = SortedPerformanceTable(pt)
     heur = heur_etri_profiles(model3, pt_sorted, aa)
     heur.solve()
 

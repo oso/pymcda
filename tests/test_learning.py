@@ -10,7 +10,7 @@ from pymcda.learning.meta_etri_profiles3 import meta_etri_profiles3
 from pymcda.learning.meta_etri_profiles4 import meta_etri_profiles4
 from pymcda.learning.mip_etri_global import mip_etri_global
 from pymcda.learning.heur_etri_profiles import heur_etri_profiles
-from pymcda.pt_sorted import sorted_performance_table
+from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import compute_ca
 from pymcda.utils import add_errors_in_assignments
 import unittest
@@ -67,7 +67,7 @@ class tests_meta_etri_profiles(unittest.TestCase):
         bids = model2.categories_profiles.get_ordered_profiles()
         model2.bpt = generate_random_profiles(bids, model.criteria)
 
-        pt_sorted = sorted_performance_table(pt)
+        pt_sorted = SortedPerformanceTable(pt)
 
         meta = meta_etri_profiles3(model2, pt_sorted, aa)
 
@@ -118,7 +118,7 @@ class tests_meta_etri_profiles4(unittest.TestCase):
         bids = model2.categories_profiles.get_ordered_profiles()
         model2.bpt = generate_random_profiles(bids, model.criteria)
 
-        pt_sorted = sorted_performance_table(pt)
+        pt_sorted = SortedPerformanceTable(pt)
 
         meta = meta_etri_profiles4(model2, pt_sorted, aa)
 
@@ -215,7 +215,7 @@ class tests_heur_etri_profiles(unittest.TestCase):
 
         aa = model.pessimist(pt)
 
-        pt_sorted = sorted_performance_table(pt)
+        pt_sorted = SortedPerformanceTable(pt)
         heur = heur_etri_profiles(model, pt_sorted, aa)
         heur.solve()
 

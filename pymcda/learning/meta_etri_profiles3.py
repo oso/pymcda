@@ -238,7 +238,7 @@ if __name__ == "__main__":
     from pymcda.utils import display_assignments_and_pt
     from pymcda.utils import add_errors_in_assignments
     from pymcda.utils import compute_ca
-    from pymcda.pt_sorted import sorted_performance_table
+    from pymcda.pt_sorted import SortedPerformanceTable
     from pymcda.types import PerformanceTable
     from pymcda.ui.graphic import display_electre_tri_models
 
@@ -280,7 +280,7 @@ if __name__ == "__main__":
     model2.bpt.display(criterion_ids = cids,
                        alternative_ids = model2.profiles)
 
-    pt_sorted = sorted_performance_table(pt_learn)
+    pt_sorted = SortedPerformanceTable(pt_learn)
     meta = meta_etri_profiles3(model2, pt_sorted, aa_err)
 
     f = meta.good / meta.na

@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import bisect
 from pymcda.types import AlternativePerformances
 
-class sorted_performance_table():
+class SortedPerformanceTable():
 
     def __init__(self, pt):
         self.pt = pt
@@ -124,7 +124,7 @@ if __name__ == "__main__":
     c = generate_criteria(5)
     pt = generate_random_performance_table(a, c, 1234)
 
-    sorted_pt = sorted_performance_table(pt)
+    sorted_pt = SortedPerformanceTable(pt)
 
     t1 = time.time()
     print len(sorted_pt.get_below('c1', 0.1)[0])

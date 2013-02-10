@@ -14,7 +14,7 @@ from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_categories_profiles
 from pymcda.generate import generate_random_profiles
 from pymcda.generate import generate_random_criteria_weights
-from pymcda.pt_sorted import sorted_performance_table
+from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import compute_ca
 from test_utils import test_result, test_results
 
@@ -87,7 +87,7 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
     # Run the metaheuristic
     t1 = time.time()
 
-    pt_sorted = sorted_performance_table(pt_learning)
+    pt_sorted = SortedPerformanceTable(pt_learning)
 
     # Init of the metas
     model_metas = {}

@@ -258,7 +258,7 @@ if __name__ == "__main__":
     from pymcda.generate import generate_random_profiles
     from pymcda.utils import display_assignments_and_pt
     from pymcda.utils import compute_number_of_winning_coalitions
-    from pymcda.pt_sorted import sorted_performance_table
+    from pymcda.pt_sorted import SortedPerformanceTable
     from pymcda.ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model
@@ -287,7 +287,7 @@ if __name__ == "__main__":
     print('========================')
     model.bpt.display(criterion_ids = cids)
 
-    pt_sorted = sorted_performance_table(pt)
+    pt_sorted = SortedPerformanceTable(pt)
     meta = meta_etri_profiles4(model2, pt_sorted, aa)
 
     t1 = time.time()

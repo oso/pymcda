@@ -13,7 +13,7 @@ from pymcda.electre_tri import electre_tri_bm
 from pymcda.learning.meta_etri_profiles3 import meta_etri_profiles3
 from pymcda.learning.meta_etri_profiles4 import meta_etri_profiles4
 from pymcda.utils import compute_ca
-from pymcda.pt_sorted import sorted_performance_table
+from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_electre_tri_bm_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
@@ -44,7 +44,7 @@ def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
                                            pcerrors / 100)
 
     # Sort the performance table
-    pt_sorted = sorted_performance_table(pt)
+    pt_sorted = SortedPerformanceTable(pt)
 
     t1 = time.time()
 

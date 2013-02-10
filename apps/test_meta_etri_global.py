@@ -12,7 +12,7 @@ from pymcda.electre_tri import electre_tri
 from pymcda.learning.meta_etri_global2 import meta_etri_global2
 from pymcda.learning.meta_etri_global3 import meta_etri_global3
 from pymcda.utils import compute_ca
-from pymcda.pt_sorted import sorted_performance_table
+from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_electre_tri_bm_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
@@ -36,12 +36,12 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
                                            pcerrors / 100)
 
     # Sort the performance table
-    pt_sorted = sorted_performance_table(pt)
+    pt_sorted = SortedPerformanceTable(pt)
 
     # Initialize nmodels meta instances
     ncriteria = len(model.criteria)
     ncategories = len(model.categories)
-    pt_sorted = sorted_performance_table(pt)
+    pt_sorted = SortedPerformanceTable(pt)
     model_metas = {}
     model_cas = {}
     for i in range(nmodels):

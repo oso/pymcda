@@ -14,7 +14,7 @@ from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_categories_profiles
 from pymcda.generate import generate_random_profiles
 from pymcda.generate import generate_random_criteria_weights
-from pymcda.pt_sorted import sorted_performance_table
+from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import compute_ca
 from test_utils import test_result, test_results
 
