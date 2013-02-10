@@ -5,7 +5,7 @@ from itertools import product
 import random
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 
-class meta_etri_profiles4():
+class MetaEtriProfiles4():
 
     def __init__(self, model, pt_sorted, aa_ori):
         self.na = len(aa_ori)
@@ -288,7 +288,7 @@ if __name__ == "__main__":
     model.bpt.display(criterion_ids = cids)
 
     pt_sorted = SortedPerformanceTable(pt)
-    meta = meta_etri_profiles4(model2, pt_sorted, aa)
+    meta = MetaEtriProfiles4(model2, pt_sorted, aa)
 
     t1 = time.time()
 

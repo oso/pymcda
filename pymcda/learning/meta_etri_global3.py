@@ -9,7 +9,7 @@ from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import PerformanceTable
 from pymcda.learning.heur_etri_profiles import HeurEtriProfiles
 from pymcda.learning.lp_etri_weights import LpEtriWeights
-from pymcda.learning.meta_etri_profiles4 import meta_etri_profiles4
+from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_electre_tri_bm_model
@@ -27,10 +27,10 @@ class MetaEtriGlobal3():
 
         self.lp = LpEtriWeights(self.model, pt_sorted.pt, self.aa_ori)
 
-        # Because meta_etri_profiles4 needs weights in initialization
+        # Because MetaEtriProfiles4 needs weights in initialization
         self.lp.solve()
 
-        self.meta = meta_etri_profiles4(self.model, pt_sorted, self.aa_ori)
+        self.meta = MetaEtriProfiles4(self.model, pt_sorted, self.aa_ori)
 
     def optimize(self, nmeta):
         self.lp.update_linear_program()

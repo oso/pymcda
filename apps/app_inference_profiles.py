@@ -14,7 +14,7 @@ from pymcda.generate import generate_criteria
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import compute_ca
 from pymcda.learning.meta_etri_profiles3 import MetaEtriProfiles3
-from pymcda.learning.meta_etri_profiles4 import meta_etri_profiles4
+from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
 from pymcda.ui.graphic import QGraphicsScene_etri
 from multiprocessing import Process, Pipe
 
@@ -34,7 +34,7 @@ def run_metaheuristic(pipe, model, pt, aa, algo, n, worst = None,
     if algo == "Meta 3":
         meta = MetaEtriProfiles3(model, pt_sorted, aa)
     elif algo == "Meta 4":
-        meta = meta_etri_profiles4(model, pt_sorted, aa)
+        meta = MetaEtriProfiles4(model, pt_sorted, aa)
     else:
         print("Invalid algorithm %s" % algo)
         pipe.close()
