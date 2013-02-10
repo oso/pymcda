@@ -15,7 +15,7 @@ from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_electre_tri_bm_model
 from pymcda.generate import generate_alternatives
 
-class meta_etri_global3():
+class MetaEtriGlobal3():
 
     def __init__(self, model, pt_sorted, aa_ori):
         self.model = model
@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
     t1 = time.time()
 
-    meta = meta_etri_global3(model2, pt_sorted, aa)
+    meta = MetaEtriGlobal3(model2, pt_sorted, aa)
 
     for i in range(nloops):
         ca = meta.optimize(nmeta)

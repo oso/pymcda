@@ -5,7 +5,7 @@ import datetime
 import random
 import time
 from itertools import product
-from pymcda.learning.meta_etri_global3 import meta_etri_global3
+from pymcda.learning.meta_etri_global3 import MetaEtriGlobal3
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import Alternatives, Criteria, PerformanceTable
 from pymcda.types import AlternativesAssignments, Categories
@@ -93,7 +93,7 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
     model_metas = {}
     for i in range(nmodels):
         m = model.copy()
-        model_metas[m] = meta_etri_global3(m, pt_sorted, aa_learning)
+        model_metas[m] = MetaEtriGlobal3(m, pt_sorted, aa_learning)
 
     # Main loop
     for i in range(nloop):
@@ -114,7 +114,7 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
             m = model_ca[0]
             del model_metas[m]
             m = model.copy()
-            model_metas[m] = meta_etri_global3(m, pt_sorted, aa_learning)
+            model_metas[m] = MetaEtriGlobal3(m, pt_sorted, aa_learning)
 
     model = model_cas[0][0]
 

@@ -10,7 +10,7 @@ from itertools import product
 from pymcda.types import AlternativesAssignments, PerformanceTable
 from pymcda.electre_tri import ElectreTri
 from pymcda.learning.meta_etri_global2 import MetaEtriGlobal2
-from pymcda.learning.meta_etri_global3 import meta_etri_global3
+from pymcda.learning.meta_etri_global3 import MetaEtriGlobal3
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_electre_tri_bm_model
@@ -271,7 +271,7 @@ if __name__ == "__main__":
         algo = MetaEtriGlobal2
         i += 1
     if options.third is True:
-        algo = meta_etri_global3
+        algo = MetaEtriGlobal3
         i += 1
     if i > 1:
         print("Cannot select multiple algorithms at the same time")
