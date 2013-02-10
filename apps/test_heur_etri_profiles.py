@@ -12,7 +12,7 @@ from pymcda.generate import generate_random_profiles
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import add_errors_in_assignments
 from pymcda.utils import compute_ca
-from pymcda.learning.heur_etri_profiles import heur_etri_profiles
+from pymcda.learning.heur_etri_profiles import HeurEtriProfiles
 from pymcda.learning.heur_etri_coalitions import HeurEtriCoalitions
 from pymcda.learning.lp_etri_weights import lp_etri_weights
 from test_utils import test_result, test_results
@@ -37,7 +37,7 @@ def test_heur_etri_profiles(seed, na, nc, ncat, pcerrors):
     # Run the heuristic
     cats = model.categories_profiles.to_categories()
     pt_sorted = SortedPerformanceTable(pt)
-    heur = heur_etri_profiles(model3, pt_sorted, aa)
+    heur = HeurEtriProfiles(model3, pt_sorted, aa)
     heur.solve()
 
     # Learn the weights and cut threshold

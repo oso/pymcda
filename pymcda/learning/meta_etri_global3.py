@@ -7,7 +7,7 @@ from itertools import product
 from pymcda.electre_tri import ElectreTri
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import PerformanceTable
-from pymcda.learning.heur_etri_profiles import heur_etri_profiles
+from pymcda.learning.heur_etri_profiles import HeurEtriProfiles
 from pymcda.learning.lp_etri_weights import lp_etri_weights
 from pymcda.learning.meta_etri_profiles4 import meta_etri_profiles4
 from pymcda.utils import compute_ca
@@ -22,7 +22,7 @@ class meta_etri_global3():
         self.aa_ori = aa_ori
 
         cats = model.categories_profiles.to_categories()
-        heur = heur_etri_profiles(model, pt_sorted, aa_ori)
+        heur = HeurEtriProfiles(model, pt_sorted, aa_ori)
         heur.solve()
 
         self.lp = lp_etri_weights(self.model, pt_sorted.pt, self.aa_ori)
