@@ -15,7 +15,7 @@ from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import compute_ca
 from pymcda.learning.meta_etri_profiles3 import MetaEtriProfiles3
 from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
-from pymcda.ui.graphic import QGraphicsScene_etri
+from pymcda.ui.graphic import QGraphicsSceneEtri
 from multiprocessing import Process, Pipe
 
 # FIXME
@@ -359,7 +359,7 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.model = generate_random_electre_tri_bm_model(ncrit, ncat,
                                     worst = self.worst, best = self.best)
 
-        self.graph_model = QGraphicsScene_etri(self.model,
+        self.graph_model = QGraphicsSceneEtri(self.model,
                                               self.worst, self.best,
                                               self.graphicv_original.size())
         self.graphicv_original.setScene(self.graph_model)
@@ -397,7 +397,7 @@ class qt_mainwindow(QtGui.QMainWindow):
             self.groupbox_result.setVisible(True)
 
             self.model2 = model.copy()
-            self.graph_model2 = QGraphicsScene_etri(self.model2,
+            self.graph_model2 = QGraphicsSceneEtri(self.model2,
                                                self.worst, self.best,
                                                self.graphicv_learned.size())
             self.graphicv_learned.setScene(self.graph_model2)

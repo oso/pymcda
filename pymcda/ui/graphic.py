@@ -22,7 +22,7 @@ def display_electre_tri_models(etri, worst = list(), best = list(),
     i = j = 0
     views = {}
     for m in etri:
-        view = mygraphicsview()
+        view = _MyGraphicsview()
         view.setRenderHint(QtGui.QPainter.Antialiasing)
         view.setSizePolicy(sizePolicy)
 
@@ -40,7 +40,7 @@ def display_electre_tri_models(etri, worst = list(), best = list(),
     dialog.resize(1024, 768)
 
     for i, m in enumerate(etri):
-        graph = QGraphicsScene_etri(m, worst[i], best[i], views[m].size())
+        graph = QGraphicsSceneEtri(m, worst[i], best[i], views[m].size())
         views[m].setScene(graph)
         if aps and aps[i]:
             for ap in aps[i]:
@@ -49,7 +49,7 @@ def display_electre_tri_models(etri, worst = list(), best = list(),
     dialog.show()
     app.exec_()
 
-class mygraphicsview(QtGui.QGraphicsView):
+class _MyGraphicsview(QtGui.QGraphicsView):
 
     def __init__(self, parent = None):
         super(QtGui.QGraphicsView, self).__init__(parent)
@@ -59,7 +59,7 @@ class mygraphicsview(QtGui.QGraphicsView):
         scene.update(self.size())
         self.resetCachedContent()
 
-class QGraphicsScene_etri(QtGui.QGraphicsScene):
+class QGraphicsSceneEtri(QtGui.QGraphicsScene):
 
     def __init__(self, model, worst, best, size, criteria_order = None,
                  parent = None):
@@ -414,11 +414,11 @@ if __name__ == "__main__":
     sizePolicy.setVerticalStretch(0)
     sizePolicy.setHeightForWidth(sizePolicy.hasHeightForWidth())
 
-    view = mygraphicsview()
+    view = _MyGraphicsview()
     view.setRenderHint(QtGui.QPainter.Antialiasing)
     view.setSizePolicy(sizePolicy)
 
-    graph = QGraphicsScene_etri(model, worst, best, view.size())
+    graph = QGraphicsSceneEtri(model, worst, best, view.size())
 
     view.setScene(graph)
     view.show()
