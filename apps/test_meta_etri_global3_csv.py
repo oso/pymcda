@@ -49,15 +49,15 @@ def load_data(filepath):
         return None
 
     data = dataset(os.path.basename(filepath))
-    data.a = load_mcda_data(csvfile, alternatives, "pt")
-    data.c = load_mcda_data(csvfile, criteria, "criterion")
-    data.pt = load_mcda_data(csvfile, performance_table, "pt",
+    data.a = load_mcda_data(csvfile, Alternatives, "pt")
+    data.c = load_mcda_data(csvfile, Criteria, "criterion")
+    data.pt = load_mcda_data(csvfile, PerformanceTable, "pt",
                              ["c%d" % i
                               for i in range(1, len(data.c) + 1)])
     data.pt.round()
-    data.aa = load_mcda_data(csvfile, alternatives_assignments,
+    data.aa = load_mcda_data(csvfile, AlternativesAssignments,
                              "pt", "assignment")
-    data.cats = load_mcda_data(csvfile, categories, "category",
+    data.cats = load_mcda_data(csvfile, Categories, "category",
                                None, "rank")
 
     if data.is_complete() is False:
