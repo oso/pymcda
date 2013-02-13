@@ -262,6 +262,17 @@ class tests_PiecewiseLinear(unittest.TestCase):
         plf = PiecewiseLinear([s1, s2])
         self.assertRaises(ValueError, plf.y, 1)
 
+class tests_CategoriesValues(unittest.TestCase):
+
+    def test001(self):
+        cv1 = CategoryValue('cat1', Interval(0, 0.25))
+        cv2 = CategoryValue('cat2', Interval(0.25, 0.5))
+        cv3 = CategoryValue('cat3', Interval(0.5, 1))
+        cvs = CategoriesValues([cv1, cv2, cv3])
+        cats = cvs.get_ordered_categories()
+
+        self.assertEqual([cv1.id, cv2.id, cv3.id], cats)
+
 from datasets import swd
 class tests_csv(unittest.TestCase):
 
@@ -380,7 +391,7 @@ class tests_mcda_methods(unittest.TestCase):
         self.assertEqual(a1, a3)
 
 test_classes = [tests_xmcda, tests_Segment, tests_PiecewiseLinear,
-                tests_csv, tests_mcda_methods]
+                tests_CategoriesValues, tests_csv, tests_mcda_methods]
 
 if __name__ == "__main__":
     suite = []

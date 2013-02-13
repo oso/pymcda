@@ -683,6 +683,11 @@ class CategoriesValues(McdaDict):
             d[cv.id] = cv.value.lower
         return d
 
+    def get_ordered_categories(self):
+        upper = self.get_upper_limits()
+        cats = sorted(upper, key = lambda key: upper[key])
+        return cats
+
     def to_xmcda(self):
         root = ElementTree.Element('categoriesValues')
 
