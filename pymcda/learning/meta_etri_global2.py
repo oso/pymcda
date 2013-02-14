@@ -12,7 +12,7 @@ from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_electre_tri_bm_model
 from pymcda.generate import generate_alternatives
 from lp_etri_weights import LpEtriWeights
-from MetaEtriProfiles4 import MetaEtriProfiles4
+from meta_etri_profiles4 import MetaEtriProfiles4
 
 class MetaEtriGlobal2():
 
