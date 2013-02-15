@@ -1,3 +1,8 @@
+"""
+.. module:: types
+.. moduleauthor:: Olivier Sobrie <olivier@sobrie.be>
+"""
+
 from __future__ import division, print_function
 import random
 import sys
@@ -26,32 +31,62 @@ def unmarshal(xml):
     return m(xml)
 
 class McdaDict(object):
+    """This class allows to declare an MCDA dictionnary element.
+    It contains usefull methods to manipulate MCDA data.
+    """
 
     def __init__(self, l = list(), id = None):
+        """Create a new MCDA dictionnary instance
+
+        Kwargs:
+           l (list): A list containing a set of MCDA objects
+           id (str): The identifier of the dictionnary
+        """
         self.id = id
         self._d = dict()
         for i in l:
             self._d[i.id] = i
 
     def __cmp__(self, mcda_dict):
+        """This method allows to compare the current MCDA dictionnary to
+        another MCDA dictionnary. If the two MCDA dictionnaries are
+        equal, then True is returned, otherwise False is returned."""
+
         return self._d.__cmp__(mcda_dict._d)
 
     def __contains__(self, key):
+        """Check if a MCDA object is present in the dictionnary. If the
+        object is contained in the dictionnary, True is returned,
+        otherwise False is returned."""
+
         return self._d.__contains__(key)
 
     def __iter__(self):
+        """Return an iterator object for the MCDA dictionnary."""
+
         return self._d.itervalues()
 
     def __getitem__(self, key):
+        """Lookup for an MCDA object in the dictionnary on basis of its
+        identifier. If there is no object with idenfier 'id' in the
+        MCDA dictionnary, then KeyError exception is returned."""
+
         return self._d.__getitem__(key)
 
     def __len__(self):
+        """Return the number of elements contained in the MCDA
+        dictionnary."""
+
         return self._d.__len__()
 
     def append(self, mcda_object):
+        """Add an MCDA object in the MCDA dictionnary"""
+
         self._d[mcda_object.id] = mcda_object
 
     def copy(self):
+        """ Perform a full copy of the dictionnary"""
+
         return deepcopy(self)
 
     def has_key(self, key):
