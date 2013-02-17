@@ -85,40 +85,76 @@ class McdaDict(object):
         self._d[mcda_object.id] = mcda_object
 
     def copy(self):
-        """ Perform a full copy of the dictionnary"""
+        """Perform a full copy of the MCDA dictionnary"""
 
         return deepcopy(self)
 
     def has_key(self, key):
+        """Check if MCDA object id is in the dictionnary"""
+
         return self._d.has_key(key)
 
     def items(self):
+        """Return a copy of the MCDA dictionary's list of (id, mcda_object)
+        pairs"""
+
         return self._d.items()
 
     def iterkeys(self):
+        """Return an iterator over the MCDA dictionary's object IDs"""
+
         return self._d.iterkeys()
 
     def itervalues(self):
+        """Return an iterator over the MCDA dictionary's object IDs"""
+
         return self._d.itervalues()
 
     def keys(self):
+        """Return the list of MCDA object IDs contained in the MCDA
+        dictionnary"""
+
         return self._d.keys()
 
     def update(self, mcda_dict):
+        """Add the object of a second MCDA dictionnary into the current
+        dictionnary"""
+
         self._d.update(mcda_dict)
 
     def values(self):
+        """Return the list of MCDA objects contained in the MCDA
+        dictionnary"""
+
         return self._d.values()
 
     def to_list(self):
+        """Return a list of MCDA objects contained in the MCDA dictionnary
+        ordered by MCDA object ID"""
+
         l = self._d.values()
         l.sort(key = lambda x: x.id)
         return l
 
     def get_subset(self, ids):
+        """Return a subset of the current MCDA dictionnary containing the
+        MCDA object IDs"""
+
         return type(self)([self._d[id] for id in ids])
 
     def split(self, n, proportions = None, randomize = True):
+        """Split the MCDA dictionnary into two or several parts
+
+        Kargs:
+           n (integer): Number of parts in which the MCDA dictionnary
+                        should be split
+
+        Kwargs:
+           propostions (list): A list containing the proportions of
+                               subset
+           randomize (bool): Wheter or not the split should be randomize
+        """
+
         if proportions is None:
             proportions = [1 / n] * n
         elif len(proportions) == n:
@@ -147,17 +183,26 @@ class McdaDict(object):
 class McdaObject(object):
 
     def __eq__(self, other):
+        """Return True if the two MCDA objects are equal, otherwise
+        return False"""
+
         return self.__dict__ == other.__dict__
 
     def copy(self):
+        """Return a copy of the current MCDA object"""
+
         return deepcopy(self)
 
 class Criteria(McdaDict):
 
     def __repr__(self):
+        """Manner to represent the MCDA dictionnary"""
+
         return "criteria(%s)" % self.values()
 
     def to_xmcda(self):
+        """Convert the MCDA dictionnary into XMCDA output"""
+
         root = ElementTree.Element('criteria')
 
         if self.id is not None:
@@ -169,6 +214,8 @@ class Criteria(McdaDict):
         return root
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA dictionnary from XMCDA input"""
+
         if xmcda.tag != 'criteria':
             raise TypeError('criteria::invalid tag')
 
@@ -183,6 +230,8 @@ class Criteria(McdaDict):
 
     def from_csv(self, csvreader, crit_col, name_col = None,
                  disabled_col = None, direction_col = None):
+        """Read the MCDA dictionnary from CSV input"""
+
         cols = None
         for row in csvreader:
             if row[0] == crit_col:
@@ -220,9 +269,13 @@ class Criterion(McdaObject):
         self.thresholds = thresholds
 
     def __repr__(self):
+        """Manner to represent the MCDA object"""
+
         return "%s" % self.id
 
     def to_xmcda(self):
+        """Convert the MCDA object into XMCDA output"""
+
         xmcda = ElementTree.Element('criterion')
         if self.id is not None:
             xmcda.set('id', self.id)
@@ -256,6 +309,8 @@ class Criterion(McdaObject):
         return xmcda
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
         if xmcda.tag != 'criterion':
             raise TypeError('criterion::invalid tag')
 
@@ -287,6 +342,8 @@ class Criterion(McdaObject):
 class CriteriaValues(McdaDict):
 
     def __repr__(self):
+        """Manner to represent the MCDA dictionnary"""
+
         return "criteria_values(%s)" % self.values()
 
     def normalize(self):
@@ -296,6 +353,8 @@ class CriteriaValues(McdaDict):
             cv.value /= total
 
     def to_xmcda(self):
+        """Convert the MCDA dictionnary into XMCDA output"""
+
         root = ElementTree.Element('criteriaValues')
 
         if self.id is not None:
@@ -307,6 +366,8 @@ class CriteriaValues(McdaDict):
         return root
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA dictionnary from XMCDA input"""
+
         if xmcda.tag != 'criteriaValues':
             raise TypeError('criteriaValues::invalid tag')
 
@@ -351,9 +412,13 @@ class CriterionValue(McdaObject):
         self.value = value
 
     def __repr__(self):
+        """Manner to represent the MCDA object"""
+
         return "%s: %s" % (self.id, self.value)
 
     def to_xmcda(self, id=None):
+        """Convert the MCDA object into XMCDA output"""
+
         xmcda = ElementTree.Element('criterionValue')
         if id is not None:
             xmcda.set('id', id)
@@ -364,6 +429,8 @@ class CriterionValue(McdaObject):
         return xmcda
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
         if xmcda.tag != 'criterionValue':
             raise TypeError('criterionValue::invalid tag')
 
@@ -381,9 +448,15 @@ class CriterionValue(McdaObject):
 class Alternatives(McdaDict):
 
     def __repr__(self):
+        """Manner to represent the MCDA object"""
+
+        """Manner to represent the MCDA dictionnary"""
+
         return "alternatives(%s)" % self.values()
 
     def to_xmcda(self):
+        """Convert the MCDA dictionnary into XMCDA output"""
+
         root = ElementTree.Element('alternatives')
 
         if self.id is not None:
@@ -395,6 +468,8 @@ class Alternatives(McdaDict):
         return root
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA dictionnary from XMCDA input"""
+
         if xmcda.tag != 'alternatives':
             raise TypeError('alternatives::invalid tag')
 
@@ -409,6 +484,8 @@ class Alternatives(McdaDict):
 
     def from_csv(self, csvreader, alt_col, name_col = None,
                  disabled_col = None):
+        """Read the MCDA dictionnary from CSV input"""
+
         cols = None
         for row in csvreader:
             if row[0] == alt_col:
@@ -436,9 +513,13 @@ class Alternative(McdaObject):
         self.disabled = disabled
 
     def __repr__(self):
+        """Manner to represent the MCDA object"""
+
         return "%s" % self.id
 
     def to_xmcda(self):
+        """Convert the MCDA object into XMCDA output"""
+
         xmcda = ElementTree.Element('alternative', id=self.id)
         if self.name is not None:
             xmcda.set('name', self.name)
@@ -452,6 +533,8 @@ class Alternative(McdaObject):
         return xmcda
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
         if xmcda.tag != 'alternative':
             raise TypeError('alternative::invalid tag')
 
@@ -472,6 +555,8 @@ class PerformanceTable(McdaDict):
         return self[id].performances
 
     def __repr__(self):
+        """Manner to represent the MCDA dictionnary"""
+
         return "performance_table(%s)" % self.values()
 
     def update_direction(self, c):
@@ -554,6 +639,8 @@ class PerformanceTable(McdaDict):
         return a
 
     def to_xmcda(self):
+        """Convert the MCDA dictionnary into XMCDA output"""
+
         root = ElementTree.Element('performanceTable')
 
         if self.id is not None:
@@ -565,6 +652,8 @@ class PerformanceTable(McdaDict):
         return root
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA dictionnary from XMCDA input"""
+
         if xmcda.tag != 'performanceTable':
             raise TypeError('performanceTable::invalid tag')
 
@@ -612,6 +701,8 @@ class PerformanceTable(McdaDict):
             print(line, file = out)
 
     def from_csv(self, csvreader, alt_col, perf_cols):
+        """Read the MCDA dictionnary from CSV input"""
+
         cols = None
         for row in csvreader:
             if row[0] == alt_col:
@@ -646,6 +737,8 @@ class AlternativePerformances(McdaObject):
         return self.performances[criterion_id]
 
     def __repr__(self):
+        """Manner to represent the MCDA object"""
+
         return "%s: %s" % (self.id, self.performances)
 
     def update_direction(self, c):
@@ -667,6 +760,8 @@ class AlternativePerformances(McdaObject):
             self.performances[key] *= value
 
     def to_xmcda(self):
+        """Convert the MCDA object into XMCDA output"""
+
         xmcda = ElementTree.Element('alternativePerformances')
         altid = ElementTree.SubElement(xmcda, 'alternativeID')
         altid.text = self.id
@@ -682,6 +777,8 @@ class AlternativePerformances(McdaObject):
         return xmcda
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
         if xmcda.tag != 'alternativePerformances':
             raise TypeError('alternativePerformances::invalid tag')
 
@@ -700,6 +797,8 @@ class AlternativePerformances(McdaObject):
 class CategoriesValues(McdaDict):
 
     def __repr__(self):
+        """Manner to represent the MCDA dictionnary"""
+
         return "categories_values(%s)" % self.values()
 
     def display(self, out = sys.stdout):
@@ -724,6 +823,8 @@ class CategoriesValues(McdaDict):
         return cats
 
     def to_xmcda(self):
+        """Convert the MCDA dictionnary into XMCDA output"""
+
         root = ElementTree.Element('categoriesValues')
 
         if self.id is not None:
@@ -735,6 +836,8 @@ class CategoriesValues(McdaDict):
         return root
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA dictionnary from XMCDA input"""
+
         if xmcda.tag != 'categoriesValues':
             raise TypeError('categoriesValues::invalid tag')
 
@@ -754,6 +857,8 @@ class CategoryValue(McdaObject):
         self.value = value
 
     def __repr__(self):
+        """Manner to represent the MCDA object"""
+
         return "%s: %s" % (self.id, self.value)
 
     def pprint(self):
@@ -763,6 +868,8 @@ class CategoryValue(McdaObject):
         print(self.pprint(), file = out)
 
     def to_xmcda(self):
+        """Convert the MCDA object into XMCDA output"""
+
         xmcda = ElementTree.Element('categoryValue')
         catid = ElementTree.SubElement(xmcda, 'categoryID')
         catid.text = self.id
@@ -771,6 +878,8 @@ class CategoryValue(McdaObject):
         return xmcda
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
         if xmcda.tag != 'categoryValue':
             raise TypeError('categoryValue::invalid tag')
 
@@ -790,6 +899,8 @@ class Interval(McdaObject):
         self.upper = upper
 
     def __repr__(self):
+        """Manner to represent the MCDA object"""
+
         return "interval(%s,%s)" % (self.lower, self.upper)
 
     def pprint(self):
@@ -808,6 +919,8 @@ class Interval(McdaObject):
         return True
 
     def to_xmcda(self):
+        """Convert the MCDA object into XMCDA output"""
+
         xmcda = ElementTree.Element('interval')
         lower = ElementTree.SubElement(xmcda, "lowerBound")
         lower.append(marshal(self.lower))
@@ -816,6 +929,8 @@ class Interval(McdaObject):
         return xmcda
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
         if xmcda.tag != 'interval':
             raise TypeError('interval::invalid tag')
 
@@ -828,9 +943,13 @@ class Interval(McdaObject):
 class AlternativesValues(McdaDict):
 
     def __repr__(self):
+        """Manner to represent the MCDA dictionnary"""
+
         return "alternatives_values(%s)" % self.values()
 
     def to_xmcda(self):
+        """Convert the MCDA dictionnary into XMCDA output"""
+
         root = ElementTree.Element('alternativesValues')
         for a_value in self:
             xmcda = a_value.to_xmcda()
@@ -838,6 +957,8 @@ class AlternativesValues(McdaDict):
         return root
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA dictionnary from XMCDA input"""
+
         if xmcda.tag != 'alternativesValues':
             raise TypeError('alternativesValues::invalid tag')
 
@@ -857,9 +978,13 @@ class AlternativeValue(McdaObject):
         self.value = value
 
     def __repr__(self):
+        """Manner to represent the MCDA object"""
+
         return "%s: %s" % (self.id, self.value)
 
     def to_xmcda(self):
+        """Convert the MCDA object into XMCDA output"""
+
         xmcda = ElementTree.Element('alternativeValue')
         lower = ElementTree.SubElement(xmcda, "alternativeID")
         lower.text = str(self.id)
@@ -868,6 +993,8 @@ class AlternativeValue(McdaObject):
         return xmcda
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
         if xmcda.tag != 'alternativeValue':
             raise TypeError('alternativesValues::invalid tag')
 
@@ -880,6 +1007,8 @@ class AlternativeValue(McdaObject):
 class CriteriaFunctions(McdaDict):
 
     def __repr__(self):
+        """Manner to represent the MCDA dictionnary"""
+
         return "criteria_functions(%s)" % self.values()
 
     def pprint(self, criterion_ids = None):
@@ -899,6 +1028,8 @@ class CriteriaFunctions(McdaDict):
         print(self.pprint(criterion_ids))
 
     def to_xmcda(self):
+        """Convert the MCDA dictionnary into XMCDA output"""
+
         root = ElementTree.Element('criteriaFunctions')
 
         if self.id is not None:
@@ -910,6 +1041,8 @@ class CriteriaFunctions(McdaDict):
         return root
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA dictionnary from XMCDA input"""
+
         if xmcda.tag != 'criteriaFunctions':
             raise TypeError('criteria_functions::invalid tag')
 
@@ -929,6 +1062,8 @@ class CriterionFunction(McdaObject):
         self.function = function
 
     def __repr__(self):
+        """Manner to represent the MCDA object"""
+
         return "criterion_function(%s)" % self.function
 
     def y(self, x):
@@ -941,6 +1076,8 @@ class CriterionFunction(McdaObject):
         print(self.pprint())
 
     def to_xmcda(self):
+        """Convert the MCDA object into XMCDA output"""
+
         root = ElementTree.Element('criterionFunction')
         critid = ElementTree.SubElement(root, 'criterionID')
         critid.text = self.id
@@ -949,6 +1086,8 @@ class CriterionFunction(McdaObject):
         return root
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
         if xmcda.tag != 'criterionFunction':
             raise TypeError('criterion_function::invalid tag')
 
@@ -993,6 +1132,8 @@ class Segment(McdaObject):
             self.pl_in, self.ph_in = p2_in, p1_in
 
     def __repr__(self):
+        """Manner to represent the MCDA object"""
+
         return "segment(%s,%s)" % (self.pl, self.ph)
 
     def slope(self):
@@ -1020,6 +1161,8 @@ class Segment(McdaObject):
         print(self.pprint())
 
     def to_xmcda(self):
+        """Convert the MCDA object into XMCDA output"""
+
         root = ElementTree.Element('segment')
         for elem in self:
             xmcda = elem.to_xmcda()
@@ -1027,6 +1170,8 @@ class Segment(McdaObject):
         return root
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
         if xmcda.tag != 'segment':
             raise TypeError('segment::invalid tag')
 
@@ -1082,6 +1227,8 @@ class PiecewiseLinear(list):
         print(self.pprint())
 
     def to_xmcda(self):
+        """Convert the MCDA object into XMCDA output"""
+
         root = ElementTree.Element('piecewiseLinear')
         for elem in self:
             xmcda = elem.to_xmcda()
@@ -1089,6 +1236,8 @@ class PiecewiseLinear(list):
         return root
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
         if xmcda.tag != 'piecewiseLinear':
             raise TypeError('piecewise_linear::invalid tag')
 
@@ -1141,9 +1290,13 @@ class Point(McdaObject):
         self.y = y
 
     def __repr__(self):
+        """Manner to represent the MCDA object"""
+
         return "(%g,%g)" % (self.x, self.y)
 
     def to_xmcda(self):
+        """Convert the MCDA object into XMCDA output"""
+
         xmcda = ElementTree.Element('point')
         abscissa = ElementTree.SubElement(xmcda, 'abscissa')
         abscissa.append(marshal(self.x))
@@ -1152,6 +1305,8 @@ class Point(McdaObject):
         return xmcda
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
         if xmcda.tag != 'point':
             raise TypeError('point::invalid tag')
 
@@ -1171,9 +1326,13 @@ class Constant(McdaObject):
         self.value = value
 
     def __repr__(self):
+        """Manner to represent the MCDA object"""
+
         return "%s: %s", (self.id, self.value)
 
     def to_xmcda(self):
+        """Convert the MCDA object into XMCDA output"""
+
         xmcda = ElementTree.Element('constant')
         if self.id is not None:
             xmcda.set('id', self.id)
@@ -1182,6 +1341,8 @@ class Constant(McdaObject):
         return xmcda
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
         if xmcda.tag != 'constant':
             raise TypeError('constant::invalid tag')
 
@@ -1191,9 +1352,13 @@ class Constant(McdaObject):
 class Thresholds(McdaDict):
 
     def __repr__(self):
+        """Manner to represent the MCDA dictionnary"""
+
         return "thresholds(%s)", self.values()
 
     def to_xmcda(self):
+        """Convert the MCDA dictionnary into XMCDA output"""
+
         root = ElementTree.Element('thresholds')
 
         if self.id is not None:
@@ -1205,6 +1370,8 @@ class Thresholds(McdaDict):
         return root
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA dictionnary from XMCDA input"""
+
         if xmcda.tag != 'thresholds':
             raise TypeError('thresholds::invalid tag')
 
@@ -1224,9 +1391,13 @@ class Threshold(McdaObject):
         self.values = values
 
     def __repr__(self):
+        """Manner to represent the MCDA object"""
+
         return "%s: %s" % (self.id, self.values)
 
     def to_xmcda(self):
+        """Convert the MCDA object into XMCDA output"""
+
         xmcda = ElementTree.Element('threshold', id=self.id)
         if self.name is not None:
             xmcda.set('name', self.name)
@@ -1237,6 +1408,8 @@ class Threshold(McdaObject):
         return xmcda
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
         if xmcda.tag != 'threshold':
             raise TypeError('threshold::invalid tag')
 
@@ -1250,12 +1423,16 @@ class Threshold(McdaObject):
 class Categories(McdaDict):
 
     def __repr__(self):
+        """Manner to represent the MCDA dictionnary"""
+
         return "categories(%s)" % self.values()
 
     def get_ids(self):
         return self.keys()
 
     def to_xmcda(self):
+        """Convert the MCDA dictionnary into XMCDA output"""
+
         root = ElementTree.Element('categories')
 
         if self.id is not None:
@@ -1271,6 +1448,8 @@ class Categories(McdaDict):
         return sorted(d, key = lambda key: d[key])
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA dictionnary from XMCDA input"""
+
         if xmcda.tag != 'categories':
             raise TypeError('categories::invalid tag')
 
@@ -1286,6 +1465,8 @@ class Categories(McdaDict):
 
     def from_csv(self, csvreader, cat_col, name_col = None,
                  rank_col = None, disabled_col = None):
+        """Read the MCDA dictionnary from CSV input"""
+
         cols = None
         for row in csvreader:
             if row[0] == cat_col:
@@ -1318,9 +1499,13 @@ class Category(McdaObject):
         self.rank = rank
 
     def __repr__(self):
+        """Manner to represent the MCDA object"""
+
         return "%s: %d" % (self.id, self.rank)
 
     def to_xmcda(self):
+        """Convert the MCDA object into XMCDA output"""
+
         xmcda = ElementTree.Element('category')
         xmcda.set('id', self.id)
         if self.name is not None:
@@ -1338,6 +1523,8 @@ class Category(McdaObject):
         return xmcda
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
         if xmcda.tag != 'category':
             raise TypeError('category::invalid tag')
 
@@ -1362,9 +1549,13 @@ class Limits(McdaObject):
         self.upper  = upper
 
     def __repr__(self):
+        """Manner to represent the MCDA object"""
+
         return "limits(%s,%s)" % (self.lower, self.upper)
 
     def to_xmcda(self):
+        """Convert the MCDA object into XMCDA output"""
+
         xmcda = ElementTree.Element('limits')
 
         if self.lower:
@@ -1380,6 +1571,8 @@ class Limits(McdaObject):
         return xmcda
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
         if xmcda.tag != 'limits':
             raise TypeError('limits::invalid tag')
 
@@ -1393,6 +1586,8 @@ class Limits(McdaObject):
 class CategoriesProfiles(McdaDict):
 
     def __repr__(self):
+        """Manner to represent the MCDA dictionnary"""
+
         return "categories_profiles(%s)" % self.values()
 
     def get_ordered_profiles(self):
@@ -1424,6 +1619,8 @@ class CategoriesProfiles(McdaDict):
         return cats
 
     def to_xmcda(self):
+        """Convert the MCDA dictionnary into XMCDA output"""
+
         root = ElementTree.Element('categoriesProfiles')
 
         if self.id is not None:
@@ -1435,6 +1632,8 @@ class CategoriesProfiles(McdaDict):
         return root
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA dictionnary from XMCDA input"""
+
         if xmcda.tag != 'categoriesProfiles':
             raise TypeError('categories_profiles::invalid tag')
 
@@ -1454,9 +1653,13 @@ class CategoryProfile(McdaObject):
         self.value = value
 
     def __repr__(self):
+        """Manner to represent the MCDA object"""
+
         return "%s: %s" % (self.id, self.value)
 
     def to_xmcda(self):
+        """Convert the MCDA object into XMCDA output"""
+
         xmcda = ElementTree.Element('categoryProfile')
         altid = ElementTree.SubElement(xmcda, 'alternativeID')
         altid.text = str(self.id)
@@ -1465,6 +1668,8 @@ class CategoryProfile(McdaObject):
         return xmcda
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
         if xmcda.tag != 'categoryProfile':
             raise TypeError('category_profile::invalid tag')
 
@@ -1482,6 +1687,8 @@ class AlternativesAssignments(McdaDict):
         return self._d[id].category_id
 
     def __repr__(self):
+        """Manner to represent the MCDA dictionnary"""
+
         return "alternatives_assignments(%s)" % self.values()
 
     def get_alternatives_in_category(self, category_id):
@@ -1526,6 +1733,8 @@ class AlternativesAssignments(McdaDict):
             print(line, file = out)
 
     def to_xmcda(self):
+        """Convert the MCDA dictionnary into XMCDA output"""
+
         root = ElementTree.Element('alternativesAffectations')
 
         if self.id is not None:
@@ -1537,6 +1746,8 @@ class AlternativesAssignments(McdaDict):
         return root
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA dictionnary from XMCDA input"""
+
         if xmcda.tag != 'alternativesAffectations':
             raise TypeError('alternatives_assignments::invalid tag')
 
@@ -1551,6 +1762,8 @@ class AlternativesAssignments(McdaDict):
         return self
 
     def from_csv(self, csvreader, alt_col, assign_col):
+        """Read the MCDA dictionnary from CSV input"""
+
         col = None
         for row in csvreader:
             if row[0] == alt_col:
@@ -1571,6 +1784,8 @@ class AlternativeAssignment(McdaObject):
         self.category_id = category_id
 
     def __repr__(self):
+        """Manner to represent the MCDA object"""
+
         return "%s: %s" % (self.id, self.category_id)
 
     def is_in_category(self, category_id):
@@ -1580,6 +1795,8 @@ class AlternativeAssignment(McdaObject):
         return False
 
     def to_xmcda(self):
+        """Convert the MCDA object into XMCDA output"""
+
         xmcda = ElementTree.Element('alternativeAffectation')
         altid = ElementTree.SubElement(xmcda, 'alternativeID')
         altid.text = self.id
@@ -1588,6 +1805,8 @@ class AlternativeAssignment(McdaObject):
         return xmcda
 
     def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
         if xmcda.tag != 'alternativeAffectation':
             raise TypeError('alternativeAffectation::invalid tag')
 
