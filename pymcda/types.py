@@ -261,6 +261,18 @@ class Criterion(McdaObject):
 
     def __init__(self, id=None, name=None, disabled=False,
                  direction=MAXIMIZE, weight=None, thresholds=None):
+        """Create a new Criterion instance
+
+        Kwargs:
+           id (str): Identified of the Criterion
+           name (str): A friendly name for the criterion
+           disabled (bool): Whether or not this criterion is disabled
+           direction (integer): Equal to -1 if criterion is to minimize,
+                                1 if the criterion is to maximize
+           weight (float): Deprecated
+           thresholds (list): List of threshold associated to the criterion
+        """
+
         self.id = id
         self.name = name
         self.disabled = disabled
