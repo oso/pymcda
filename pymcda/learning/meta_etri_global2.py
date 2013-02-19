@@ -10,6 +10,7 @@ from pymcda.types import PerformanceTable
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_electre_tri_bm_model
+from pymcda.generate import generate_random_profiles
 from pymcda.generate import generate_alternatives
 from lp_etri_weights import LpEtriWeights
 from meta_etri_profiles4 import MetaEtriProfiles4
@@ -18,10 +19,19 @@ class MetaEtriGlobal2():
 
     def __init__(self, model, pt_sorted, aa_ori):
         self.model = model
+        self.pt_sorted = pt_sorted
         self.aa_ori = aa_ori
         self.lp = LpEtriWeights(self.model, pt_sorted.pt, self.aa_ori)
         self.meta = MetaEtriProfiles4(self.model, pt_sorted,
                                                self.aa_ori)
+
+    def init_profiles(self):
+        b = self.model.categories_profiles.get_ordered_profiles()
+        worst = self.pt_sorted.pt.get_worst(self.model.criteria)
+        best = self.pt_sorted.pt.get_best(self.model.criteria)
+        self.model.bpt = generate_random_profiles(b, model.criteria,
+                                                  worst = worst,
+                                                  best = best)
 
     def optimize(self, nmeta):
         self.lp.update_linear_program()
@@ -88,6 +98,7 @@ if __name__ == "__main__":
                                                           ncategories)
 
         meta = MetaEtriGlobal2(model_meta, pt_sorted, aa)
+        meta.init_profiles()
         metas.append(meta)
 
     t1 = time.time()

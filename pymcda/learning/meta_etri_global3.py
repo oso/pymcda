@@ -19,18 +19,21 @@ class MetaEtriGlobal3():
 
     def __init__(self, model, pt_sorted, aa_ori):
         self.model = model
+        self.pt_sorted = pt_sorted
         self.aa_ori = aa_ori
 
-        cats = model.categories_profiles.to_categories()
-        heur = HeurEtriProfiles(model, pt_sorted, aa_ori)
-        heur.solve()
-
+        self.init_profiles()
         self.lp = LpEtriWeights(self.model, pt_sorted.pt, self.aa_ori)
 
         # Because MetaEtriProfiles4 needs weights in initialization
         self.lp.solve()
 
         self.meta = MetaEtriProfiles4(self.model, pt_sorted, self.aa_ori)
+
+    def init_profiles(self):
+        cats = self.model.categories_profiles.to_categories()
+        heur = HeurEtriProfiles(self.model, self.pt_sorted, self.aa_ori)
+        heur.solve()
 
     def optimize(self, nmeta):
         self.lp.update_linear_program()
