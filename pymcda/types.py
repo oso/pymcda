@@ -588,10 +588,21 @@ class PerformanceTable(McdaDict):
         return "performance_table(%s)" % self.values()
 
     def update_direction(self, c):
+        """Multiply all performances by -1 if the criterion is to
+        minimize"""
+
         for ap in self._d.values():
             ap.update_direction(c)
 
     def round(self, k = 3, cids = None):
+        """Round all performances on criteria cids to maximum k digit
+
+        Kwargs:
+           k (int): max number of digit
+           cids (list): list of criteria which should be rounded to k
+                        digit
+        """
+
         if cids is None:
             cids = next(self._d.itervalues()).performances.keys()
 
@@ -599,6 +610,15 @@ class PerformanceTable(McdaDict):
             ap.round(k, cids)
 
     def multiply(self, value, cids = None):
+        """Multiply all performance on criteria cids by value
+
+        Kwargs:
+           value (float): value by which each performance should be
+                          multiplied
+           cids (list): list of criteria which should be multiplied by
+                        value
+        """
+
         if cids is None:
             cids = next(self._d.itervalues()).performances.keys()
 
