@@ -112,9 +112,7 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
 
         for model_ca in model_cas[int((nmodels + 1) / 2):]:
             m = model_ca[0]
-            del model_metas[m]
-            m = model.copy()
-            model_metas[m] = MetaEtriGlobal3(m, pt_sorted, aa_learning)
+            model_metas[m].init_profiles()
 
     model = model_cas[0][0]
 
