@@ -264,7 +264,7 @@ class Criterion(McdaObject):
         """Create a new Criterion instance
 
         Kwargs:
-           id (str): Identified of the Criterion
+           id (str): Identifier of the criterion
            name (str): A friendly name for the criterion
            disabled (bool): Whether or not this criterion is disabled
            direction (integer): Equal to -1 if criterion is to minimize,
@@ -359,6 +359,9 @@ class CriteriaValues(McdaDict):
         return "criteria_values(%s)" % self.values()
 
     def normalize(self):
+        """Method that allow to  normalize all the criteria values
+        contained in the MCDA dictionnary"""
+
         total = sum([cv.value for cv in self])
 
         for cv in self:
@@ -420,6 +423,13 @@ class CriteriaValues(McdaDict):
 class CriterionValue(McdaObject):
 
     def __init__(self, id=None, value=None):
+        """Create a new CriterionValue instance
+
+        Kwargs:
+           id (str): Identifier of the Criterion
+           value (float): The value associated to the criterion
+        """
+
         self.id = id
         self.value = value
 
@@ -460,8 +470,6 @@ class CriterionValue(McdaObject):
 class Alternatives(McdaDict):
 
     def __repr__(self):
-        """Manner to represent the MCDA object"""
-
         """Manner to represent the MCDA dictionnary"""
 
         return "alternatives(%s)" % self.values()
@@ -520,6 +528,14 @@ class Alternatives(McdaDict):
 class Alternative(McdaObject):
 
     def __init__(self, id=None, name=None, disabled=False):
+        """Create a new Alternative instance
+
+        Kwargs:
+           id (str): Identifier of the alternative
+           name (str): A friendly name for the alternative
+           disabled (bool): Whether or not this alternative is disabled
+        """
+
         self.id = id
         self.name = name
         self.disabled = disabled
