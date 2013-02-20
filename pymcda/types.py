@@ -626,6 +626,8 @@ class PerformanceTable(McdaDict):
             ap.multiply(value, cids)
 
     def get_best(self, c):
+        """Return the best possible fictive alternative performances"""
+
         perfs = next(self.itervalues()).performances
         wa = AlternativePerformances('best', perfs.copy())
         for ap, crit in product(self, c):
@@ -636,6 +638,8 @@ class PerformanceTable(McdaDict):
         return wa
 
     def get_worst(self, c):
+        """Return the worst possible fictive alternative performances"""
+
         perfs = next(self.itervalues()).performances
         wa = AlternativePerformances('worst', perfs.copy())
         for ap, crit in product(self, c):
@@ -646,6 +650,9 @@ class PerformanceTable(McdaDict):
         return wa
 
     def get_min(self):
+        """Return an alternative which has the minimal performances on all
+        criteria"""
+
         perfs = next(self.itervalues()).performances
         a = AlternativePerformances('min', perfs.copy())
         for ap, cid in product(self, perfs.keys()):
@@ -655,6 +662,9 @@ class PerformanceTable(McdaDict):
         return a
 
     def get_max(self):
+        """Return an alternative which has the maximal performances on all
+        criteria"""
+
         perfs = next(self.itervalues()).performances
         a = AlternativePerformances('max', perfs.copy())
         for ap, cid in product(self, perfs.keys()):
@@ -664,6 +674,9 @@ class PerformanceTable(McdaDict):
         return a
 
     def get_mean(self):
+        """Return an alternative which has the mean performances on all
+        criteria"""
+
         cids = next(self.itervalues()).performances.keys()
         a = AlternativePerformances('mean', {cid: 0 for cid in cids})
         for ap, cid in product(self, cids):
@@ -676,6 +689,8 @@ class PerformanceTable(McdaDict):
         return a
 
     def get_range(self):
+        """Return the range of the evaluations on each criterion"""
+
         ap_min = self.get_min().performances
         ap_max = self.get_max().performances
 
