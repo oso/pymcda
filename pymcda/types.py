@@ -885,6 +885,13 @@ class CategoriesValues(McdaDict):
         cats = sorted(upper, key = lambda key: upper[key])
         return cats
 
+    def to_categories(self):
+        cats = Categories()
+        for i, cat in enumerate(self.get_ordered_categories()):
+            cat = Category(cat, rank = i + 1)
+            cats.append(cat)
+        return cats
+
     def to_xmcda(self):
         """Convert the MCDA dictionnary into XMCDA output"""
 
