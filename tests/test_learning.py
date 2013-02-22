@@ -1,15 +1,19 @@
 from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
+from pymcda.types import CriteriaValues, CriterionValue
+from pymcda.uta import Utadis
 from pymcda.generate import generate_random_electre_tri_bm_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.generate import generate_random_profiles
+from pymcda.generate import generate_random_utadis_model
 from pymcda.learning.lp_etri_weights import LpEtriWeights
 from pymcda.learning.meta_etri_profiles3 import MetaEtriProfiles3
 from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
 from pymcda.learning.mip_etri_global import MipEtriGlobal
 from pymcda.learning.heur_etri_profiles import HeurEtriProfiles
+from pymcda.learning.lp_utadis import LpUtadis
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import compute_ca
 from pymcda.utils import add_errors_in_assignments
@@ -284,9 +288,45 @@ class tests_heur_etri_profiles(unittest.TestCase):
     def test004(self):
         self.one_test(3, 1000, 10, 3, 0.987)
 
+class tests_lp_utadis(unittest.TestCase):
+
+    def one_test(self, seed, na, nc, ncat, ns):
+        u = generate_random_utadis_model(nc, ncat, ns, ns, seed)
+        a = generate_alternatives(na)
+        pt = generate_random_performance_table(a, u.criteria)
+
+        aa = u.get_assignments(pt)
+
+        css = CriteriaValues([])
+        for cf in u.cfs:
+            cs = CriterionValue(cf.id, len(cf.function))
+            css.append(cs)
+
+        cat = u.cat_values.to_categories()
+        lp = LpUtadis(css, cat, pt.get_worst(u.criteria),
+                      pt.get_best(u.criteria))
+        obj, cvs, cfs, catv = lp.solve(aa, pt)
+
+        u2 = Utadis(u.criteria, cvs, cfs, catv)
+        aa2 = u2.get_assignments(pt)
+
+        self.assertEqual(aa, aa2)
+
+    def test001(self):
+        for i in range(10):
+            self.one_test(i, 1000, 10, 3, 1)
+
+    def test002(self):
+        for i in range(10):
+            self.one_test(i, 1000, 10, 3, 2)
+
+    def test003(self):
+        for i in range(10):
+            self.one_test(i, 1000, 10, 3, 3)
+
 test_classes = [tests_lp_etri_weights, tests_meta_etri_profiles,
                 tests_meta_etri_profiles4, tests_mip_etri_global,
-                tests_heur_etri_profiles]
+                tests_heur_etri_profiles, tests_lp_utadis]
 
 if __name__ == "__main__":
     suite = []
