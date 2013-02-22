@@ -54,6 +54,53 @@ class tests_lp_etri_weights(unittest.TestCase):
         for i in range(10):
             self.one_test(i, 10, 5, 1000)
 
+    def one_test2(self, seed, ncrit, ncat, na):
+        model = generate_random_electre_tri_bm_model(ncrit, ncat, seed)
+        a = generate_alternatives(na)
+        pt = generate_random_performance_table(a, model.criteria)
+
+        aa = model.pessimist(pt)
+
+        model2 = model.copy()
+        model2.cvs = None
+
+        lp_weights = LpEtriWeights(model2, pt, aa)
+
+        bids = model.categories_profiles.get_ordered_profiles()
+        bpt = generate_random_profiles(bids, model.criteria)
+
+        model.bpt = model2.bpt = bpt
+        aa = model.pessimist(pt)
+
+        lp_weights.aa_ori = aa
+        lp_weights.update_linear_program()
+
+        lp_weights.solve()
+
+        aa2 = model2.pessimist(pt)
+
+        self.assertEqual(aa, aa2)
+
+    def test006(self):
+        for i in range(10):
+            self.one_test2(i, 10, 3, 1000)
+
+    def test007(self):
+        for i in range(10):
+            self.one_test2(i, 10, 3, 100)
+
+    def test008(self):
+        for i in range(10):
+            self.one_test2(i, 10, 4, 100)
+
+    def test009(self):
+        for i in range(10):
+            self.one_test2(i, 10, 5, 100)
+
+    def test010(self):
+        for i in range(10):
+            self.one_test2(i, 10, 5, 1000)
+
 class tests_meta_etri_profiles(unittest.TestCase):
 
     def one_test(self, seed, na, nc, ncat, max_loop, n):
