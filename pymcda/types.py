@@ -790,6 +790,14 @@ class PerformanceTable(McdaDict):
 class AlternativePerformances(McdaObject):
 
     def __init__(self, id=None, performances=None):
+        """Create a new AlternativePerformances instance
+
+        Kwargs:
+           id (str): Identifier of the alternative
+           performances (dict): Alternatives' performances on the
+                                different criteria
+        """
+
         self.id = id
         if performances is None:
             self.performances = {}
@@ -805,10 +813,20 @@ class AlternativePerformances(McdaObject):
         return "%s: %s" % (self.id, self.performances)
 
     def update_direction(self, c):
+        """Multiply all performances by -1 if the criterion is to
+        minimize"""
+
         for crit in c:
             self.performances[crit.id] *= crit.direction
 
     def round(self, k = 3, cids = None):
+        """Round all performances on criteria cids to maximum k digit
+        Kwargs:
+           k (int): max number of digit
+           cids (list): list of criteria which should be rounded to k
+                        digit
+        """
+
         if cids is None:
             cids = self.performances.keys()
 
@@ -816,6 +834,15 @@ class AlternativePerformances(McdaObject):
             self.performances[key] = round(value, k)
 
     def multiply(self, value, cids = None):
+        """Multiply all performance on criteria cids by value
+
+        Kwargs:
+           value (float): value by which each performance should be
+                          multiplied
+           cids (list): list of criteria which should be multiplied by
+                        value
+        """
+
         if cids is None:
             cids = self.performances.keys()
 
