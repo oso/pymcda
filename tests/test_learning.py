@@ -324,6 +324,14 @@ class tests_lp_utadis(unittest.TestCase):
         for i in range(10):
             self.one_test(i, 1000, 10, 3, 3)
 
+    def test004(self):
+        for i in range(10):
+            self.one_test(i, 1000, 10, 3, 4)
+
+    def test005(self):
+        for i in range(10):
+            self.one_test(i, 1000, 10, 3, 5)
+
 test_classes = [tests_lp_etri_weights, tests_meta_etri_profiles,
                 tests_meta_etri_profiles4, tests_mip_etri_global,
                 tests_heur_etri_profiles, tests_lp_utadis]
