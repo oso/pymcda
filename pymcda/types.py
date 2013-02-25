@@ -805,6 +805,7 @@ class AlternativePerformances(McdaObject):
             self.performances = performances
 
     def __call__(self, criterion_id):
+        """Return the performance of the alternative on criterion_id"""
         return self.performances[criterion_id]
 
     def __repr__(self):
@@ -908,11 +909,15 @@ class CategoriesValues(McdaDict):
         return d
 
     def get_ordered_categories(self):
+        """Get the list of ordered categories"""
+
         upper = self.get_upper_limits()
         cats = sorted(upper, key = lambda key: upper[key])
         return cats
 
     def to_categories(self):
+        """Convert the content of the dictionnary into Categories()"""
+
         cats = Categories()
         for i, cat in enumerate(self.get_ordered_categories()):
             cat = Category(cat, rank = i + 1)
