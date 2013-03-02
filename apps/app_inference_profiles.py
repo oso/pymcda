@@ -15,21 +15,28 @@ from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import compute_ca
 from pymcda.learning.meta_etri_profiles3 import MetaEtriProfiles3
 from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
+from pymcda.learning.heur_etri_profiles import HeurEtriProfiles
 from pymcda.ui.graphic import QGraphicsSceneEtri
 from multiprocessing import Process, Pipe
 
 # FIXME
 from pymcda.types import AlternativePerformances
 
-def run_metaheuristic(pipe, model, pt, aa, algo, n, worst = None,
-                      best = None):
-
-    model.bpt = generate_random_profiles(model.profiles,
-                                         model.criteria,
-                                         worst = worst,
-                                         best = best)
+def run_metaheuristic(pipe, model, pt, aa, algo, n, use_heur = False,
+                      worst = None, best = None):
 
     pt_sorted = SortedPerformanceTable(pt)
+
+    if use_heur is True:
+        heur = HeurEtriProfiles(model, pt_sorted, aa)
+        heur.solve()
+    else:
+        model.bpt = generate_random_profiles(model.profiles,
+                                             model.criteria,
+                                             worst = worst,
+                                             best = best)
+
+
 
     if algo == "Meta 3":
         meta = MetaEtriProfiles3(model, pt_sorted, aa)
@@ -57,8 +64,8 @@ def run_metaheuristic(pipe, model, pt, aa, algo, n, worst = None,
 
 class qt_thread_algo(QtCore.QThread):
 
-    def __init__(self, n, model, pt, aa, algo, worst = None, best = None,
-                 parent = None):
+    def __init__(self, n, model, pt, aa, algo, use_heur = False,
+                 worst = None, best = None, parent = None):
         super(qt_thread_algo, self).__init__(parent)
         self.mutex = QtCore.QMutex()
         self.stopped = False
@@ -73,6 +80,7 @@ class qt_thread_algo(QtCore.QThread):
         self.worst = worst
         self.best = best
         self.algo = algo
+        self.use_heur = use_heur
 
     def stop(self):
         try:
@@ -92,7 +100,8 @@ class qt_thread_algo(QtCore.QThread):
         parent_pipe, child_pipe = Pipe(False)
         p = Process(target = run_metaheuristic,
                     args = (child_pipe, self.model, self.pt, self.aa,
-                            self.algo, self.n, self.worst, self.best))
+                            self.algo, self.n, self.use_heur,
+                            self.worst, self.best))
         p.start()
 
         for i in range(self.n + 1):
@@ -232,6 +241,13 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.layout_nloop.addWidget(self.label_nloop)
         self.layout_nloop.addWidget(self.spinbox_nloop)
         self.layout_meta_params.addLayout(self.layout_nloop)
+
+        self.layout_use_heur = QtGui.QHBoxLayout()
+        self.checkbox_use_heur = QtGui.QCheckBox(self.groupbox_meta_params)
+        self.checkbox_use_heur.setCheckState(False)
+        self.checkbox_use_heur.setText("Use profiles' heuristic")
+        self.layout_use_heur.addWidget(self.checkbox_use_heur)
+        self.layout_meta_params.addLayout(self.layout_use_heur)
 
         # Initialization
         self.groupbox_init = QtGui.QGroupBox(self.centralwidget)
@@ -430,9 +446,11 @@ class qt_mainwindow(QtGui.QMainWindow):
 
         nloop = self.spinbox_nloop.value()
         algo = self.combobox_algo.currentText()
+        use_heur = self.checkbox_use_heur.isChecked()
 
         self.thread = qt_thread_algo(nloop, self.model, self.pt, self.aa,
-                                     algo, self.worst, self.best, None)
+                                     algo, use_heur, self.worst, self.best,
+                                     None)
         self.connect(self.thread, QtCore.SIGNAL("update(int)"),
                      self.update)
         self.connect(self.thread, QtCore.SIGNAL("finished()"),
