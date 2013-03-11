@@ -813,6 +813,57 @@ class AlternativePerformances(McdaObject):
 
         return "%s: %s" % (self.id, self.performances)
 
+    def __mathop(self, value, op):
+        out = AlternativePerformances(self.id)
+        if type(value) == float or type(value) == int:
+            for key in self.performances.keys():
+                if op == 'add':
+                    out.performances[key] = self.performances[key] + value
+                elif op == 'sub':
+                    out.performances[key] = self.performances[key] - value
+                elif op == 'mul':
+                    out.performances[key] = self.performances[key] * value
+                elif op == 'div':
+                    out.performances[key] = self.performances[key] / value
+        elif type(value) == AlternativePerformances:
+            for key in self.performances.keys():
+                if op == 'add':
+                    out.performances[key] = self.performances[key] + \
+                                            value.performances[key]
+                elif op == 'sub':
+                    out.performances[key] = self.performances[key] - \
+                                            value.performances[key]
+                elif op == 'mul':
+                    out.performances[key] = self.performances[key] * \
+                                            value.performances[key]
+                elif op == 'div':
+                    out.performances[key] = self.performances[key] / \
+                                            value.performances[key]
+        else:
+            raise TypeError("Invalid value type (%s)" % type(value))
+
+        return out
+
+    def __add__(self, value):
+        """Add value to the performances"""
+
+        return self.__mathop(value, "add")
+
+    def __sub__(self, value):
+        """Substract value to the performances"""
+
+        return self.__mathop(value, "sub")
+
+    def __mul__(self, value):
+        """Multiply performances by value"""
+
+        return self.__mathop(value, "mul")
+
+    def __div__(self, value):
+        """Divide performances by value"""
+
+        return self.__mathop(value, "div")
+
     def update_direction(self, c):
         """Multiply all performances by -1 if the criterion is to
         minimize"""

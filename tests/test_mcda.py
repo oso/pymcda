@@ -390,6 +390,50 @@ class tests_mcda_methods(unittest.TestCase):
         a3 = a.get_subset(a1.keys())
         self.assertEqual(a1, a3)
 
+    def test010(self):
+        a1 = AlternativePerformances('a1', {'c1': 1, 'c2': 2, 'c3': 3})
+        a2 = AlternativePerformances('a2', {'c1': 4, 'c2': 5, 'c3': 6})
+        a3 = a1 + a2
+        self.assertEqual(a3.performances, {'c1': 5, 'c2': 7, 'c3': 9})
+
+    def test011(self):
+        a1 = AlternativePerformances('a1', {'c1': 1, 'c2': 2, 'c3': 3})
+        a2 = AlternativePerformances('a2', {'c1': 4, 'c2': 5, 'c3': 6})
+        a3 = a2 - a1
+        self.assertEqual(a3.performances, {'c1': 3, 'c2': 3, 'c3': 3})
+
+    def test012(self):
+        a1 = AlternativePerformances('a1', {'c1': 1, 'c2': 2, 'c3': 3})
+        a2 = AlternativePerformances('a2', {'c1': 4, 'c2': 5, 'c3': 6})
+        a3 = a1 * a2
+        self.assertEqual(a3.performances, {'c1': 4, 'c2': 10, 'c3': 18})
+
+    def test013(self):
+        a1 = AlternativePerformances('a1', {'c1': 1, 'c2': 2, 'c3': 3})
+        a2 = AlternativePerformances('a2', {'c1': 4, 'c2': 5, 'c3': 6})
+        a3 = a2 / a1
+        self.assertEqual(a3.performances, {'c1': 4, 'c2': 2.5, 'c3': 2})
+
+    def test014(self):
+        a1 = AlternativePerformances('a1', {'c1': 1, 'c2': 2, 'c3': 3})
+        a2 = a1 + 2
+        self.assertEqual(a2.performances, {'c1': 3, 'c2': 4, 'c3': 5})
+
+    def test015(self):
+        a1 = AlternativePerformances('a1', {'c1': 1, 'c2': 2, 'c3': 3})
+        a2 = a1 - 2
+        self.assertEqual(a2.performances, {'c1': -1, 'c2': 0, 'c3': 1})
+
+    def test016(self):
+        a1 = AlternativePerformances('a1', {'c1': 1, 'c2': 2, 'c3': 3})
+        a2 = a1 * 2
+        self.assertEqual(a2.performances, {'c1': 2, 'c2': 4, 'c3': 6})
+
+    def test017(self):
+        a1 = AlternativePerformances('a1', {'c1': 1, 'c2': 2, 'c3': 3})
+        a2 = a1 / 2
+        self.assertEqual(a2.performances, {'c1': 0.5, 'c2': 1, 'c3': 1.5})
+
 test_classes = [tests_xmcda, tests_Segment, tests_PiecewiseLinear,
                 tests_CategoriesValues, tests_csv, tests_mcda_methods]
 
