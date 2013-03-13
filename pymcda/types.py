@@ -587,6 +587,52 @@ class PerformanceTable(McdaDict):
 
         return "performance_table(%s)" % self.values()
 
+    def __mathop(self, value, op):
+        out = PerformanceTable([], self.id)
+        if type(value) == float or type(value) == int \
+           or type(AlternativePerformances):
+            for key, val in self.items():
+                if op == "add":
+                    ap = val + value
+                elif op == "sub":
+                    ap = val - value
+                elif op == "mul":
+                    ap = val * value
+                elif op == "div":
+                    ap = val / value
+                out.append(ap)
+        elif type(PerformanceTable):
+            for key, val in self.items():
+                ap = val * value[key]
+                out.append(ap)
+        else:
+            raise TypeError("Invalid value type (%s)" % type(value))
+
+        return out
+
+    def __add__(self, value):
+        """Add value to the performances"""
+
+        return self.__mathop(value, "add")
+
+    def __sub__(self, value):
+        """Substract value to the performances"""
+
+        return self.__mathop(value, "sub")
+
+    def __mul__(self, value):
+        """Multiply performances by value"""
+
+        return self.__mathop(value, "mul")
+
+    def __div__(self, value):
+        return self.__truediv__(value)
+
+    def __truediv__(self, value):
+        """Divide performances by value"""
+
+        return self.__mathop(value, "div")
+
     def update_direction(self, c):
         """Multiply all performances by -1 if the criterion is to
         minimize"""
@@ -860,6 +906,9 @@ class AlternativePerformances(McdaObject):
         return self.__mathop(value, "mul")
 
     def __div__(self, value):
+        return self.__truediv__(value)
+
+    def __truediv__(self, value):
         """Divide performances by value"""
 
         return self.__mathop(value, "div")

@@ -434,6 +434,52 @@ class tests_mcda_methods(unittest.TestCase):
         a2 = a1 / 2
         self.assertEqual(a2.performances, {'c1': 0.5, 'c2': 1, 'c3': 1.5})
 
+    def test018(self):
+        a1 = AlternativePerformances('a1', {'c1': 1, 'c2': 2, 'c3': 3})
+        a2 = AlternativePerformances('a2', {'c1': 4, 'c2': 5, 'c3': 6})
+        pt = PerformanceTable([a1, a2])
+        a3 = AlternativePerformances('a3', {'c1': 2, 'c2': 1, 'c3': 3})
+        pt2 = pt + a3
+
+        self.assertEqual(pt2[a1.id].performances,
+                         {'c1': 3, 'c2': 3, 'c3': 6})
+        self.assertEqual(pt2[a2.id].performances,
+                         {'c1': 6, 'c2': 6, 'c3': 9})
+
+    def test019(self):
+        a1 = AlternativePerformances('a1', {'c1': 1, 'c2': 2, 'c3': 3})
+        a2 = AlternativePerformances('a2', {'c1': 4, 'c2': 5, 'c3': 6})
+        pt = PerformanceTable([a1, a2])
+        a3 = AlternativePerformances('a3', {'c1': 2, 'c2': 1, 'c3': 3})
+        pt2 = pt - a3
+
+        self.assertEqual(pt2[a1.id].performances,
+                         {'c1': -1, 'c2': 1, 'c3': 0})
+        self.assertEqual(pt2[a2.id].performances,
+                         {'c1': 2, 'c2': 4, 'c3': 3})
+    def test020(self):
+        a1 = AlternativePerformances('a1', {'c1': 1, 'c2': 2, 'c3': 3})
+        a2 = AlternativePerformances('a2', {'c1': 4, 'c2': 5, 'c3': 6})
+        pt = PerformanceTable([a1, a2])
+        a3 = AlternativePerformances('a3', {'c1': 2, 'c2': 1, 'c3': 3})
+        pt2 = pt * a3
+
+        self.assertEqual(pt2[a1.id].performances,
+                         {'c1': 2, 'c2': 2, 'c3': 9})
+        self.assertEqual(pt2[a2.id].performances,
+                         {'c1': 8, 'c2': 5, 'c3': 18})
+    def test021(self):
+        a1 = AlternativePerformances('a1', {'c1': 1, 'c2': 2, 'c3': 3})
+        a2 = AlternativePerformances('a2', {'c1': 4, 'c2': 5, 'c3': 6})
+        pt = PerformanceTable([a1, a2])
+        a3 = AlternativePerformances('a3', {'c1': 2, 'c2': 1, 'c3': 3})
+        pt2 = pt / a3
+
+        self.assertEqual(pt2[a1.id].performances,
+                         {'c1': 0.5, 'c2': 2, 'c3': 1})
+        self.assertEqual(pt2[a2.id].performances,
+                         {'c1': 2, 'c2': 5, 'c3': 2})
+
 test_classes = [tests_xmcda, tests_Segment, tests_PiecewiseLinear,
                 tests_CategoriesValues, tests_csv, tests_mcda_methods]
 
