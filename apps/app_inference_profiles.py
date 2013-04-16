@@ -309,7 +309,7 @@ class qt_mainwindow(QtGui.QMainWindow):
 
         self.layout_loop = QtGui.QHBoxLayout()
         self.label_loop = QtGui.QLabel(self.groupbox_model_params)
-        self.label_loop.setText("Loop")
+        self.label_loop.setText("Iteration:")
         self.spinbox_loop = QtGui.QSpinBox(self.groupbox_result)
         self.spinbox_loop.setMinimum(0)
         self.spinbox_loop.setMaximum(0)
