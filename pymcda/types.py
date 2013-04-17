@@ -1418,6 +1418,27 @@ class PiecewiseLinear(list):
 
         return s.y(x)
 
+    @property
+    def xmin(self):
+        x = [s.pl.x for s in self]
+        return min(x)
+
+    @property
+    def xmax(self):
+        x = [s.ph.x for s in self]
+        print(x)
+        return max(x)
+
+    @property
+    def ymin(self):
+        y = [s.pl.y for s in self] + [s.ph.y for s in self]
+        return min(y)
+
+    @property
+    def ymax(self):
+        y = [s.pl.y for s in self] + [s.ph.y for s in self]
+        return max(y)
+
     def pprint(self):
         string = "f("
         for seg in self:
