@@ -262,6 +262,21 @@ class tests_PiecewiseLinear(unittest.TestCase):
         plf = PiecewiseLinear([s1, s2])
         self.assertRaises(ValueError, plf.y, 1)
 
+    def test009(self):
+        p1 = Point(0, 0)
+        p2 = Point(1, 1)
+        s1 = Segment(p1, p2)
+
+        p3 = Point(3, 7)
+        p4 = Point(5, 9)
+        s2 = Segment(p3, p4)
+
+        plf = PiecewiseLinear([s1, s2])
+        self.assertEqual(plf.xmin, 0)
+        self.assertEqual(plf.xmax, 5)
+        self.assertEqual(plf.ymin, 0)
+        self.assertEqual(plf.ymax, 9)
+
 class tests_CategoriesValues(unittest.TestCase):
 
     def test001(self):
