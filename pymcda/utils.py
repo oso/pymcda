@@ -21,6 +21,22 @@ def add_errors_in_assignments(aa, category_ids, errors_pc):
 
     return l
 
+def add_errors_in_assignments_proba(aa, category_ids, proba):
+    l = AlternativesAssignments([])
+
+    for a in aa:
+        r = random.random()
+        if r <= proba:
+            cat = a.category_id
+            new_cat = a.category_id
+            while new_cat == cat:
+                new_cat = random.sample(category_ids, 1)[0]
+            a.category_id = new_cat
+
+            l.append(a)
+
+    return l
+
 def display_assignments_and_pt(alternatives, criteria, aas, pts):
 
     for i, aa in enumerate(aas):
