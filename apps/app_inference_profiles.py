@@ -25,6 +25,7 @@ from pymcda.types import AlternativePerformances
 def run_metaheuristic(pipe, model, pt, aa, algo, n, use_heur = False,
                       worst = None, best = None):
 
+    random.seed(0)
     pt_sorted = SortedPerformanceTable(pt)
 
     if use_heur is True:
@@ -35,8 +36,6 @@ def run_metaheuristic(pipe, model, pt, aa, algo, n, use_heur = False,
                                              model.criteria,
                                              worst = worst,
                                              best = best)
-
-
 
     if algo == "Meta 3":
         meta = MetaEtriProfiles3(model, pt_sorted, aa)
@@ -255,10 +254,6 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.rightlayout.addWidget(self.groupbox_init)
         self.layout_init = QtGui.QVBoxLayout(self.groupbox_init)
 
-        self.button_seed = QtGui.QPushButton(self.centralwidget)
-        self.button_seed.setText("Reset seed")
-        self.layout_init.addWidget(self.button_seed)
-
         self.button_generate = QtGui.QPushButton(self.centralwidget)
         self.button_generate.setText("Generate model and\n performance table")
         self.layout_init.addWidget(self.button_generate)
@@ -329,9 +324,6 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.setCentralWidget(self.centralwidget)
 
     def setup_connect(self):
-        QtCore.QObject.connect(self.button_seed,
-                               QtCore.SIGNAL('clicked()'),
-                               self.on_button_seed)
         QtCore.QObject.connect(self.button_generate,
                                QtCore.SIGNAL('clicked()'),
                                self.on_button_generate)
@@ -353,11 +345,9 @@ class qt_mainwindow(QtGui.QMainWindow):
             scene.update(self.graphicv_learned.size())
             self.graphicv_original.resetCachedContent()
 
-    def on_button_seed(self):
+    def on_button_generate(self):
         seed = self.spinbox_seed.value()
         random.seed(seed)
-
-    def on_button_generate(self):
         self.generate_model()
         self.generate_alt()
 
@@ -391,7 +381,6 @@ class qt_mainwindow(QtGui.QMainWindow):
                                                     worst = self.worst,
                                                     best = self.best)
         self.aa = self.model.pessimist(self.pt)
-
 
     def on_spinbox_loop_value_changed(self, value):
         model = self.thread.results[value]
