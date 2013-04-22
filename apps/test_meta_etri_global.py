@@ -16,7 +16,7 @@ from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_electre_tri_bm_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
-from pymcda.utils import add_errors_in_assignments
+from pymcda.utils import add_errors_in_assignments_proba
 from test_utils import test_result, test_results
 
 def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
@@ -32,8 +32,10 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
 
     # Add errors in assignment examples
     aa_err = aa.copy()
-    aa_erroned = add_errors_in_assignments(aa_err, model.categories,
-                                           pcerrors / 100)
+    aa_erroned = add_errors_in_assignments_proba(aa_err,
+                                                 model.categories,
+                                                 pcerrors / 100)
+    na_err = len(aa_erroned)
 
     # Sort the performance table
     pt_sorted = SortedPerformanceTable(pt)
@@ -110,6 +112,13 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
     aa_gen2 = model2.pessimist(pt_gen)
     ca_gen = compute_ca(aa_gen, aa_gen2)
 
+    aa_gen_err = aa_gen.copy()
+    aa_gen_erroned = add_errors_in_assignments_proba(aa_gen_err,
+                                                     model.categories,
+                                                     pcerrors / 100)
+    aa_gen2 = model2.pessimist(pt_gen)
+    ca_gen_err = compute_ca(aa_gen_err, aa_gen2)
+
     # Save all infos in test_result class
     t = test_result("%s-%d-%d-%d-%d-%g-%d-%d-%d" % (seed, na, nc, ncat,
                     na_gen, pcerrors, max_loops, nmodels, max_oloops))
@@ -126,11 +135,13 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
     t['max_oloops'] = max_oloops
 
     # Ouput params
+    t['na_err'] = na_err
     t['ca_best'] = ca_best
     t['ca_errors'] = ca_errors
     t['ca2_best'] = ca2_best
     t['ca2_errors'] = ca2_errors
     t['ca_gen'] = ca_gen
+    t['ca_gen_err'] = ca_gen_err
     t['nloops'] = nloops
     t['t_total'] = t_total
 
@@ -178,9 +189,9 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, nmodels,
 
         if initialized is False:
             fields = ['seed', 'na', 'nc', 'ncat', 'na_gen', 'pcerrors',
-                      'max_oloops', 'nmodels', 'max_loops', 'ca_best',
-                      'ca_errors', 'ca2_best', 'ca2_errors', 'ca_gen',
-                      'nloops', 't_total']
+                      'max_oloops', 'nmodels', 'max_loops', 'na_err',
+                      'ca_best', 'ca_errors', 'ca2_best', 'ca2_errors',
+                      'ca_gen', 'ca_gen_err', 'nloops', 't_total']
             writer.writerow(fields)
             initialized = True
 
@@ -197,7 +208,8 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, nmodels,
     t = results.summary(['na', 'nc', 'ncat', 'na_gen', 'pcerrors',
                          'max_oloops', 'nmodels', 'max_loops'],
                          ['ca_best', 'ca_errors', 'ca2_best',
-                          'ca2_errors', 'ca_gen', 'nloops', 't_total'])
+                          'ca2_errors', 'ca_gen', 'ca_gen_err',
+                          'nloops', 't_total'])
     t.tocsv(writer)
 
     # Summary by columns
