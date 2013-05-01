@@ -1426,7 +1426,6 @@ class PiecewiseLinear(list):
     @property
     def xmax(self):
         x = [s.ph.x for s in self]
-        print(x)
         return max(x)
 
     @property
@@ -1438,6 +1437,11 @@ class PiecewiseLinear(list):
     def ymax(self):
         y = [s.pl.y for s in self] + [s.ph.y for s in self]
         return max(y)
+
+    def get_ordered(self):
+        """Return segments ordered by x value"""
+
+        return sorted(self, key = lambda s: s.pl.x)
 
     def pprint(self):
         string = "f("
