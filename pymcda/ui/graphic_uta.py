@@ -222,11 +222,30 @@ if __name__ == "__main__":
     view = _MyGraphicsview()
     view.setRenderHint(QtGui.QPainter.Antialiasing)
     view.setSizePolicy(sizePolicy)
+    view2 = _MyGraphicsview()
+    view2.setRenderHint(QtGui.QPainter.Antialiasing)
+    view2.setSizePolicy(sizePolicy)
+    view3 = _MyGraphicsview()
+    view3.setRenderHint(QtGui.QPainter.Antialiasing)
+    view3.setSizePolicy(sizePolicy)
 
-#    graph = QGraphPiecewiseLinear(f1, view.size())
+    dialog = QtGui.QDialog()
+    hbox = QtGui.QHBoxLayout(dialog)
+
+    hbox.addWidget(view)
+    hbox.addWidget(view2)
+    hbox.addWidget(view3)
+
     graph = QGraphCriterionFunction(cf1, view.size())
+    graph2 = QGraphCriterionFunction(cf2, view.size())
+    graph3 = QGraphCriterionFunction(cf3, view.size())
 
     view.setScene(graph)
-    view.show()
+    view2.setScene(graph2)
+    view3.setScene(graph3)
+
+    dialog.setLayout(hbox)
+    dialog.resize(600, 200)
+    dialog.show()
 
     app.exec_()
