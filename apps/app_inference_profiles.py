@@ -128,6 +128,7 @@ class qt_mainwindow(QtGui.QMainWindow):
 
         self.setup_ui()
         self.setup_connect()
+        self.setup_shortcuts()
 
         self.timer = QtCore.QTimer()
         QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"),
@@ -334,6 +335,13 @@ class qt_mainwindow(QtGui.QMainWindow):
                                QtCore.SIGNAL('valueChanged(int)'),
                                self.on_spinbox_loop_value_changed)
 
+    def setup_shortcuts(self):
+        action = QtGui.QAction('&Exit', self)
+        action.setShortcut('Ctrl+W')
+        action.setStatusTip('Exit application')
+        action.triggered.connect(QtGui.qApp.quit)
+        self.addAction(action)
+
     def resizeEvent(self, event):
         scene = self.graphicv_original.scene()
         if scene:
@@ -455,7 +463,7 @@ class qt_mainwindow(QtGui.QMainWindow):
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    app.setApplicationName("ELECTRE TRI profile inference")
+    app.setApplicationName("MR-Sort profile inference")
 
     font = QtGui.QFont("Sans Serif", 8)
     app.setFont(font)
