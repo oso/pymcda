@@ -15,7 +15,7 @@ class QGraphPiecewiseLinear(QtGui.QGraphicsScene):
     def update(self, size):
         self.size = size
         axis_height = self.size.height() - 60
-        axis_width = self.size.width() - 60
+        axis_width = self.size.width() - 70
         self.ymin, self.ymax = - 25 / 2, - axis_height + 25 / 2
         self.xmin, self.xmax = 25 / 2, axis_width + 25 / 2
         self.xmax_excess = 25
@@ -72,7 +72,7 @@ class QGraphPiecewiseLinear(QtGui.QGraphicsScene):
 
     def __create_text_coordinate(self, x):
         item = QtGui.QGraphicsTextItem()
-        item.setPlainText("%g" % x)
+        item.setPlainText("%3.3g" % x)
         item.setZValue(1)
 
         font = QtGui.QFont()
@@ -109,8 +109,8 @@ class QGraphPiecewiseLinear(QtGui.QGraphicsScene):
             path.lineTo(self.xmin, y)
 
             txtitem = self.__create_text_coordinate(point.y)
-            txtitem.setPos(self.xmin - txtitem.boundingRect().width(),
-                           y - txtitem.boundingRect().height() / 2)
+            txtitem.setPos(self.xmin,
+                           y - txtitem.boundingRect().height() / 2 - 3)
             self.addItem(txtitem)
 
             self.ycoord.append(y)
