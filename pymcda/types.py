@@ -1229,6 +1229,10 @@ class CriteriaFunctions(McdaDict):
     def display(self, criterion_ids = None):
         print(self.pprint(criterion_ids))
 
+    def multiply_y(self, cvs):
+        for cf in self:
+            cf.multiply_y(cvs[cf.id].value)
+
     def to_xmcda(self):
         """Convert the MCDA dictionnary into XMCDA output"""
 
@@ -1276,6 +1280,9 @@ class CriterionFunction(McdaObject):
 
     def display(self):
         print(self.pprint())
+
+    def multiply_y(self, value):
+        self.function.multiply_y(value)
 
     def to_xmcda(self):
         """Convert the MCDA object into XMCDA output"""
@@ -1417,6 +1424,11 @@ class PiecewiseLinear(list):
             raise ValueError("No segment found for this value (%g)" % x)
 
         return s.y(x)
+
+    def multiply_y(self, value):
+        for s in self:
+            s.pl.y *= value
+            s.ph.y *= value
 
     @property
     def xmin(self):

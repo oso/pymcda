@@ -36,6 +36,12 @@ class Uta(object):
 
         return au
 
+    def set_equal_weights(self):
+        self.cvs.normalize()
+        self.cfs.multiply_y(self.cvs)
+        for cv in self.cvs:
+            cv.value = 1
+
 class Utadis(Uta):
 
     def __init__(self, criteria = None, cvs = None, cfs = None,
