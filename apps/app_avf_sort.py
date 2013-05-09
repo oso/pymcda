@@ -111,7 +111,6 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.scrollarea_original = QtGui.QScrollArea(self.groupbox_original)
         self.scrollarea_original.setWidgetResizable(True)
         self.widget_original = QtGui.QWidget()
-#        self.layout_original = QtGui.QHBoxLayout(self.widget_original)
         self.layout_original = QtGui.QGridLayout(self.widget_original)
         self.layout_original.setContentsMargins(0, 0, 0, 0)
         self.layout_original.setSpacing(0)
@@ -327,6 +326,7 @@ class qt_mainwindow(QtGui.QMainWindow):
 
         self.model = generate_random_utadis_model(ncrit, ncat, nseg_min,
                                                   nseg_max)
+        self.model.set_equal_weights()
 
         self.plot_model(self.model, self.layout_original)
 
