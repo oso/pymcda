@@ -287,7 +287,7 @@ if __name__ == "__main__":
     options.nc = read_multiple_integer(options.nc, "Number of criteria")
     options.ncat = read_multiple_integer(options.ncat, "Number of categories")
     options.ns = read_multiple_integer(options.ns, "Number of function " \
-                                       "segments ? ")
+                                       "segments")
     options.na_gen = read_multiple_integer(options.na_gen, "Number of " \
                                            "generalization alternatives")
     options.pcerrors = read_multiple_integer(options.pcerrors, "Ratio of " \
