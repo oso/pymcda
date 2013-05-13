@@ -58,7 +58,7 @@ def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
 
     # Compute new assignment and classification accuracy
     aa2 = model2.get_assignments(pt)
-    ok = ok_errors = ok2 = ok2_errors = 0
+    ok = ok_errors = ok2 = ok2_errors = altered = 0
     for alt in a:
         if aa_err(alt.id) == aa2(alt.id):
             ok2 += 1
@@ -69,6 +69,8 @@ def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
             ok += 1
             if alt.id in aa_erroned:
                 ok_errors += 1
+        elif alt.id not in aa_erroned:
+            altered += 1
 
     total = len(a)
 
@@ -110,6 +112,7 @@ def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
     t['obj'] = obj
     t['ca'] = ca
     t['ca_errors'] = ca_errors
+    t['altered'] = altered
     t['ca2'] = ca2
     t['ca2_errors'] = ca2_errors
     t['ca_gen'] = ca_gen
@@ -161,7 +164,7 @@ def run_tests(na, nc, ncat, ns, na_gen, pcerrors, nseeds, filename):
     # Perform a summary
     writer.writerow(['', ''])
     t = results.summary(['na', 'nc', 'ncat', 'ns', 'na_gen', 'pcerrors'],
-                        ['na_err' 'obj', 'ca', 'ca_errors', 'ca2',
+                        ['na_err' 'obj', 'ca', 'ca_errors', 'altered', 'ca2',
                          'ca2_errors', 'ca_gen', 'ca_gen_err', 't_total',
                          't_const', 't_solve'])
     t.tocsv(writer)
