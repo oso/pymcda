@@ -16,7 +16,15 @@ class ElectreTri(McdaObject):
         self.bpt = bpt
         self.lbda = lbda
         self.categories_profiles = categories_profiles
-        if categories_profiles:
+
+    @property
+    def categories_profiles(self):
+        return self.cprofiles
+
+    @categories_profiles.setter
+    def categories_profiles(self, categories_profiles):
+        self.cprofiles = categories_profiles
+        if self.cprofiles:
             self.categories = categories_profiles.get_ordered_categories()
             self.profiles = categories_profiles.get_ordered_profiles()
 
