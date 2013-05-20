@@ -633,6 +633,9 @@ class PerformanceTable(McdaDict):
 
         return self.__mathop(value, "div")
 
+    def get_criteria_ids(self):
+        return next(self.itervalues()).performances.keys()
+
     def update_direction(self, c):
         """Multiply all performances by -1 if the criterion is to
         minimize"""
