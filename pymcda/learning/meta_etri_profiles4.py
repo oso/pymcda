@@ -69,6 +69,7 @@ class MetaEtriProfiles4():
                     num += 2
                     total += 1
                     h_above[perfs[i] + delta] = num / total
+#            elif self.aa_ori(a) < self.aa(a) and \
             elif self.aa_ori(a) != self.aa(a) and \
                  self.cat[self.aa_ori(a)] < self.cat[cat_a]:
                 num += 0.1
@@ -109,6 +110,7 @@ class MetaEtriProfiles4():
                 elif self.aa(a) == cat_a:
                     # -
                     total += 1
+#            elif self.aa_ori(a) > self.aa(a) and \
             elif self.aa_ori(a) != self.aa(a) and \
                  self.cat[self.aa_ori(a)] > self.cat[cat_b]:
                 num += 0.1
