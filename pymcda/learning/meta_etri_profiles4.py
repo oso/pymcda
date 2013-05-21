@@ -50,15 +50,17 @@ class MetaEtriProfiles4():
 
         for i, a in enumerate(alts):
             conc = ct[a]
+            aa_ori = self.aa_ori._d[a].category_id
+            aa = self.aa._d[a].category_id
             diff = conc - w
-            if self.aa_ori(a) == cat_a:
-                if self.aa(a) == cat_a and diff < lbda:
+            if aa_ori == cat_a:
+                if aa == cat_a and diff < lbda:
                     # --
                     total += 5
-                elif self.aa(a) == cat_b:
+                elif aa == cat_b:
                     # -
                     total += 1
-            elif self.aa_ori(a) == cat_b and self.aa(a) == cat_a:
+            elif aa_ori == cat_b and aa == cat_a:
                 if diff >= lbda:
                     # +
                     num += 0.5
@@ -70,8 +72,8 @@ class MetaEtriProfiles4():
                     total += 1
                     h_above[perfs[i] + delta] = num / total
 #            elif self.aa_ori(a) < self.aa(a) and \
-            elif self.aa_ori(a) != self.aa(a) and \
-                 self.cat[self.aa_ori(a)] < self.cat[cat_a]:
+            elif aa_ori != aa and \
+                 self.cat[aa_ori] < self.cat[cat_a]:
                 num += 0.1
                 total += 1
                 h_above[perfs[i] + delta] = num / total
@@ -91,8 +93,10 @@ class MetaEtriProfiles4():
 
         for i, a in enumerate(alts):
             conc = ct[a]
+            aa_ori = self.aa_ori._d[a].category_id
+            aa = self.aa._d[a].category_id
             diff = conc + w
-            if self.aa_ori(a) == cat_a and self.aa(a) == cat_b:
+            if aa_ori == cat_a and aa == cat_b:
                 if diff >= lbda:
                     # ++
                     num += 2
@@ -103,16 +107,16 @@ class MetaEtriProfiles4():
                     num += 0.5
                     total += 1
                     h_below[perfs[i]] = num / total
-            elif self.aa_ori(a) == cat_b:
-                if self.aa(a) == cat_b and diff >= lbda:
+            elif aa_ori == cat_b:
+                if aa == cat_b and diff >= lbda:
                     # --
                     total += 5
-                elif self.aa(a) == cat_a:
+                elif aa == cat_a:
                     # -
                     total += 1
 #            elif self.aa_ori(a) > self.aa(a) and \
-            elif self.aa_ori(a) != self.aa(a) and \
-                 self.cat[self.aa_ori(a)] > self.cat[cat_b]:
+            elif aa_ori != aa and \
+                 self.cat[aa_ori] > self.cat[cat_b]:
                 num += 0.1
                 total += 1
                 h_below[perfs[i]] = num / total
