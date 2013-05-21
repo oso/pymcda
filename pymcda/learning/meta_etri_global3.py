@@ -3,8 +3,10 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 import random
 from itertools import product
+from multiprocessing import Process, Queue
+from threading import Thread
 
-from pymcda.electre_tri import ElectreTri
+from pymcda.electre_tri import ElectreTriBM
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import PerformanceTable
 from pymcda.learning.heur_etri_profiles import HeurEtriProfiles
@@ -14,13 +16,70 @@ from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_electre_tri_bm_model
 from pymcda.generate import generate_alternatives
+from pymcda.generate import generate_categories_profiles
+
+class MetaEtriGlobalPop3():
+
+    def __init__(self, nmodels, criteria, categories, pt_sorted, aa_ori):
+        self.nmodels = nmodels
+        self.models = list()
+        self.metas = list()
+
+        for i in range(self.nmodels):
+            cps = generate_categories_profiles(categories)
+            model = ElectreTriBM(criteria, None, None, None, cps)
+            self.models.append(model)
+            meta = MetaEtriGlobal3(model, pt_sorted, aa_ori, i)
+            self.metas.append(meta)
+
+    def _process_optimize(self, queue, meta, nmeta):
+        ca = meta.optimize(nmeta)
+        queue.put([ca, meta.model.bpt, meta.model.cv, meta.model.lbda])
+
+    def reinit_worst_models(self):
+        meta_ca = [(meta, meta.ca) for meta in self.metas]
+        meta_ca = sorted(meta_ca, key = lambda (k,v): (v,k),
+                           reverse = True)
+        for i in range(int((self.nmodels + 1) / 2), self.nmodels):
+            meta_ca[i][0].init_profiles()
+
+    def optimize(self, nmeta):
+        self.reinit_worst_models()
+
+        processes = list()
+        for meta in self.metas:
+            q = Queue()
+            p = Process(target = self._process_optimize,
+                        args = (q, meta, nmeta))
+            processes.append((meta, p, q))
+
+            p.start()
+
+        print 'started'
+
+        for meta, p, q in processes:
+            p.join()
+            meta.ca, meta.model.bpt, meta.model.cv, meta.model.lbda = q.get()
+
+        print 'joined'
+
+        models_ca = [(meta.model, meta.ca) for meta in self.metas]
+        models_ca = sorted(models_ca,
+                           key = lambda (k,v): (v,k),
+                           reverse = True)
+
+        return models_ca[0][0], models_ca[0][1]
 
 class MetaEtriGlobal3():
 
-    def __init__(self, model, pt_sorted, aa_ori):
+    def __init__(self, model, pt_sorted, aa_ori, seed = None):
+        if seed is not None:
+            random.seed(seed)
+
         self.model = model
         self.pt_sorted = pt_sorted
         self.aa_ori = aa_ori
+        self.ca = 0
 
         self.init_profiles()
         self.lp = LpEtriWeights(self.model, pt_sorted.pt, self.aa_ori)
@@ -55,6 +114,7 @@ class MetaEtriGlobal3():
                 break
 
         self.model.bpt = best_bpt
+        self.ca = best_ca
         return best_ca
 
 if __name__ == "__main__":
@@ -64,7 +124,6 @@ if __name__ == "__main__":
     from pymcda.utils import display_assignments_and_pt
     from pymcda.utils import compute_winning_coalitions
     from pymcda.types import AlternativePerformances
-    from pymcda.electre_tri import ElectreTri
     from pymcda.ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model
@@ -80,7 +139,7 @@ if __name__ == "__main__":
     aa = model.pessimist(pt)
 
     nmeta = 20
-    nloops = 10
+    nloops = 30
 
     print('Original model')
     print('==============')
@@ -97,15 +156,12 @@ if __name__ == "__main__":
 
     t1 = time.time()
 
-    meta = MetaEtriGlobal3(model2, pt_sorted, aa)
-
+    meta = MetaEtriGlobalPop3(10, model.criteria,
+                              model.categories_profiles.to_categories(),
+                              pt_sorted, aa)
     for i in range(nloops):
-        ca = meta.optimize(nmeta)
-
-        print i, ca
-
-        if ca == 1:
-            break
+        model2, ca = meta.optimize(20)
+        print ca
 
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
