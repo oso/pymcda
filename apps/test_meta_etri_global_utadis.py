@@ -9,8 +9,7 @@ from itertools import product
 
 from pymcda.types import AlternativesAssignments, PerformanceTable
 from pymcda.electre_tri import ElectreTri
-from pymcda.learning.meta_etri_global2 import MetaEtriGlobal2
-from pymcda.learning.meta_etri_global3 import MetaEtriGlobal3
+from pymcda.learning.meta_etri_global3 import MetaEtriGlobalPop3
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_electre_tri_bm_model
@@ -40,52 +39,25 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, ns, na_gen, pcerrors,
     # Sort the performance table
     pt_sorted = SortedPerformanceTable(pt)
 
-    # Initialize nmodels meta instances
-    ncriteria = len(model.criteria)
-    ncategories = len(cats)
-    pt_sorted = SortedPerformanceTable(pt)
-    model_metas = {}
-    model_cas = {}
-    for i in range(nmodels):
-        m = generate_random_electre_tri_bm_model(ncriteria, ncategories)
-        meta = algo(m, pt_sorted, aa_err)
-        model_metas[m] = meta
-        model_cas[meta.model] = meta.meta.good / meta.meta.na
-
-    model_cas = sorted(model_cas.iteritems(),
-                       key = lambda (k,v): (v,k),
-                       reverse = True)
     t1 = time.time()
 
     # Perform at max oloops on the set of metas
-    ca2_iter = [model_cas[0][1]] + [1] * (max_loops)
+    meta = MetaEtriGlobalPop3(nmodels, model.criteria,
+                              model.cat_values.to_categories(),
+                              pt_sorted, aa_err)
+    ca2_iter = [meta.metas[0].ca] + [1] * (max_loops)
+
     nloops = 0
     for i in range(0, max_loops):
-        model_cas = {}
-        for m, meta in model_metas.items():
-            model_cas[m] = meta.optimize(max_oloops)
-            if model_cas[m] == 1:
-                break
+        model2, ca2 = meta.optimize(max_oloops)
 
-        model_cas = sorted(model_cas.iteritems(),
-                           key = lambda (k,v): (v,k),
-                           reverse = True)
-
+        ca2_iter[i + 1] = ca2
         nloops += 1
-        ca2_best = model_cas[0][1]
 
-        ca2_iter[i + 1] = ca2_best
-
-        if ca2_best == 1:
+        if ca2 == 1:
             break
 
-        for model_ca in model_cas[int((nmodels + 1) / 2):]:
-            m = model_ca[0]
-            model_metas[m].init_profiles()
-
     t_total = time.time() - t1
-
-    model2 = model_cas[0][0]
 
     # Determine the number of erroned alternatives badly assigned
     aa2 = model2.pessimist(pt)
@@ -131,7 +103,7 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, ns, na_gen, pcerrors,
     # Ouput params
     t['ca_best'] = ca_best
     t['ca_errors'] = ca_errors
-    t['ca2_best'] = ca2_best
+    t['ca2_best'] = ca2
     t['ca2_errors'] = ca2_errors
     t['ca_gen'] = ca_gen
     t['nloops'] = nloops
@@ -218,12 +190,6 @@ if __name__ == "__main__":
     from test_utils import read_csv_filename
 
     parser = OptionParser(usage = "python %s [options]" % sys.argv[0])
-    parser.add_option("-2", "--second", action = "store_true",
-                      dest = "second", default = False,
-                      help = "Second algorithm")
-    parser.add_option("-3", "--third", action = "store_true",
-                      dest = "third", default = False,
-                      help = "Third algorithm")
     parser.add_option("-n", "--na", action = "store", type="string",
                       dest = "na",
                       help = "number of assignment examples")
@@ -262,25 +228,7 @@ if __name__ == "__main__":
 
     (options, args) = parser.parse_args()
 
-    while options.second is False and options.third is False:
-        print("2. Random population and adapted intervals")
-        print("3. Heurisitc initialized profiles and adapted intervals")
-        i = raw_input("Which algorithm ? ")
-        if i == '2':
-            options.second = True
-        elif i == '3':
-            options.third = True
-
-    i = 0
-    if options.second is True:
-        algo = MetaEtriGlobal2
-        i += 1
-    if options.third is True:
-        algo = MetaEtriGlobal3
-        i += 1
-    if i > 1:
-        print("Cannot select multiple algorithms at the same time")
-        sys.exit(1)
+    algo = MetaEtriGlobalPop3
 
     options.na = read_multiple_integer(options.na,
                                        "Number of assignment examples")
