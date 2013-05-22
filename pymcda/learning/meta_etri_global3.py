@@ -55,13 +55,9 @@ class MetaEtriGlobalPop3():
 
             p.start()
 
-        print 'started'
-
         for meta, p, q in processes:
             p.join()
             meta.ca, meta.model.bpt, meta.model.cv, meta.model.lbda = q.get()
-
-        print 'joined'
 
         models_ca = [(meta.model, meta.ca) for meta in self.metas]
         models_ca = sorted(models_ca,
@@ -161,7 +157,7 @@ if __name__ == "__main__":
                               pt_sorted, aa)
     for i in range(nloops):
         model2, ca = meta.optimize(20)
-        print ca
+        print("%d: ca: %f" % (i, ca))
 
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
