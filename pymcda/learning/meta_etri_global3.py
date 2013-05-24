@@ -2,8 +2,9 @@ from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 import random
+import math
 from itertools import product
-from multiprocessing import Process, Queue
+from multiprocessing import Pool, Process, Queue
 from threading import Thread
 
 from pymcda.electre_tri import ElectreTriBM
@@ -22,56 +23,63 @@ class MetaEtriGlobalPop3():
 
     def __init__(self, nmodels, criteria, categories, pt_sorted, aa_ori):
         self.nmodels = nmodels
-        self.models = list()
-        self.metas = list()
+        self.criteria = criteria
+        self.categories = categories
+        self.pt_sorted = pt_sorted
+        self.aa_ori = aa_ori
 
+        self.metas = list()
         for i in range(self.nmodels):
-            cps = generate_categories_profiles(categories)
-            model = ElectreTriBM(criteria, None, None, None, cps)
-            self.models.append(model)
-            meta = MetaEtriGlobal3(model, pt_sorted, aa_ori, i)
+            meta = self.init_one_meta(i)
             self.metas.append(meta)
 
-    def _process_optimize(self, queue, meta, nmeta):
-        ca = meta.optimize(nmeta)
-        queue.put([ca, meta.model.bpt, meta.model.cv, meta.model.lbda])
+    def init_one_meta(self, seed):
+        cps = generate_categories_profiles(self.categories)
+        model = ElectreTriBM(self.criteria, None, None, None, cps)
+        meta = MetaEtriGlobal3(model, self.pt_sorted, self.aa_ori)
+        random.seed(seed)
+        meta.random_state = random.getstate()
+        return meta
 
     def reinit_worst_models(self):
-        meta_ca = [(meta, meta.ca) for meta in self.metas]
-        meta_ca = sorted(meta_ca, key = lambda (k,v): (v,k),
-                           reverse = True)
-        for i in range(int((self.nmodels + 1) / 2), self.nmodels):
-            meta_ca[i][0].init_profiles()
+        metas_sorted = sorted(self.metas, key = lambda (k): k.ca,
+                              reverse = True)
+        nmeta_to_reinit = int(math.ceil(self.nmodels / 2))
+        for meta in metas_sorted[nmeta_to_reinit:]:
+            meta.init_profiles()
+
+    def _process_optimize(self, meta, nmeta):
+        random.setstate(meta.random_state)
+        ca = meta.optimize(nmeta)
+        meta.queue.put([ca, meta.model.bpt, meta.model.cv,
+                        meta.model.lbda, random.getstate()])
 
     def optimize(self, nmeta):
         self.reinit_worst_models()
 
         processes = list()
         for meta in self.metas:
-            q = Queue()
-            p = Process(target = self._process_optimize,
-                        args = (q, meta, nmeta))
-            processes.append((meta, p, q))
+            meta.queue = Queue()
+            meta.p = Process(target = self._process_optimize,
+                             args = (meta, nmeta))
+            meta.p.start()
 
-            p.start()
+        for meta in self.metas:
+            output = meta.queue.get()
+            meta.ca = output[0]
+            meta.model.bpt = output[1]
+            meta.model.cv = output[2]
+            meta.model.lbda = output[3]
+            meta.random_state = output[4]
 
-        for meta, p, q in processes:
-            p.join()
-            meta.ca, meta.model.bpt, meta.model.cv, meta.model.lbda = q.get()
+        metas_sorted = sorted(self.metas, key = lambda (k): k.ca,
+                              reverse = True)
 
-        models_ca = [(meta.model, meta.ca) for meta in self.metas]
-        models_ca = sorted(models_ca,
-                           key = lambda (k,v): (v,k),
-                           reverse = True)
-
-        return models_ca[0][0], models_ca[0][1]
+        return metas_sorted[0].model, metas_sorted[0].ca
 
 class MetaEtriGlobal3():
 
-    def __init__(self, model, pt_sorted, aa_ori, seed = None):
-        if seed is not None:
-            random.seed(seed)
-
+    def __init__(self, model, pt_sorted, aa_ori):
         self.model = model
         self.pt_sorted = pt_sorted
         self.aa_ori = aa_ori
