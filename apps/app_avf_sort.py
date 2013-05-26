@@ -7,6 +7,7 @@ from itertools import combinations
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 from pymcda.generate import generate_random_utadis_model
+from pymcda.generate import generate_random_electre_tri_bm_model
 from pymcda.generate import generate_random_profiles
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
@@ -16,43 +17,41 @@ from pymcda.types import CriteriaValues, CriterionValue
 from pymcda.uta import Utadis
 from pymcda.learning.lp_utadis import LpUtadis
 from pymcda.ui.graphic_uta import QGraphCriterionFunction
+from pymcda.ui.graphic import QGraphicsSceneEtri
 from pymcda.utils import compute_ca
 from multiprocessing import Process, Pipe
 
 # FIXME
 from pymcda.types import AlternativePerformances
 
-def run_lp(pipe, model, pt, aa):
-    cat = model.cat_values.to_categories()
+COMBO_AVFSORT = 0
+COMBO_MRSORT = 1
 
-    css = CriteriaValues([])
-    for cf in model.cfs:
-        cs = CriterionValue(cf.id, len(cf.function))
-        css.append(cs)
-
-    c = model.criteria
+def run_lp_avf(pipe, criteria, categories, worst, best, css, pt, aa):
+    c = criteria
     gi_worst = AlternativePerformances('worst', {crit.id: 0 for crit in c})
     gi_best = AlternativePerformances('best', {crit.id: 1 for crit in c})
 
-    lp = LpUtadis(css, cat, gi_worst, gi_best)
+    lp = LpUtadis(css, categories, gi_worst, gi_best)
     obj, cvs, cfs, catv = lp.solve(aa, pt)
 
-    model = Utadis(c, cvs, cfs, catv)
+    model = Utadis(criteria, cvs, cfs, catv)
     aa2 = model.get_assignments(pt)
     ca = compute_ca(aa, aa2)
     pipe.send([model, ca])
 
     pipe.close()
 
-class qt_thread_algo(QtCore.QThread):
+class qt_thread_avf(QtCore.QThread):
 
-    def __init__(self, model, pt, aa, parent = None):
-        super(qt_thread_algo, self).__init__(parent)
-        self.mutex = QtCore.QMutex()
-        self.stopped = False
-        self.model = model
-        self.ncrit = len(model.criteria)
-        self.ncat = len(model.cat_values)
+    def __init__(self, criteria, categories, worst, best, css, pt, aa,
+                 parent = None):
+        super(qt_thread_avf, self).__init__(parent)
+        self.criteria = criteria
+        self.categories = categories
+        self.worst = worst
+        self.best = best
+        self.css = css
         self.pt = pt
         self.aa = aa
         self.learned_model = None
@@ -63,8 +62,10 @@ class qt_thread_algo(QtCore.QThread):
 
     def run(self):
         self.parent_pipe, child_pipe = Pipe(False)
-        self.p = Process(target = run_lp,
-                         args = (child_pipe, self.model, self.pt, self.aa))
+        self.p = Process(target = run_lp_avf,
+                         args = (child_pipe, self.criteria,
+                                 self.categories, self.worst, self.best,
+                                 self.css, self.pt, self.aa))
         self.p.start()
 
         self.learned_model = self.parent_pipe.recv()
@@ -140,6 +141,17 @@ class qt_mainwindow(QtGui.QMainWindow):
 
         self.layout_model_params = QtGui.QVBoxLayout(self.groupbox_model_params)
 
+        self.layout_seed = QtGui.QHBoxLayout()
+        self.label_seed = QtGui.QLabel(self.groupbox_model_params)
+        self.label_seed.setText("Seed")
+        self.spinbox_seed = QtGui.QSpinBox(self.groupbox_model_params)
+        self.spinbox_seed.setMinimum(0)
+        self.spinbox_seed.setMaximum(1000000)
+        self.spinbox_seed.setProperty("value", 123)
+        self.layout_seed.addWidget(self.label_seed)
+        self.layout_seed.addWidget(self.spinbox_seed)
+        self.layout_model_params.addLayout(self.layout_seed)
+
         self.layout_criteria = QtGui.QHBoxLayout()
         self.label_criteria = QtGui.QLabel(self.groupbox_model_params)
         self.label_criteria.setText("Criteria")
@@ -162,9 +174,24 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.layout_categories.addWidget(self.spinbox_categories)
         self.layout_model_params.addLayout(self.layout_categories)
 
+        # Original model
+        self.groupbox_original_model = QtGui.QGroupBox(self.centralwidget)
+        self.groupbox_original_model.setTitle("Original model")
+        self.rightlayout.addWidget(self.groupbox_original_model)
+        self.layout_original_model = QtGui.QVBoxLayout(self.groupbox_original_model)
+
+        self.layout_ori = QtGui.QHBoxLayout()
+        self.label_type = QtGui.QLabel(self.groupbox_original_model)
+        self.label_type.setText("Type of model")
+        self.combobox_type = QtGui.QComboBox()
+        self.combobox_type.insertItems(0, ["AVF-Sort", "MR-Sort"])
+        self.layout_ori.addWidget(self.label_type)
+        self.layout_ori.addWidget(self.combobox_type)
+        self.layout_original_model.addLayout(self.layout_ori)
+
         # Alternative parameters
         self.groupbox_alt_params = QtGui.QGroupBox(self.centralwidget)
-        self.groupbox_alt_params.setTitle("Alternative parameters")
+        self.groupbox_alt_params.setTitle("Alternatives")
         self.rightlayout.addWidget(self.groupbox_alt_params)
         self.layout_alt_params = QtGui.QVBoxLayout(self.groupbox_alt_params)
 
@@ -181,20 +208,9 @@ class qt_mainwindow(QtGui.QMainWindow):
 
         # Metaheuristic parameters
         self.groupbox_meta_params = QtGui.QGroupBox(self.centralwidget)
-        self.groupbox_meta_params.setTitle("Parameters")
+        self.groupbox_meta_params.setTitle("Learned model")
         self.rightlayout.addWidget(self.groupbox_meta_params)
         self.layout_meta_params = QtGui.QVBoxLayout(self.groupbox_meta_params)
-
-        self.layout_seed = QtGui.QHBoxLayout()
-        self.label_seed = QtGui.QLabel(self.groupbox_meta_params)
-        self.label_seed.setText("Seed")
-        self.spinbox_seed = QtGui.QSpinBox(self.groupbox_meta_params)
-        self.spinbox_seed.setMinimum(0)
-        self.spinbox_seed.setMaximum(1000000)
-        self.spinbox_seed.setProperty("value", 123)
-        self.layout_seed.addWidget(self.label_seed)
-        self.layout_seed.addWidget(self.spinbox_seed)
-        self.layout_meta_params.addLayout(self.layout_seed)
 
         self.layout_nsegments = QtGui.QHBoxLayout()
         self.label_nsegments = QtGui.QLabel(self.groupbox_meta_params)
@@ -262,6 +278,9 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.gridlayout.addLayout(self.rightlayout, 0, 2, 1, 1)
         self.setCentralWidget(self.centralwidget)
 
+        # Update layout of original model parameters
+        self.update_layout_original_model_avf()
+
     def setup_connect(self):
         QtCore.QObject.connect(self.button_generate,
                                QtCore.SIGNAL('clicked()'),
@@ -269,6 +288,9 @@ class qt_mainwindow(QtGui.QMainWindow):
         QtCore.QObject.connect(self.button_run,
                                QtCore.SIGNAL('clicked()'),
                                self.on_button_run)
+        QtCore.QObject.connect(self.combobox_type,
+                               QtCore.SIGNAL('currentIndexChanged(int)'),
+                               self.on_combobox_type_index_changed)
 
     def setup_shortcuts(self):
         action = QtGui.QAction('&Exit', self)
@@ -290,13 +312,7 @@ class qt_mainwindow(QtGui.QMainWindow):
             scene = gv.scene()
             scene.update(gv.size())
 
-    def on_button_generate(self):
-        seed = self.spinbox_seed.value()
-        random.seed(seed)
-        self.generate_model()
-        self.generate_alt()
-
-    def clear_model(self, layout):
+    def clear_layout(self, layout):
         item = layout.takeAt(0)
         while item:
             layout.removeItem(item)
@@ -304,10 +320,64 @@ class qt_mainwindow(QtGui.QMainWindow):
             widget.deleteLater()
             item = layout.takeAt(0)
 
-    def plot_model(self, model, layout):
+    def delete_layout(self, layout):
+        self.clear_layout(layout)
+        del layout
+
+    def update_layout_original_model_avf(self):
+        self.layout_nsegments_ori = QtGui.QHBoxLayout()
+        self.label_nsegments_ori = QtGui.QLabel(self.groupbox_original_model)
+        self.label_nsegments_ori.setText("Segments")
+        self.spinbox_nsegments_ori = QtGui.QSpinBox(self.groupbox_original_model)
+        self.spinbox_nsegments_ori.setMinimum(1)
+        self.spinbox_nsegments_ori.setMaximum(10)
+        self.spinbox_nsegments_ori.setProperty("value", 3)
+        self.layout_nsegments_ori.addWidget(self.label_nsegments_ori)
+        self.layout_nsegments_ori.addWidget(self.spinbox_nsegments_ori)
+        self.layout_original_model.addLayout(self.layout_nsegments_ori)
+
+    def update_layout_original_model_mr(self):
+        layout = self.layout_original_model.takeAt(1)
+        self.delete_layout(layout)
+
+    def on_combobox_type_index_changed(self, index):
+        if index == COMBO_AVFSORT:
+            self.update_layout_original_model_avf()
+        else:
+            self.update_layout_original_model_mr()
+
+    def on_button_generate(self):
+        seed = self.spinbox_seed.value()
+        random.seed(seed)
+
+        # FIXME
+        ncrit = self.spinbox_criteria.value()
+        crit = generate_criteria(ncrit)
+        self.worst = AlternativePerformances("worst",
+                                    {c.id: 0 for c in crit})
+        self.best = AlternativePerformances("best",
+                                    {c.id: 1 for c in crit})
+
+        if self.combobox_type.currentIndex() == COMBO_AVFSORT:
+            self.generate_avf_sort_model()
+        else:
+            self.generate_mr_sort_model()
+
+        self.generate_assignments()
+
+    def plot_mr_sort_model(self, model, layout):
+        self.clear_layout(layout)
+        gv = _MyGraphicsview()
+        graph_model = QGraphicsSceneEtri(self.model,
+                                         self.worst, self.best,
+                                         gv.size())
+        gv.setScene(graph_model)
+        layout.addWidget(gv)
+
+    def plot_avf_sort_model(self, model, layout):
         n_per_row = len(model.cfs) / 2
         i = 0
-        self.clear_model(layout)
+        self.clear_layout(layout)
         for cf in model.cfs:
             gv = _MyGraphicsview()
             scene = QGraphCriterionFunction(cf, QtCore.QSize(130, 130))
@@ -318,21 +388,32 @@ class qt_mainwindow(QtGui.QMainWindow):
             layout.addWidget(gv, i / n_per_row, i % n_per_row)
             i = i + 1
 
-    def generate_model(self):
+    def generate_mr_sort_model(self):
         ncrit = self.spinbox_criteria.value()
         ncat = self.spinbox_categories.value()
-        nseg_min = self.spinbox_nsegments.value()
-        nseg_max = self.spinbox_nsegments.value()
+
+        self.model = generate_random_electre_tri_bm_model(ncrit, ncat,
+                                                          worst = self.worst,
+                                                          best = self.best)
+        self.categories = self.model.categories_profiles.to_categories()
+        self.plot_mr_sort_model(self.model, self.layout_original)
+
+    def generate_avf_sort_model(self):
+        ncrit = self.spinbox_criteria.value()
+        ncat = self.spinbox_categories.value()
+        nseg_min = self.spinbox_nsegments_ori.value()
+        nseg_max = self.spinbox_nsegments_ori.value()
 
         self.model = generate_random_utadis_model(ncrit, ncat, nseg_min,
                                                   nseg_max)
         self.model.set_equal_weights()
+        self.categories = self.model.categories
 
-        self.plot_model(self.model, self.layout_original)
+        self.plot_avf_sort_model(self.model, self.layout_original)
 
-    def generate_alt(self):
+    def generate_assignments(self):
         ncrit = len(self.model.criteria)
-        ncat = len(self.model.cat_values)
+        ncat = len(self.model.categories)
         nalt = self.spinbox_nalt.value()
 
         self.a = generate_alternatives(nalt)
@@ -355,7 +436,7 @@ class qt_mainwindow(QtGui.QMainWindow):
             model = self.thread.learned_model[0]
             ca = self.thread.learned_model[1]
             self.label_ca2.setText("%g" % ca)
-            self.plot_model(model, self.layout_learned)
+            self.plot_avf_sort_model(model, self.layout_learned)
 
     def on_button_run(self):
         if hasattr(self, 'started') and self.started is True:
@@ -367,8 +448,17 @@ class qt_mainwindow(QtGui.QMainWindow):
 
         self.label_time2.setText("")
 
-        self.thread = qt_thread_algo(self.model, self.pt, self.aa,
-                                     None)
+        ns = self.spinbox_nsegments.value()
+        css = CriteriaValues([])
+        for c in self.model.criteria:
+            cs = CriterionValue(c.id, ns)
+            css.append(cs)
+
+        self.thread = qt_thread_avf(self.model.criteria,
+                                    self.categories,
+                                    self.worst, self.best, css,
+                                    self.pt, self.aa, None)
+
         self.connect(self.thread, QtCore.SIGNAL("finished()"),
                      self.finished)
 
