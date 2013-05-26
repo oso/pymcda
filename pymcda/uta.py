@@ -53,6 +53,10 @@ class Utadis(Uta):
                                  key = lambda (k, v): (v, k))
         self.limits = [ cat_limit[1] for cat_limit in self.cat_limits ]
 
+    @property
+    def categories(self):
+        return self.cat_values.to_categories()
+
     def get_assignment(self, ap):
         av = self.global_utility(ap)
         i = bisect.bisect_left(self.limits, av.value)
