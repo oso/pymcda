@@ -182,6 +182,14 @@ class ElectreTri(McdaObject):
 
         return assignments
 
+    PESSIMIST = 0
+    OPTIMIST = 1
+    def get_assignments(self, pt, procedure = PESSIMIST):
+        if procedure == ElectreTri.OPTIMIST:
+            return self.optimist(pt)
+        else:
+            return self.pessimist(pt)
+
 class ElectreTriBM(ElectreTri):
 
     def concordance(self, ap, profile):
