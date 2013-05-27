@@ -16,6 +16,7 @@ from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.types import CriteriaValues, CriterionValue
 from pymcda.uta import Utadis
 from pymcda.learning.lp_utadis import LpUtadis
+from pymcda.learning.meta_etri_global3 import MetaEtriGlobalPop3
 from pymcda.ui.graphic_uta import QGraphCriterionFunction
 from pymcda.ui.graphic import QGraphicsSceneEtri
 from pymcda.utils import compute_ca
@@ -27,12 +28,88 @@ from pymcda.types import AlternativePerformances
 COMBO_AVFSORT = 0
 COMBO_MRSORT = 1
 
-def run_lp_avf(pipe, criteria, categories, worst, best, css, pt, aa):
-    c = criteria
-    gi_worst = AlternativePerformances('worst', {crit.id: 0 for crit in c})
-    gi_best = AlternativePerformances('best', {crit.id: 1 for crit in c})
+def run_meta_mr(pipe, criteria, categories, worst, best, nmodels, niter,
+                nmeta, pt, aa):
+    pt_sorted = SortedPerformanceTable(pt)
 
-    lp = LpUtadis(css, categories, gi_worst, gi_best)
+    meta = MetaEtriGlobalPop3(nmodels, criteria, categories, pt_sorted, aa)
+
+    ca = meta.metas[0].meta.good / len(aa)
+    pipe.send([meta.metas[0].model, ca])
+
+    for i in range(1, niter + 1):
+        model, ca = meta.optimize(nmeta)
+        pipe.send([model, ca])
+        if ca == 1:
+            break
+
+    pipe.close()
+
+class qt_thread_mr(QtCore.QThread):
+
+    def __init__(self, criteria, categories, worst, best, nmodels, niter,
+                 nmeta, pt, aa, parent = None):
+        super(qt_thread_mr, self).__init__(parent)
+        self.mutex = QtCore.QMutex()
+        self.criteria = criteria
+        self.categories = categories
+        self.worst = worst
+        self.best = best
+        self.nmodels = nmodels
+        self.niter = niter
+        self.nmeta = nmeta
+        self.pt = pt
+        self.aa = aa
+        self.learned_model = None
+        self.stopped = False
+        self.results = list()
+        self.fitness = list()
+
+    def stop(self):
+        try:
+            self.mutex.lock()
+            self.stopped = True
+        finally:
+            self.mutex.unlock()
+
+    def is_stopped(self):
+        try:
+            self.mutex.lock()
+            return self.stopped
+        finally:
+            self.mutex.unlock()
+
+    def run(self):
+        pt_sorted = SortedPerformanceTable(self.pt)
+
+        meta = MetaEtriGlobalPop3(self.nmodels, self.criteria,
+                                  self.categories, pt_sorted,
+                                  self.aa)
+
+        self.mutex.lock()
+        self.results.append(meta.metas[0].model.copy())
+        self.fitness.append(meta.metas[0].ca)
+        self.mutex.unlock()
+        self.emit(QtCore.SIGNAL('update(int)'), 0)
+
+        for i in range(1, self.niter + 1):
+            if self.is_stopped() is True:
+                break
+
+            model, ca = meta.optimize(self.nmeta)
+
+            self.mutex.lock()
+            self.results.append(model.copy())
+            self.fitness.append(ca)
+            self.mutex.unlock()
+
+            self.emit(QtCore.SIGNAL('update(int)'), i)
+
+            if ca == 1:
+                break
+
+def run_lp_avf(pipe, criteria, categories, worst, best, css, pt, aa):
+    lp = LpUtadis(css, categories, worst, best)
     obj, cvs, cfs, catv = lp.solve(aa, pt)
 
     model = Utadis(criteria, cvs, cfs, catv)
@@ -68,7 +145,10 @@ class qt_thread_avf(QtCore.QThread):
                                  self.css, self.pt, self.aa))
         self.p.start()
 
-        self.learned_model = self.parent_pipe.recv()
+        try:
+            self.learned_model = self.parent_pipe.recv()
+        except IOError:
+            pass
 
         self.parent_pipe.close()
         self.p.join()
@@ -180,14 +260,14 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.rightlayout.addWidget(self.groupbox_original_model)
         self.layout_original_model = QtGui.QVBoxLayout(self.groupbox_original_model)
 
-        self.layout_ori = QtGui.QHBoxLayout()
-        self.label_type = QtGui.QLabel(self.groupbox_original_model)
-        self.label_type.setText("Type of model")
-        self.combobox_type = QtGui.QComboBox()
-        self.combobox_type.insertItems(0, ["AVF-Sort", "MR-Sort"])
-        self.layout_ori.addWidget(self.label_type)
-        self.layout_ori.addWidget(self.combobox_type)
-        self.layout_original_model.addLayout(self.layout_ori)
+        self.layout_type_ori = QtGui.QHBoxLayout()
+        self.label_type_ori = QtGui.QLabel(self.groupbox_original_model)
+        self.label_type_ori.setText("Type of model")
+        self.combobox_type_ori = QtGui.QComboBox()
+        self.combobox_type_ori.insertItems(0, ["AVF-Sort", "MR-Sort"])
+        self.layout_type_ori.addWidget(self.label_type_ori)
+        self.layout_type_ori.addWidget(self.combobox_type_ori)
+        self.layout_original_model.addLayout(self.layout_type_ori)
 
         # Alternative parameters
         self.groupbox_alt_params = QtGui.QGroupBox(self.centralwidget)
@@ -206,22 +286,20 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.layout_nalt.addWidget(self.spinbox_nalt)
         self.layout_alt_params.addLayout(self.layout_nalt)
 
-        # Metaheuristic parameters
+        # Learned model
         self.groupbox_meta_params = QtGui.QGroupBox(self.centralwidget)
         self.groupbox_meta_params.setTitle("Learned model")
         self.rightlayout.addWidget(self.groupbox_meta_params)
         self.layout_meta_params = QtGui.QVBoxLayout(self.groupbox_meta_params)
 
-        self.layout_nsegments = QtGui.QHBoxLayout()
-        self.label_nsegments = QtGui.QLabel(self.groupbox_meta_params)
-        self.label_nsegments.setText("Number of segments")
-        self.spinbox_nsegments = QtGui.QSpinBox(self.groupbox_meta_params)
-        self.spinbox_nsegments.setMinimum(1)
-        self.spinbox_nsegments.setMaximum(10)
-        self.spinbox_nsegments.setProperty("value", 3)
-        self.layout_nsegments.addWidget(self.label_nsegments)
-        self.layout_nsegments.addWidget(self.spinbox_nsegments)
-        self.layout_meta_params.addLayout(self.layout_nsegments)
+        self.layout_type = QtGui.QHBoxLayout()
+        self.label_type = QtGui.QLabel(self.groupbox_meta_params)
+        self.label_type.setText("Type of model")
+        self.combobox_type = QtGui.QComboBox()
+        self.combobox_type.insertItems(0, ["AVF-Sort", "MR-Sort"])
+        self.layout_type.addWidget(self.label_type)
+        self.layout_type.addWidget(self.combobox_type)
+        self.layout_meta_params.addLayout(self.layout_type)
 
         # Initialization
         self.groupbox_init = QtGui.QGroupBox(self.centralwidget)
@@ -250,24 +328,6 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.rightlayout.addWidget(self.groupbox_result)
         self.layout_result = QtGui.QVBoxLayout(self.groupbox_result)
 
-        self.layout_time = QtGui.QHBoxLayout()
-        self.label_time = QtGui.QLabel(self.groupbox_result)
-        self.label_time.setText("Time:")
-        self.label_time2 = QtGui.QLabel(self.groupbox_result)
-        self.label_time2.setText("")
-        self.layout_time.addWidget(self.label_time)
-        self.layout_time.addWidget(self.label_time2)
-        self.layout_result.addLayout(self.layout_time)
-
-        self.layout_ca = QtGui.QHBoxLayout()
-        self.label_ca = QtGui.QLabel(self.groupbox_result)
-        self.label_ca.setText("CA:")
-        self.label_ca2 = QtGui.QLabel(self.groupbox_result)
-        self.label_ca2.setText("")
-        self.layout_ca.addWidget(self.label_ca)
-        self.layout_ca.addWidget(self.label_ca2)
-        self.layout_result.addLayout(self.layout_ca)
-
         # Spacer
         self.spacer_item = QtGui.QSpacerItem(20, 20,
                                              QtGui.QSizePolicy.Minimum,
@@ -279,7 +339,8 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.setCentralWidget(self.centralwidget)
 
         # Update layout of original model parameters
-        self.update_layout_original_model_avf()
+        self.update_layout_model_avf_ori(self.layout_original_model)
+        self.update_layout_model_avf(self.layout_meta_params)
 
     def setup_connect(self):
         QtCore.QObject.connect(self.button_generate,
@@ -288,6 +349,9 @@ class qt_mainwindow(QtGui.QMainWindow):
         QtCore.QObject.connect(self.button_run,
                                QtCore.SIGNAL('clicked()'),
                                self.on_button_run)
+        QtCore.QObject.connect(self.combobox_type_ori,
+                               QtCore.SIGNAL('currentIndexChanged(int)'),
+                               self.on_combobox_type_ori_index_changed)
         QtCore.QObject.connect(self.combobox_type,
                                QtCore.SIGNAL('currentIndexChanged(int)'),
                                self.on_combobox_type_index_changed)
@@ -324,7 +388,10 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.clear_layout(layout)
         del layout
 
-    def update_layout_original_model_avf(self):
+    def update_layout_model_avf_ori(self, layout):
+        while layout.itemAt(1):
+            self.delete_layout(layout.takeAt(1))
+
         self.layout_nsegments_ori = QtGui.QHBoxLayout()
         self.label_nsegments_ori = QtGui.QLabel(self.groupbox_original_model)
         self.label_nsegments_ori.setText("Segments")
@@ -334,17 +401,75 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.spinbox_nsegments_ori.setProperty("value", 3)
         self.layout_nsegments_ori.addWidget(self.label_nsegments_ori)
         self.layout_nsegments_ori.addWidget(self.spinbox_nsegments_ori)
-        self.layout_original_model.addLayout(self.layout_nsegments_ori)
+        layout.addLayout(self.layout_nsegments_ori)
 
-    def update_layout_original_model_mr(self):
-        layout = self.layout_original_model.takeAt(1)
-        self.delete_layout(layout)
+    def update_layout_model_avf(self, layout):
+        while layout.itemAt(1):
+            self.delete_layout(layout.takeAt(1))
+
+        self.layout_nsegments = QtGui.QHBoxLayout()
+        self.label_nsegments = QtGui.QLabel(self.groupbox_meta_params)
+        self.label_nsegments.setText("Segments")
+        self.spinbox_nsegments = QtGui.QSpinBox(self.groupbox_meta_params)
+        self.spinbox_nsegments.setMinimum(1)
+        self.spinbox_nsegments.setMaximum(10)
+        self.spinbox_nsegments.setProperty("value", 3)
+        self.layout_nsegments.addWidget(self.label_nsegments)
+        self.layout_nsegments.addWidget(self.spinbox_nsegments)
+        layout.addLayout(self.layout_nsegments)
+
+    def update_layout_model_mr_ori(self, layout):
+        while layout.itemAt(1):
+            self.delete_layout(layout.takeAt(1))
+
+    def update_layout_model_mr(self, layout):
+        while layout.itemAt(1):
+            self.delete_layout(layout.takeAt(1))
+
+        self.layout_nmodels = QtGui.QHBoxLayout()
+        self.label_nmodels = QtGui.QLabel(self.groupbox_meta_params)
+        self.label_nmodels.setText("Nb. models")
+        self.spinbox_nmodels = QtGui.QSpinBox(self.groupbox_meta_params)
+        self.spinbox_nmodels.setMinimum(1)
+        self.spinbox_nmodels.setMaximum(1000000)
+        self.spinbox_nmodels.setProperty("value", 10)
+        self.layout_nmodels.addWidget(self.label_nmodels)
+        self.layout_nmodels.addWidget(self.spinbox_nmodels)
+        layout.addLayout(self.layout_nmodels)
+
+        self.layout_niter = QtGui.QHBoxLayout()
+        self.label_niter = QtGui.QLabel(self.groupbox_meta_params)
+        self.label_niter.setText("Max iterations")
+        self.spinbox_niter = QtGui.QSpinBox(self.groupbox_meta_params)
+        self.spinbox_niter.setMinimum(1)
+        self.spinbox_niter.setMaximum(1000000)
+        self.spinbox_niter.setProperty("value", 30)
+        self.layout_niter.addWidget(self.label_niter)
+        self.layout_niter.addWidget(self.spinbox_niter)
+        layout.addLayout(self.layout_niter)
+
+        self.layout_nmeta = QtGui.QHBoxLayout()
+        self.label_nmeta = QtGui.QLabel(self.groupbox_meta_params)
+        self.label_nmeta.setText("Profiles it.")
+        self.spinbox_nmeta = QtGui.QSpinBox(self.groupbox_meta_params)
+        self.spinbox_nmeta.setMinimum(1)
+        self.spinbox_nmeta.setMaximum(1000000)
+        self.spinbox_nmeta.setProperty("value", 20)
+        self.layout_nmeta.addWidget(self.label_nmeta)
+        self.layout_nmeta.addWidget(self.spinbox_nmeta)
+        layout.addLayout(self.layout_nmeta)
+
+    def on_combobox_type_ori_index_changed(self, index):
+        if index == COMBO_AVFSORT:
+            self.update_layout_model_avf_ori(self.layout_original_model)
+        else:
+            self.update_layout_model_mr_ori(self.layout_original_model)
 
     def on_combobox_type_index_changed(self, index):
         if index == COMBO_AVFSORT:
-            self.update_layout_original_model_avf()
+            self.update_layout_model_avf(self.layout_meta_params)
         else:
-            self.update_layout_original_model_mr()
+            self.update_layout_model_mr(self.layout_meta_params)
 
     def on_button_generate(self):
         seed = self.spinbox_seed.value()
@@ -358,7 +483,7 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.best = AlternativePerformances("best",
                                     {c.id: 1 for c in crit})
 
-        if self.combobox_type.currentIndex() == COMBO_AVFSORT:
+        if self.combobox_type_ori.currentIndex() == COMBO_AVFSORT:
             self.generate_avf_sort_model()
         else:
             self.generate_mr_sort_model()
@@ -368,7 +493,7 @@ class qt_mainwindow(QtGui.QMainWindow):
     def plot_mr_sort_model(self, model, layout):
         self.clear_layout(layout)
         gv = _MyGraphicsview()
-        graph_model = QGraphicsSceneEtri(self.model,
+        graph_model = QGraphicsSceneEtri(model,
                                          self.worst, self.best,
                                          gv.size())
         gv.setScene(graph_model)
@@ -421,9 +546,66 @@ class qt_mainwindow(QtGui.QMainWindow):
                                                     self.model.criteria)
         self.aa = self.model.get_assignments(self.pt)
 
+    def init_results_avf(self):
+        while self.layout_result.itemAt(0):
+            self.delete_layout(self.layout_result.takeAt(0))
+
+        self.layout_time = QtGui.QHBoxLayout()
+        self.label_time = QtGui.QLabel(self.groupbox_result)
+        self.label_time.setText("Time:")
+        self.label_time2 = QtGui.QLabel(self.groupbox_result)
+        self.label_time2.setText("")
+        self.layout_time.addWidget(self.label_time)
+        self.layout_time.addWidget(self.label_time2)
+        self.layout_result.addLayout(self.layout_time)
+
+        self.layout_ca = QtGui.QHBoxLayout()
+        self.label_ca = QtGui.QLabel(self.groupbox_result)
+        self.label_ca.setText("CA:")
+        self.label_ca2 = QtGui.QLabel(self.groupbox_result)
+        self.label_ca2.setText("")
+        self.layout_ca.addWidget(self.label_ca)
+        self.layout_ca.addWidget(self.label_ca2)
+        self.layout_result.addLayout(self.layout_ca)
+
+    def init_results_mr(self):
+        self.init_results_avf()
+
+        self.layout_ca = QtGui.QHBoxLayout()
+        self.layout_loop = QtGui.QHBoxLayout()
+        self.label_loop = QtGui.QLabel(self.groupbox_model_params)
+        self.label_loop.setText("Iteration:")
+        self.spinbox_loop = QtGui.QSpinBox(self.groupbox_result)
+        self.spinbox_loop.setMinimum(0)
+        self.spinbox_loop.setMaximum(0)
+        self.spinbox_loop.setProperty("value", 0)
+        self.layout_loop.addWidget(self.label_loop)
+        self.layout_loop.addWidget(self.spinbox_loop)
+        self.layout_result.addLayout(self.layout_loop)
+
+        QtCore.QObject.connect(self.spinbox_loop,
+                               QtCore.SIGNAL('valueChanged(int)'),
+                               self.on_spinbox_loop_value_changed)
+
+    def on_spinbox_loop_value_changed(self, value):
+        self.thread.mutex.lock()
+        model = self.thread.results[value]
+        fitness = self.thread.fitness[value]
+        self.thread.mutex.unlock()
+
+        self.plot_mr_sort_model(model, self.layout_learned)
+        self.label_ca2.setText("%g" % fitness)
+
     def timeout(self):
         t = time.time() - self.start_time
         self.label_time2.setText("%.1f sec" % t)
+
+    def update(self, i):
+        self.spinbox_loop.setMaximum(i)
+        self.spinbox_loop.setProperty("value", i)
+
+        if i == 0:
+            self.on_spinbox_loop_value_changed(0)
 
     def finished(self):
         self.timer.stop()
@@ -446,22 +628,39 @@ class qt_mainwindow(QtGui.QMainWindow):
         if not hasattr(self, 'model'):
             self.on_button_generate()
 
-        self.label_time2.setText("")
+        if self.combobox_type.currentIndex() == COMBO_AVFSORT:
+            self.init_results_avf()
 
-        ns = self.spinbox_nsegments.value()
-        css = CriteriaValues([])
-        for c in self.model.criteria:
-            cs = CriterionValue(c.id, ns)
-            css.append(cs)
+            ns = self.spinbox_nsegments.value()
+            css = CriteriaValues([])
+            for c in self.model.criteria:
+                cs = CriterionValue(c.id, ns)
+                css.append(cs)
 
-        self.thread = qt_thread_avf(self.model.criteria,
-                                    self.categories,
-                                    self.worst, self.best, css,
-                                    self.pt, self.aa, None)
+            self.thread = qt_thread_avf(self.model.criteria,
+                                        self.categories,
+                                        self.worst, self.best, css,
+                                        self.pt, self.aa, None)
+
+        else:
+            self.init_results_mr()
+
+            nmodels = self.spinbox_nmodels.value()
+            niter = self.spinbox_niter.value()
+            nmeta = self.spinbox_nmeta.value()
+            self.thread = qt_thread_mr(self.model.criteria,
+                                       self.categories,
+                                       self.worst, self.best,
+                                       nmodels, niter, nmeta,
+                                       self.pt, self.aa, None)
+
+            self.connect(self.thread, QtCore.SIGNAL("update(int)"),
+                         self.update)
 
         self.connect(self.thread, QtCore.SIGNAL("finished()"),
                      self.finished)
 
+        self.label_time2.setText("")
         self.start_time = time.time()
         self.timer.start(100)
         self.thread.start()
