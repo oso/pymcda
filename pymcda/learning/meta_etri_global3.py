@@ -1,4 +1,5 @@
 from __future__ import division
+import errno
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 import random
@@ -18,6 +19,16 @@ from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_electre_tri_bm_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_categories_profiles
+
+def queue_get_retry(queue):
+    while True:
+        try:
+            return queue.get()
+        except IOError, e:
+            if e.errno == errno.EINTR:
+                continue
+            else:
+                raise
 
 class MetaEtriGlobalPop3():
 
@@ -57,7 +68,6 @@ class MetaEtriGlobalPop3():
     def optimize(self, nmeta):
         self.reinit_worst_models()
 
-        processes = list()
         for meta in self.metas:
             meta.queue = Queue()
             meta.p = Process(target = self._process_optimize,
@@ -65,7 +75,8 @@ class MetaEtriGlobalPop3():
             meta.p.start()
 
         for meta in self.metas:
-            output = meta.queue.get()
+            output = queue_get_retry(meta.queue)
+
             meta.ca = output[0]
             meta.model.bpt = output[1]
             meta.model.cv = output[2]
