@@ -5,7 +5,7 @@ import datetime
 import random
 import time
 from itertools import product
-from pymcda.learning.meta_etri_global3 import MetaEtriGlobal3
+from pymcda.learning.meta_etri_global3 import MetaEtriGlobalPop3
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import Alternatives, Criteria, PerformanceTable
 from pymcda.types import AlternativesAssignments, Categories
@@ -89,32 +89,16 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
 
     pt_sorted = SortedPerformanceTable(pt_learning)
 
-    # Init of the metas
-    model_metas = {}
-    for i in range(nmodels):
-        m = model.copy()
-        model_metas[m] = MetaEtriGlobal3(m, pt_sorted, aa_learning)
+    # Algorithm
+    meta = MetaEtriGlobalPop3(nmodels, model.criteria,
+                              model.categories_profiles.to_categories(),
+                              pt_sorted, aa_learning)
 
-    # Main loop
-    for i in range(nloop):
-        model_cas = {}
-        for m, meta in model_metas.items():
-            model_cas[m] = meta.optimize(nmeta)
-            if model_cas[m] == 1:
-                break
+    for i in range(0, nloop):
+        model, ca_learning = meta.optimize(nmeta)
 
-        model_cas = sorted(model_cas.items(), key = lambda (k,v): (v,k),
-                           reverse = True)
-
-        ca_learning = model_cas[0][1]
         if ca_learning == 1:
             break
-
-        for model_ca in model_cas[int((nmodels + 1) / 2):]:
-            m = model_ca[0]
-            model_metas[m].init_profiles()
-
-    model = model_cas[0][0]
 
     t_total = time.time() - t1
 
