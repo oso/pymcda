@@ -62,8 +62,15 @@ class QGraphPiecewiseLinear(QtGui.QGraphicsScene):
         xmin, xmax = self.pl.xmin, self.pl.xmax
         ymin, ymax = self.pl.ymin, self.pl.ymax
 
-        x = (point.x - xmin) / (xmax - xmin)
-        y = (point.y - ymin) / (ymax - ymin)
+        if xmax - xmin != 0:
+            x = (point.x - xmin) / (xmax - xmin)
+        else:
+            x = 0
+
+        if ymax - ymin != 0:
+            y = (point.y - ymin) / (ymax - ymin)
+        else:
+            y = 0
 
         x = self.xmin + x * (self.xmax - self.xmin)
         y = self.ymin + y * (self.ymax - self.ymin)
