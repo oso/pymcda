@@ -14,14 +14,14 @@ from pymcda.uta import Utadis
 from pymcda.learning.lp_utadis import LpUtadis
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
-from pymcda.generate import generate_random_utadis_model
+from pymcda.generate import generate_random_avfsort_model
 from pymcda.utils import compute_ca
 from pymcda.utils import add_errors_in_assignments_proba
 from test_utils import test_result, test_results
 
 def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
     # Generate a random UTADIS model and assignment examples
-    model = generate_random_utadis_model(nc, ncat, ns, ns)
+    model = generate_random_avfsort_model(nc, ncat, ns, ns)
     model.set_equal_weights()
     cat = model.cat_values.to_categories()
 

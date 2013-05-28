@@ -7,7 +7,7 @@ from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.generate import generate_random_profiles
-from pymcda.generate import generate_random_utadis_model
+from pymcda.generate import generate_random_avfsort_model
 from pymcda.learning.lp_etri_weights import LpEtriWeights
 from pymcda.learning.meta_etri_profiles3 import MetaEtriProfiles3
 from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
@@ -291,7 +291,7 @@ class tests_heur_etri_profiles(unittest.TestCase):
 class tests_lp_utadis(unittest.TestCase):
 
     def one_test(self, seed, na, nc, ncat, ns):
-        u = generate_random_utadis_model(nc, ncat, ns, ns, seed)
+        u = generate_random_avfsort_model(nc, ncat, ns, ns, seed)
         a = generate_alternatives(na)
         pt = generate_random_performance_table(a, u.criteria)
 

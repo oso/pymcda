@@ -217,9 +217,9 @@ def generate_random_mrsort_model(ncrit, ncat, seed = None, k = 3,
 
     return ElectreTriBM(c, cv, bpt, lbda, cps)
 
-def generate_random_utadis_model(ncrit, ncat, nseg_min, nseg_max,
-                                 seed = None, k = 3,
-                                 random_direction = False):
+def generate_random_avfsort_model(ncrit, ncat, nseg_min, nseg_max,
+                                  seed = None, k = 3,
+                                  random_direction = False):
     if seed is not None:
         random.seed(seed)
 
@@ -256,5 +256,5 @@ if __name__ == "__main__":
     print(cw)
     model = generate_random_mrsort_model(10, 3)
     print(model)
-    model = generate_random_utadis_model(10, 3, 3, 3)
+    model = generate_random_avfsort_model(10, 3, 3, 3)
     print(model)

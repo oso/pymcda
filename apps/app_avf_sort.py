@@ -6,7 +6,7 @@ import time
 from itertools import combinations
 from PyQt4 import QtCore
 from PyQt4 import QtGui
-from pymcda.generate import generate_random_utadis_model
+from pymcda.generate import generate_random_avfsort_model
 from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_random_profiles
 from pymcda.generate import generate_alternatives
@@ -529,8 +529,8 @@ class qt_mainwindow(QtGui.QMainWindow):
         nseg_min = self.spinbox_nsegments_ori.value()
         nseg_max = self.spinbox_nsegments_ori.value()
 
-        self.model = generate_random_utadis_model(ncrit, ncat, nseg_min,
-                                                  nseg_max)
+        self.model = generate_random_avfsort_model(ncrit, ncat, nseg_min,
+                                                   nseg_max)
         self.model.set_equal_weights()
         self.categories = self.model.categories
 

@@ -12,7 +12,7 @@ from pymcda.electre_tri import ElectreTri
 from pymcda.learning.meta_etri_global3 import MetaEtriGlobalPop3
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
-from pymcda.generate import generate_random_utadis_model
+from pymcda.generate import generate_random_avfsort_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.utils import add_errors_in_assignments
@@ -22,7 +22,7 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, ns, na_gen, pcerrors,
                                  max_oloops, nmodels, max_loops):
 
     # Generate a random UTADIS model
-    model = generate_random_utadis_model(nc, ncat, ns, ns, seed)
+    model = generate_random_avfsort_model(nc, ncat, ns, ns, seed)
     cats = model.cat_values.get_ordered_categories()
 
     # Generate a set of alternatives
