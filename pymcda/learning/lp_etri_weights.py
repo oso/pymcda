@@ -358,7 +358,7 @@ if __name__ == "__main__":
     import random
     from pymcda.generate import generate_alternatives
     from pymcda.generate import generate_random_performance_table
-    from pymcda.generate import generate_random_electre_tri_bm_model
+    from pymcda.generate import generate_random_mrsort_model
     from pymcda.utils import add_errors_in_assignments
     from pymcda.utils import display_assignments_and_pt
     from pymcda.utils import compute_winning_coalitions
@@ -367,7 +367,7 @@ if __name__ == "__main__":
     print("Solver used: %s" % solver)
 
     # Original Electre Tri model
-    model = generate_random_electre_tri_bm_model(10, 5, 890)
+    model = generate_random_mrsort_model(10, 5, 890)
 
     # Generate random alternatives
     a = generate_alternatives(15000)

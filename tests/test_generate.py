@@ -65,16 +65,16 @@ class tests_generate(unittest.TestCase):
         c = generate_categories(10)
         self.assertEqual(len(c), 10)
 
-    def test010_generate_random_electre_tri_bm_model(self):
-        m = generate_random_electre_tri_bm_model(10, 5, 0)
+    def test010_generate_random_mrsort_model(self):
+        m = generate_random_mrsort_model(10, 5, 0)
 
         self.assertEqual(len(m.criteria), 10)
         self.assertEqual(len(m.categories), 5)
 
-    def test011_generate_random_electre_tri_bm_model(self):
-        m = generate_random_electre_tri_bm_model(10, 5, 0)
-        m2 = generate_random_electre_tri_bm_model(10, 5, 0)
-        m3 = generate_random_electre_tri_bm_model(10, 5)
+    def test011_generate_random_mrsort_model(self):
+        m = generate_random_mrsort_model(10, 5, 0)
+        m2 = generate_random_mrsort_model(10, 5, 0)
+        m3 = generate_random_mrsort_model(10, 5)
 
         self.assertEqual(m, m2)
         self.assertNotEqual(m2, m3)

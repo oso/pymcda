@@ -201,9 +201,9 @@ def generate_random_categories_values(cats, k = 3):
 
     return catvs
 
-def generate_random_electre_tri_bm_model(ncrit, ncat, seed = None, k = 3,
-                                         worst = None, best = None,
-                                         random_direction = False):
+def generate_random_mrsort_model(ncrit, ncat, seed = None, k = 3,
+                                 worst = None, best = None,
+                                 random_direction = False):
     if seed is not None:
         random.seed(int(seed))
 
@@ -254,7 +254,7 @@ if __name__ == "__main__":
     print(catv)
     cw = generate_random_criteria_weights(crits)
     print(cw)
-    model = generate_random_electre_tri_bm_model(10, 3)
+    model = generate_random_mrsort_model(10, 3)
     print(model)
     model = generate_random_utadis_model(10, 3, 3, 3)
     print(model)

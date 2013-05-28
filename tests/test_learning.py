@@ -3,7 +3,7 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 from pymcda.types import CriteriaValues, CriterionValue
 from pymcda.uta import Utadis
-from pymcda.generate import generate_random_electre_tri_bm_model
+from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.generate import generate_random_profiles
@@ -22,7 +22,7 @@ import unittest
 class tests_lp_etri_weights(unittest.TestCase):
 
     def one_test(self, seed, ncrit, ncat, na):
-        model = generate_random_electre_tri_bm_model(ncrit, ncat, seed)
+        model = generate_random_mrsort_model(ncrit, ncat, seed)
         a = generate_alternatives(na)
         pt = generate_random_performance_table(a, model.criteria)
 
@@ -59,7 +59,7 @@ class tests_lp_etri_weights(unittest.TestCase):
             self.one_test(i, 10, 5, 1000)
 
     def one_test2(self, seed, ncrit, ncat, na):
-        model = generate_random_electre_tri_bm_model(ncrit, ncat, seed)
+        model = generate_random_mrsort_model(ncrit, ncat, seed)
         a = generate_alternatives(na)
         pt = generate_random_performance_table(a, model.criteria)
 
@@ -108,7 +108,7 @@ class tests_lp_etri_weights(unittest.TestCase):
 class tests_meta_etri_profiles(unittest.TestCase):
 
     def one_test(self, seed, na, nc, ncat, max_loop, n):
-        model = generate_random_electre_tri_bm_model(nc, ncat, seed)
+        model = generate_random_mrsort_model(nc, ncat, seed)
         a = generate_alternatives(na)
         pt = generate_random_performance_table(a, model.criteria)
 
@@ -159,7 +159,7 @@ class tests_meta_etri_profiles(unittest.TestCase):
 class tests_meta_etri_profiles4(unittest.TestCase):
 
     def one_test(self, seed, na, nc, ncat, max_loop, n):
-        model = generate_random_electre_tri_bm_model(nc, ncat, seed)
+        model = generate_random_mrsort_model(nc, ncat, seed)
         a = generate_alternatives(na)
         pt = generate_random_performance_table(a, model.criteria)
 
@@ -210,7 +210,7 @@ class tests_meta_etri_profiles4(unittest.TestCase):
 class tests_mip_etri_global(unittest.TestCase):
 
     def one_test(self, seed, na, nc, ncat, pcerrors):
-        model = generate_random_electre_tri_bm_model(nc, ncat, seed)
+        model = generate_random_mrsort_model(nc, ncat, seed)
         a = generate_alternatives(na)
         pt = generate_random_performance_table(a, model.criteria)
 
@@ -260,7 +260,7 @@ class tests_mip_etri_global(unittest.TestCase):
 class tests_heur_etri_profiles(unittest.TestCase):
 
     def one_test(self, seed, na, nc, ncat, ca_expected):
-        model = generate_random_electre_tri_bm_model(nc, ncat, seed)
+        model = generate_random_mrsort_model(nc, ncat, seed)
         a = generate_alternatives(na)
         pt = generate_random_performance_table(a, model.criteria)
 

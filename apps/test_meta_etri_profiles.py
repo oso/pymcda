@@ -14,7 +14,7 @@ from pymcda.learning.meta_etri_profiles3 import MetaEtriProfiles3
 from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
-from pymcda.generate import generate_random_electre_tri_bm_model
+from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.generate import generate_random_profiles
@@ -26,7 +26,7 @@ algo = None
 def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
                                    max_loops):
     # Generate an ELECTRE TRI model and assignment examples
-    model = generate_random_electre_tri_bm_model(nc, ncat, seed)
+    model = generate_random_mrsort_model(nc, ncat, seed)
     model2 = model.copy()
 
     # Generate a first set of alternatives

@@ -16,7 +16,7 @@ from pymcda.learning.lp_etri_weights import LpEtriWeights
 from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
-from pymcda.generate import generate_random_electre_tri_bm_model
+from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_categories_profiles
 
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     from pymcda.ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model
-    model = generate_random_electre_tri_bm_model(10, 3, 1)
+    model = generate_random_mrsort_model(10, 3, 1)
     worst = AlternativePerformances("worst",
                                      {c.id: 0 for c in model.criteria})
     best = AlternativePerformances("best",
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     ncategories = len(model.categories)
     pt_sorted = SortedPerformanceTable(pt)
 
-    model2 = generate_random_electre_tri_bm_model(ncriteria, ncategories)
+    model2 = generate_random_mrsort_model(ncriteria, ncategories)
 
     t1 = time.time()
 

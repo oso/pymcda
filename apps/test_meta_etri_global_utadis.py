@@ -12,7 +12,6 @@ from pymcda.electre_tri import ElectreTri
 from pymcda.learning.meta_etri_global3 import MetaEtriGlobalPop3
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
-from pymcda.generate import generate_random_electre_tri_bm_model
 from pymcda.generate import generate_random_utadis_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table

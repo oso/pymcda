@@ -231,7 +231,7 @@ class MetaEtriProfiles3():
         return self.good / self.na
 
 if __name__ == "__main__":
-    from pymcda.generate import generate_random_electre_tri_bm_model
+    from pymcda.generate import generate_random_mrsort_model
     from pymcda.generate import generate_alternatives
     from pymcda.generate import generate_random_performance_table
     from pymcda.generate import generate_random_profiles
@@ -243,7 +243,7 @@ if __name__ == "__main__":
     from pymcda.ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model
-    model = generate_random_electre_tri_bm_model(10, 3, 123)
+    model = generate_random_mrsort_model(10, 3, 123)
 
     # Generate a set of alternatives
     a = generate_alternatives(1000)

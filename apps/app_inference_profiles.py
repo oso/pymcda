@@ -6,7 +6,7 @@ import time
 from itertools import combinations
 from PyQt4 import QtCore
 from PyQt4 import QtGui
-from pymcda.generate import generate_random_electre_tri_bm_model
+from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_random_profiles
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
@@ -370,8 +370,9 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.best = AlternativePerformances("best",
                                     {c.id: 10 for c in crit})
 
-        self.model = generate_random_electre_tri_bm_model(ncrit, ncat,
-                                    worst = self.worst, best = self.best)
+        self.model = generate_random_mrsort_model(ncrit, ncat,
+                                                  worst = self.worst,
+                                                  best = self.best)
 
         self.graph_model = QGraphicsSceneEtri(self.model,
                                               self.worst, self.best,

@@ -339,7 +339,7 @@ class MipEtriGlobal():
         return obj
 
 if __name__ == "__main__":
-    from pymcda.generate import generate_random_electre_tri_bm_model
+    from pymcda.generate import generate_random_mrsort_model
     from pymcda.generate import generate_alternatives
     from pymcda.generate import generate_random_performance_table
     from pymcda.utils import display_assignments_and_pt
@@ -350,7 +350,7 @@ if __name__ == "__main__":
     ncat = 3
 
     # Generate a random ELECTRE TRI BM model
-    model = generate_random_electre_tri_bm_model(ncrit, ncat, seed)
+    model = generate_random_mrsort_model(ncrit, ncat, seed)
 
     # Display model parameters
     print('Original model')

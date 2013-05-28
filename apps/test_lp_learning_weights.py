@@ -11,7 +11,7 @@ from pymcda.types import AlternativesAssignments, PerformanceTable
 from pymcda.electre_tri import ElectreTri
 from pymcda.learning.lp_etri_weights import LpEtriWeights
 from pymcda.generate import generate_alternatives
-from pymcda.generate import generate_random_electre_tri_bm_model
+from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_random_performance_table
 from pymcda.utils import compute_ca
 from pymcda.utils import add_errors_in_assignments
@@ -19,7 +19,7 @@ from test_utils import test_result, test_results
 
 def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
     # Generate an ELECTRE TRI model and assignment examples
-    model = generate_random_electre_tri_bm_model(nc, ncat, seed)
+    model = generate_random_mrsort_model(nc, ncat, seed)
     model2 = model.copy()
 
     # Generate a first set of alternatives

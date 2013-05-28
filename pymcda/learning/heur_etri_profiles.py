@@ -79,7 +79,7 @@ class HeurEtriProfiles():
         self.model.bpt = bpt
 
 if __name__ == "__main__":
-    from pymcda.generate import generate_random_electre_tri_bm_model
+    from pymcda.generate import generate_random_mrsort_model
     from pymcda.generate import generate_alternatives
     from pymcda.generate import generate_random_performance_table
     from pymcda.generate import generate_random_profiles
@@ -90,7 +90,7 @@ if __name__ == "__main__":
     from pymcda.learning.lp_etri_weights import LpEtriWeights
     from pymcda.ui.graphic import display_electre_tri_models
 
-    model = generate_random_electre_tri_bm_model(10, 3, 17)
+    model = generate_random_mrsort_model(10, 3, 17)
     coal = compute_winning_coalitions(model.cv, model.lbda)
     print("Number of coalitions: %d" % len(coal))
 

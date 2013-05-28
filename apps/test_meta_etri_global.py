@@ -13,7 +13,7 @@ from pymcda.learning.meta_etri_global2 import MetaEtriGlobal2
 from pymcda.learning.meta_etri_global3 import MetaEtriGlobal3
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
-from pymcda.generate import generate_random_electre_tri_bm_model
+from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.utils import add_errors_in_assignments_proba
@@ -23,7 +23,7 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
                                  max_oloops, nmodels, max_loops):
 
     # Generate a random ELECTRE TRI BM model
-    model = generate_random_electre_tri_bm_model(nc, ncat, seed)
+    model = generate_random_mrsort_model(nc, ncat, seed)
 
     # Generate a set of alternatives
     a = generate_alternatives(na)
@@ -47,7 +47,7 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
     model_metas = {}
     model_cas = {}
     for i in range(nmodels):
-        m = generate_random_electre_tri_bm_model(ncriteria, ncategories)
+        m = generate_random_mrsort_model(ncriteria, ncategories)
         meta = algo(m, pt_sorted, aa_err)
         model_metas[m] = meta
         model_cas[meta.model] = meta.meta.good / meta.meta.na

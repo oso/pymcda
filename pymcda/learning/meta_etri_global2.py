@@ -9,7 +9,7 @@ from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import PerformanceTable
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
-from pymcda.generate import generate_random_electre_tri_bm_model
+from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_random_profiles
 from pymcda.generate import generate_alternatives
 from lp_etri_weights import LpEtriWeights
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     from pymcda.ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model
-    model = generate_random_electre_tri_bm_model(10, 3, 123)
+    model = generate_random_mrsort_model(10, 3, 123)
     worst = AlternativePerformances("worst",
                                      {c.id: 0 for c in model.criteria})
     best = AlternativePerformances("best",
@@ -94,8 +94,8 @@ if __name__ == "__main__":
 
     metas = []
     for i in range(nmodels):
-        model_meta = generate_random_electre_tri_bm_model(ncriteria,
-                                                          ncategories)
+        model_meta = generate_random_mrsort_model(ncriteria,
+                                                  ncategories)
 
         meta = MetaEtriGlobal2(model_meta, pt_sorted, aa)
         meta.init_profiles()
@@ -121,8 +121,8 @@ if __name__ == "__main__":
             break
 
         for j in range(int((nmodels + 1) / 2), nmodels):
-            model_meta = generate_random_electre_tri_bm_model(ncriteria,
-                                                              ncategories)
+            model_meta = generate_random_mrsort_model(ncriteria,
+                                                      ncategories)
 
             metas[j] = MetaEtriGlobal2(model_meta, pt_sorted, aa)
 

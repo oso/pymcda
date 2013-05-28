@@ -7,7 +7,7 @@ from itertools import combinations
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 from pymcda.generate import generate_random_utadis_model
-from pymcda.generate import generate_random_electre_tri_bm_model
+from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_random_profiles
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
@@ -517,9 +517,9 @@ class qt_mainwindow(QtGui.QMainWindow):
         ncrit = self.spinbox_criteria.value()
         ncat = self.spinbox_categories.value()
 
-        self.model = generate_random_electre_tri_bm_model(ncrit, ncat,
-                                                          worst = self.worst,
-                                                          best = self.best)
+        self.model = generate_random_mrsort_model(ncrit, ncat,
+                                                  worst = self.worst,
+                                                  best = self.best)
         self.categories = self.model.categories_profiles.to_categories()
         self.plot_mr_sort_model(self.model, self.layout_original)
 

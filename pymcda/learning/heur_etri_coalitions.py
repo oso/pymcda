@@ -2,7 +2,7 @@ from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 from collections import defaultdict
-from pymcda.generate import generate_random_electre_tri_bm_model
+from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_random_performance_table
 from pymcda.generate import generate_alternatives
 from pymcda.utils import compute_winning_coalitions
@@ -77,7 +77,7 @@ class HeurEtriCoalitions():
         return coalitions
 
 if __name__ == "__main__":
-    m = generate_random_electre_tri_bm_model(5, 2, 123)
+    m = generate_random_mrsort_model(5, 2, 123)
 
     coal = compute_winning_coalitions(m.cv, m.lbda)
     print("Number of winning coalitions: %d" % len(coal))

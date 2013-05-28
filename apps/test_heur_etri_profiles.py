@@ -5,7 +5,7 @@ import time
 import csv
 from itertools import product
 
-from pymcda.generate import generate_random_electre_tri_bm_model
+from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.generate import generate_random_profiles
@@ -19,7 +19,7 @@ from test_utils import test_result, test_results
 
 def test_heur_etri_profiles(seed, na, nc, ncat, pcerrors):
     # Generate an ELECTRE TRI model and assignment examples
-    model = generate_random_electre_tri_bm_model(nc, ncat, seed)
+    model = generate_random_mrsort_model(nc, ncat, seed)
     model2 = model.copy()
     model3 = model.copy()
 

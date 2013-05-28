@@ -6,7 +6,7 @@ import csv
 from itertools import product
 
 from pymcda.learning.heur_etri_coalitions import HeurEtriCoalitions
-from pymcda.generate import generate_random_electre_tri_bm_model
+from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.utils import compute_winning_coalitions
@@ -15,7 +15,7 @@ from test_utils import test_result, test_results
 
 def test_heur_etri_coalitions(seed, na, nc, ncat, pcexamples, pcerrors):
     # Generate an ELECTRE TRI model and assignment examples
-    model = generate_random_electre_tri_bm_model(nc, ncat, seed)
+    model = generate_random_mrsort_model(nc, ncat, seed)
 
     # Generate a first set of alternatives
     a = generate_alternatives(na)
