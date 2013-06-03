@@ -16,7 +16,7 @@ from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.types import CriteriaValues, CriterionValue
 from pymcda.uta import Utadis
 from pymcda.learning.lp_avfsort import LpAVFSort
-from pymcda.learning.meta_etri_global3 import MetaEtriGlobalPop3
+from pymcda.learning.meta_mrsort3 import MetaMRSortPop3
 from pymcda.ui.graphic_uta import QGraphCriterionFunction
 from pymcda.ui.graphic import QGraphicsSceneEtri
 from pymcda.utils import compute_ca
@@ -32,7 +32,7 @@ def run_meta_mr(pipe, criteria, categories, worst, best, nmodels, niter,
                 nmeta, pt, aa):
     pt_sorted = SortedPerformanceTable(pt)
 
-    meta = MetaEtriGlobalPop3(nmodels, criteria, categories, pt_sorted, aa)
+    meta = MetaMRSortPop3(nmodels, criteria, categories, pt_sorted, aa)
 
     ca = meta.metas[0].meta.good / len(aa)
     pipe.send([meta.metas[0].model, ca])
@@ -82,9 +82,9 @@ class qt_thread_mr(QtCore.QThread):
     def run(self):
         pt_sorted = SortedPerformanceTable(self.pt)
 
-        meta = MetaEtriGlobalPop3(self.nmodels, self.criteria,
-                                  self.categories, pt_sorted,
-                                  self.aa)
+        meta = MetaMRSortPop3(self.nmodels, self.criteria,
+                              self.categories, pt_sorted,
+                              self.aa)
 
         self.mutex.lock()
         self.results.append(meta.metas[0].model.copy())

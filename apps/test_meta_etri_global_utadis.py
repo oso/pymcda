@@ -9,7 +9,7 @@ from itertools import product
 
 from pymcda.types import AlternativesAssignments, PerformanceTable
 from pymcda.electre_tri import ElectreTri
-from pymcda.learning.meta_etri_global3 import MetaEtriGlobalPop3
+from pymcda.learning.meta_mrsort3 import MetaMRSortPop3
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_avfsort_model
@@ -41,7 +41,7 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, ns, na_gen, pcerrors,
     t1 = time.time()
 
     # Perform at max oloops on the set of metas
-    meta = MetaEtriGlobalPop3(nmodels, model.criteria,
+    meta = MetaMRSortPop3(nmodels, model.criteria,
                               model.cat_values.to_categories(),
                               pt_sorted, aa_err)
     ca2_iter = [meta.metas[0].ca] + [1] * (max_loops)
@@ -227,7 +227,7 @@ if __name__ == "__main__":
 
     (options, args) = parser.parse_args()
 
-    algo = MetaEtriGlobalPop3
+    algo = MetaMRSortPop3
 
     options.na = read_multiple_integer(options.na,
                                        "Number of assignment examples")

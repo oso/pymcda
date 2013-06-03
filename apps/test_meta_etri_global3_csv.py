@@ -5,7 +5,7 @@ import datetime
 import random
 import time
 from itertools import product
-from pymcda.learning.meta_etri_global3 import MetaEtriGlobalPop3
+from pymcda.learning.meta_mrsort3 import MetaMRSortPop3
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import Alternatives, Criteria, PerformanceTable
 from pymcda.types import AlternativesAssignments, Categories
@@ -90,9 +90,9 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
     pt_sorted = SortedPerformanceTable(pt_learning)
 
     # Algorithm
-    meta = MetaEtriGlobalPop3(nmodels, model.criteria,
-                              model.categories_profiles.to_categories(),
-                              pt_sorted, aa_learning)
+    meta = MetaMRSortPop3(nmodels, model.criteria,
+                          model.categories_profiles.to_categories(),
+                          pt_sorted, aa_learning)
 
     for i in range(0, nloop):
         model, ca_learning = meta.optimize(nmeta)
@@ -231,7 +231,7 @@ if __name__ == "__main__":
     options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
 
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    default_filename = "data/test_meta_etri_global3-%s-%s.csv" \
+    default_filename = "data/test_meta_mrsort3-%s-%s.csv" \
                        % (data.name, dt)
     options.filename = read_csv_filename(options.filename, default_filename)
 
