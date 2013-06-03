@@ -5,7 +5,7 @@ import datetime
 import random
 import time
 from itertools import product
-from pymcda.learning.lp_utadis import LpUtadis
+from pymcda.learning.lp_avfsort import LpAVFSort
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import Alternatives, Criteria, PerformanceTable
 from pymcda.types import AlternativesAssignments, Categories
@@ -84,7 +84,7 @@ def run_test(seed, data, pclearning, nseg):
         cs = CriterionValue(c.id, nseg)
         css.append(cs)
 
-    lp = LpUtadis(css, data.cats, worst, best)
+    lp = LpAVFSort(css, data.cats, worst, best)
     obj, cvs, cfs, catv = lp.solve(aa_learning, pt_learning)
 
     t_total = time.time() - t1
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
 
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    default_filename = "data/test_lp_utadis-%s-%s.csv" \
+    default_filename = "data/test_lp_avfsort-%s-%s.csv" \
                        % (data.name, dt)
     options.filename = read_csv_filename(options.filename, default_filename)
 

@@ -12,7 +12,7 @@ from pymcda.types import AlternativePerformances
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.uta import Utadis
 from pymcda.electre_tri import ElectreTri
-from pymcda.learning.lp_utadis import LpUtadis
+from pymcda.learning.lp_avfsort import LpAVFSort
 from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
@@ -20,7 +20,7 @@ from pymcda.utils import compute_ca
 from pymcda.utils import add_errors_in_assignments
 from test_utils import test_result, test_results
 
-def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
+def test_lp_avfsort(seed, na, nc, ncat, ns, na_gen, pcerrors):
     # Generate a random ELECTRE TRI model and assignment examples
     model = generate_random_mrsort_model(nc, ncat, seed)
 
@@ -47,7 +47,7 @@ def test_lp_utadis(seed, na, nc, ncat, ns, na_gen, pcerrors):
 
     # Run linear program
     t1 = time.time()
-    lp = LpUtadis(css, model.categories_profiles.to_categories(),
+    lp = LpAVFSort(css, model.categories_profiles.to_categories(),
                    gi_worst, gi_best)
     t2 = time.time()
     obj, cv_l, cfs_l, catv_l = lp.solve(aa_err, pt)
@@ -136,7 +136,7 @@ def run_tests(na, nc, ncat, ns, na_gen, pcerrors, nseeds, filename):
         in product(na, nc, ncat, ns, na_gen, pcerrors, seeds):
 
         t1 = time.time()
-        t = test_lp_utadis(seed, _na, _nc, _ncat, _ns,  _na_gen, _pcerrors)
+        t = test_lp_avfsort(seed, _na, _nc, _ncat, _ns,  _na_gen, _pcerrors)
         t2 = time.time()
 
         if initialized is False:
@@ -223,7 +223,7 @@ if __name__ == "__main__":
 
     while not options.filename:
         dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        default_filename = "data/test_lp_utadis_etri-%s.csv" % dt
+        default_filename = "data/test_lp_avfsort_etri-%s.csv" % dt
         options.filename = raw_input("File to save CSV data [%s] ? " \
                                      % default_filename)
         if not options.filename:

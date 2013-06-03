@@ -13,7 +13,7 @@ from pymcda.learning.meta_etri_profiles3 import MetaEtriProfiles3
 from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
 from pymcda.learning.mip_mrsort import MipMRSort
 from pymcda.learning.heur_mrsort_init_profiles import HeurMRSortInitProfiles
-from pymcda.learning.lp_utadis import LpUtadis
+from pymcda.learning.lp_avfsort import LpAVFSort
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import compute_ca
 from pymcda.utils import add_errors_in_assignments
@@ -288,7 +288,7 @@ class tests_heur_etri_profiles(unittest.TestCase):
     def test004(self):
         self.one_test(3, 1000, 10, 3, 0.987)
 
-class tests_lp_utadis(unittest.TestCase):
+class tests_lp_avfsort(unittest.TestCase):
 
     def one_test(self, seed, na, nc, ncat, ns):
         u = generate_random_avfsort_model(nc, ncat, ns, ns, seed)
@@ -303,8 +303,8 @@ class tests_lp_utadis(unittest.TestCase):
             css.append(cs)
 
         cat = u.cat_values.to_categories()
-        lp = LpUtadis(css, cat, pt.get_worst(u.criteria),
-                      pt.get_best(u.criteria))
+        lp = LpAVFSort(css, cat, pt.get_worst(u.criteria),
+                       pt.get_best(u.criteria))
         obj, cvs, cfs, catv = lp.solve(aa, pt)
 
         u2 = Utadis(u.criteria, cvs, cfs, catv)
@@ -334,7 +334,7 @@ class tests_lp_utadis(unittest.TestCase):
 
 test_classes = [tests_lp_mrsort_weights, tests_meta_etri_profiles,
                 tests_meta_etri_profiles4, tests_mip_mrsort,
-                tests_heur_etri_profiles, tests_lp_utadis]
+                tests_heur_etri_profiles, tests_lp_avfsort]
 
 if __name__ == "__main__":
     suite = []

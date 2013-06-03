@@ -15,7 +15,7 @@ from pymcda.generate import generate_criteria
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.types import CriteriaValues, CriterionValue
 from pymcda.uta import Utadis
-from pymcda.learning.lp_utadis import LpUtadis
+from pymcda.learning.lp_avfsort import LpAVFSort
 from pymcda.learning.meta_etri_global3 import MetaEtriGlobalPop3
 from pymcda.ui.graphic_uta import QGraphCriterionFunction
 from pymcda.ui.graphic import QGraphicsSceneEtri
@@ -109,7 +109,7 @@ class qt_thread_mr(QtCore.QThread):
                 break
 
 def run_lp_avf(pipe, criteria, categories, worst, best, css, pt, aa):
-    lp = LpUtadis(css, categories, worst, best)
+    lp = LpAVFSort(css, categories, worst, best)
     obj, cvs, cfs, catv = lp.solve(aa, pt)
 
     model = Utadis(criteria, cvs, cfs, catv)
