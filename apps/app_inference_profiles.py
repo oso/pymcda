@@ -15,7 +15,7 @@ from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import compute_ca
 from pymcda.learning.meta_etri_profiles3 import MetaEtriProfiles3
 from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
-from pymcda.learning.heur_etri_profiles import HeurEtriProfiles
+from pymcda.learning.heur_mrsort_init_profiles import HeurMRSortInitProfiles
 from pymcda.ui.graphic import QGraphicsSceneEtri
 from multiprocessing import Process, Pipe
 
@@ -29,7 +29,7 @@ def run_metaheuristic(pipe, model, pt, aa, algo, n, use_heur = False,
     pt_sorted = SortedPerformanceTable(pt)
 
     if use_heur is True:
-        heur = HeurEtriProfiles(model, pt_sorted, aa)
+        heur = HeurMRSortInitProfiles(model, pt_sorted, aa)
         heur.solve()
     else:
         model.bpt = generate_random_profiles(model.profiles,

@@ -12,7 +12,7 @@ from pymcda.learning.lp_etri_weights import LpEtriWeights
 from pymcda.learning.meta_etri_profiles3 import MetaEtriProfiles3
 from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
 from pymcda.learning.mip_etri_global import MipEtriGlobal
-from pymcda.learning.heur_etri_profiles import HeurEtriProfiles
+from pymcda.learning.heur_mrsort_init_profiles import HeurMRSortInitProfiles
 from pymcda.learning.lp_utadis import LpUtadis
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import compute_ca
@@ -267,7 +267,7 @@ class tests_heur_etri_profiles(unittest.TestCase):
         aa = model.pessimist(pt)
 
         pt_sorted = SortedPerformanceTable(pt)
-        heur = HeurEtriProfiles(model, pt_sorted, aa)
+        heur = HeurMRSortInitProfiles(model, pt_sorted, aa)
         heur.solve()
 
         aa2 = model.pessimist(pt)

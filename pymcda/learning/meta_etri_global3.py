@@ -11,7 +11,7 @@ from threading import Thread
 from pymcda.electre_tri import ElectreTriBM
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import PerformanceTable
-from pymcda.learning.heur_etri_profiles import HeurEtriProfiles
+from pymcda.learning.heur_mrsort_init_profiles import HeurMRSortInitProfiles
 from pymcda.learning.lp_etri_weights import LpEtriWeights
 from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
 from pymcda.utils import compute_ca
@@ -106,7 +106,7 @@ class MetaEtriGlobal3():
 
     def init_profiles(self):
         cats = self.model.categories_profiles.to_categories()
-        heur = HeurEtriProfiles(self.model, self.pt_sorted, self.aa_ori)
+        heur = HeurMRSortInitProfiles(self.model, self.pt_sorted, self.aa_ori)
         heur.solve()
 
     def optimize(self, nmeta):

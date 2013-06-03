@@ -12,12 +12,12 @@ from pymcda.generate import generate_random_profiles
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import add_errors_in_assignments
 from pymcda.utils import compute_ca
-from pymcda.learning.heur_etri_profiles import HeurEtriProfiles
+from pymcda.learning.heur_mrsort_init_profiles import HeurMRSortInitProfiles
 from pymcda.learning.heur_etri_coalitions import HeurEtriCoalitions
 from pymcda.learning.lp_etri_weights import LpEtriWeights
 from test_utils import test_result, test_results
 
-def test_heur_etri_profiles(seed, na, nc, ncat, pcerrors):
+def test_heur_mrsort_init_profiles(seed, na, nc, ncat, pcerrors):
     # Generate an ELECTRE TRI model and assignment examples
     model = generate_random_mrsort_model(nc, ncat, seed)
     model2 = model.copy()
@@ -37,7 +37,7 @@ def test_heur_etri_profiles(seed, na, nc, ncat, pcerrors):
     # Run the heuristic
     cats = model.categories_profiles.to_categories()
     pt_sorted = SortedPerformanceTable(pt)
-    heur = HeurEtriProfiles(model3, pt_sorted, aa)
+    heur = HeurMRSortInitProfiles(model3, pt_sorted, aa)
     heur.solve()
 
     # Learn the weights and cut threshold
@@ -96,7 +96,7 @@ def run_tests(na, nc, ncat, pcerrors, nseeds, filename):
         in product(na, nc, ncat, pcerrors, seeds):
 
         t1 = time.time()
-        t = test_heur_etri_profiles(seed, _na, _nc, _ncat, _pcerrors)
+        t = test_heur_mrsort_init_profiles(seed, _na, _nc, _ncat, _pcerrors)
         t2 = time.time()
 
         if initialized is False:
@@ -169,7 +169,7 @@ if __name__ == "__main__":
 
     while not options.filename:
         dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        default_filename = "data/test_heur_etri_profiles-%s.csv" % dt
+        default_filename = "data/test_heur_mrsort_init_profiles-%s.csv" % dt
         options.filename = raw_input("File to save CSV data [%s] ? " \
                                      % default_filename)
         if not options.filename:
