@@ -13,7 +13,7 @@ from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import PerformanceTable
 from pymcda.learning.heur_mrsort_init_profiles import HeurMRSortInitProfiles
 from pymcda.learning.lp_mrsort_weights import LpMRSortWeights
-from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
+from pymcda.learning.heur_mrsort_profiles4 import MetaMRSortProfiles4
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_mrsort_model
@@ -99,10 +99,10 @@ class MetaEtriGlobal3():
         self.init_profiles()
         self.lp = LpMRSortWeights(self.model, pt_sorted.pt, self.aa_ori)
 
-        # Because MetaEtriProfiles4 needs weights in initialization
+        # Because MetaMRSortProfiles4 needs weights in initialization
         self.lp.solve()
 
-        self.meta = MetaEtriProfiles4(self.model, pt_sorted, self.aa_ori)
+        self.meta = MetaMRSortProfiles4(self.model, pt_sorted, self.aa_ori)
 
     def init_profiles(self):
         cats = self.model.categories_profiles.to_categories()

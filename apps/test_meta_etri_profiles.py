@@ -10,8 +10,8 @@ from itertools import product
 from pymcda.types import AlternativesAssignments, PerformanceTable
 from pymcda.types import AlternativePerformances
 from pymcda.electre_tri import ElectreTriBM
-from pymcda.learning.meta_etri_profiles3 import MetaEtriProfiles3
-from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
+from pymcda.learning.heur_mrsort_profiles3 import MetaMRSortProfiles3
+from pymcda.learning.heur_mrsort_profiles4 import MetaMRSortProfiles4
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_mrsort_model
@@ -242,10 +242,10 @@ if __name__ == "__main__":
 
     i = 0
     if options.third is True:
-        algo = MetaEtriProfiles3
+        algo = MetaMRSortProfiles3
         i += 1
     if options.fourth is True:
-        algo = MetaEtriProfiles4
+        algo = MetaMRSortProfiles4
         i += 1
     if i > 1:
         print("Cannot select multiple algorithms at the same time")

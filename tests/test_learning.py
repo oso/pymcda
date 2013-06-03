@@ -9,8 +9,8 @@ from pymcda.generate import generate_random_performance_table
 from pymcda.generate import generate_random_profiles
 from pymcda.generate import generate_random_avfsort_model
 from pymcda.learning.lp_mrsort_weights import LpMRSortWeights
-from pymcda.learning.meta_etri_profiles3 import MetaEtriProfiles3
-from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
+from pymcda.learning.heur_mrsort_profiles3 import MetaMRSortProfiles3
+from pymcda.learning.heur_mrsort_profiles4 import MetaMRSortProfiles4
 from pymcda.learning.mip_mrsort import MipMRSort
 from pymcda.learning.heur_mrsort_init_profiles import HeurMRSortInitProfiles
 from pymcda.learning.lp_avfsort import LpAVFSort
@@ -105,7 +105,7 @@ class tests_lp_mrsort_weights(unittest.TestCase):
         for i in range(10):
             self.one_test2(i, 10, 5, 1000)
 
-class tests_meta_etri_profiles(unittest.TestCase):
+class tests_heur_mrsort_profiles(unittest.TestCase):
 
     def one_test(self, seed, na, nc, ncat, max_loop, n):
         model = generate_random_mrsort_model(nc, ncat, seed)
@@ -120,7 +120,7 @@ class tests_meta_etri_profiles(unittest.TestCase):
 
         pt_sorted = SortedPerformanceTable(pt)
 
-        meta = MetaEtriProfiles3(model2, pt_sorted, aa)
+        meta = MetaMRSortProfiles3(model2, pt_sorted, aa)
 
         for i in range(1, max_loop + 1):
             ca = meta.optimize()
@@ -156,7 +156,7 @@ class tests_meta_etri_profiles(unittest.TestCase):
     def test008(self):
         self.one_test(7, 1000, 5, 2, 100, 42)
 
-class tests_meta_etri_profiles4(unittest.TestCase):
+class tests_heur_mrsort_profiles4(unittest.TestCase):
 
     def one_test(self, seed, na, nc, ncat, max_loop, n):
         model = generate_random_mrsort_model(nc, ncat, seed)
@@ -171,7 +171,7 @@ class tests_meta_etri_profiles4(unittest.TestCase):
 
         pt_sorted = SortedPerformanceTable(pt)
 
-        meta = MetaEtriProfiles4(model2, pt_sorted, aa)
+        meta = MetaMRSortProfiles4(model2, pt_sorted, aa)
 
         for i in range(1, max_loop + 1):
             ca = meta.optimize()
@@ -332,8 +332,8 @@ class tests_lp_avfsort(unittest.TestCase):
         for i in range(10):
             self.one_test(i, 1000, 10, 3, 5)
 
-test_classes = [tests_lp_mrsort_weights, tests_meta_etri_profiles,
-                tests_meta_etri_profiles4, tests_mip_mrsort,
+test_classes = [tests_lp_mrsort_weights, tests_heur_mrsort_profiles,
+                tests_heur_mrsort_profiles4, tests_mip_mrsort,
                 tests_heur_etri_profiles, tests_lp_avfsort]
 
 if __name__ == "__main__":
