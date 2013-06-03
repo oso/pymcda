@@ -87,7 +87,7 @@ if __name__ == "__main__":
     from pymcda.utils import compute_ca
     from pymcda.utils import compute_winning_coalitions
     from pymcda.utils import display_coalitions
-    from pymcda.learning.lp_etri_weights import LpEtriWeights
+    from pymcda.learning.lp_mrsort_weights import LpMRSortWeights
     from pymcda.ui.graphic import display_electre_tri_models
 
     model = generate_random_mrsort_model(10, 3, 17)
@@ -110,7 +110,7 @@ if __name__ == "__main__":
         b = model.categories_profiles.get_ordered_profiles()
         model2.bpt = generate_random_profiles(b, model2.criteria)
 
-        lp_weights = LpEtriWeights(model2, pt, aa)
+        lp_weights = LpMRSortWeights(model2, pt, aa)
         lp_weights.solve()
 
         aa2 = model2.pessimist(pt)
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     heur = HeurMRSortInitProfiles(model3, sorted_pt, aa)
     heur.solve()
 
-    lp_weights = LpEtriWeights(model3, pt, aa)
+    lp_weights = LpMRSortWeights(model3, pt, aa)
     lp_weights.solve()
 
     aa3 = model3.pessimist(pt)

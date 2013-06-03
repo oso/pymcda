@@ -12,7 +12,7 @@ from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_random_profiles
 from pymcda.generate import generate_alternatives
-from lp_etri_weights import LpEtriWeights
+from lp_mrsort_weights import LpMRSortWeights
 from meta_etri_profiles4 import MetaEtriProfiles4
 
 class MetaEtriGlobal2():
@@ -21,7 +21,7 @@ class MetaEtriGlobal2():
         self.model = model
         self.pt_sorted = pt_sorted
         self.aa_ori = aa_ori
-        self.lp = LpEtriWeights(self.model, pt_sorted.pt, self.aa_ori)
+        self.lp = LpMRSortWeights(self.model, pt_sorted.pt, self.aa_ori)
         self.meta = MetaEtriProfiles4(self.model, pt_sorted,
                                                self.aa_ori)
 

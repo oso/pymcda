@@ -12,7 +12,7 @@ from pymcda.electre_tri import ElectreTriBM
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import PerformanceTable
 from pymcda.learning.heur_mrsort_init_profiles import HeurMRSortInitProfiles
-from pymcda.learning.lp_etri_weights import LpEtriWeights
+from pymcda.learning.lp_mrsort_weights import LpMRSortWeights
 from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
@@ -97,7 +97,7 @@ class MetaEtriGlobal3():
         self.ca = 0
 
         self.init_profiles()
-        self.lp = LpEtriWeights(self.model, pt_sorted.pt, self.aa_ori)
+        self.lp = LpMRSortWeights(self.model, pt_sorted.pt, self.aa_ori)
 
         # Because MetaEtriProfiles4 needs weights in initialization
         self.lp.solve()

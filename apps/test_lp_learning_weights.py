@@ -9,7 +9,7 @@ from itertools import product
 
 from pymcda.types import AlternativesAssignments, PerformanceTable
 from pymcda.electre_tri import ElectreTri
-from pymcda.learning.lp_etri_weights import LpEtriWeights
+from pymcda.learning.lp_mrsort_weights import LpMRSortWeights
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_random_performance_table
@@ -35,7 +35,7 @@ def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
 
     # Run linear program
     t1 = time.time()
-    lp_weights = LpEtriWeights(model2, pt, aa_err, 0.0001)
+    lp_weights = LpMRSortWeights(model2, pt, aa_err, 0.0001)
     t2 = time.time()
     obj = lp_weights.solve()
     t3 = time.time()

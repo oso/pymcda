@@ -8,7 +8,7 @@ from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.generate import generate_random_profiles
 from pymcda.generate import generate_random_avfsort_model
-from pymcda.learning.lp_etri_weights import LpEtriWeights
+from pymcda.learning.lp_mrsort_weights import LpMRSortWeights
 from pymcda.learning.meta_etri_profiles3 import MetaEtriProfiles3
 from pymcda.learning.meta_etri_profiles4 import MetaEtriProfiles4
 from pymcda.learning.mip_etri_global import MipEtriGlobal
@@ -19,7 +19,7 @@ from pymcda.utils import compute_ca
 from pymcda.utils import add_errors_in_assignments
 import unittest
 
-class tests_lp_etri_weights(unittest.TestCase):
+class tests_lp_mrsort_weights(unittest.TestCase):
 
     def one_test(self, seed, ncrit, ncat, na):
         model = generate_random_mrsort_model(ncrit, ncat, seed)
@@ -31,7 +31,7 @@ class tests_lp_etri_weights(unittest.TestCase):
         model2 = model.copy()
         model2.cvs = None
 
-        lp_weights = LpEtriWeights(model2, pt, aa)
+        lp_weights = LpMRSortWeights(model2, pt, aa)
         lp_weights.solve()
 
         aa2 = model2.pessimist(pt)
@@ -68,7 +68,7 @@ class tests_lp_etri_weights(unittest.TestCase):
         model2 = model.copy()
         model2.cvs = None
 
-        lp_weights = LpEtriWeights(model2, pt, aa)
+        lp_weights = LpMRSortWeights(model2, pt, aa)
 
         bids = model.categories_profiles.get_ordered_profiles()
         bpt = generate_random_profiles(bids, model.criteria)
@@ -332,7 +332,7 @@ class tests_lp_utadis(unittest.TestCase):
         for i in range(10):
             self.one_test(i, 1000, 10, 3, 5)
 
-test_classes = [tests_lp_etri_weights, tests_meta_etri_profiles,
+test_classes = [tests_lp_mrsort_weights, tests_meta_etri_profiles,
                 tests_meta_etri_profiles4, tests_mip_etri_global,
                 tests_heur_etri_profiles, tests_lp_utadis]
 

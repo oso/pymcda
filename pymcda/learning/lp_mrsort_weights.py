@@ -19,7 +19,7 @@ elif solver == 'cplex':
 else:
     raise NameError('Invalid solver selected')
 
-class LpEtriWeights():
+class LpMRSortWeights():
 
     def __init__(self, model, pt, aa_ori, delta=0.0001):
         self.model = model
@@ -401,7 +401,7 @@ if __name__ == "__main__":
 
     model2 = model.copy()
     t1 = time.time()
-    lp_weights = LpEtriWeights(model2, pt_learn, aa_err, delta)
+    lp_weights = LpMRSortWeights(model2, pt_learn, aa_err, delta)
     t2 = time.time()
     obj = lp_weights.solve()
     t3 = time.time()
