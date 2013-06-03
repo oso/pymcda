@@ -17,7 +17,7 @@ if solver == 'cplex':
 else:
     raise NameError('Invalid solver selected')
 
-class MipEtriGlobal():
+class MipMRSort():
 
     def __init__(self, model, pt, aa, epsilon = 0.0001):
         self.pt = pt
@@ -377,7 +377,7 @@ if __name__ == "__main__":
     model2.bpt = None
     model2.lbda = None
 
-    mip = MipEtriGlobal(model2, pt, aa)
+    mip = MipMRSort(model2, pt, aa)
     mip.solve()
 
     # Display learned model parameters

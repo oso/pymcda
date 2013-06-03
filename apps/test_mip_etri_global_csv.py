@@ -5,7 +5,7 @@ import datetime
 import random
 import time
 from itertools import product
-from pymcda.learning.mip_etri_global import MipEtriGlobal
+from pymcda.learning.mip_mrsort import MipMRSort
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import Alternatives, Criteria, PerformanceTable
 from pymcda.types import AlternativesAssignments, Categories
@@ -87,7 +87,7 @@ def run_test(seed, data, pclearning):
     # Run the linear program
     t1 = time.time()
 
-    mip = MipEtriGlobal(model, pt_learning, aa_learning)
+    mip = MipMRSort(model, pt_learning, aa_learning)
     obj = mip.solve()
 
     t_total = time.time() - t1
@@ -199,7 +199,7 @@ if __name__ == "__main__":
     options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
 
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    default_filename = "data/test_mip_etri_global-%s-%s.csv" \
+    default_filename = "data/test_mip_mrsort-%s-%s.csv" \
                        % (data.name, dt)
     options.filename = read_csv_filename(options.filename, default_filename)
 
