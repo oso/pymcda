@@ -257,7 +257,7 @@ class tests_mip_mrsort(unittest.TestCase):
     def test008(self):
         self.one_test(7, 20, 5, 3, 50)
 
-class tests_heur_etri_profiles(unittest.TestCase):
+class tests_heur_mrsort_init_profiles(unittest.TestCase):
 
     def one_test(self, seed, na, nc, ncat, ca_expected):
         model = generate_random_mrsort_model(nc, ncat, seed)
@@ -334,7 +334,7 @@ class tests_lp_avfsort(unittest.TestCase):
 
 test_classes = [tests_lp_mrsort_weights, tests_heur_mrsort_profiles,
                 tests_heur_mrsort_profiles4, tests_mip_mrsort,
-                tests_heur_etri_profiles, tests_lp_avfsort]
+                tests_heur_mrsort_init_profiles, tests_lp_avfsort]
 
 if __name__ == "__main__":
     suite = []
