@@ -5,7 +5,7 @@ import time
 import csv
 from itertools import product
 
-from pymcda.learning.heur_etri_coalitions import HeurEtriCoalitions
+from pymcda.learning.heur_mrsort_coalitions import HeurMRSortCoalitions
 from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
@@ -13,7 +13,7 @@ from pymcda.utils import compute_winning_coalitions
 from pymcda.utils import add_errors_in_assignments
 from test_utils import test_result, test_results
 
-def test_heur_etri_coalitions(seed, na, nc, ncat, pcexamples, pcerrors):
+def test_heur_mrsort_coalitions(seed, na, nc, ncat, pcexamples, pcerrors):
     # Generate an ELECTRE TRI model and assignment examples
     model = generate_random_mrsort_model(nc, ncat, seed)
 
@@ -25,11 +25,11 @@ def test_heur_etri_coalitions(seed, na, nc, ncat, pcexamples, pcerrors):
     aa = model.pessimist(pt)
 
     # Run the heuristic
-    heur = HeurEtriCoalitions(model.criteria, model.categories,
-                                       pt, aa)
+    heur = HeurMRSortCoalitions(model.criteria, model.categories,
+                                pt, aa)
     coal2 = heur.find_coalitions(int(na * pcexamples))
 
-    # Compute the original winning coallitions
+    # Compute the original winning coalitions
     coal = compute_winning_coalitions(model.cv, model.lbda)
 
     # Compare orignal and computed coalitions
@@ -80,8 +80,8 @@ def run_tests(na, nc, ncat, pcexamples, pcerrors, nseeds, filename):
         in product(na, nc, ncat, pcexamples, pcerrors, seeds):
 
         t1 = time.time()
-        t = test_heur_etri_coalitions(seed, _na, _nc, _ncat, _pcexamples,
-                                      _pcerrors)
+        t = test_heur_mrsort_coalitions(seed, _na, _nc, _ncat,
+                                        _pcexamples, _pcerrors)
         t2 = time.time()
 
         if initialized is False:
@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
     while not options.filename:
         dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        default_filename = "data/test_heur_etri_coalitions-%s.csv" % dt
+        default_filename = "data/test_heur_mrsort_coalitions-%s.csv" % dt
         options.filename = raw_input("File to save CSV data [%s] ? " \
                                      % default_filename)
         if not options.filename:

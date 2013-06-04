@@ -13,7 +13,7 @@ from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import add_errors_in_assignments
 from pymcda.utils import compute_ca
 from pymcda.learning.heur_mrsort_init_profiles import HeurMRSortInitProfiles
-from pymcda.learning.heur_etri_coalitions import HeurEtriCoalitions
+from pymcda.learning.heur_mrsort_coalitions import HeurMRSortCoalitions
 from pymcda.learning.lp_mrsort_weights import LpMRSortWeights
 from test_utils import test_result, test_results
 
