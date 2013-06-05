@@ -346,7 +346,7 @@ if __name__ == "__main__":
     from pymcda.utils import add_errors_in_assignments
     from pymcda.utils import display_assignments_and_pt
 
-    # Generate an utadis model
+    # Generate an avfsort model
     c = generate_criteria(2)
     cv = generate_random_criteria_values(c, seed = 6)
     cv.normalize()

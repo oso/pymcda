@@ -50,7 +50,7 @@ class tests_uta(unittest.TestCase):
         self.assertAlmostEqual(model.global_utility(ap2).value, 1)
         self.assertAlmostEqual(model.global_utility(ap3).value, 0)
 
-class tests_utadis(unittest.TestCase):
+class tests_avfsort(unittest.TestCase):
 
     def generate_model(self):
         c1 = Criterion("c1")
@@ -143,7 +143,7 @@ class tests_utadis(unittest.TestCase):
         self.assertEquals(assignments["a2"].category_id, "cat1")
         self.assertEquals(assignments["a3"].category_id, "cat3")
 
-test_classes = [tests_uta, tests_utadis]
+test_classes = [tests_uta, tests_avfsort]
 
 if __name__ == "__main__":
     suite = []
