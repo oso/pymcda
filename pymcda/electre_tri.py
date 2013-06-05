@@ -190,7 +190,7 @@ class ElectreTri(McdaObject):
         else:
             return self.pessimist(pt)
 
-class ElectreTriBM(ElectreTri):
+class MRSort(ElectreTri):
 
     def concordance(self, ap, profile):
         w = wsum = 0

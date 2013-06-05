@@ -9,7 +9,7 @@ from itertools import product
 
 from pymcda.types import AlternativesAssignments, PerformanceTable
 from pymcda.types import AlternativePerformances
-from pymcda.electre_tri import ElectreTriBM
+from pymcda.electre_tri import MRSort
 from pymcda.learning.heur_mrsort_profiles3 import MetaMRSortProfiles3
 from pymcda.learning.heur_mrsort_profiles4 import MetaMRSortProfiles4
 from pymcda.utils import compute_ca

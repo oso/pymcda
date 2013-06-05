@@ -2,7 +2,7 @@ from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import random
-from pymcda.electre_tri import ElectreTriBM
+from pymcda.electre_tri import MRSort
 from pymcda.uta import AVFSort
 from pymcda.types import Alternative, Alternatives
 from pymcda.types import AlternativePerformances, PerformanceTable
@@ -215,7 +215,7 @@ def generate_random_mrsort_model(ncrit, ncat, seed = None, k = 3,
     bpt = generate_random_profiles(b, c, None, k, worst, best)
     lbda = random.uniform(0.5, 1)
 
-    return ElectreTriBM(c, cv, bpt, lbda, cps)
+    return MRSort(c, cv, bpt, lbda, cps)
 
 def generate_random_avfsort_model(ncrit, ncat, nseg_min, nseg_max,
                                   seed = None, k = 3,

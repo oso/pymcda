@@ -8,7 +8,7 @@ from itertools import product
 from multiprocessing import Pool, Process, Queue
 from threading import Thread
 
-from pymcda.electre_tri import ElectreTriBM
+from pymcda.electre_tri import MRSort
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import PerformanceTable
 from pymcda.learning.heur_mrsort_init_profiles import HeurMRSortInitProfiles
@@ -46,7 +46,7 @@ class MetaMRSortPop3():
 
     def init_one_meta(self, seed):
         cps = generate_categories_profiles(self.categories)
-        model = ElectreTriBM(self.criteria, None, None, None, cps)
+        model = MRSort(self.criteria, None, None, None, cps)
         meta = MetaMRSort3(model, self.pt_sorted, self.aa_ori)
         random.seed(seed)
         meta.random_state = random.getstate()

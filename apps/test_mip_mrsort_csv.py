@@ -9,7 +9,7 @@ from pymcda.learning.mip_mrsort import MipMRSort
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import Alternatives, Criteria, PerformanceTable
 from pymcda.types import AlternativesAssignments, Categories
-from pymcda.electre_tri import ElectreTriBM
+from pymcda.electre_tri import MRSort
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_categories_profiles
 from pymcda.generate import generate_random_profiles
@@ -82,7 +82,7 @@ def run_test(seed, data, pclearning):
     cvs = None
     lbda = None
 
-    model = ElectreTriBM(data.c, cvs, bpt, lbda, cat_profiles)
+    model = MRSort(data.c, cvs, bpt, lbda, cat_profiles)
 
     # Run the linear program
     t1 = time.time()
