@@ -15,7 +15,7 @@ from pymcda.generate import generate_random_profiles
 from pymcda.generate import generate_random_criteria_weights
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import compute_ca
-from pymcda.uta import Utadis
+from pymcda.uta import AVFSort
 from test_utils import test_result, test_results
 
 class dataset(object):
@@ -89,7 +89,7 @@ def run_test(seed, data, pclearning, nseg):
 
     t_total = time.time() - t1
 
-    model = Utadis(c, cvs, cfs, catv)
+    model = AVFSort(c, cvs, cfs, catv)
 
     # CA learning set
     aa_learning2 = model.get_assignments(pt_learning)

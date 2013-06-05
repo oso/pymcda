@@ -2,7 +2,7 @@ from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 from pymcda.types import CriteriaValues, CriterionValue
-from pymcda.uta import Utadis
+from pymcda.uta import AVFSort
 from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
@@ -307,7 +307,7 @@ class tests_lp_avfsort(unittest.TestCase):
                        pt.get_best(u.criteria))
         obj, cvs, cfs, catv = lp.solve(aa, pt)
 
-        u2 = Utadis(u.criteria, cvs, cfs, catv)
+        u2 = AVFSort(u.criteria, cvs, cfs, catv)
         aa2 = u2.get_assignments(pt)
 
         self.assertEqual(aa, aa2)

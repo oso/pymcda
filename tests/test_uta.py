@@ -1,6 +1,6 @@
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
-from pymcda.uta import Uta, Utadis
+from pymcda.uta import Uta, AVFSort
 from pymcda.types import *
 import unittest
 
@@ -88,7 +88,7 @@ class tests_utadis(unittest.TestCase):
 
         catv = CategoriesValues([catv1, catv2, catv3])
 
-        return Utadis(c, cvs, cfs, catv)
+        return AVFSort(c, cvs, cfs, catv)
 
     def test001(self):
         model = self.generate_model()

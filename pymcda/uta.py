@@ -42,11 +42,11 @@ class Uta(object):
         for cv in self.cvs:
             cv.value = 1
 
-class Utadis(Uta):
+class AVFSort(Uta):
 
     def __init__(self, criteria = None, cvs = None, cfs = None,
                  cat_values = None):
-        super(Utadis, self).__init__(criteria, cvs, cfs)
+        super(AVFSort, self).__init__(criteria, cvs, cfs)
         self.cat_values = cat_values
         upper = cat_values.get_upper_limits()
         self.cat_limits = sorted(upper.iteritems(),

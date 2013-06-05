@@ -10,7 +10,7 @@ from itertools import product
 from pymcda.types import AlternativesAssignments, PerformanceTable
 from pymcda.types import AlternativePerformances
 from pymcda.types import CriterionValue, CriteriaValues
-from pymcda.uta import Utadis
+from pymcda.uta import AVFSort
 from pymcda.electre_tri import ElectreTri
 from pymcda.learning.lp_avfsort import LpAVFSort
 from pymcda.generate import generate_random_mrsort_model
@@ -53,7 +53,7 @@ def test_lp_avfsort(seed, na, nc, ncat, ns, na_gen, pcerrors):
     obj, cv_l, cfs_l, catv_l = lp.solve(aa_err, pt)
     t3 = time.time()
 
-    model2 = Utadis(model.criteria, cv_l, cfs_l, catv_l)
+    model2 = AVFSort(model.criteria, cv_l, cfs_l, catv_l)
 
     # Compute new assignment and classification accuracy
     aa2 = model2.get_assignments(pt)

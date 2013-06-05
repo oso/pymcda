@@ -14,7 +14,7 @@ from pymcda.generate import generate_random_performance_table
 from pymcda.generate import generate_criteria
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.types import CriteriaValues, CriterionValue
-from pymcda.uta import Utadis
+from pymcda.uta import AVFSort
 from pymcda.learning.lp_avfsort import LpAVFSort
 from pymcda.learning.meta_mrsort3 import MetaMRSortPop3
 from pymcda.ui.graphic_uta import QGraphCriterionFunction
@@ -112,7 +112,7 @@ def run_lp_avf(pipe, criteria, categories, worst, best, css, pt, aa):
     lp = LpAVFSort(css, categories, worst, best)
     obj, cvs, cfs, catv = lp.solve(aa, pt)
 
-    model = Utadis(criteria, cvs, cfs, catv)
+    model = AVFSort(criteria, cvs, cfs, catv)
     aa2 = model.get_assignments(pt)
     ca = compute_ca(aa, aa2)
     pipe.send([model, ca])
