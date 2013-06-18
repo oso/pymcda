@@ -63,7 +63,7 @@ class QGraphicsSceneEtri(QtGui.QGraphicsScene):
 
     def __init__(self, model, worst, best, size, criteria_order = None,
                  parent = None):
-        super(QtGui.QGraphicsScene, self).__init__(parent)
+        super(QGraphicsSceneEtri, self).__init__(parent)
         self.model = model
         if criteria_order:
             self.criteria_order = criteria_order
