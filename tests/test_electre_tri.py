@@ -1,6 +1,12 @@
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
-from pymcda.electre_tri import ElectreTri
+from pymcda.electre_tri import ElectreTri, MRSort
+from pymcda.generate import generate_alternatives, generate_criteria
+from pymcda.generate import generate_random_performance_table
+from pymcda.generate import generate_categories
+from pymcda.generate import generate_categories_profiles
+from pymcda.types import CriterionValue, CriteriaValues
+from pymcda.types import AlternativePerformances, PerformanceTable
 import unittest
 
 def compare_assignments(assignments, expected_assignments):
@@ -50,7 +56,88 @@ class tests_electre_tri(unittest.TestCase):
         self.assertEqual(ok, 1, "One or more alternatives were wrongly \
                          assigned")
 
-test_classes = [tests_electre_tri]
+class tests_mrsort(unittest.TestCase):
+
+    def test001(self):
+        c = generate_criteria(4)
+
+        cv1 = CriterionValue('c1', 0.25)
+        cv2 = CriterionValue('c2', 0.25)
+        cv3 = CriterionValue('c3', 0.25)
+        cv4 = CriterionValue('c4', 0.25)
+        cv = CriteriaValues([cv1, cv2, cv3, cv4])
+
+        cat = generate_categories(2)
+        cps = generate_categories_profiles(cat)
+
+        bp = AlternativePerformances('b1', {'c1': 0.5, 'c2': 0.5,
+                                            'c3': 0.5, 'c4': 0.5})
+        bpt = PerformanceTable([bp])
+        lbda = 0.5
+
+        etri = MRSort(c, cv, bpt, 0.5, cps)
+
+        a = generate_alternatives(1000)
+        pt = generate_random_performance_table(a, c)
+        aas = etri.pessimist(pt)
+
+        for aa in aas:
+            w = 0
+            perfs = pt[aa.id].performances
+            for c, val in perfs.items():
+                if val >= bp.performances[c]:
+                    w += cv[c].value
+
+            if aa.category_id == 'cat1':
+                self.assertLess(w, lbda)
+            else:
+                self.assertGreaterEqual(w, lbda)
+
+    def test002(self):
+        c = generate_criteria(4)
+
+        cv1 = CriterionValue('c1', 0.25)
+        cv2 = CriterionValue('c2', 0.25)
+        cv3 = CriterionValue('c3', 0.25)
+        cv4 = CriterionValue('c4', 0.25)
+        cv = CriteriaValues([cv1, cv2, cv3, cv4])
+
+        cat = generate_categories(3)
+        cps = generate_categories_profiles(cat)
+
+        bp1 = AlternativePerformances('b1', {'c1': 0.25, 'c2': 0.25,
+                                             'c3': 0.25, 'c4': 0.25})
+        bp2 = AlternativePerformances('b2', {'c1': 0.75, 'c2': 0.75,
+                                             'c3': 0.75, 'c4': 0.75})
+        bpt = PerformanceTable([bp1, bp2])
+        lbda = 0.5
+
+        etri = MRSort(c, cv, bpt, 0.5, cps)
+
+        a = generate_alternatives(1000)
+        pt = generate_random_performance_table(a, c)
+        aas = etri.pessimist(pt)
+
+        for aa in aas:
+            w1 = w2 = 0
+            perfs = pt[aa.id].performances
+            for c, val in perfs.items():
+                if val >= bp1.performances[c]:
+                    w1 += cv[c].value
+                if val >= bp2.performances[c]:
+                    w2 += cv[c].value
+
+            if aa.category_id == 'cat1':
+                self.assertLess(w1, lbda)
+                self.assertLess(w2, lbda)
+            elif aa.category_id == 'cat2':
+                self.assertGreaterEqual(w1, lbda)
+                self.assertLess(w2, lbda)
+            else:
+                self.assertGreaterEqual(w1, lbda)
+                self.assertGreaterEqual(w2, lbda)
+
+test_classes = [tests_electre_tri, tests_mrsort]
 
 if __name__ == "__main__":
     suite = []
