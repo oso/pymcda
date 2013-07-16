@@ -1,8 +1,9 @@
 from __future__ import division
 import math
+from copy import deepcopy
+from itertools import product
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import McdaObject
-from copy import deepcopy
 
 def eq(a, b, eps=10e-10):
     return abs(a-b) <= eps
@@ -189,6 +190,34 @@ class ElectreTri(McdaObject):
             return self.optimist(pt)
         else:
             return self.pessimist(pt)
+
+    def auck(self, aa, pt, k):
+        profile = self.profiles[k-1]
+        lower_cat = self.categories[:k]
+        upper_cat = self.categories[k:]
+
+        lower_aa = {}
+        upper_aa = {}
+        for a in aa:
+            cred = self.credibility(pt[a.id], self.bpt[profile], k)
+            if a.category_id in lower_cat:
+                lower_aa[a.id] = cred
+            else:
+                upper_aa[a.id] = cred
+
+        nlower = len(lower_aa)
+        nupper = len(upper_aa)
+
+        score = 0
+        for a_up, a_low in product(upper_aa.keys(), lower_aa.keys()):
+            a_up_cred = upper_aa[a_up]
+            a_low_cred = lower_aa[a_low]
+            if a_up_cred > a_low_cred:
+                score += 1
+            elif a_up_cred == a_low_cred:
+                score += 0.5
+
+        return score / (nlower * nupper)
 
 class MRSort(ElectreTri):
 
