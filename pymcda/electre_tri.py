@@ -196,8 +196,7 @@ class ElectreTri(McdaObject):
         lower_cat = self.categories[:k]
         upper_cat = self.categories[k:]
 
-        lower_aa = {}
-        upper_aa = {}
+        lower_aa, upper_aa = {}, {}
         for a in aa:
             cred = self.credibility(pt[a.id], self.bpt[profile], k)
             if a.category_id in lower_cat:
@@ -205,13 +204,11 @@ class ElectreTri(McdaObject):
             else:
                 upper_aa[a.id] = cred
 
-        nlower = len(lower_aa)
-        nupper = len(upper_aa)
+        nlower, nupper = len(lower_aa), len(upper_aa)
 
         score = 0
         for a_up, a_low in product(upper_aa.keys(), lower_aa.keys()):
-            a_up_cred = upper_aa[a_up]
-            a_low_cred = lower_aa[a_low]
+            a_up_cred, a_low_cred = upper_aa[a_up], lower_aa[a_low]
             if a_up_cred > a_low_cred:
                 score += 1
             elif a_up_cred == a_low_cred:
