@@ -1,8 +1,10 @@
+from __future__ import division
 import bisect
 
 from pymcda.types import AlternativeValue, AlternativesValues
 from pymcda.types import AlternativeAssignment
 from pymcda.types import AlternativesAssignments
+from itertools import product
 
 class Uta(object):
 
@@ -71,3 +73,31 @@ class AVFSort(Uta):
         for ap in pt:
             assignments.append(self.get_assignment(ap))
         return assignments
+
+    def auck(self, aa, pt, k):
+        categories = self.cat_values.get_ordered_categories()
+        lower_cat = categories[:k]
+        upper_cat = categories[k:]
+
+        lower_aa = {}
+        upper_aa = {}
+        for a in aa:
+            cred = self.global_utility(pt[a.id]).value
+            if a.category_id in lower_cat:
+                lower_aa[a.id] = cred
+            else:
+                upper_aa[a.id] = cred
+
+        nlower = len(lower_aa)
+        nupper = len(upper_aa)
+
+        score = 0
+        for a_up, a_low in product(upper_aa.keys(), lower_aa.keys()):
+            a_up_cred = upper_aa[a_up]
+            a_low_cred = lower_aa[a_low]
+            if a_up_cred > a_low_cred:
+                score += 1
+            elif a_up_cred == a_low_cred:
+                score += 0.5
+
+        return score / (nlower * nupper)

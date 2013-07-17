@@ -2,6 +2,8 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 from pymcda.uta import Uta, AVFSort
 from pymcda.types import *
+from pymcda.generate import *
+from pymcda.utils import *
 import unittest
 
 class tests_uta(unittest.TestCase):
@@ -143,7 +145,35 @@ class tests_avfsort(unittest.TestCase):
         self.assertEquals(assignments["a2"].category_id, "cat1")
         self.assertEquals(assignments["a3"].category_id, "cat3")
 
-test_classes = [tests_uta, tests_avfsort]
+class tests_indicators(unittest.TestCase):
+
+    def test001_auck_no_errors(self):
+        random.seed(2)
+        crits = generate_criteria(5)
+        model = generate_random_avfsort_model(5, 2, 1, 1)
+
+        alts = generate_alternatives(1000)
+        pt = generate_random_performance_table(alts, crits)
+        aa = model.get_assignments(pt)
+
+        auck = model.auck(aa, pt, 1)
+        self.assertEqual(auck, 1)
+
+    def test002_auck_all_errors(self):
+        random.seed(2)
+        crits = generate_criteria(5)
+        model = generate_random_avfsort_model(5, 2, 1, 1)
+
+        alts = generate_alternatives(1000)
+        pt = generate_random_performance_table(alts, crits)
+        aa = model.get_assignments(pt)
+        categories = model.categories.get_ordered_categories()
+        aa_err = add_errors_in_assignments(aa, categories, 1)
+
+        auck = model.auck(aa_err, pt, 1)
+        self.assertEqual(auck, 0)
+
+test_classes = [tests_uta, tests_avfsort, tests_indicators]
 
 if __name__ == "__main__":
     suite = []
