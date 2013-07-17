@@ -177,6 +177,18 @@ class test_indicator(unittest.TestCase):
         auck = model.auck(aa_err, pt, 1)
         self.assertEqual(auck, 0)
 
+    def test003_auc_no_errors(self):
+        random.seed(3)
+        crits = generate_criteria(5)
+        model = generate_random_mrsort_model(len(crits), 3)
+
+        alts = generate_alternatives(1000)
+        pt = generate_random_performance_table(alts, crits)
+        aa = model.get_assignments(pt)
+
+        auc = model.auc(aa, pt)
+        self.assertEqual(auc, 1)
+
 test_classes = [tests_electre_tri, tests_mrsort, test_indicator]
 
 if __name__ == "__main__":

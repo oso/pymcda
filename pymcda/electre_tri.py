@@ -219,6 +219,13 @@ class ElectreTri(McdaObject):
 
         return score / (nlower * nupper)
 
+    def auc(self, aa, pt):
+        auck_sum = 0
+        for k in range(1, len(self.profiles) + 1):
+            auck_sum += self.auck(aa, pt, k)
+
+        return auck_sum / len(self.profiles)
+
 class MRSort(ElectreTri):
 
     def concordance(self, ap, profile):

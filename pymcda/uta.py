@@ -101,3 +101,10 @@ class AVFSort(Uta):
                 score += 0.5
 
         return score / (nlower * nupper)
+
+    def auc(self, aa, pt):
+        auck_sum = 0
+        for k in range(1, len(self.cat_limits)):
+            auck_sum += self.auck(aa, pt, k)
+
+        return auck_sum / (len(self.cat_limits) - 1)
