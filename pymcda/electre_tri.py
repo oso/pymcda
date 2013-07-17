@@ -205,6 +205,8 @@ class ElectreTri(McdaObject):
                 upper_aa[a.id] = cred
 
         nlower, nupper = len(lower_aa), len(upper_aa)
+        if nlower == 0 or nupper == 0:
+            return 1
 
         score = 0
         for a_up, a_low in product(upper_aa.keys(), lower_aa.keys()):
