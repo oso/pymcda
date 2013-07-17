@@ -1,12 +1,15 @@
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
+import random
 from pymcda.electre_tri import ElectreTri, MRSort
 from pymcda.generate import generate_alternatives, generate_criteria
+from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_random_performance_table
 from pymcda.generate import generate_categories
 from pymcda.generate import generate_categories_profiles
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import AlternativePerformances, PerformanceTable
+from pymcda.utils import add_errors_in_assignments
 import unittest
 
 def compare_assignments(assignments, expected_assignments):
@@ -58,7 +61,16 @@ class tests_electre_tri(unittest.TestCase):
 
 class tests_mrsort(unittest.TestCase):
 
+    def setUp(self):
+        if not hasattr(self, 'i'):
+            self.i = 0
+        else:
+            self.i += 1
+
+        random.seed(self.i)
+
     def test001(self):
+        random.seed(1)
         c = generate_criteria(4)
 
         cv1 = CriterionValue('c1', 0.25)
@@ -94,6 +106,7 @@ class tests_mrsort(unittest.TestCase):
                 self.assertGreaterEqual(w, lbda)
 
     def test002(self):
+        random.seed(2)
         c = generate_criteria(4)
 
         cv1 = CriterionValue('c1', 0.25)
@@ -137,7 +150,34 @@ class tests_mrsort(unittest.TestCase):
                 self.assertGreaterEqual(w1, lbda)
                 self.assertGreaterEqual(w2, lbda)
 
-test_classes = [tests_electre_tri, tests_mrsort]
+class test_indicator(unittest.TestCase):
+
+    def test001_auck_no_errors(self):
+        random.seed(1)
+        crits = generate_criteria(5)
+        model = generate_random_mrsort_model(len(crits), 2)
+
+        alts = generate_alternatives(1000)
+        pt = generate_random_performance_table(alts, crits)
+        aa = model.get_assignments(pt)
+
+        auck = model.auck(aa, pt, 1)
+        self.assertEqual(auck, 1)
+
+    def test002_auck_all_errors(self):
+        random.seed(2)
+        crits = generate_criteria(5)
+        model = generate_random_mrsort_model(len(crits), 2)
+
+        alts = generate_alternatives(1000)
+        pt = generate_random_performance_table(alts, crits)
+        aa = model.get_assignments(pt)
+        aa_err = add_errors_in_assignments(aa, model.categories, 1)
+
+        auck = model.auck(aa_err, pt, 1)
+        self.assertEqual(auck, 0)
+
+test_classes = [tests_electre_tri, tests_mrsort, test_indicator]
 
 if __name__ == "__main__":
     suite = []
