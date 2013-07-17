@@ -94,17 +94,20 @@ def run_test(seed, data, pclearning, nseg):
     # CA learning set
     aa_learning2 = model.get_assignments(pt_learning)
     ca_learning = compute_ca(aa_learning, aa_learning2)
+    auc_learning = model.auc(aa_learning, pt_learning)
 
     # Compute CA of test setting
     if len(aa_test) > 0:
         aa_test2 = model.get_assignments(pt_test)
         ca_test = compute_ca(aa_test, aa_test2)
+        auc_test = model.auc(aa_test, pt_test)
     else:
         ca_test = 0
 
     # Compute CA of whole set
     aa2 = model.get_assignments(data.pt)
     ca = compute_ca(data.aa, aa2)
+    auc = model.auc(data.aa, data.pt)
 
     t = test_result("%s-%d-%d" % (data.name, seed, pclearning))
     t['seed'] = seed
@@ -119,6 +122,9 @@ def run_test(seed, data, pclearning, nseg):
     t['ca_learning'] = ca_learning
     t['ca_test'] = ca_test
     t['ca_all'] = ca
+    t['auc_learning'] = auc_learning
+    t['auc_test'] = auc_test
+    t['auc_all'] = auc
     t['t_total'] = t_total
 
     return t
@@ -147,9 +153,7 @@ def run_tests(nseeds, data, pclearning, nseg, filename):
         t2 = time.time()
 
         if initialized is False:
-            fields = ['seed', 'na', 'nc', 'ncat', 'ns', 'pclearning',
-                      'na_learning', 'na_test', 'obj', 'ca_learning',
-                      'ca_test', 'ca_all', 't_total']
+            fields = t.get_attributes()
             writer.writerow(fields)
             initialized = True
 
@@ -165,6 +169,7 @@ def run_tests(nseeds, data, pclearning, nseg, filename):
     t = results.summary(['na', 'nc', 'ncat', 'ns', 'pclearning',
                          'na_learning', 'na_test'],
                         ['obj', 'ca_learning', 'ca_test', 'ca_all',
+                         'auc_learning', 'auc_test', 'auc_all',
                          't_total'])
     t.tocsv(writer)
 
