@@ -102,16 +102,22 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
 
     t_total = time.time() - t1
 
+    aa_learning2 = model.pessimist(pt_learning)
+    ca_learning = compute_ca(aa_learning, aa_learning2)
+    auc_learning = model.auc(aa_learning, pt_learning)
+
     # Compute CA of test setting
     if len(aa_test) > 0:
         aa_test2 = model.pessimist(pt_test)
         ca_test = compute_ca(aa_test, aa_test2)
+        auc_test = model.auc(aa_test, pt_test)
     else:
         ca_test = 0
 
     # Compute CA of whole set
     aa2 = model.pessimist(data.pt)
     ca = compute_ca(data.aa, aa2)
+    auc = model.auc(data.aa, data.pt)
 
     t = test_result("%s-%d-%d-%d-%d-%d" % (data.name, seed, nloop, nmodels,
                                            nmeta, pclearning))
@@ -119,15 +125,18 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
     t['na'] = len(data.a)
     t['nc'] = len(data.c)
     t['ncat'] = len(data.cats)
+    t['pclearning'] = pclearning
     t['nloop'] = nloop
     t['nmodels'] = nmodels
     t['nmeta'] = nmeta
-    t['pclearning'] = pclearning
     t['na_learning'] = len(aa_learning)
     t['na_test'] = len(aa_test)
     t['ca_learning'] = ca_learning
     t['ca_test'] = ca_test
     t['ca_all'] = ca
+    t['auc_learning'] = auc_learning
+    t['auc_test'] = auc_test
+    t['auc_all'] = auc
     t['t_total'] = t_total
 
     return t
@@ -159,10 +168,7 @@ def run_tests(nseeds, data, pclearning, nloop, nmodels, nmeta, filename):
         t2 = time.time()
 
         if initialized is False:
-            fields = ['seed', 'na', 'nc', 'ncat', 'pclearning',
-                      'na_learning', 'na_test', 'nloop', 'nmodels',
-                      'nmeta', 'ca_learning', 'ca_test', 'ca_all',
-                      't_total']
+            fields = t.get_attributes()
             writer.writerow(fields)
             initialized = True
 
@@ -177,7 +183,8 @@ def run_tests(nseeds, data, pclearning, nloop, nmodels, nmeta, filename):
 
     t = results.summary(['na', 'nc', 'ncat', 'pclearning', 'na_learning',
                          'na_test', 'nloop', 'nmodels', 'nmeta'],
-                        ['ca_learning', 'ca_test', 'ca_all', 't_total'])
+                        ['ca_learning', 'ca_test', 'ca_all',
+                         'auc_learning', 'auc_test', 'auc_all', 't_total'])
     t.tocsv(writer)
 
 if __name__ == "__main__":
