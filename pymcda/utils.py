@@ -138,3 +138,16 @@ def compute_degree_of_extremality(pt):
             results[ap.id] *= up / (maxv[cid] - minv[cid])
 
     return results
+
+def compute_ranking_differences(aa, aa2, categories):
+    ncategories = len(categories)
+    rank_diff = {i: 0 for i in range(-ncategories + 1, ncategories)}
+
+    cat_rank = { category: i for i, category in enumerate(categories) }
+    aids = aa.keys()
+    for aid in aids:
+        cata, catb = aa[aid].category_id, aa2[aid].category_id
+        ranka, rankb = cat_rank[cata], cat_rank[catb]
+        rank_diff[rankb - ranka] += 1
+
+    return rank_diff
