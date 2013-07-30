@@ -151,3 +151,13 @@ def compute_ranking_differences(aa, aa2, categories):
         rank_diff[rankb - ranka] += 1
 
     return rank_diff
+
+def compute_ranking_matrix(aa, aa2, categories):
+    matrix = {(a, b): 0 for a in categories for b in categories}
+
+    aids = aa.keys()
+    for aid in aids:
+        cata, catb = aa[aid].category_id, aa2[aid].category_id
+        matrix[(cata, catb)] += 1
+
+    return matrix

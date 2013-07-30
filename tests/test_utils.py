@@ -78,6 +78,19 @@ class tests_utils(unittest.TestCase):
         self.assertEqual(rank_diff[1], ncat1)
         self.assertEqual(rank_diff[0], ncat2)
 
+    def test006(self):
+        random.seed(5)
+        aa = self.generate_random_assignments(1000, 2)
+        aa_err = aa.copy()
+        category_ids = ['cat%d' % (i + 1) for i in range(2)]
+        ncat1 = len([a for a in aa if a.category_id == 'cat1'])
+        ncat2 = len([a for a in aa if a.category_id == 'cat2'])
+        rank_matrix = compute_ranking_matrix(aa, aa_err, category_ids)
+
+        self.assertEqual(sum(rank_matrix.values()), 1000)
+        self.assertEqual(sum([rank_matrix[('cat1', 'cat1')],
+                              rank_matrix[('cat2', 'cat2')]]), 1000)
+
 test_classes = [tests_utils]
 
 if __name__ == "__main__":
