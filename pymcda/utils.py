@@ -5,6 +5,7 @@ import random
 from itertools import chain, combinations, product
 from math import factorial, ceil
 from pymcda.types import AlternativesAssignments
+from collections import OrderedDict
 
 def add_errors_in_assignments(aa, category_ids, errors_pc):
     n = int(len(aa)*errors_pc)
@@ -153,7 +154,8 @@ def compute_ranking_differences(aa, aa2, categories):
     return rank_diff
 
 def compute_ranking_matrix(aa, aa2, categories):
-    matrix = {(a, b): 0 for a in categories for b in categories}
+    matrix = OrderedDict([((a, b), 0) for a in categories \
+                                      for b in categories])
 
     aids = aa.keys()
     for aid in aids:
