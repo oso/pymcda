@@ -189,7 +189,15 @@ class test_indicator(unittest.TestCase):
         auc = model.auc(aa, pt)
         self.assertEqual(auc, 1)
 
-test_classes = [tests_electre_tri, tests_mrsort, test_indicator]
+class test_xmcda(unittest.TestCase):
+
+    def test001(self):
+        model = generate_random_mrsort_model(5, 3)
+        mxmcda = model.to_xmcda()
+        model2 = MRSort().from_xmcda(mxmcda)
+        self.assertEqual(model, model2)
+
+test_classes = [tests_electre_tri, tests_mrsort, test_indicator, test_xmcda]
 
 if __name__ == "__main__":
     suite = []

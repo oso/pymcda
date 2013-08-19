@@ -3,7 +3,11 @@ import math
 from copy import deepcopy
 from itertools import product
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
+from pymcda.types import Criteria, CriteriaValues, PerformanceTable
+from pymcda.types import CategoriesProfiles
 from pymcda.types import McdaObject
+from pymcda.types import marshal, unmarshal
+from xml.etree import ElementTree
 
 def eq(a, b, eps=10e-10):
     return abs(a-b) <= eps
@@ -11,12 +15,13 @@ def eq(a, b, eps=10e-10):
 class ElectreTri(McdaObject):
 
     def __init__(self, criteria=None, cv=None, bpt=None, lbda=None,
-                 categories_profiles=None):
+                 categories_profiles=None, id = None):
         self.criteria = criteria
         self.cv = cv
         self.bpt = bpt
         self.lbda = lbda
         self.categories_profiles = categories_profiles
+        self.id = id
 
     @property
     def categories_profiles(self):
@@ -224,6 +229,44 @@ class ElectreTri(McdaObject):
             auck_sum += self.auck(aa, pt, k)
 
         return auck_sum / len(self.profiles)
+
+    def to_xmcda(self):
+        root = ElementTree.Element('ElectreTri')
+
+        if self.id is not None:
+            root.set('id', self.id)
+
+        for obj in ['criteria', 'cv', 'bpt', 'categories_profiles']:
+            xmcda = getattr(self, obj).to_xmcda()
+            root.append(xmcda)
+
+        mparams = ElementTree.SubElement(root, 'methodParameters')
+        param = ElementTree.SubElement(mparams, 'parameter')
+        value = ElementTree.SubElement(param, 'value')
+        lbda = marshal(self.lbda)
+        value.append(lbda)
+
+        return root
+
+    def from_xmcda(self, xmcda):
+        if xmcda.tag != 'ElectreTri':
+            raise TypeError('ElectreTri::invalid tag')
+
+        self.id = xmcda.get('id')
+        value = xmcda.find('.//methodParameters/parameter/value')
+        self.lbda = unmarshal(value.getchildren()[0])
+
+        criteria = xmcda.find('.//criteria')
+        setattr(self, 'criteria', Criteria().from_xmcda(criteria))
+        cv = xmcda.find('.//criteriaValues')
+        setattr(self, 'cv', CriteriaValues().from_xmcda(cv))
+        bpt = xmcda.find('.//performanceTable')
+        setattr(self, 'bpt', PerformanceTable().from_xmcda(bpt))
+        categories_profiles = xmcda.find('.//categoriesProfiles')
+        setattr(self, 'categories_profiles',
+                CategoriesProfiles().from_xmcda(categories_profiles))
+
+        return self
 
 class MRSort(ElectreTri):
 
