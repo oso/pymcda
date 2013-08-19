@@ -211,6 +211,7 @@ class Criteria(McdaDict):
         for crit in self:
             crit_xmcda = crit.to_xmcda()
             root.append(crit_xmcda)
+
         return root
 
     def from_xmcda(self, xmcda):
