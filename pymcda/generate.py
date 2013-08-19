@@ -37,7 +37,7 @@ def generate_random_criteria_weights(crits, seed = None, k = 3):
     if seed is not None:
         random.seed(seed)
 
-    weights = [ round(random.random(), k) for i in range(len(crits) - 1) ]
+    weights = [ random.random() for i in range(len(crits) - 1) ]
     weights.sort()
 
     cvals = CriteriaValues()
@@ -47,9 +47,9 @@ def generate_random_criteria_weights(crits, seed = None, k = 3):
         if i == 0:
             cval.value = weights[i]
         elif i == len(crits) - 1:
-            cval.value = 1 - weights[i - 1]
+            cval.value = round(1 - weights[i - 1], k)
         else:
-            cval.value = weights[i] - weights[i - 1]
+            cval.value = round(weights[i] - weights[i - 1], k)
 
         cvals.append(cval)
 
@@ -68,6 +68,7 @@ def generate_random_criteria_values(crits, seed = None, k = 3,
             cval.value = random.randint(vmin, vmax)
         else:
             cval.value = round(random.uniform(vmin, vmax), k)
+
         cvals.append(cval)
 
     return cvals
@@ -213,7 +214,7 @@ def generate_random_mrsort_model(ncrit, ncat, seed = None, k = 3,
     cps = generate_categories_profiles(cat)
     b = cps.get_ordered_profiles()
     bpt = generate_random_profiles(b, c, None, k, worst, best)
-    lbda = random.uniform(0.5, 1)
+    lbda = round(random.uniform(0.5, 1), k)
 
     return MRSort(c, cv, bpt, lbda, cps)
 
