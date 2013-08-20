@@ -45,7 +45,7 @@ def generate_random_criteria_weights(crits, seed = None, k = 3):
         cval = CriterionValue()
         cval.id = c.id
         if i == 0:
-            cval.value = weights[i]
+            cval.value = round(weights[i], k)
         elif i == len(crits) - 1:
             cval.value = round(1 - weights[i - 1], k)
         else:
