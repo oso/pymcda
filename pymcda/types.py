@@ -211,7 +211,6 @@ class Criteria(McdaDict):
         for crit in self:
             crit_xmcda = crit.to_xmcda()
             root.append(crit_xmcda)
-
         return root
 
     def from_xmcda(self, xmcda):
@@ -349,6 +348,10 @@ class Criterion(McdaObject):
         value = xmcda.find('.//criterionValue/value')
         if value is not None:
             self.weight = unmarshal(value.getchildren()[0])
+
+        value = xmcda.find('.//thresholds')
+        if value is not None:
+            self.thresholds = Thresholds().from_xmcda(value)
 
         return self
 
@@ -1599,6 +1602,13 @@ class Thresholds(McdaDict):
 
         return "thresholds(%s)", self.values()
 
+    def has_threshold(self, threshold_id):
+        for t in self:
+            if t.id == threshold_id:
+                return True
+
+        return False
+
     def to_xmcda(self):
         """Convert the MCDA dictionnary into XMCDA output"""
 
@@ -1626,6 +1636,8 @@ class Thresholds(McdaDict):
             t.from_xmcda(tag)
             self.append(t)
 
+        return self
+
 class Threshold(McdaObject):
 
     def __init__(self, id, name=None, values=None):
@@ -1636,7 +1648,7 @@ class Threshold(McdaObject):
     def __repr__(self):
         """Manner to represent the MCDA object"""
 
-        return "%s: %s" % (self.id, self.values)
+        return "%s: %s" % (self.id, self.values.value)
 
     def to_xmcda(self):
         """Convert the MCDA object into XMCDA output"""
@@ -1662,6 +1674,9 @@ class Threshold(McdaObject):
         if values.tag == 'constant':
             c = Constant(None, 0)
             c.from_xmcda(values)
+            self.values = c
+
+        return self
 
 class Categories(McdaDict):
 
