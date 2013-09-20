@@ -116,6 +116,11 @@ class McdaDict(object):
 
         return self._d.keys()
 
+    def remove(self, key):
+        """This method allows to remove an element from the dictionnary"""
+
+        del self._d[key]
+
     def update(self, mcda_dict):
         """Add the object of a second MCDA dictionnary into the current
         dictionnary"""
