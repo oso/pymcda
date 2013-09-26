@@ -73,6 +73,7 @@ class MetaMRSortProfiles4():
                     h_above[perfs[i] + delta] = num / total
 #            elif self.aa_ori(a) < self.aa(a) and \
             elif aa_ori != aa and \
+                 self.cat[aa] < self.cat[cat_a] and \
                  self.cat[aa_ori] < self.cat[cat_a]:
                 num += 0.1
                 total += 1
@@ -116,6 +117,7 @@ class MetaMRSortProfiles4():
                     total += 1
 #            elif self.aa_ori(a) > self.aa(a) and \
             elif aa_ori != aa and \
+                 self.cat[aa] > self.cat[cat_b] and \
                  self.cat[aa_ori] > self.cat[cat_b]:
                 num += 0.1
                 total += 1
