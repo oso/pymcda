@@ -2079,3 +2079,18 @@ class AlternativeAssignment(McdaObject):
         self.category_id = catid.text
 
         return self
+
+class CriteriaValuesSet(McdaDict):
+    pass
+
+class AlternativeCriteriaValues(McdaObject):
+
+    def __init__(self, id, values = None):
+        self.id = id
+        if values:
+            self.values = values
+        else:
+            self.values = McdaDict()
+
+class AlternativesCriteriaValues(McdaDict):
+    pass
