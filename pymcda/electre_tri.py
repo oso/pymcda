@@ -14,13 +14,17 @@ def eq(a, b, eps=10e-10):
 
 class ElectreTri(McdaObject):
 
-    def __init__(self, criteria=None, cv=None, bpt=None, lbda=None,
-                 categories_profiles=None, id = None):
+    def __init__(self, criteria = None, cv = None, bpt = None, lbda = None,
+                 categories_profiles = None, veto = None, indifference = None,
+                 preference = None, id = None):
         self.criteria = criteria
         self.cv = cv
         self.bpt = bpt
         self.lbda = lbda
         self.categories_profiles = categories_profiles
+        self.veto = veto
+        self.preference = preference
+        self.indifference = indifference
         self.id = id
 
     @property
@@ -48,7 +52,23 @@ class ElectreTri(McdaObject):
         if self.profiles is None:
             raise KeyError('No profiles defined')
 
-    def get_threshold_by_profile(self, c, threshold_id, profile_rank):
+    def get_threshold_by_profile(self, c, threshold_id, profile):
+        if threshold_id == 'q':
+            thresholds = self.indifference
+        elif threshold_id == 'p':
+            thresholds = self.preference
+        elif threshold_id == 'v':
+            thresholds = self.veto
+
+        if thresholds is None:
+            return self._get_threshold_by_profile(c, threshold_id,
+                                                  profile)
+
+        return thresholds[profile].values[threshold_id][c.id].value
+
+    def _get_threshold_by_profile(self, c, threshold_id, profile):
+        profile_rank = self.profiles.index(profile) + 1
+
         if c.thresholds is None:
             return None
 
@@ -60,13 +80,13 @@ class ElectreTri(McdaObject):
         else:
             return None
 
-    def __partial_concordance(self, x, y, c, profile_rank):
+    def __partial_concordance(self, x, y, c, profile):
         # compute g_j(b) - g_j(a)
         diff = (y.performances[c.id]-x.performances[c.id])*c.direction
 
         # compute c_j(a, b)
-        p = self.get_threshold_by_profile(c, 'p', profile_rank)
-        q = self.get_threshold_by_profile(c, 'q', profile_rank)
+        p = self.get_threshold_by_profile(c, 'p', profile)
+        q = self.get_threshold_by_profile(c, 'q', profile)
         if q is None:
             q = 0
         if p is None:
@@ -81,14 +101,14 @@ class ElectreTri(McdaObject):
             den = float(p-q)
             return num/den
 
-    def __concordance(self, x, y, profile_rank):
+    def __concordance(self, x, y, profile):
         wsum = 0
         pjcj = 0
         for c in self.criteria:
             if c.disabled == 1:
                 continue
 
-            cj = self.__partial_concordance(x, y, c, profile_rank)
+            cj = self.__partial_concordance(x, y, c, profile)
 
             cval = self.cv[c.id]
             weight = cval.value
@@ -99,13 +119,13 @@ class ElectreTri(McdaObject):
 
         return pjcj/wsum
 
-    def __partial_discordance(self, x, y, c, profile_rank):
+    def __partial_discordance(self, x, y, c, profile):
         # compute g_j(b) - g_j(a)
         diff = (y.performances[c.id]-x.performances[c.id])*c.direction
 
         # compute d_j(a,b)
-        p = self.get_threshold_by_profile(c, 'p', profile_rank)
-        v = self.get_threshold_by_profile(c, 'v', profile_rank)
+        p = self.get_threshold_by_profile(c, 'p', profile)
+        v = self.get_threshold_by_profile(c, 'v', profile)
         if v is None:
             return 0
         elif diff > v:
@@ -117,16 +137,16 @@ class ElectreTri(McdaObject):
             den = float(v-p)
             return num/den
 
-    def credibility(self, x, y, profile_rank):
+    def credibility(self, x, y, profile):
         self.__check_input_params()
-        concordance = self.__concordance(x, y, profile_rank)
+        concordance = self.__concordance(x, y, profile)
 
         sigma = concordance
         for c in self.criteria:
             if c.disabled == 1:
                 continue
 
-            dj = self.__partial_discordance(x, y, c, profile_rank)
+            dj = self.__partial_discordance(x, y, c, profile)
             if dj > concordance:
                 num = float(1-dj)
                 den = float(1-concordance)
@@ -134,9 +154,9 @@ class ElectreTri(McdaObject):
 
         return sigma
 
-    def __outrank(self, action_perfs, criteria, profile, profile_rank, lbda):
-        s_ab = self.credibility(action_perfs, profile, profile_rank)
-        s_ba = self.credibility(profile, action_perfs, profile_rank)
+    def __outrank(self, action_perfs, criteria, profile, lbda):
+        s_ab = self.credibility(action_perfs, profile, profile.id)
+        s_ba = self.credibility(profile, action_perfs, profile.id)
 
         if eq(s_ab, lbda) or s_ab > lbda:
             if s_ba >= lbda:
@@ -158,7 +178,7 @@ class ElectreTri(McdaObject):
             cat_rank = len(profiles)
             for i, profile in enumerate(profiles):
                 s_ab = self.credibility(action_perfs, self.bpt[profile],
-                                        i+1)
+                                        profile)
                 if not eq(s_ab, self.lbda) and s_ab < self.lbda:
                     cat_rank -= 1
 
@@ -177,7 +197,7 @@ class ElectreTri(McdaObject):
             cat_rank = 0
             for i, profile in enumerate(profiles):
                 outr = self.__outrank(action_perfs, self.criteria,
-                                      self.bpt[profile], i+1, self.lbda)
+                                      self.bpt[profile], self.lbda)
                 if outr != "-":
                     cat_rank += 1
 
@@ -203,7 +223,7 @@ class ElectreTri(McdaObject):
 
         lower_aa, upper_aa = {}, {}
         for a in aa:
-            cred = self.credibility(pt[a.id], self.bpt[profile], k)
+            cred = self.credibility(pt[a.id], self.bpt[profile], profile)
             if a.category_id in lower_cat:
                 lower_aa[a.id] = cred
             else:
@@ -282,7 +302,7 @@ class MRSort(ElectreTri):
 
         return w / wsum
 
-    def credibility(self, x, y, profile_rank):
+    def credibility(self, x, y, profile):
         w = 0
         wsum = 0
         for c in self.criteria:
@@ -290,7 +310,7 @@ class MRSort(ElectreTri):
                 continue
 
             cval = self.cv[c.id]
-            v = self.get_threshold_by_profile(c, 'v', profile_rank)
+            v = self.get_threshold_by_profile(c, 'v', profile)
             diff = (y.performances[c.id]-x.performances[c.id])*c.direction
             if diff <= 0:
                 w += cval.value

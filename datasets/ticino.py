@@ -8,6 +8,8 @@ from pymcda.types import Threshold, Thresholds, Constant
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import Category, Categories
 from pymcda.types import CategoryProfile, CategoriesProfiles, Limits
+from pymcda.types import AlternativeCriteriaValues, AlternativesCriteriaValues
+from pymcda.types import CriteriaValuesSet
 
 # Criteria
 prix = Criterion('prix', 'prix', False, -1, 25)
@@ -83,6 +85,40 @@ transport.thresholds = Thresholds([q_transport, p_transport, v_transport])
 envir.thresholds = Thresholds([q_envir, p_envir, v_envir])
 residents.thresholds = Thresholds([q_residents, p_residents, v_residents])
 competition.thresholds = Thresholds([q_competition, p_competition, v_competition])
+
+# New manner to define thresholds
+q2_prix = CriterionValue('prix', 15)
+q2_transport = CriterionValue('transport', 80)
+q2_envir = CriterionValue('envir', 1)
+q2_residents = CriterionValue('residents', 0.5)
+q2_competition = CriterionValue('competition', 1)
+q2b = CriteriaValues([q2_prix, q2_transport, q2_envir, q2_residents,
+                      q2_competition], "q")
+q2b1 = AlternativeCriteriaValues("b1", CriteriaValuesSet([q2b]))
+q2b2 = AlternativeCriteriaValues("b2", CriteriaValuesSet([q2b]))
+q2 = AlternativesCriteriaValues([q2b1, q2b2])
+
+p2_prix = CriterionValue('prix', 40)
+p2_transport = CriterionValue('transport', 350)
+p2_envir = CriterionValue('envir', 3)
+p2_residents = CriterionValue('residents', 3.5)
+p2_competition = CriterionValue('competition', 5)
+p2b = CriteriaValues([p2_prix, p2_transport, p2_envir, p2_residents,
+                      p2_competition], "p")
+p2b1 = AlternativeCriteriaValues("b1", CriteriaValuesSet([p2b]))
+p2b2 = AlternativeCriteriaValues("b2", CriteriaValuesSet([p2b]))
+p2 = AlternativesCriteriaValues([p2b1, p2b2])
+
+v2_prix = CriterionValue('prix', 40)
+v2_transport = CriterionValue('transport', 350)
+v2_envir = CriterionValue('envir', 3)
+v2_residents = CriterionValue('residents', 3.5)
+v2_competition = CriterionValue('competition', 5)
+v2b = CriteriaValues([v2_prix, v2_transport, v2_envir, v2_residents,
+                      v2_competition], "v")
+v2b1 = AlternativeCriteriaValues("b1", CriteriaValuesSet([v2b]))
+v2b2 = AlternativeCriteriaValues("b2", CriteriaValuesSet([v2b]))
+v2 = AlternativesCriteriaValues([v2b1, v2b2])
 
 # Lambda
 lbda = 0.75

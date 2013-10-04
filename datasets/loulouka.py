@@ -8,6 +8,8 @@ from pymcda.types import Threshold, Thresholds, Constant
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import Category, Categories
 from pymcda.types import CategoryProfile, CategoriesProfiles, Limits
+from pymcda.types import AlternativeCriteriaValues, AlternativesCriteriaValues
+from pymcda.types import CriteriaValuesSet
 
 # Weights
 g1 = Criterion('g01', 'g1', False, 1, 0.02)
@@ -612,6 +614,61 @@ g8.thresholds = Thresholds([q_g8, p_g8])
 g9.thresholds = Thresholds([q_g9, p_g9])
 g10.thresholds = Thresholds([q_g10, p_g10])
 g11.thresholds = Thresholds([q_g11, p_g11, v_g11])
+
+# New manner to define the thresholds
+q2_g1 = CriterionValue('g01', 0)
+q2_g2 = CriterionValue('g02', 0)
+q2_g3 = CriterionValue('g03', 0)
+q2_g4 = CriterionValue('g04', 0)
+q2_g5 = CriterionValue('g05', 0)
+q2_g6 = CriterionValue('g06', 0)
+q2_g7 = CriterionValue('g07', 0)
+q2_g8 = CriterionValue('g08', 0)
+q2_g9 = CriterionValue('g09', 0)
+q2_g10 = CriterionValue('g10', 0)
+q2_g11 = CriterionValue('g11', 0)
+q2b = CriteriaValues([q2_g1, q2_g2, q2_g3, q2_g4, q2_g5, q2_g6, q2_g7, q2_g8,
+                      q2_g9, q2_g10, q2_g11], "q")
+q2b1 = AlternativeCriteriaValues("b1", CriteriaValuesSet([q2b]))
+q2b2 = AlternativeCriteriaValues("b2", CriteriaValuesSet([q2b]))
+q2b3 = AlternativeCriteriaValues("b3", CriteriaValuesSet([q2b]))
+q2 = AlternativesCriteriaValues([q2b1, q2b2, q2b3])
+
+p2_g1 = CriterionValue('g01', 1)
+p2_g2 = CriterionValue('g02', 1)
+p2_g3 = CriterionValue('g03', 1)
+p2_g4 = CriterionValue('g04', 1)
+p2_g5 = CriterionValue('g05', 1)
+p2_g6 = CriterionValue('g06', 1)
+p2_g7 = CriterionValue('g07', 1)
+p2_g8 = CriterionValue('g08', 1)
+p2_g9 = CriterionValue('g09', 1)
+p2_g10 = CriterionValue('g10', 1)
+p2_g11 = CriterionValue('g11', 1)
+p2b = CriteriaValues([p2_g1, p2_g2, p2_g3, p2_g4, p2_g5, p2_g6, p2_g7, p2_g8,
+                      p2_g9, p2_g10, p2_g11], "p")
+p2b1 = AlternativeCriteriaValues("b1", CriteriaValuesSet([p2b]))
+p2b2 = AlternativeCriteriaValues("b2", CriteriaValuesSet([p2b]))
+p2b3 = AlternativeCriteriaValues("b3", CriteriaValuesSet([p2b]))
+p2 = AlternativesCriteriaValues([p2b1, p2b2, p2b3])
+
+v2_g1 = CriterionValue('g01', None)
+v2_g2 = CriterionValue('g02', None)
+v2_g3 = CriterionValue('g03', None)
+v2_g4 = CriterionValue('g04', None)
+v2_g5 = CriterionValue('g05', None)
+v2_g6 = CriterionValue('g06', None)
+v2_g7 = CriterionValue('g07', None)
+v2_g8 = CriterionValue('g08', None)
+v2_g9 = CriterionValue('g09', None)
+v2_g10 = CriterionValue('g10', None)
+v2_g11 = CriterionValue('g11', 4)
+v2b = CriteriaValues([v2_g1, v2_g2, v2_g3, v2_g4, v2_g5, v2_g6, v2_g7, v2_g8,
+                      v2_g9, v2_g10, v2_g11], "v")
+v2b1 = AlternativeCriteriaValues("b1", CriteriaValuesSet([v2b]))
+v2b2 = AlternativeCriteriaValues("b2", CriteriaValuesSet([v2b]))
+v2b3 = AlternativeCriteriaValues("b3", CriteriaValuesSet([v2b]))
+v2 = AlternativesCriteriaValues([v2b1, v2b2, v2b3])
 
 # Lambda
 lbda = 0.76

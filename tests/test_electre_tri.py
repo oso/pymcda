@@ -31,16 +31,16 @@ class tests_electre_tri(unittest.TestCase):
         from datasets.loulouka import c, cv, ptb, lbda, pt, aap, cps
         etri = ElectreTri(c, cv, ptb, lbda, cps).pessimist(pt)
         ok = compare_assignments(etri, aap)
-        self.assertEqual(ok, 1, "One or more alternatives were wrongly \
-                         assigned")
+        self.assertEqual(ok, 1, "One or more alternatives were wrongly "
+                         "assigned")
 
     def test002_test_pessimist_ticino(self):
         """ Ticino - Pessimist """
         from datasets.ticino import c, cv, ptb, lbda, pt, aap, cps
         etri = ElectreTri(c, cv, ptb, lbda, cps).pessimist(pt)
         ok = compare_assignments(etri, aap)
-        self.assertEqual(ok, 1, "One or more alternatives were wrongly \
-                         assigned")
+        self.assertEqual(ok, 1, "One or more alternatives were wrongly "
+                         "assigned")
 
 
     def test003_test_optimist_loulouka(self):
@@ -48,16 +48,51 @@ class tests_electre_tri(unittest.TestCase):
         from datasets.loulouka import c, cv, ptb, lbda, pt, aao, cps
         etri = ElectreTri(c, cv, ptb, lbda, cps).optimist(pt)
         ok = compare_assignments(etri, aao)
-        self.assertEqual(ok, 1, "One or more alternatives were wrongly \
-                         assigned")
+        self.assertEqual(ok, 1, "One or more alternatives were wrongly "
+                         "assigned")
 
     def test004_test_optimist_ticino(self):
         """ Ticino - Optimist """
         from datasets.ticino import c, cv, ptb, lbda, pt, aao, cps
         etri = ElectreTri(c, cv, ptb, lbda, cps).optimist(pt)
         ok = compare_assignments(etri, aao)
-        self.assertEqual(ok, 1, "One or more alternatives were wrongly \
-                         assigned")
+        self.assertEqual(ok, 1, "One or more alternatives were wrongly "
+                         "assigned")
+
+class tests_electre_tri_new_threshold(unittest.TestCase):
+
+    def test001_test_pessimist_loulouka(self):
+        """ Loulouka - Pessimist """
+        from datasets.loulouka import c, cv, ptb, lbda, pt, aap, cps, v2, q2, p2
+        etri = ElectreTri(c, cv, ptb, lbda, cps, v2, q2, p2).pessimist(pt)
+        ok = compare_assignments(etri, aap)
+        self.assertEqual(ok, 1, "One or more alternatives were wrongly "
+                         "assigned")
+
+    def test002_test_pessimist_ticino(self):
+        """ Ticino - Pessimist """
+        from datasets.ticino import c, cv, ptb, lbda, pt, aap, cps, v2, q2, p2
+        etri = ElectreTri(c, cv, ptb, lbda, cps, v2, q2, p2).pessimist(pt)
+        ok = compare_assignments(etri, aap)
+        self.assertEqual(ok, 1, "One or more alternatives were wrongly "
+                         "assigned")
+
+
+    def test003_test_optimist_loulouka(self):
+        """ Loulouka - Optimist """
+        from datasets.loulouka import c, cv, ptb, lbda, pt, aao, cps, v2, q2, p2
+        etri = ElectreTri(c, cv, ptb, lbda, cps).optimist(pt)
+        ok = compare_assignments(etri, aao)
+        self.assertEqual(ok, 1, "One or more alternatives were wrongly "
+                         "assigned")
+
+    def test004_test_optimist_ticino(self):
+        """ Ticino - Optimist """
+        from datasets.ticino import c, cv, ptb, lbda, pt, aao, cps, v2, q2, p2
+        etri = ElectreTri(c, cv, ptb, lbda, cps, v2, q2, p2).optimist(pt)
+        ok = compare_assignments(etri, aao)
+        self.assertEqual(ok, 1, "One or more alternatives were wrongly "
+                         "assigned")
 
 class tests_mrsort(unittest.TestCase):
 
@@ -197,7 +232,8 @@ class test_xmcda(unittest.TestCase):
         model2 = MRSort().from_xmcda(mxmcda)
         self.assertEqual(model, model2)
 
-test_classes = [tests_electre_tri, tests_mrsort, test_indicator, test_xmcda]
+test_classes = [tests_electre_tri, tests_electre_tri_new_threshold,
+                tests_mrsort, test_indicator, test_xmcda]
 
 if __name__ == "__main__":
     suite = []
