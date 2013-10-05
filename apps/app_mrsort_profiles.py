@@ -233,7 +233,7 @@ class qt_mainwindow(QtGui.QMainWindow):
 
         self.layout_nloop = QtGui.QHBoxLayout()
         self.label_nloop = QtGui.QLabel(self.groupbox_meta_params)
-        self.label_nloop.setText("Loops")
+        self.label_nloop.setText("Max Iterations")
         self.spinbox_nloop = QtGui.QSpinBox(self.groupbox_meta_params)
         self.spinbox_nloop.setMinimum(1)
         self.spinbox_nloop.setMaximum(1000000)
