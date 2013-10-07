@@ -128,7 +128,7 @@ class ElectreTri(McdaObject):
         v = self.get_threshold_by_profile(c, 'v', profile)
         if v is None:
             return 0
-        elif diff > v:
+        elif diff >= v:
             return 1
         elif p is None or diff <= p:
             return 0
