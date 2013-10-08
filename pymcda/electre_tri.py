@@ -314,7 +314,7 @@ class MRSort(ElectreTri):
             diff = (y.performances[c.id]-x.performances[c.id])*c.direction
             if diff <= 0:
                 w += cval.value
-            elif v is not None and diff > v:
+            elif v is not None and diff >= v:
                 return 0
 
             wsum += cval.value
