@@ -319,4 +319,37 @@ class MRSort(ElectreTri):
 
             wsum += cval.value
 
-        return w/wsum
+        return w / wsum
+
+class MRSortVC(MRSort):
+
+    def __init__(self, criteria = None, cv = None, bpt = None, lbda = None,
+                 categories_profiles = None, veto = None, veto_weights = None,
+                 veto_lbda = None, id = None):
+        super(MRSortVC, self).__init__(criteria, cv, bpt, lbda,
+                                       categories_profiles)
+        self.veto = veto
+        self.veto_weights = veto_weights
+        self.veto_lbda = veto_lbda
+
+    def veto_concordance(self, x, y, profile):
+        w = wsum = 0
+        for c in self.criteria:
+            diff = y.performances[c.id] - x.performances[c.id]
+            diff *= c.direction
+            v = self.get_threshold_by_profile(c, 'v', profile)
+            if diff >= v:
+                w += self.veto_weights[c.id].value
+
+            wsum += self.veto_weights[c.id].value
+
+        return w / wsum
+
+    def credibility(self, x, y, profile):
+        c = self.concordance(x, y)
+
+        vc = self.veto_concordance(x, y, profile)
+        if vc >= self.veto_lbda:
+            return 0
+
+        return c
