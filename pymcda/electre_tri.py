@@ -348,6 +348,9 @@ class MRSortVC(MRSort):
     def credibility(self, x, y, profile):
         c = self.concordance(x, y)
 
+        if self.veto is None:
+            return c
+
         vc = self.veto_concordance(x, y, profile)
         if vc >= self.veto_lbda:
             return 0
