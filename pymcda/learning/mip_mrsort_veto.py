@@ -4,6 +4,9 @@ from itertools import product
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import AlternativePerformances, PerformanceTable
+from pymcda.types import AlternativesCriteriaValues
+from pymcda.types import AlternativeCriteriaValues
+from pymcda.types import CriteriaValuesSet
 
 verbose = False
 
@@ -17,7 +20,7 @@ if solver == 'cplex':
 else:
     raise NameError('Invalid solver selected')
 
-class MipMRSort():
+class MipMRSortVC():
 
     def __init__(self, model, pt, aa, epsilon = 0.0001):
         self.pt = pt
@@ -57,7 +60,7 @@ class MipMRSort():
                               types = [self.lp.variables.type.binary
                                        for a in self.aa.keys()])
         self.lp.variables.add(names = ["lambda"], lb = [0.5], ub = [1])
-        self.lp.variables.add(names = ["LAMBDA"], lb = [0.0], ub = [0.5])
+        self.lp.variables.add(names = ["LAMBDA"], lb = [0.0], ub = [1.1])
         self.lp.variables.add(names = ["w_" + c.id for c in self.criteria],
                               lb = [0 for c in self.criteria],
                               ub = [1 for c in self.criteria])
@@ -76,10 +79,10 @@ class MipMRSort():
         self.lp.variables.add(names = ["v_%s_%s" % (profile, c.id)
                                        for profile in self.__profiles
                                        for c in self.criteria],
-                              lb = [self.ap_min.performances[c.id]
+                              lb = [0
                                     for profile in self.__profiles
                                     for c in self.criteria],
-                              ub = [self.ap_max.performances[c.id]
+                              ub = [self.ap_range.performances[c.id]
                                     for profile in self.__profiles
                                     for c in self.criteria])
 
@@ -171,7 +174,7 @@ class MipMRSort():
                         rhs = [-2]
                        )
 
-        # sum usup(a,j) - LAMBDA < M osup_a
+        # sum uinf(a,j) - LAMBDA < M oinf_a
         constraints.add(names = ["veto_inf2_%s" % (aa.id)],
                         lin_expr =
                             [
@@ -222,6 +225,33 @@ class MipMRSort():
                                 ],
                             senses = ["G"],
                             rhs = [-1]
+                           )
+
+            # - M vinf_(i,j) < a_{i,j} - b_{h,j} - v_{h,j}
+            constraints.add(names = ["v_vinf_%s_%s" % (aa.id, c.id)],
+                            lin_expr =
+                                [
+                                 [["vinf_%s_%s" % (aa.id, c.id),
+                                   "g_%s_%s" % (b, c.id),
+                                   "v_%s_%s" % (b, c.id)],
+                                  [-bigm, 1, -1]],
+                                ],
+                            senses = ["L"],
+                            rhs = [self.pt[aa.id].performances[c.id] -
+                                   self.epsilon]
+                           )
+
+            # M (1 - vinf_(i,j)) >= a_{i,j} - b_{h,j} - v_{h,j}
+            constraints.add(names = ["v_vinf_%s_%s" % (aa.id, c.id)],
+                            lin_expr =
+                                [
+                                 [["vinf_%s_%s" % (aa.id, c.id),
+                                   "g_%s_%s" % (b, c.id),
+                                   "v_%s_%s" % (b, c.id)],
+                                  [-bigm, 1, -1]],
+                                ],
+                            senses = ["G"],
+                            rhs = [self.pt[aa.id].performances[c.id] - bigm]
                            )
 
             # M dinf_(i,j) > a_{i,j} - b_{h-1,j}
@@ -371,7 +401,34 @@ class MipMRSort():
                             rhs = [-1]
                            )
 
-            # dinf_(i,j) > a_{i,j} - b_{h,j}
+            # - M vsup_(i,j) < a_{i,j} - b_{h,j} - v_{h,j}
+            constraints.add(names = ["v_vsup_%s_%s" % (aa.id, c.id)],
+                            lin_expr =
+                                [
+                                 [["vsup_%s_%s" % (aa.id, c.id),
+                                   "g_%s_%s" % (b, c.id),
+                                   "v_%s_%s" % (b, c.id)],
+                                  [-bigm, 1, -1]],
+                                ],
+                            senses = ["L"],
+                            rhs = [self.pt[aa.id].performances[c.id] -
+                                   self.epsilon]
+                           )
+
+            # M (1 - vsup_(i,j)) >= a_{i,j} - b_{h,j} - v_{h,j}
+            constraints.add(names = ["v_vsup_%s_%s" % (aa.id, c.id)],
+                            lin_expr =
+                                [
+                                 [["vsup_%s_%s" % (aa.id, c.id),
+                                   "g_%s_%s" % (b, c.id),
+                                   "v_%s_%s" % (b, c.id)],
+                                  [-bigm, 1, -1]],
+                                ],
+                            senses = ["G"],
+                            rhs = [self.pt[aa.id].performances[c.id] - bigm]
+                           )
+
+            # M dsup_(i,j) > a_{i,j} - b_{h,j}
             constraints.add(names = ["d_dsup_%s_%s" % (aa.id, c.id)],
                             lin_expr =
                                 [
@@ -384,7 +441,7 @@ class MipMRSort():
                                    self.epsilon]
                            )
 
-            # dinf_(i,j) <= a_{i,j} - b_{h,j} + 1
+            # M dsup_(i,j) <= a_{i,j} - b_{h,j} + M
             constraints.add(names = ["d_dsup_%s_%s" % (aa.id, c.id)],
                             lin_expr =
                                 [
@@ -501,16 +558,16 @@ class MipMRSort():
                         rhs = [1]
                        )
 
-        # LAMBDA <= 1 - lambda
-        constraints.add(names = ["lbdas"],
-                        lin_expr =
-                            [
-                             [["lambda", "LAMBDA"],
-                              [1, 1]],
-                            ],
-                        senses = ["L"],
-                        rhs = [1]
-                       )
+#        # LAMBDA <= 1 - lambda
+#        constraints.add(names = ["lbdas"],
+#                        lin_expr =
+#                            [
+#                             [["lambda", "LAMBDA"],
+#                              [1, 1]],
+#                            ],
+#                        senses = ["L"],
+#                        rhs = [1]
+#                       )
 
     def add_objective(self):
         self.lp.objective.set_sense(self.lp.objective.sense.maximize)
@@ -521,15 +578,16 @@ class MipMRSort():
         a1 = self.aa.get_alternatives_in_categories(self.__categories[1:])
         a2 = self.aa.get_alternatives_in_categories(self.__categories[:-1])
 
-        self.lp.objective.set_linear([("oinf_%s" % a, - 2 / len(a1))
+        self.lp.objective.set_linear([("oinf_%s" % a, - 1 / (2 * len(a1)))
                                       for a in a1])
-        self.lp.objective.set_linear([("osup_%s" % a, - 2 / len(a2))
+        self.lp.objective.set_linear([("osup_%s" % a, - 1 / (2 * len(a2)))
                                       for a in a2])
 
     def solve(self):
         self.lp.solve()
 
         obj = self.lp.solution.get_objective_value()
+        print 'obj', obj
 
         cvs = CriteriaValues()
         for c in self.criteria:
@@ -552,6 +610,26 @@ class MipMRSort():
 
         self.model.bpt = pt
         self.model.bpt.update_direction(self.model.criteria)
+
+        wv = CriteriaValues()
+        for c in self.criteria:
+            w = CriterionValue()
+            w.id = c.id
+            w.value = self.lp.solution.get_values('z_' + c.id)
+            wv.append(w)
+
+        self.model.veto_weights = wv
+        self.model.veto_lbda = self.lp.solution.get_values("LAMBDA")
+
+        v = PerformanceTable()
+        for p in self.__profiles:
+            vp = AlternativePerformances("v%s" % p, {}, p)
+            for c in self.criteria:
+                perf = self.lp.solution.get_values('v_%s_%s' % (p, c.id))
+                vp.performances[c.id] = round(perf, 5)
+            v.append(vp)
+
+        self.model.veto = v
 
         return obj
 
@@ -594,9 +672,12 @@ if __name__ == "__main__":
     model2.bpt = None
     model2.lbda = None
 
-    mip = MipMRSort(model2, pt, aa)
+    mip = MipMRSortVC(model2, pt, aa)
     mip.solve()
 
+    print model2.veto
+    print model2.veto_lbda
+    print model2.veto_weights
     # Display learned model parameters
     print('Learned model')
     print('=============')
