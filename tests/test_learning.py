@@ -199,7 +199,7 @@ class tests_heur_mrsort_profiles4(unittest.TestCase):
         self.one_test(4, 100, 10, 3, 100, 18)
 
     def test006(self):
-        self.one_test(5, 100, 10, 3, 100, 19)
+        self.one_test(5, 100, 10, 3, 100, 16)
 
     def test007(self):
         self.one_test(6, 100, 10, 3, 100, 41)
@@ -280,13 +280,13 @@ class tests_heur_mrsort_init_profiles(unittest.TestCase):
         self.one_test(0, 1000, 10, 3, 0.999)
 
     def test002(self):
-        self.one_test(1, 1000, 10, 3, 0.736)
+        self.one_test(1, 1000, 10, 3, 0.721)
 
     def test003(self):
-        self.one_test(2, 1000, 10, 3, 0.608)
+        self.one_test(2, 1000, 10, 3, 0.607)
 
     def test004(self):
-        self.one_test(3, 1000, 10, 3, 0.987)
+        self.one_test(3, 1000, 10, 3, 0.986)
 
 class tests_lp_avfsort(unittest.TestCase):
 

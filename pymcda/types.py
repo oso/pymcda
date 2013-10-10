@@ -9,6 +9,7 @@ import sys
 from itertools import product
 from xml.etree import ElementTree
 from copy import deepcopy
+from collections import OrderedDict
 
 type2tag = {
     int: 'integer',
@@ -43,7 +44,7 @@ class McdaDict(object):
            id (str): The identifier of the dictionnary
         """
         self.id = id
-        self._d = dict()
+        self._d = OrderedDict()
         for i in l:
             self._d[i.id] = i
 
