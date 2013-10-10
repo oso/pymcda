@@ -643,6 +643,10 @@ class PerformanceTable(McdaDict):
 
         return self.__mathop(value, "div")
 
+    def get_by_alternative_id(self, alternative_id):
+        d = {ap.altid: ap for ap in self}
+        return d[alternative_id]
+
     def get_criteria_ids(self):
         return next(self.itervalues()).performances.keys()
 
@@ -848,7 +852,7 @@ class PerformanceTable(McdaDict):
 
 class AlternativePerformances(McdaObject):
 
-    def __init__(self, id=None, performances=None):
+    def __init__(self, id=None, performances=None, alternative_id=None):
         """Create a new AlternativePerformances instance
 
         Kwargs:
@@ -858,6 +862,10 @@ class AlternativePerformances(McdaObject):
         """
 
         self.id = id
+        self.altid = alternative_id
+        if self.altid is None:
+            self.altid = id
+
         if performances is None:
             self.performances = {}
         else:
@@ -869,7 +877,6 @@ class AlternativePerformances(McdaObject):
 
     def __repr__(self):
         """Manner to represent the MCDA object"""
-
         return "%s: %s" % (self.id, self.performances)
 
     def __mathop(self, value, op):
@@ -967,8 +974,10 @@ class AlternativePerformances(McdaObject):
         """Convert the MCDA object into XMCDA output"""
 
         xmcda = ElementTree.Element('alternativePerformances')
+        if self.altid is not None:
+            xmcda.set('id', self.id)
         altid = ElementTree.SubElement(xmcda, 'alternativeID')
-        altid.text = self.id
+        altid.text = self.altid
 
         for crit_id, val in self.performances.iteritems():
             perf = ElementTree.SubElement(xmcda, 'performance')
@@ -986,8 +995,12 @@ class AlternativePerformances(McdaObject):
         if xmcda.tag != 'alternativePerformances':
             raise TypeError('alternativePerformances::invalid tag')
 
+        self.id = xmcda.get('id')
+
         altid = xmcda.find('.//alternativeID')
-        self.id = altid.text
+        self.altid = altid.text
+        if self.id is None:
+            self.id = altid.text
 
         tag_list = xmcda.getiterator('performance')
         for tag in tag_list:
