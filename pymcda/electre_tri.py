@@ -290,6 +290,15 @@ class ElectreTri(McdaObject):
 
 class MRSort(ElectreTri):
 
+    def __init__(self, criteria = None, cv = None, bpt = None,
+                 lbda = None, categories_profiles = None, veto = None,
+                 veto_weights = None, veto_lbda = None, id = None):
+        super(MRSort, self).__init__(criteria, cv, bpt, lbda,
+                                     categories_profiles)
+        self.veto = veto
+        self.veto_weights = veto_weights
+        self.veto_lbda = veto_lbda
+
     def concordance(self, ap, profile):
         w = wsum = 0
         for c in self.criteria:
@@ -302,48 +311,19 @@ class MRSort(ElectreTri):
 
         return w / wsum
 
-    def credibility(self, x, y, profile):
-        w = 0
-        wsum = 0
-        for c in self.criteria:
-            if c.disabled == 1:
-                continue
-
-            cval = self.cv[c.id]
-            v = self.get_threshold_by_profile(c, 'v', profile)
-            diff = (y.performances[c.id]-x.performances[c.id])*c.direction
-            if diff <= 0:
-                w += cval.value
-            elif v is not None and diff >= v:
-                return 0
-
-            wsum += cval.value
-
-        return w / wsum
-
-class MRSortVC(MRSort):
-
-    def __init__(self, criteria = None, cv = None, bpt = None, lbda = None,
-                 categories_profiles = None, veto = None, veto_weights = None,
-                 veto_lbda = None, id = None):
-        super(MRSortVC, self).__init__(criteria, cv, bpt, lbda,
-                                       categories_profiles)
-        self.veto = veto
-        self.veto_weights = veto_weights
-        self.veto_lbda = veto_lbda
-
     def veto_concordance(self, x, y, profile):
-        w = wsum = 0
+        w = 0
         for c in self.criteria:
             diff = y.performances[c.id] - x.performances[c.id]
             diff *= c.direction
             v = self.get_threshold_by_profile(c, 'v', profile)
             if diff >= v:
-                w += self.veto_weights[c.id].value
+                if self.veto_weights is None:
+                    return 1
+                else:
+                    w += self.veto_weights[c.id].value
 
-            wsum += self.veto_weights[c.id].value
-
-        return w / wsum
+        return w
 
     def credibility(self, x, y, profile):
         c = self.concordance(x, y)
@@ -352,7 +332,9 @@ class MRSortVC(MRSort):
             return c
 
         vc = self.veto_concordance(x, y, profile)
-        if vc >= self.veto_lbda:
+        if self.veto_lbda and vc >= self.veto_lbda:
+            return 0
+        elif self.veto_lbda is None and vc >= 0:
             return 0
 
         return c
