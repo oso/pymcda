@@ -4,9 +4,6 @@ from itertools import product
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import AlternativePerformances, PerformanceTable
-from pymcda.types import AlternativesCriteriaValues
-from pymcda.types import AlternativeCriteriaValues
-from pymcda.types import CriteriaValuesSet
 
 verbose = False
 

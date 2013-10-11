@@ -8,8 +8,6 @@ from pymcda.types import Threshold, Thresholds, Constant
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import Category, Categories
 from pymcda.types import CategoryProfile, CategoriesProfiles, Limits
-from pymcda.types import AlternativeCriteriaValues, AlternativesCriteriaValues
-from pymcda.types import CriteriaValuesSet
 
 # Weights
 g1 = Criterion('g01', 'g1', False, 1, 0.02)
