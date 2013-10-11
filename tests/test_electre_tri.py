@@ -9,6 +9,7 @@ from pymcda.generate import generate_categories
 from pymcda.generate import generate_categories_profiles
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import AlternativePerformances, PerformanceTable
+from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.utils import add_errors_in_assignments
 import unittest
 
@@ -232,8 +233,129 @@ class test_xmcda(unittest.TestCase):
         model2 = MRSort().from_xmcda(mxmcda)
         self.assertEqual(model, model2)
 
+class tests_mrsort_vc(unittest.TestCase):
+
+    def test001(self):
+        c = generate_criteria(5)
+        w1 = CriterionValue('c1', 0.2)
+        w2 = CriterionValue('c2', 0.2)
+        w3 = CriterionValue('c3', 0.2)
+        w4 = CriterionValue('c4', 0.2)
+        w5 = CriterionValue('c5', 0.2)
+        w = CriteriaValues([w1, w2, w3, w4, w5])
+
+        b1 = AlternativePerformances('b1', {'c1': 10, 'c2': 10, 'c3': 10, 'c4': 10, 'c5': 10})
+        bpt = PerformanceTable([b1])
+
+        cat = generate_categories(2)
+        cps = generate_categories_profiles(cat)
+
+        vb1 = AlternativePerformances('vb1', {'c1': 2, 'c2': 2, 'c3': 2, 'c4': 2, 'c5': 2}, 'b1')
+        v = PerformanceTable([vb1])
+        vw = w.copy()
+
+        a1 = AlternativePerformances('a1',   {'c1':  9, 'c2':  9, 'c3':  9, 'c4':  9, 'c5': 11})
+        a2 = AlternativePerformances('a2',   {'c1':  9, 'c2':  9, 'c3':  9, 'c4': 11, 'c5':  9})
+        a3 = AlternativePerformances('a3',   {'c1':  9, 'c2':  9, 'c3':  9, 'c4': 11, 'c5': 11})
+        a4 = AlternativePerformances('a4',   {'c1':  9, 'c2':  9, 'c3': 11, 'c4':  9, 'c5':  9})
+        a5 = AlternativePerformances('a5',   {'c1':  9, 'c2':  9, 'c3': 11, 'c4':  9, 'c5': 11})
+        a6 = AlternativePerformances('a6',   {'c1':  9, 'c2':  9, 'c3': 11, 'c4': 11, 'c5':  9})
+        a7 = AlternativePerformances('a7',   {'c1':  9, 'c2':  9, 'c3': 11, 'c4': 11, 'c5': 11})
+        a8 = AlternativePerformances('a8',   {'c1':  9, 'c2': 11, 'c3':  9, 'c4':  9, 'c5':  9})
+        a9 = AlternativePerformances('a9',   {'c1':  9, 'c2': 11, 'c3':  9, 'c4':  9, 'c5': 11})
+        a10 = AlternativePerformances('a10', {'c1':  9, 'c2': 11, 'c3':  9, 'c4': 11, 'c5':  9})
+        a11 = AlternativePerformances('a11', {'c1':  9, 'c2': 11, 'c3':  9, 'c4': 11, 'c5': 11})
+        a12 = AlternativePerformances('a12', {'c1':  9, 'c2': 11, 'c3': 11, 'c4':  9, 'c5':  9})
+        a13 = AlternativePerformances('a13', {'c1':  9, 'c2': 11, 'c3': 11, 'c4':  9, 'c5': 11})
+        a14 = AlternativePerformances('a14', {'c1':  9, 'c2': 11, 'c3': 11, 'c4': 11, 'c5':  9})
+        a15 = AlternativePerformances('a15', {'c1':  9, 'c2': 11, 'c3': 11, 'c4': 11, 'c5': 11})
+        a16 = AlternativePerformances('a16', {'c1': 11, 'c2':  9, 'c3':  9, 'c4':  9, 'c5':  9})
+        a17 = AlternativePerformances('a17', {'c1': 11, 'c2':  9, 'c3':  9, 'c4':  9, 'c5': 11})
+        a18 = AlternativePerformances('a18', {'c1': 11, 'c2':  9, 'c3':  9, 'c4': 11, 'c5':  9})
+        a19 = AlternativePerformances('a19', {'c1': 11, 'c2':  9, 'c3':  9, 'c4': 11, 'c5': 11})
+        a20 = AlternativePerformances('a20', {'c1': 11, 'c2':  9, 'c3': 11, 'c4':  9, 'c5':  9})
+        a21 = AlternativePerformances('a21', {'c1': 11, 'c2':  9, 'c3': 11, 'c4':  9, 'c5': 11})
+        a22 = AlternativePerformances('a22', {'c1': 11, 'c2':  9, 'c3': 11, 'c4': 11, 'c5':  9})
+        a23 = AlternativePerformances('a23', {'c1': 11, 'c2':  9, 'c3': 11, 'c4': 11, 'c5': 11})
+        a24 = AlternativePerformances('a24', {'c1': 11, 'c2': 11, 'c3':  9, 'c4':  9, 'c5':  9})
+        a25 = AlternativePerformances('a25', {'c1': 11, 'c2': 11, 'c3':  9, 'c4':  9, 'c5': 11})
+        a26 = AlternativePerformances('a26', {'c1': 11, 'c2': 11, 'c3':  9, 'c4': 11, 'c5':  9})
+        a27 = AlternativePerformances('a27', {'c1': 11, 'c2': 11, 'c3':  9, 'c4': 11, 'c5': 11})
+        a28 = AlternativePerformances('a28', {'c1': 11, 'c2': 11, 'c3': 11, 'c4':  9, 'c5':  9})
+        a29 = AlternativePerformances('a29', {'c1': 11, 'c2': 11, 'c3': 11, 'c4':  9, 'c5': 11})
+        a30 = AlternativePerformances('a30', {'c1': 11, 'c2': 11, 'c3': 11, 'c4': 11, 'c5':  9})
+        a31 = AlternativePerformances('a31', {'c1': 11, 'c2': 11, 'c3': 11, 'c4': 11, 'c5':  7})
+        a32 = AlternativePerformances('a32', {'c1': 11, 'c2': 11, 'c3': 11, 'c4':  7, 'c5': 11})
+        a33 = AlternativePerformances('a33', {'c1': 11, 'c2': 11, 'c3':  7, 'c4': 11, 'c5': 11})
+        a34 = AlternativePerformances('a34', {'c1': 11, 'c2':  7, 'c3': 11, 'c4': 11, 'c5': 11})
+        a35 = AlternativePerformances('a35', {'c1':  7, 'c2': 11, 'c3': 11, 'c4': 11, 'c5': 11})
+        a36 = AlternativePerformances('a36', {'c1': 11, 'c2': 11, 'c3': 11, 'c4':  7, 'c5':  7})
+        a37 = AlternativePerformances('a37', {'c1': 11, 'c2': 11, 'c3':  7, 'c4': 11, 'c5':  7})
+        a38 = AlternativePerformances('a38', {'c1': 11, 'c2':  7, 'c3': 11, 'c4': 11, 'c5':  7})
+        a39 = AlternativePerformances('a39', {'c1':  7, 'c2': 11, 'c3': 11, 'c4': 11, 'c5':  7})
+        a40 = AlternativePerformances('a40', {'c1': 11, 'c2': 11, 'c3':  7, 'c4':  7, 'c5': 11})
+        a41 = AlternativePerformances('a41', {'c1': 11, 'c2':  7, 'c3': 11, 'c4':  7, 'c5': 11})
+        a42 = AlternativePerformances('a42', {'c1':  7, 'c2': 11, 'c3': 11, 'c4':  7, 'c5': 11})
+        a43 = AlternativePerformances('a43', {'c1': 11, 'c2':  7, 'c3':  7, 'c4': 11, 'c5': 11})
+        a44 = AlternativePerformances('a44', {'c1':  7, 'c2': 11, 'c3':  7, 'c4': 11, 'c5': 11})
+        a45 = AlternativePerformances('a45', {'c1':  7, 'c2':  7, 'c3': 11, 'c4': 11, 'c5': 11})
+        pt = PerformanceTable([eval("a%d" % i) for i in range(1, 46)])
+
+        ap1 = AlternativeAssignment('a1', 'cat1')
+        ap2 = AlternativeAssignment('a2', 'cat1')
+        ap3 = AlternativeAssignment('a3', 'cat1')
+        ap4 = AlternativeAssignment('a4', 'cat1')
+        ap5 = AlternativeAssignment('a5', 'cat1')
+        ap6 = AlternativeAssignment('a6', 'cat1')
+        ap7 = AlternativeAssignment('a7', 'cat2')
+        ap8 = AlternativeAssignment('a8', 'cat1')
+        ap9 = AlternativeAssignment('a9', 'cat1')
+        ap10 = AlternativeAssignment('a10', 'cat1')
+        ap11 = AlternativeAssignment('a11', 'cat2')
+        ap12 = AlternativeAssignment('a12', 'cat1')
+        ap13 = AlternativeAssignment('a13', 'cat2')
+        ap14 = AlternativeAssignment('a14', 'cat2')
+        ap15 = AlternativeAssignment('a15', 'cat2')
+        ap16 = AlternativeAssignment('a16', 'cat1')
+        ap17 = AlternativeAssignment('a17', 'cat1')
+        ap18 = AlternativeAssignment('a18', 'cat1')
+        ap19 = AlternativeAssignment('a19', 'cat2')
+        ap20 = AlternativeAssignment('a20', 'cat1')
+        ap21 = AlternativeAssignment('a21', 'cat2')
+        ap22 = AlternativeAssignment('a22', 'cat2')
+        ap23 = AlternativeAssignment('a23', 'cat2')
+        ap24 = AlternativeAssignment('a24', 'cat1')
+        ap25 = AlternativeAssignment('a25', 'cat2')
+        ap26 = AlternativeAssignment('a26', 'cat2')
+        ap27 = AlternativeAssignment('a27', 'cat2')
+        ap28 = AlternativeAssignment('a28', 'cat2')
+        ap29 = AlternativeAssignment('a29', 'cat2')
+        ap30 = AlternativeAssignment('a30', 'cat2')
+        ap31 = AlternativeAssignment('a31', 'cat2')
+        ap32 = AlternativeAssignment('a32', 'cat2')
+        ap33 = AlternativeAssignment('a33', 'cat2')
+        ap34 = AlternativeAssignment('a34', 'cat2')
+        ap35 = AlternativeAssignment('a35', 'cat2')
+        ap36 = AlternativeAssignment('a36', 'cat1')
+        ap37 = AlternativeAssignment('a37', 'cat1')
+        ap38 = AlternativeAssignment('a38', 'cat1')
+        ap39 = AlternativeAssignment('a39', 'cat1')
+        ap40 = AlternativeAssignment('a40', 'cat1')
+        ap41 = AlternativeAssignment('a41', 'cat1')
+        ap42 = AlternativeAssignment('a42', 'cat1')
+        ap43 = AlternativeAssignment('a43', 'cat1')
+        ap44 = AlternativeAssignment('a44', 'cat1')
+        ap45 = AlternativeAssignment('a45', 'cat1')
+        aa = AlternativesAssignments([eval("ap%d" % i) for i in range(1, 46)])
+
+        model = MRSort(c, w, bpt, 0.6, cps, v, vw, 0.4)
+        aa2 = model.pessimist(pt)
+        ok = compare_assignments(aa, aa2)
+        self.assertEqual(ok, 1, "One or more alternatives were wrongly "
+                         "assigned")
+
 test_classes = [tests_electre_tri, tests_electre_tri_new_threshold,
-                tests_mrsort, test_indicator, test_xmcda]
+                tests_mrsort, test_indicator, test_xmcda, tests_mrsort_vc]
 
 if __name__ == "__main__":
     suite = []
