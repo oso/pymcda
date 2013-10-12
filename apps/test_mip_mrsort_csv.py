@@ -4,6 +4,7 @@ import csv
 import datetime
 import random
 import time
+from collections import OrderedDict
 from itertools import product
 from pymcda.learning.mip_mrsort import MipMRSort
 from pymcda.types import CriterionValue, CriteriaValues
@@ -110,7 +111,8 @@ def run_test(seed, data, pclearning):
         ca_test = 0
         auc_test = 0
         ncat = len(data.cats)
-        diff_test = {i: 0 for i in range(-ncat + 1, ncat)}
+        diff_test = OrderedDict([((a, b), 0) for a in ordered_categories \
+                                             for b in ordered_categories])
 
     # Compute CA of whole set
     aa2 = model.pessimist(data.pt)
