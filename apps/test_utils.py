@@ -1,11 +1,14 @@
 from __future__ import print_function
 from __future__ import division
 import csv
+import os
 import sys
 import time
 import traceback
 from copy import deepcopy
 from itertools import product
+from pymcda.types import Alternatives, Criteria, PerformanceTable
+from pymcda.types import AlternativesAssignments, Categories
 
 class test_result():
 
@@ -421,6 +424,52 @@ def parser_parse_options(*options):
         parser.add_option("-f", "--filename", action = "store",
                           type = "string", dest = "filename",
                           help = "filename to save csv output")
+
+class dataset(object):
+
+    def __init__(self, name):
+        self.name = name
+
+    def is_complete(self):
+        for obj in self.__dict__:
+            if obj is None:
+                return False
+        return True
+
+def load_mcda_data(csvfile, obj, *field):
+    csvfile.seek(0)
+    csvreader = csv.reader(csvfile, delimiter = ";")
+    try:
+        obj = obj().from_csv(csvreader, *field)
+    except:
+        print("Cannot get %s" % obj())
+        return None
+
+    return obj
+
+def load_mcda_input_data(filepath):
+    try:
+        csvfile = open(filepath, 'rb')
+        csvreader = csv.reader(csvfile, delimiter = ";")
+    except:
+        print("Cannot open file '%s'" % filepath)
+        return None
+
+    data = dataset(os.path.basename(filepath))
+    data.a = load_mcda_data(csvfile, Alternatives, "pt")
+    data.c = load_mcda_data(csvfile, Criteria, "criterion")
+    data.pt = load_mcda_data(csvfile, PerformanceTable, "pt",
+                             [c.id for c in data.c])
+    data.pt.round()
+    data.aa = load_mcda_data(csvfile, AlternativesAssignments,
+                             "pt", "assignment")
+    data.cats = load_mcda_data(csvfile, Categories, "category",
+                               None, "rank")
+
+    if data.is_complete() is False:
+        return None
+
+    return data
 
 if __name__ == "__main__":
     a = test_list_example()

@@ -19,52 +19,7 @@ from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import compute_ca
 from pymcda.utils import compute_ranking_matrix
 from test_utils import test_result, test_results
-
-class dataset(object):
-
-    def __init__(self, name):
-        self.name = name
-
-    def is_complete(self):
-        for obj in self.__dict__:
-            if obj is None:
-                return False
-        return True
-
-def load_mcda_data(csvfile, obj, *field):
-    csvfile.seek(0)
-    csvreader = csv.reader(csvfile, delimiter = ";")
-    try:
-        obj = obj().from_csv(csvreader, *field)
-    except:
-        print("Cannot get %s" % obj())
-        return None
-
-    return obj
-
-def load_data(filepath):
-    try:
-        csvfile = open(filepath, 'rb')
-        csvreader = csv.reader(csvfile, delimiter = ";")
-    except:
-        print("Cannot open file '%s'" % filepath)
-        return None
-
-    data = dataset(os.path.basename(filepath))
-    data.a = load_mcda_data(csvfile, Alternatives, "pt")
-    data.c = load_mcda_data(csvfile, Criteria, "criterion")
-    data.pt = load_mcda_data(csvfile, PerformanceTable, "pt",
-                             [c.id for c in data.c])
-    data.pt.round()
-    data.aa = load_mcda_data(csvfile, AlternativesAssignments,
-                             "pt", "assignment")
-    data.cats = load_mcda_data(csvfile, Categories, "category",
-                               None, "rank")
-
-    if data.is_complete() is False:
-        return None
-
-    return data
+from test_utils import load_mcda_input_data
 
 def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
     random.seed(seed)
@@ -239,7 +194,7 @@ if __name__ == "__main__":
 
     while not options.csvfile:
         options.csvfile = raw_input("CSV file containing data ? ")
-    data = load_data(options.csvfile)
+    data = load_mcda_input_data(options.csvfile)
     if data is None:
         exit(1)
 
