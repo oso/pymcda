@@ -254,6 +254,8 @@ class Criteria(McdaDict):
             elif cols is not None:
                 c = Criterion(row[0])
                 for i in cols.keys():
+                    if cols[i] == 'direction':
+                        row[i] = int(row[i])
                     setattr(c, cols[i], row[i])
                 self.append(c)
 
@@ -288,8 +290,11 @@ class Criterion(McdaObject):
 
     def __repr__(self):
         """Manner to represent the MCDA object"""
-
-        return "%s" % self.id
+        if self.direction == 1:
+            direction = "+"
+        else:
+            direction = "-"
+        return "%s(%s)" % (self.id, direction)
 
     def to_xmcda(self):
         """Convert the MCDA object into XMCDA output"""
