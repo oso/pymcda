@@ -457,7 +457,8 @@ def load_mcda_input_data(filepath):
 
     data = dataset(os.path.basename(filepath))
     data.a = load_mcda_data(csvfile, Alternatives, "pt")
-    data.c = load_mcda_data(csvfile, Criteria, "criterion")
+    data.c = load_mcda_data(csvfile, Criteria, "criterion", None, None,
+                            'direction')
     data.pt = load_mcda_data(csvfile, PerformanceTable, "pt",
                              [c.id for c in data.c])
     data.pt.round()
