@@ -76,8 +76,8 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
         ca_test = 0
         auc_test = 0
         ncat = len(data.cats)
-        diff_test = OrderedDict([((a, b), 0) for a in ordered_categories \
-                                             for b in ordered_categories])
+        diff_test = OrderedDict([((a, b), 0) for a in model.categories \
+                                             for b in model.categories])
 
     # Compute CA of whole set
     aa2 = model.pessimist(data.pt)
