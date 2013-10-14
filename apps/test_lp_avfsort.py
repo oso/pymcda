@@ -49,7 +49,7 @@ def test_lp_avfsort(seed, na, nc, ncat, ns, na_gen, pcerrors):
 
     # Run linear program
     t1 = time.time()
-    lp = LpAVFSort(css, cat, gi_worst, gi_best)
+    lp = LpAVFSort(model.criteria, css, cat, gi_worst, gi_best)
     t2 = time.time()
     obj, cv_l, cfs_l, catv_l = lp.solve(aa_err, pt)
     t3 = time.time()

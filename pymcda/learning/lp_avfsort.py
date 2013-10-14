@@ -28,7 +28,8 @@ else:
 
 class LpAVFSort(object):
 
-    def __init__(self, cs, cat, gi_worst, gi_best):
+    def __init__(self, c, cs, cat, gi_worst, gi_best):
+        self.criteria = c
         self.cs = cs
         self.cat = { cat: i+1 \
                      for i, cat in enumerate(cat.get_ordered_categories()) }
@@ -99,7 +100,12 @@ class LpAVFSort(object):
             d = self.points[cs.id][left + 1] - self.points[cs.id][left]
             k = (perf - self.points[cs.id][left]) / d
 
-            w_coefs = [1] * left + [k] + [0] * (cs.value - left - 1)
+            if self.criteria[cs.id].direction == 1:
+                w_coefs = [1] * left + [k] + [0] * (cs.value - left - 1)
+            else:
+                k = 1 - k
+                w_coefs = [0] * left + [k] + [1] * (cs.value - left - 1)
+
             d_coefs[cs.id] = w_coefs
 
         return d_coefs
@@ -247,21 +253,34 @@ class LpAVFSort(object):
             cv = CriterionValue(cs.id, 1)
             cvs.append(cv)
 
-            p1 = Point(self.points[cs.id][0], 0)
+            nseg = cs.value
+            x_points = range(nseg)
+
+            if self.criteria[cs.id].direction == 1:
+                p1 = Point(self.points[cs.id][0], 0)
+            else:
+                p1 = Point(self.points[cs.id][nseg], 0)
+                x_points.reverse()
 
             ui = 0
             f = PiecewiseLinear([])
-            for i in range(cs.value):
+            for i in x_points:
                 uivar = 'w_' + cs.id + "_%d" % (i + 1)
                 ui += self.w[cs.id][i].primal
-                p2 = Point(self.points[cs.id][i + 1], ui)
+
+                if self.criteria[cs.id].direction == 1:
+                    x = self.points[cs.id][i + 1]
+                else:
+                    x = self.points[cs.id][i]
+
+                p2 = Point(x, ui)
 
                 s = Segment(p1, p2)
-
                 f.append(s)
 
                 p1 = p2
 
+            s.pl_in = True
             s.ph_in = True
             cf = CriterionFunction(cs.id, f)
             cfs.append(cf)
@@ -293,20 +312,34 @@ class LpAVFSort(object):
             cv = CriterionValue(cs.id, 1)
             cvs.append(cv)
 
-            p1 = Point(self.points[cs.id][0], 0)
+            nseg = cs.value
+            x_points = range(nseg)
+
+            if self.criteria[cs.id].direction == 1:
+                p1 = Point(self.points[cs.id][0], 0)
+            else:
+                p1 = Point(self.points[cs.id][nseg], 0)
+                x_points.reverse()
 
             ui = 0
             f = PiecewiseLinear([])
-            for i in range(cs.value):
+            for i in x_points:
                 uivar = 'w_' + cs.id + "_%d" % (i + 1)
                 ui += self.lp.solution.get_values(uivar)
-                p2 = Point(self.points[cs.id][i + 1], ui)
+
+                if self.criteria[cs.id].direction == 1:
+                    x = self.points[cs.id][i + 1]
+                else:
+                    x = self.points[cs.id][i]
+
+                p2 = Point(x, ui)
 
                 s = Segment(p1, p2)
                 f.append(s)
 
                 p1 = p2
 
+            s.pl_in = True
             s.ph_in = True
             cf = CriterionFunction(cs.id, f)
             cfs.append(cf)
@@ -354,8 +387,8 @@ if __name__ == "__main__":
     from pymcda.utils import display_assignments_and_pt
 
     # Generate an avfsort model
-    c = generate_criteria(7)
-    cv = generate_random_criteria_values(c, seed = 6)
+    c = generate_criteria(7, random_direction = True)
+    cv = generate_random_criteria_values(c, seed = 1)
     cv.normalize()
     cat = generate_categories(3)
 
@@ -369,7 +402,7 @@ if __name__ == "__main__":
     pt = generate_random_performance_table(a, c)
     aa = u.get_assignments(pt)
     aa_err = aa.copy()
-    aa_erroned = add_errors_in_assignments(aa_err, cat.keys(), 0.2)
+    aa_erroned = add_errors_in_assignments(aa_err, cat.keys(), 0.0)
 
     print('==============')
     print('Original model')
@@ -393,7 +426,7 @@ if __name__ == "__main__":
         cs = CriterionValue(cf.id, len(cf.function))
         css.append(cs)
 
-    lp = LpAVFSort(css, cat, gi_worst, gi_best)
+    lp = LpAVFSort(c, css, cat, gi_worst, gi_best)
     obj, cvs, cfs, catv = lp.solve(aa_err, pt)
 
     print('=============')

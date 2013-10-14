@@ -109,7 +109,7 @@ class qt_thread_mr(QtCore.QThread):
                 break
 
 def run_lp_avf(pipe, criteria, categories, worst, best, css, pt, aa):
-    lp = LpAVFSort(css, categories, worst, best)
+    lp = LpAVFSort(criteria, css, categories, worst, best)
     obj, cvs, cfs, catv = lp.solve(aa, pt)
 
     model = AVFSort(criteria, cvs, cfs, catv)

@@ -40,7 +40,7 @@ def run_test(seed, data, pclearning, nseg):
         cs = CriterionValue(c.id, nseg)
         css.append(cs)
 
-    lp = LpAVFSort(css, data.cats, worst, best)
+    lp = LpAVFSort(data.c, css, data.cats, worst, best)
     obj, cvs, cfs, catv = lp.solve(aa_learning, pt_learning)
 
     t_total = time.time() - t1

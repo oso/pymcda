@@ -303,7 +303,7 @@ class tests_lp_avfsort(unittest.TestCase):
             css.append(cs)
 
         cat = u.cat_values.to_categories()
-        lp = LpAVFSort(css, cat, pt.get_worst(u.criteria),
+        lp = LpAVFSort(u.criteria, css, cat, pt.get_worst(u.criteria),
                        pt.get_best(u.criteria))
         obj, cvs, cfs, catv = lp.solve(aa, pt)
 
