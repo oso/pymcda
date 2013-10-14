@@ -168,6 +168,7 @@ def generate_random_piecewise_linear(gi_min = 0, gi_max = 1, n_segments = 3,
         f.append(s)
 
     s.ph_in = True
+    s.pl_in = True
 
     return f
 
@@ -177,7 +178,12 @@ def generate_random_criteria_functions(crits, gi_min = 0, gi_max = 1,
     cfs = CriteriaFunctions()
     for crit in crits:
         ns = random.randint(nseg_min, nseg_max)
-        f = generate_random_piecewise_linear(gi_min, gi_max, ns, ui_min,
+        if crit.direction == 1:
+            _gi_min, _gi_max = gi_min, gi_max
+        else:
+            _gi_min, _gi_max = gi_max, gi_min
+
+        f = generate_random_piecewise_linear(_gi_min, _gi_max, ns, ui_min,
                                              ui_max)
         cf = CriterionFunction(crit.id, f)
         cfs.append(cf)
