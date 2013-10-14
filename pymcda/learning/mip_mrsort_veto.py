@@ -555,17 +555,6 @@ class MipMRSortVC():
                         rhs = [1]
                        )
 
-#        # LAMBDA <= 1 - lambda
-#        constraints.add(names = ["lbdas"],
-#                        lin_expr =
-#                            [
-#                             [["lambda", "LAMBDA"],
-#                              [1, 1]],
-#                            ],
-#                        senses = ["L"],
-#                        rhs = [1]
-#                       )
-
     def add_objective(self):
         self.lp.objective.set_sense(self.lp.objective.sense.maximize)
 
