@@ -163,3 +163,28 @@ def compute_confusion_matrix(aa, aa2, categories):
         matrix[(cata, catb)] += 1
 
     return matrix
+
+def print_confusion_matrix(matrix):
+    list_categories = []
+    for cata, catb in matrix.keys():
+        if cata not in list_categories:
+            list_categories.append(cata)
+        if catb not in list_categories:
+            list_categories.append(catb)
+
+    len_cols = {cat: max([len(cat)] + [len(str(matrix[cat, cat2])) \
+                          for cat2 in list_categories]) \
+                for cat in list_categories}
+
+    string = " " * max([len(cat) + 1 for cat in list_categories])
+    for cat in list_categories:
+        string += "%s " % cat
+    print(string)
+
+    for cat in list_categories:
+        string = "%s " % cat
+        for catb in list_categories:
+            val = str(matrix[cat, catb])
+            string += " " * (len_cols[cat] - len(val))
+            string += "%s " % val
+        print(string)
