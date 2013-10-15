@@ -66,7 +66,7 @@ class MipMRSort():
                               lb = [self.ap_min.performances[c.id]
                                     for profile in self.__profiles
                                     for c in self.criteria],
-                              ub = [self.ap_max.performances[c.id]
+                              ub = [self.ap_max.performances[c.id] + self.delta
                                     for profile in self.__profiles
                                     for c in self.criteria])
 
