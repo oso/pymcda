@@ -153,7 +153,7 @@ def compute_ranking_differences(aa, aa2, categories):
 
     return rank_diff
 
-def compute_ranking_matrix(aa, aa2, categories):
+def compute_confusion_matrix(aa, aa2, categories):
     matrix = OrderedDict([((a, b), 0) for a in categories \
                                       for b in categories])
 

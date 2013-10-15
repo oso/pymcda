@@ -85,7 +85,7 @@ class tests_utils(unittest.TestCase):
         category_ids = ['cat%d' % (i + 1) for i in range(2)]
         ncat1 = len([a for a in aa if a.category_id == 'cat1'])
         ncat2 = len([a for a in aa if a.category_id == 'cat2'])
-        rank_matrix = compute_ranking_matrix(aa, aa_err, category_ids)
+        rank_matrix = compute_confusion_matrix(aa, aa_err, category_ids)
 
         self.assertEqual(sum(rank_matrix.values()), 1000)
         self.assertEqual(sum([rank_matrix[('cat1', 'cat1')],

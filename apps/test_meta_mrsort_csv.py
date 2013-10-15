@@ -17,7 +17,7 @@ from pymcda.generate import generate_random_profiles
 from pymcda.generate import generate_random_criteria_weights
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.utils import compute_ca
-from pymcda.utils import compute_ranking_matrix
+from pymcda.utils import compute_confusion_matrix
 from test_utils import test_result, test_results
 from test_utils import load_mcda_input_data
 
@@ -61,7 +61,7 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
     aa_learning2 = model.pessimist(pt_learning)
     ca_learning = compute_ca(aa_learning, aa_learning2)
     auc_learning = model.auc(aa_learning, pt_learning)
-    diff_learning = compute_ranking_matrix(aa_learning, aa_learning2,
+    diff_learning = compute_confusion_matrix(aa_learning, aa_learning2,
                                            model.categories)
 
     # Compute CA of test setting
@@ -69,7 +69,7 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
         aa_test2 = model.pessimist(pt_test)
         ca_test = compute_ca(aa_test, aa_test2)
         auc_test = model.auc(aa_test, pt_test)
-        diff_test = compute_ranking_matrix(aa_test, aa_test2,
+        diff_test = compute_confusion_matrix(aa_test, aa_test2,
                                            model.categories)
 
     else:
@@ -83,7 +83,7 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
     aa2 = model.pessimist(data.pt)
     ca = compute_ca(data.aa, aa2)
     auc = model.auc(data.aa, data.pt)
-    diff_all = compute_ranking_matrix(data.aa, aa2, model.categories)
+    diff_all = compute_confusion_matrix(data.aa, aa2, model.categories)
 
     t = test_result("%s-%d-%d-%d-%d-%d" % (data.name, seed, nloop, nmodels,
                                            nmeta, pclearning))
