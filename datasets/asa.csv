@@ -4,7 +4,7 @@ diabetic;-1;;;;;;;;;;;;;
 hypertension;-1;;;;;;;;;;;;;
 respiratory_failure;-1;;;;;;;;;;;;;
 heart_failure;-1;;;;;;;;;;;;;
-cardiac_regularity;-1;;;;;;;;;;;;;
+cardiac_regularity;1;;;;;;;;;;;;;
 pacemaker;-1;;;;;;;;;;;;;
 bav;-1;;;;;;;;;;;;;
 hvg;1;;;;;;;;;;;;;
