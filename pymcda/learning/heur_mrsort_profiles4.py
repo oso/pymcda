@@ -40,7 +40,8 @@ class MetaMRSortProfiles4():
                                 cat_b, cat_a, ct):
         w = self.model.cv[cid].value
         lbda = self.model.lbda
-        delta = 0.00001 * self.model.criteria[cid].direction
+        direction = self.model.criteria[cid].direction
+        delta = 0.00001 * direction
 
         h_above = {}
         num = total = 0
@@ -49,6 +50,9 @@ class MetaMRSortProfiles4():
                                                 True, True)
 
         for i, a in enumerate(alts):
+            if (perfs[i] + delta) * direction > perf_above * direction:
+                continue
+
             conc = ct[a]
             aa_ori = self.aa_ori._d[a].category_id
             aa = self.aa._d[a].category_id
