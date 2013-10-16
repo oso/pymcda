@@ -51,6 +51,8 @@ class LpAVFSort(object):
         for cs in self.cs:
             best = self.gi_best.performances[cs.id]
             worst = self.gi_worst.performances[cs.id]
+            if worst > best:
+                worst, best = best, worst
             diff = best - worst
 
             self.points[cs.id] = [ worst ]
@@ -418,8 +420,8 @@ if __name__ == "__main__":
           % (len(aa_erroned) / len(a) * 100))
 
     # Learn the parameters from assignment examples
-    gi_worst = AlternativePerformances('worst', {crit.id: 0 for crit in c})
-    gi_best = AlternativePerformances('best', {crit.id: 1 for crit in c})
+    gi_worst = pt.get_worst(c)
+    gi_best = pt.get_best(c)
 
     css = CriteriaValues([])
     for cf in cfs:
