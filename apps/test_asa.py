@@ -1,0 +1,85 @@
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
+import time
+from pymcda.electre_tri import MRSort
+from pymcda.generate import generate_categories_profiles
+from pymcda.pt_sorted import SortedPerformanceTable
+from pymcda.types import CriterionValue, CriteriaValues
+from pymcda.utils import compute_ca
+from pymcda.learning.meta_mrsort3 import MetaMRSortPop3
+from pymcda.learning.lp_avfsort import LpAVFSort
+from pymcda.ui.graphic import display_electre_tri_models
+from pymcda.uta import AVFSort
+from pymcda.utils import compute_confusion_matrix
+from pymcda.utils import print_confusion_matrix
+from test_utils import load_mcda_input_data
+
+def usage():
+    print("%s etri|utadis" % sys.argv[0])
+    sys.exit(1)
+
+if len(sys.argv) != 2:
+    usage()
+
+algo = sys.argv[1]
+
+nseg = 4
+nmodels = 10
+nloop = 10
+nmeta = 20
+
+data = load_mcda_input_data('../datasets/asa.csv')
+
+print(data.c)
+worst = data.pt.get_worst(data.c)
+best = data.pt.get_best(data.c)
+
+t1 = time.time()
+
+if algo == 'etri':
+    cat_profiles = generate_categories_profiles(data.cats)
+    model = MRSort(data.c, None, None, None, cat_profiles)
+    pt_sorted = SortedPerformanceTable(data.pt)
+
+    meta = MetaMRSortPop3(nmodels, model.criteria,
+                          model.categories_profiles.to_categories(),
+                          pt_sorted, data.aa)
+
+    for i in range(0, nloop):
+        model, ca_learning = meta.optimize(nmeta)
+        if ca_learning == 1:
+            break
+elif algo == 'utadis':
+    css = CriteriaValues(CriterionValue(c.id, nseg) for c in data.c)
+    lp = LpAVFSort(data.c, css, data.cats, worst, best)
+    obj, cvs, cfs, catv = lp.solve(data.aa, data.pt)
+    model = AVFSort(data.c, cvs, cfs, catv)
+else:
+    print("Invalid algorithm!")
+    sys.exit(1)
+
+t_total = time.time() - t1
+
+aa2 = model.get_assignments(data.pt)
+
+ca = compute_ca(data.aa, aa2)
+auc = model.auc(data.aa, data.pt)
+
+print("t:   %g\n" % t_total)
+print("CA:  %g\n" % ca)
+print("AUC: %g\n" % auc)
+
+print("Confusion matrix")
+print_confusion_matrix(compute_confusion_matrix(data.aa, aa2,
+                                                model.categories.get_ordered_categories()))
+
+print("Model parameters")
+cids = model.criteria.keys()
+if algo == 'etri':
+    model.bpt.display(criterion_ids = cids)
+    model.cv.display(criterion_ids = cids)
+    print("lambda: %.7s" % model.lbda)
+    display_electre_tri_models([model], [worst], [best])
+else:
+    model.cfs.display(criterion_ids = cids)
+    model.cat_values.display()
