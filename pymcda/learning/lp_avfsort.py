@@ -51,8 +51,6 @@ class LpAVFSort(object):
         for cs in self.cs:
             best = self.gi_best.performances[cs.id]
             worst = self.gi_worst.performances[cs.id]
-            if worst > best:
-                worst, best = best, worst
             diff = best - worst
 
             self.points[cs.id] = [ worst ]
@@ -61,9 +59,15 @@ class LpAVFSort(object):
             self.points[cs.id].append(best)
 
     def __get_left_points(self, cid, x):
-        left = bisect.bisect_right(self.points[cid], x) - 1
+        left = bisect.bisect_right(sorted(self.points[cid]), x) - 1
+        if self.criteria[cid].direction == -1:
+            left = len(self.points[cid]) - 2 - left
+
         if left == len(self.points[cid]) - 1:
             left -= 1
+        elif left == -1:
+            left += 1
+
         return left
 
     def add_variables_cplex(self, aids):
@@ -99,14 +103,18 @@ class LpAVFSort(object):
         for cs in self.cs:
             perf = ap.performances[cs.id]
             left = self.__get_left_points(cs.id, perf)
-            d = self.points[cs.id][left + 1] - self.points[cs.id][left]
-            k = (perf - self.points[cs.id][left]) / d
 
             if self.criteria[cs.id].direction == 1:
-                w_coefs = [1] * left + [k] + [0] * (cs.value - left - 1)
+                d = self.points[cs.id][left + 1] - self.points[cs.id][left]
+                k = (perf - self.points[cs.id][left]) / d
             else:
-                k = 1 - k
-                w_coefs = [0] * left + [k] + [1] * (cs.value - left - 1)
+                d = self.points[cs.id][left] - self.points[cs.id][left + 1]
+                k = (self.points[cs.id][left] - perf) / d
+
+            if k > 1 or k < 0:
+                raise
+
+            w_coefs = [1] * left + [k] + [0] * (cs.value - left - 1)
 
             d_coefs[cs.id] = w_coefs
 
@@ -258,11 +266,7 @@ class LpAVFSort(object):
             nseg = cs.value
             x_points = range(nseg)
 
-            if self.criteria[cs.id].direction == 1:
-                p1 = Point(self.points[cs.id][0], 0)
-            else:
-                p1 = Point(self.points[cs.id][nseg], 0)
-                x_points.reverse()
+            p1 = Point(self.points[cs.id][0], 0)
 
             ui = 0
             f = PiecewiseLinear([])
@@ -270,10 +274,7 @@ class LpAVFSort(object):
                 uivar = 'w_' + cs.id + "_%d" % (i + 1)
                 ui += self.w[cs.id][i].primal
 
-                if self.criteria[cs.id].direction == 1:
-                    x = self.points[cs.id][i + 1]
-                else:
-                    x = self.points[cs.id][i]
+                x = self.points[cs.id][i + 1]
 
                 p2 = Point(x, ui)
 
@@ -317,11 +318,7 @@ class LpAVFSort(object):
             nseg = cs.value
             x_points = range(nseg)
 
-            if self.criteria[cs.id].direction == 1:
-                p1 = Point(self.points[cs.id][0], 0)
-            else:
-                p1 = Point(self.points[cs.id][nseg], 0)
-                x_points.reverse()
+            p1 = Point(self.points[cs.id][0], 0)
 
             ui = 0
             f = PiecewiseLinear([])
@@ -329,10 +326,7 @@ class LpAVFSort(object):
                 uivar = 'w_' + cs.id + "_%d" % (i + 1)
                 ui += self.lp.solution.get_values(uivar)
 
-                if self.criteria[cs.id].direction == 1:
-                    x = self.points[cs.id][i + 1]
-                else:
-                    x = self.points[cs.id][i]
+                x = self.points[cs.id][i + 1]
 
                 p2 = Point(x, ui)
 
