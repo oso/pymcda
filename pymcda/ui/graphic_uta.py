@@ -188,6 +188,39 @@ class _MyGraphicsview(QtGui.QGraphicsView):
         scene.update(self.size())
         self.resetCachedContent()
 
+def display_utadis_model(cfs):
+    app = QtGui.QApplication(sys.argv)
+
+    dialog = QtGui.QDialog()
+    layout = QtGui.QGridLayout(dialog)
+    layout.setContentsMargins(0, 0, 0, 0)
+    layout.setSpacing(0)
+
+    sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,
+                                   QtGui.QSizePolicy.Expanding)
+    sizePolicy.setHorizontalStretch(1)
+    sizePolicy.setVerticalStretch(0)
+    sizePolicy.setHeightForWidth(sizePolicy.hasHeightForWidth())
+
+    n_per_row = len(cfs) / 2
+    i = 0
+    for cf in cfs:
+        view = _MyGraphicsview()
+        view.setRenderHint(QtGui.QPainter.Antialiasing)
+        view.setSizePolicy(sizePolicy)
+        graph = QGraphCriterionFunction(cf, view.size())
+
+        layout.addWidget(view, i / n_per_row, i % n_per_row)
+        i = i + 1
+
+        view.setScene(graph)
+
+    dialog.setLayout(layout)
+    dialog.resize(640, 480)
+    dialog.show()
+
+    app.exec_()
+
 if __name__ == "__main__":
     from pymcda.types import Criterion, Criteria
     from pymcda.types import CriterionValue, CriteriaValues
