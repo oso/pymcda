@@ -9,9 +9,11 @@ from pymcda.utils import compute_ca
 from pymcda.learning.meta_mrsort3 import MetaMRSortPop3
 from pymcda.learning.lp_avfsort import LpAVFSort
 from pymcda.ui.graphic import display_electre_tri_models
+from pymcda.ui.graphic_uta import display_utadis_model
 from pymcda.uta import AVFSort
 from pymcda.utils import compute_confusion_matrix
 from pymcda.utils import print_confusion_matrix
+from pymcda.utils import display_assignments_and_pt
 from test_utils import load_mcda_input_data
 
 def usage():
@@ -65,15 +67,25 @@ aa2 = model.get_assignments(data.pt)
 ca = compute_ca(data.aa, aa2)
 auc = model.auc(data.aa, data.pt)
 
-print("t:   %g\n" % t_total)
-print("CA:  %g\n" % ca)
-print("AUC: %g\n" % auc)
+print("t:   %g" % t_total)
+print("CA:  %g" % ca)
+print("AUC: %g" % auc)
 
-print("Confusion matrix")
+print("Confusion matrix:")
 print_confusion_matrix(compute_confusion_matrix(data.aa, aa2,
                                                 model.categories.get_ordered_categories()))
 
-print("Model parameters")
+anok = []
+for a in data.a:
+    if data.aa[a.id].category_id != aa2[a.id].category_id:
+        anok.append(a)
+
+
+if len(anok) > 0:
+    print("Alternatives wrongly assigned:")
+    display_assignments_and_pt(anok, data.c, [data.aa, aa2], [data.pt])
+
+print("Model parameters:")
 cids = model.criteria.keys()
 if algo == 'etri':
     model.bpt.display(criterion_ids = cids)
@@ -83,3 +95,4 @@ if algo == 'etri':
 else:
     model.cfs.display(criterion_ids = cids)
     model.cat_values.display()
+    display_utadis_model(model.cfs)
