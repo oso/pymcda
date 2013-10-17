@@ -7,6 +7,7 @@ from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.utils import compute_ca
 from pymcda.learning.meta_mrsort3 import MetaMRSortPop3
+from pymcda.learning.mip_mrsort import MipMRSort
 from pymcda.learning.lp_avfsort import LpAVFSort
 from pymcda.ui.graphic import display_electre_tri_models
 from pymcda.ui.graphic_uta import display_utadis_model
@@ -17,7 +18,7 @@ from pymcda.utils import display_assignments_and_pt
 from test_utils import load_mcda_input_data
 
 def usage():
-    print("%s etri|utadis" % sys.argv[0])
+    print("%s meta_etri|mip_etri|lp_utadis" % sys.argv[0])
     sys.exit(1)
 
 if len(sys.argv) != 2:
@@ -38,7 +39,8 @@ best = data.pt.get_best(data.c)
 
 t1 = time.time()
 
-if algo == 'etri':
+if algo == 'meta_etri':
+    model_type = 'etri'
     cat_profiles = generate_categories_profiles(data.cats)
     model = MRSort(data.c, None, None, None, cat_profiles)
     pt_sorted = SortedPerformanceTable(data.pt)
@@ -51,7 +53,14 @@ if algo == 'etri':
         model, ca_learning = meta.optimize(nmeta)
         if ca_learning == 1:
             break
-elif algo == 'utadis':
+elif algo == 'mip_etri':
+    model_type = 'etri'
+    cat_profiles = generate_categories_profiles(data.cats)
+    model = MRSort(data.c, None, None, None, cat_profiles)
+    mip = MipMRSort(model, data.pt, data.aa)
+    mip.solve()
+elif algo == 'lp_utadis':
+    model_type = 'utadis'
     css = CriteriaValues(CriterionValue(c.id, nseg) for c in data.c)
     lp = LpAVFSort(data.c, css, data.cats, worst, best)
     obj, cvs, cfs, catv = lp.solve(data.aa, data.pt)
@@ -80,19 +89,18 @@ for a in data.a:
     if data.aa[a.id].category_id != aa2[a.id].category_id:
         anok.append(a)
 
-
 if len(anok) > 0:
     print("Alternatives wrongly assigned:")
     display_assignments_and_pt(anok, data.c, [data.aa, aa2], [data.pt])
 
 print("Model parameters:")
 cids = model.criteria.keys()
-if algo == 'etri':
+if model_type == 'etri':
     model.bpt.display(criterion_ids = cids)
     model.cv.display(criterion_ids = cids)
     print("lambda: %.7s" % model.lbda)
     display_electre_tri_models([model], [worst], [best])
-else:
+elif model_type == 'utadis':
     model.cfs.display(criterion_ids = cids)
     model.cat_values.display()
     display_utadis_model(model.cfs)
