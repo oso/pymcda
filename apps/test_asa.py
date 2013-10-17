@@ -18,20 +18,20 @@ from pymcda.utils import display_assignments_and_pt
 from test_utils import load_mcda_input_data
 
 def usage():
-    print("%s meta_etri|mip_etri|lp_utadis" % sys.argv[0])
+    print("%s file.csv meta_etri|mip_etri|lp_utadis" % sys.argv[0])
     sys.exit(1)
 
-if len(sys.argv) != 2:
+if len(sys.argv) != 3:
     usage()
 
-algo = sys.argv[1]
+algo = sys.argv[2]
 
 nseg = 4
 nmodels = 10
 nloop = 10
 nmeta = 20
 
-data = load_mcda_input_data('../datasets/asa.csv')
+data = load_mcda_input_data(sys.argv[1])
 
 print(data.c)
 worst = data.pt.get_worst(data.c)
@@ -82,7 +82,7 @@ print("AUC: %g" % auc)
 
 print("Confusion matrix:")
 print_confusion_matrix(compute_confusion_matrix(data.aa, aa2,
-                                                model.categories.get_ordered_categories()))
+                                                data.cats.get_ordered_categories()))
 
 anok = []
 for a in data.a:
