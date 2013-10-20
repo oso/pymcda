@@ -175,6 +175,7 @@ def print_confusion_matrix(matrix):
     len_cols = {cat: max([len(cat)] + [len(str(matrix[cat, cat2])) \
                           for cat2 in list_categories]) \
                 for cat in list_categories}
+    len_cols[0] = max([len(cat) for cat in list_categories])
 
     string = " " * max([len(cat) + 1 for cat in list_categories])
     for cat in list_categories:
@@ -182,9 +183,9 @@ def print_confusion_matrix(matrix):
     print(string)
 
     for cat in list_categories:
-        string = "%s " % cat
+        string = "%s " % cat + " " * (len_cols[0] - len(cat))
         for catb in list_categories:
             val = str(matrix[cat, catb])
-            string += " " * (len_cols[cat] - len(val))
+            string += " " * (len_cols[catb] - len(val))
             string += "%s " % val
         print(string)
