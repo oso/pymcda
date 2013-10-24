@@ -70,7 +70,7 @@ class MipMRSortVC():
                               lb = [self.ap_min.performances[c.id]
                                     for profile in self.__profiles
                                     for c in self.criteria],
-                              ub = [self.ap_max.performances[c.id] + self.delta
+                              ub = [self.ap_max.performances[c.id] + self.epsilon
                                     for profile in self.__profiles
                                     for c in self.criteria])
         self.lp.variables.add(names = ["v_%s_%s" % (profile, c.id)
