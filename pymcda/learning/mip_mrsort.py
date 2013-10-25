@@ -14,6 +14,8 @@ except:
 
 if solver == 'cplex':
     import cplex
+elif solver == 'glpk':
+    import pymprog
 else:
     raise NameError('Invalid solver selected')
 
@@ -31,20 +33,70 @@ class MipMRSort():
         self.__profiles = self.cps.get_ordered_profiles()
         self.__categories = self.cps.get_ordered_categories()
 
-        self.lp = cplex.Cplex()
-        if verbose is False:
-            self.lp.set_log_stream(None)
-            self.lp.set_results_stream(None)
-#            self.lp.set_warning_stream(None)
-#            self.lp.set_error_stream(None)
+        self.pt.update_direction(model.criteria)
+        if solver == 'glpk':
+            self.lp = pymprog.model('lp_elecre_tri_weights')
+            self.lp.verb = verbose
+            self.add_variables_glpk()
+            self.add_constraints_glpk()
+            self.add_objective_glpk()
+        elif solver == 'cplex':
+            self.lp = cplex.Cplex()
+            self.add_variables_cplex()
+            self.add_constraints_cplex()
+            self.add_objective_cplex()
+            if verbose is False:
+                self.lp.set_log_stream(None)
+                self.lp.set_results_stream(None)
+#                self.lp.set_warning_stream(None)
+#                self.lp.set_error_stream(None)
 
         self.pt.update_direction(model.criteria)
-        self.add_variables()
-        self.add_constraints()
-        self.add_objective()
-        self.pt.update_direction(model.criteria)
 
-    def add_variables(self):
+    def add_variables_glpk(self):
+        n = len(self.criteria)
+        m = len(self.aa)
+        ncat = len(self.__categories)
+        self.ap_min = self.pt.get_min()
+        self.ap_max = self.pt.get_max()
+        self.ap_range = self.pt.get_range()
+        a1 = self.aa.get_alternatives_in_categories(self.__categories[1:])
+        a2 = self.aa.get_alternatives_in_categories(self.__categories[:-1])
+
+        self.a = {}
+        for a in self.aa:
+            self.a[a.id] = self.lp.var(name = "a_%s" % a.id, kind = bool)
+
+        self.w = {}
+        for c in self.criteria:
+            self.w[c.id] = self.lp.var(name = "w_%s" % c.id, bounds = (0, 1))
+
+        self.lbda = self.lp.var(name = 'lambda', bounds = (0.5, 1))
+
+        self.g = {p: {} for p in self.__profiles}
+        for p, c in product(self.__profiles, self.criteria):
+            minp = self.ap_min.performances[c.id]
+            maxp = self.ap_max.performances[c.id]
+            self.g[p][c.id] = self.lp.var(name = "g_%s_%s" % (p, c.id),
+                                          bounds = (minp, maxp))
+
+        self.cinf = {a: {} for a in a1}
+        self.dinf = {a: {} for a in a1}
+        for a, c in product(a1, self.criteria):
+            self.cinf[a][c.id] = self.lp.var(name = "cinf_%s_%s" % (a, c.id),
+                                             bounds = (0, 1))
+            self.dinf[a][c.id] = self.lp.var(name = "dinf_%s_%s" % (a, c.id),
+                                             kind = bool)
+
+        self.csup = {a: {} for a in a2}
+        self.dsup = {a: {} for a in a2}
+        for a, c in product(a2, self.criteria):
+            self.csup[a][c.id] = self.lp.var(name = "csup_%s_%s" % (a, c.id),
+                                             bounds = (0, 1))
+            self.dsup[a][c.id] = self.lp.var(name = "dsup_%s_%s" % (a, c.id),
+                                             kind = bool)
+
+    def add_variables_cplex(self):
         self.ap_min = self.pt.get_min()
         self.ap_max = self.pt.get_max()
         self.ap_range = self.pt.get_range()
@@ -95,7 +147,83 @@ class MipMRSort():
                                        for a in a2
                                        for c in self.criteria])
 
-    def __add_alternative_lower_constraints(self, aa):
+    def __add_lower_constraints_glpk(self, aa):
+        i = self.__categories.index(aa.category_id)
+        b = self.__profiles[i - 1]
+
+        # sum cinf_j(a_i, b_{h-1}) >= lambda - 2 (1 - alpha_i)
+        self.lp.st(sum(self.cinf[aa.id].values()) \
+                   >= self.lbda - 2 + 2 * self.a[aa.id])
+
+        for c in self.criteria:
+            bigm = self.ap_range.performances[c.id]
+
+            # cinf_j(a_i, b_{h-1}) <= w_j
+            self.lp.st(self.cinf[aa.id][c.id] <= self.w[c.id])
+
+            # cinf_j(a_i, b_{h-1}) <= dinf_{i,j}
+            self.lp.st(self.cinf[aa.id][c.id] <= self.dinf[aa.id][c.id])
+
+            # cinf_j(a_i, b_{h-1}) >= dinf_{i,j} - 1 + w_j
+            self.lp.st(self.cinf[aa.id][c.id] >= self.dinf[aa.id][c.id] - 1
+                                                 + self.w[c.id])
+
+            # dinf_(i,j) > a_{i,j} - b_{h-1,j}
+            self.lp.st(self.dinf[aa.id][c.id] >= \
+                                        self.pt[aa.id].performances[c.id] \
+                                        - self.g[b][c.id] + self.epsilon)
+
+            # dinf_(i,j) <= a_{i,j} - b_{h-1,j} + 1
+            self.lp.st(self.dinf[aa.id][c.id] <= \
+                                        self.pt[aa.id].performances[c.id] \
+                                        - self.g[b][c.id] + 1)
+
+    def __add_upper_constraints_glpk(self, aa):
+        i = self.__categories.index(aa.category_id)
+        b = self.__profiles[i]
+
+        # sum csup_j(a_i, b_{h-1}) < lambda + 2 (1 - alpha_i)
+        self.lp.st(sum(self.csup[aa.id].values()) \
+                   <= self.lbda + 2 - 2 * self.a[aa.id] - self.epsilon)
+
+        for c in self.criteria:
+            bigm = self.ap_range.performances[c.id]
+
+            # csup_j(a_i, b_h) <= w_j
+            self.lp.st(self.csup[aa.id][c.id] <= self.w[c.id])
+
+            # csup_j(a_i, b_h) <= dsup_{i,j}
+            self.lp.st(self.csup[aa.id][c.id] <= self.dsup[aa.id][c.id])
+
+            # csup_j(a_i, b_{h-1}) >= dsup_{i,j} - 1 + w_j
+            self.lp.st(self.csup[aa.id][c.id] >= self.dsup[aa.id][c.id] - 1
+                                                 + self.w[c.id])
+
+            # dsup_(i,j) > a_{i,j} - b_{h,j}
+            self.lp.st(self.dsup[aa.id][c.id] >= \
+                                        self.pt[aa.id].performances[c.id] \
+                                        - self.g[b][c.id] + self.epsilon)
+
+            # dsup_(i,j) <= a_{i,j} - b_{h,j} + 1
+            self.lp.st(self.dsup[aa.id][c.id] <= \
+                                        self.pt[aa.id].performances[c.id] \
+                                        - self.g[b][c.id] + 1)
+
+    def add_constraints_glpk(self):
+        self.add_lower_constraints = self.__add_lower_constraints_glpk
+        self.add_upper_constraints = self.__add_upper_constraints_glpk
+        self.add_alternatives_constraints()
+
+        profiles = self.cps.get_ordered_profiles()
+        for h, c in product(range(len(profiles) - 1), self.criteria):
+            # g_j(b_h) <= g_j(b_{h+1})
+            self.lp.st(self.g[profiles[h]][c.id] <= \
+                                            self.g[profiles[h + 1]][c.id])
+
+        # sum w_j = 1
+        self.lp.st(sum(self.w.values()) == 1)
+
+    def __add_lower_constraints_cplex(self, aa):
         constraints = self.lp.linear_constraints
         i = self.__categories.index(aa.category_id)
         b = self.__profiles[i - 1]
@@ -178,7 +306,7 @@ class MipMRSort():
                             rhs = [self.pt[aa.id].performances[c.id] + bigm]
                            )
 
-    def __add_alternative_upper_constraints(self, aa):
+    def __add_upper_constraints_cplex(self, aa):
         constraints = self.lp.linear_constraints
         i = self.__categories.index(aa.category_id)
         b = self.__profiles[i]
@@ -236,7 +364,7 @@ class MipMRSort():
                             rhs = [-1]
                            )
 
-            # dinf_(i,j) > a_{i,j} - b_{h,j}
+            # dsup_(i,j) > a_{i,j} - b_{h,j}
             constraints.add(names = ["d_dsup_%s_%s" % (aa.id, c.id)],
                             lin_expr =
                                 [
@@ -249,7 +377,7 @@ class MipMRSort():
                                    self.epsilon]
                            )
 
-            # dinf_(i,j) <= a_{i,j} - b_{h,j} + 1
+            # dsup_(i,j) <= a_{i,j} - b_{h,j} + 1
             constraints.add(names = ["d_dsup_%s_%s" % (aa.id, c.id)],
                             lin_expr =
                                 [
@@ -269,14 +397,16 @@ class MipMRSort():
             cat = aa.category_id
 
             if cat != lower_cat:
-                self.__add_alternative_lower_constraints(aa)
+                self.add_lower_constraints(aa)
 
             if cat != upper_cat:
-                self.__add_alternative_upper_constraints(aa)
+                self.add_upper_constraints(aa)
 
-    def add_constraints(self):
+    def add_constraints_cplex(self):
         constraints = self.lp.linear_constraints
 
+        self.add_lower_constraints = self.__add_lower_constraints_cplex
+        self.add_upper_constraints = self.__add_upper_constraints_cplex
         self.add_alternatives_constraints()
 
         profiles = self.cps.get_ordered_profiles()
@@ -304,12 +434,15 @@ class MipMRSort():
                         rhs = [1]
                         )
 
-    def add_objective(self):
+    def add_objective_glpk(self):
+        self.lp.max(sum(self.a.values()))
+
+    def add_objective_cplex(self):
         self.lp.objective.set_sense(self.lp.objective.sense.maximize)
         self.lp.objective.set_linear([("a_%s" % aid, 1)
                                       for aid in self.aa.keys()])
 
-    def solve(self):
+    def solve_cplex(self):
         self.lp.solve()
 
         obj = self.lp.solution.get_objective_value()
@@ -337,6 +470,45 @@ class MipMRSort():
         self.model.bpt.update_direction(self.model.criteria)
 
         return obj
+
+    def solve_glpk(self):
+        self.lp.solve()
+
+        status = self.lp.status()
+        if status != 'opt':
+            raise RuntimeError("Solver status: %s" % self.lp.status())
+
+        #print(self.lp.reportKKT())
+        obj = self.lp.vobj()
+
+        cvs = CriteriaValues()
+        for c in self.criteria:
+            cv = CriterionValue()
+            cv.id = c.id
+            cv.value = float(self.w[c.id].primal)
+            cvs.append(cv)
+
+        self.model.cv = cvs
+        self.model.lbda = self.lbda.primal
+
+        pt = PerformanceTable()
+        for p in self.__profiles:
+            ap = AlternativePerformances(p)
+            for c in self.criteria:
+                perf = self.g[p][c.id].primal
+                ap.performances[c.id] = round(perf, 5)
+            pt.append(ap)
+
+        self.model.bpt = pt
+        self.model.bpt.update_direction(self.model.criteria)
+
+        return obj
+
+    def solve(self):
+        if solver == 'glpk':
+            return self.solve_glpk()
+        elif solver == 'cpex':
+            return self.solve_cplex()
 
 if __name__ == "__main__":
     from pymcda.generate import generate_random_mrsort_model
