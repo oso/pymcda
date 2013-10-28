@@ -463,7 +463,7 @@ class MipMRSort():
             ap = AlternativePerformances(p)
             for c in self.criteria:
                 perf = self.lp.solution.get_values("g_%s_%s" % (p, c.id))
-                ap.performances[c.id] = round(perf, 5)
+                ap.performances[c.id] = perf
             pt.append(ap)
 
         self.model.bpt = pt
@@ -472,6 +472,7 @@ class MipMRSort():
         return obj
 
     def solve_glpk(self):
+        self.lp.solvopt(method='exact', integer='advanced')
         self.lp.solve()
 
         status = self.lp.status()
@@ -496,7 +497,7 @@ class MipMRSort():
             ap = AlternativePerformances(p)
             for c in self.criteria:
                 perf = self.g[p][c.id].primal
-                ap.performances[c.id] = round(perf, 5)
+                ap.performances[c.id] = perf
             pt.append(ap)
 
         self.model.bpt = pt
