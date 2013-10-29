@@ -508,7 +508,7 @@ class MipMRSort():
     def solve(self):
         if solver == 'glpk':
             return self.solve_glpk()
-        elif solver == 'cpex':
+        elif solver == 'cplex':
             return self.solve_cplex()
 
 if __name__ == "__main__":
