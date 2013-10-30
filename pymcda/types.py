@@ -1039,18 +1039,27 @@ class CategoriesValues(McdaDict):
             d[cv.id] = cv.value.lower
         return d
 
+    def __cmp_categories_values(self, catva, catvb):
+        if catva.value.lower > catvb.value.lower:
+            return 1
+        elif catva.value.lower < catvb.value.lower:
+            return 0
+        elif catva.value.upper > catvb.value.upper:
+            return 1
+        else:
+            return 0
+
     def get_ordered_categories(self):
         """Get the list of ordered categories"""
 
-        upper = self.get_upper_limits()
-        cats = sorted(upper, key = lambda key: upper[key])
-        return cats
+        catvs = sorted(self, cmp = self.__cmp_categories_values)
+        return [catv.id for catv in catvs]
 
     def to_categories(self):
         """Convert the content of the dictionnary into Categories()"""
 
         cats = Categories()
-        for i, cat in enumerate(self.get_ordered_categories()):
+        for i, cat in enumerate(reversed(self.get_ordered_categories())):
             cat = Category(cat, rank = i + 1)
             cats.append(cat)
         return cats
@@ -1727,7 +1736,7 @@ class Categories(McdaDict):
 
     def get_ordered_categories(self):
         d = {c.id: c.rank for c in self}
-        return sorted(d, key = lambda key: d[key])
+        return sorted(d, key = lambda key: d[key], reverse = True)
 
     def from_xmcda(self, xmcda):
         """Read the MCDA dictionnary from XMCDA input"""
@@ -1895,7 +1904,7 @@ class CategoriesProfiles(McdaDict):
 
     def to_categories(self):
         cats = Categories()
-        for i, cat in enumerate(self.get_ordered_categories()):
+        for i, cat in enumerate(reversed(self.get_ordered_categories())):
             cat = Category(cat, rank = i + 1)
             cats.append(cat)
         return cats

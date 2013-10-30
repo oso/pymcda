@@ -636,10 +636,10 @@ v2 = PerformanceTable([v2b1, v2b2, v2b3])
 lbda = 0.76
 
 # Categories
-cat1 = Category('cat1', rank=1)
-cat2 = Category('cat2', rank=2)
-cat3 = Category('cat3', rank=3)
-cat4 = Category('cat4', rank=4)
+cat1 = Category('cat1', rank=4)
+cat2 = Category('cat2', rank=3)
+cat3 = Category('cat3', rank=2)
+cat4 = Category('cat4', rank=1)
 cats = Categories([cat1, cat2, cat3, cat4])
 
 # Categories profiles

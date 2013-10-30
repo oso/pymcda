@@ -14,10 +14,10 @@ sys;-1;;;;;;;;;;;;;
 dia;-1;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;
 category;rank;;;;;;;;;;;;;
-asa1;4;;;;;;;;;;;;;
-asa2;3;;;;;;;;;;;;;
-asa3;2;;;;;;;;;;;;;
-asa4;1;;;;;;;;;;;;;
+asa1;1;;;;;;;;;;;;;
+asa2;2;;;;;;;;;;;;;
+asa3;3;;;;;;;;;;;;;
+asa4;4;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;
 pt;age;diabetic;hypertension;respiratory_failure;heart_failure;cardiac_regularity;pacemaker;bav;hvg;spo2;gly;sys;dia;assignment
 p1;0.167;0;0;0;0;0;0;0;0;99;1.03;13.5;7;asa1

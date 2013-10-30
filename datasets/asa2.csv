@@ -5,8 +5,8 @@ avc;-1;;;;
 tp;1;;;;
 ;;;;;
 category;rank;;;;
-refused;1;;;;
-accepted;2;;;;
+accepted;1;;;;
+refused;2;;;;
 ;;;;;
 pt;asa;idm;avc;tp;assignment
 p1;1;0;0;99;accepted

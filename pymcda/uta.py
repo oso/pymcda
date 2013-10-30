@@ -50,10 +50,9 @@ class AVFSort(Uta):
                  cat_values = None):
         super(AVFSort, self).__init__(criteria, cvs, cfs)
         self.cat_values = cat_values
-        upper = cat_values.get_upper_limits()
-        self.cat_limits = sorted(upper.iteritems(),
-                                 key = lambda (k, v): (v, k))
-        self.limits = [ cat_limit[1] for cat_limit in self.cat_limits ]
+        self.ordered_cat = self.cat_values.get_ordered_categories()
+        lower = cat_values.get_upper_limits()
+        self.limits = sorted(lower.values())
 
     @property
     def categories(self):
@@ -63,9 +62,9 @@ class AVFSort(Uta):
         av = self.global_utility(ap)
         i = bisect.bisect_left(self.limits, av.value)
         if i == len(self.limits):
-            cat = self.cat_limits[-1][0]
+            cat = self.ordered_cat[-1]
         else:
-            cat = self.cat_limits[i][0]
+            cat = self.ordered_cat[i]
         return AlternativeAssignment(ap.id, cat)
 
     def get_assignments(self, pt):
@@ -103,7 +102,7 @@ class AVFSort(Uta):
 
     def auc(self, aa, pt):
         auck_sum = 0
-        for k in range(1, len(self.cat_limits)):
+        for k in range(1, len(self.ordered_cat)):
             auck_sum += self.auck(aa, pt, k)
 
-        return auck_sum / (len(self.cat_limits) - 1)
+        return auck_sum / (len(self.ordered_cat) - 1)
