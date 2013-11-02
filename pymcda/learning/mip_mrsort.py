@@ -168,15 +168,15 @@ class MipMRSort():
             self.lp.st(self.cinf[aa.id][c.id] >= self.dinf[aa.id][c.id] - 1
                                                  + self.w[c.id])
 
-            # dinf_(i,j) > a_{i,j} - b_{h-1,j}
-            self.lp.st(self.dinf[aa.id][c.id] >= \
+            # M dinf_(i,j) > a_{i,j} - b_{h-1,j}
+            self.lp.st(bigm * self.dinf[aa.id][c.id] >= \
                                         self.pt[aa.id].performances[c.id] \
                                         - self.g[b][c.id] + self.epsilon)
 
-            # dinf_(i,j) <= a_{i,j} - b_{h-1,j} + 1
-            self.lp.st(self.dinf[aa.id][c.id] <= \
+            # M dinf_(i,j) <= a_{i,j} - b_{h-1,j} + M
+            self.lp.st(bigm * self.dinf[aa.id][c.id] <= \
                                         self.pt[aa.id].performances[c.id] \
-                                        - self.g[b][c.id] + 1)
+                                        - self.g[b][c.id] + bigm)
 
     def __add_upper_constraints_glpk(self, aa):
         i = self.__categories.index(aa.category_id)
@@ -199,15 +199,15 @@ class MipMRSort():
             self.lp.st(self.csup[aa.id][c.id] >= self.dsup[aa.id][c.id] - 1
                                                  + self.w[c.id])
 
-            # dsup_(i,j) > a_{i,j} - b_{h,j}
-            self.lp.st(self.dsup[aa.id][c.id] >= \
+            # M dsup_(i,j) > a_{i,j} - b_{h,j}
+            self.lp.st(bigm * self.dsup[aa.id][c.id] >= \
                                         self.pt[aa.id].performances[c.id] \
                                         - self.g[b][c.id] + self.epsilon)
 
-            # dsup_(i,j) <= a_{i,j} - b_{h,j} + 1
-            self.lp.st(self.dsup[aa.id][c.id] <= \
+            # M dsup_(i,j) <= a_{i,j} - b_{h,j} + M
+            self.lp.st(bigm * self.dsup[aa.id][c.id] <= \
                                         self.pt[aa.id].performances[c.id] \
-                                        - self.g[b][c.id] + 1)
+                                        - self.g[b][c.id] + bigm)
 
     def add_constraints_glpk(self):
         self.add_lower_constraints = self.__add_lower_constraints_glpk
@@ -281,7 +281,7 @@ class MipMRSort():
                             rhs = [-1]
                            )
 
-            # dinf_(i,j) > a_{i,j} - b_{h-1,j}
+            # M dinf_(i,j) > a_{i,j} - b_{h-1,j}
             constraints.add(names = ["d_dinf_%s_%s" % (aa.id, c.id)],
                             lin_expr =
                                 [
@@ -294,7 +294,7 @@ class MipMRSort():
                                    self.epsilon]
                            )
 
-            # dinf_(i,j) <= a_{i,j} - b_{h-1,j} + 1
+            # M dinf_(i,j) <= a_{i,j} - b_{h-1,j} + M
             constraints.add(names = ["d_dinf_%s_%s" % (aa.id, c.id)],
                             lin_expr =
                                 [
@@ -364,7 +364,7 @@ class MipMRSort():
                             rhs = [-1]
                            )
 
-            # dsup_(i,j) > a_{i,j} - b_{h,j}
+            # M dsup_(i,j) > a_{i,j} - b_{h,j}
             constraints.add(names = ["d_dsup_%s_%s" % (aa.id, c.id)],
                             lin_expr =
                                 [
@@ -377,7 +377,7 @@ class MipMRSort():
                                    self.epsilon]
                            )
 
-            # dsup_(i,j) <= a_{i,j} - b_{h,j} + 1
+            # M dsup_(i,j) <= a_{i,j} - b_{h,j} + M
             constraints.add(names = ["d_dsup_%s_%s" % (aa.id, c.id)],
                             lin_expr =
                                 [
@@ -472,6 +472,7 @@ class MipMRSort():
         return obj
 
     def solve_glpk(self):
+        self.lp.solvopt(method='exact', integer='advanced')
         self.lp.solve()
 
         status = self.lp.status()
