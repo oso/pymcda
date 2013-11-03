@@ -34,16 +34,39 @@ class MipMRSort():
         self.__categories = self.cps.get_ordered_categories()
 
         self.pt.update_direction(model.criteria)
+
+        if self.model.bpt is not None:
+            self.model.bpt.update_direction(model.criteria)
+
+            tmp_pt = self.pt.copy()
+            for bp in self.model.bpt:
+                tmp_pt.append(bp)
+
+            self.ap_min = tmp_pt.get_min()
+            self.ap_max = tmp_pt.get_max()
+            self.ap_range = tmp_pt.get_range()
+        else:
+            self.ap_min = self.pt.get_min()
+            self.ap_max = self.pt.get_max()
+            self.ap_range = self.pt.get_range()
+
+        for c in self.criteria:
+            self.ap_min.performances[c.id] -= self.epsilon
+            self.ap_max.performances[c.id] += self.epsilon
+            self.ap_range.performances[c.id] += 2 * self.epsilon * 100
+
         if solver == 'glpk':
             self.lp = pymprog.model('lp_elecre_tri_weights')
             self.lp.verb = verbose
             self.add_variables_glpk()
             self.add_constraints_glpk()
+            self.add_extra_constraints_glpk()
             self.add_objective_glpk()
         elif solver == 'cplex':
             self.lp = cplex.Cplex()
             self.add_variables_cplex()
             self.add_constraints_cplex()
+            self.add_extra_constraints_cplex()
             self.add_objective_cplex()
             if verbose is False:
                 self.lp.set_log_stream(None)
@@ -52,14 +75,13 @@ class MipMRSort():
 #                self.lp.set_error_stream(None)
 
         self.pt.update_direction(model.criteria)
+        if self.model.bpt is not None:
+            self.model.bpt.update_direction(model.criteria)
 
     def add_variables_glpk(self):
         n = len(self.criteria)
         m = len(self.aa)
         ncat = len(self.__categories)
-        self.ap_min = self.pt.get_min()
-        self.ap_max = self.pt.get_max()
-        self.ap_range = self.pt.get_range()
         a1 = self.aa.get_alternatives_in_categories(self.__categories[1:])
         a2 = self.aa.get_alternatives_in_categories(self.__categories[:-1])
 
@@ -75,10 +97,9 @@ class MipMRSort():
 
         self.g = {p: {} for p in self.__profiles}
         for p, c in product(self.__profiles, self.criteria):
-            minp = self.ap_min.performances[c.id]
-            maxp = self.ap_max.performances[c.id]
             self.g[p][c.id] = self.lp.var(name = "g_%s_%s" % (p, c.id),
-                                          bounds = (minp, maxp))
+                                          bounds = (self.ap_min.performances[c.id],
+                                                    self.ap_max.performances[c.id]))
 
         self.cinf = {a: {} for a in a1}
         self.dinf = {a: {} for a in a1}
@@ -97,14 +118,6 @@ class MipMRSort():
                                              kind = bool)
 
     def add_variables_cplex(self):
-        self.ap_min = self.pt.get_min()
-        self.ap_max = self.pt.get_max()
-        self.ap_range = self.pt.get_range()
-        for c in self.criteria:
-            self.ap_min.performances[c.id] -= self.epsilon
-            self.ap_max.performances[c.id] += self.epsilon
-            self.ap_range.performances[c.id] *= 2
-
         self.lp.variables.add(names = ["a_" + a for a in self.aa.keys()],
                               types = [self.lp.variables.type.binary
                                        for a in self.aa.keys()])
@@ -221,7 +234,20 @@ class MipMRSort():
                                             self.g[profiles[h + 1]][c.id])
 
         # sum w_j = 1
-        self.lp.st(sum(self.w.values()) == 1)
+        if self.model.cv is None:
+            self.lp.st(sum(self.w.values()) == 1)
+
+    def add_extra_constraints_glpk(self):
+        if self.model.lbda is not None:
+            self.lp.st(self.lbda == self.model.lbda)
+
+        if self.model.cv is not None:
+            for cv in self.model.cv:
+                self.lp.st(self.w[cv.id] == cv.value)
+
+        if self.model.bpt is not None:
+            for bp, c in product(self.model.bpt, self.model.criteria):
+                self.lp.st(self.g[bp.id][c.id] == bp.performances[c.id])
 
     def __add_lower_constraints_cplex(self, aa):
         constraints = self.lp.linear_constraints
@@ -424,15 +450,54 @@ class MipMRSort():
                            )
 
         # sum w_j = 1
-        constraints.add(names = ["wsum"],
-                        lin_expr =
-                            [
-                             [["w_%s" % c.id for c in self.criteria],
-                              [1 for c in self.criteria]],
-                            ],
-                        senses = ["E"],
-                        rhs = [1]
-                        )
+        if self.model.cv is None:
+            constraints.add(names = ["wsum"],
+                            lin_expr =
+                                [
+                                 [["w_%s" % c.id for c in self.criteria],
+                                  [1 for c in self.criteria]],
+                                ],
+                            senses = ["E"],
+                            rhs = [1]
+                            )
+
+    def add_extra_constraints_cplex(self):
+        constraints = self.lp.linear_constraints
+
+        if self.model.lbda is not None:
+            constraints.add(names = ["lambda"],
+                            lin_expr =
+                                [
+                                 [["lambda"],
+                                  [1]]
+                                 ],
+                            senses = ["E"],
+                            rhs = [self.model.lbda]
+                           )
+
+        if self.model.cv is not None:
+            for cv in self.model.cv:
+                constraints.add(names = ["w_%s" % cv.id],
+                                lin_expr =
+                                    [
+                                     [["w_%s" % cv.id],
+                                      [1]]
+                                     ],
+                                senses = ["E"],
+                                rhs = [cv.value]
+                               )
+
+        if self.model.bpt is not None:
+            for bp, c in product(self.model.bpt, self.model.criteria):
+                constraints.add(names = ["g_%s_%s" % (bp.id, c.id)],
+                                lin_expr =
+                                    [
+                                     [["g_%s_%s" % (bp.id, c.id)],
+                                      [1]]
+                                     ],
+                                senses = ["E"],
+                                rhs = [bp.performances[c.id]]
+                               )
 
     def add_objective_glpk(self):
         self.lp.max(sum(self.a.values()))
@@ -546,9 +611,9 @@ if __name__ == "__main__":
 
     # Run the MIP
     model2 = model.copy()
-    model2.cv = None
+    model2.cv = model.cv
     model2.bpt = None
-    model2.lbda = None
+    model2.lbda = model.lbda
 
     mip = MipMRSort(model2, pt, aa)
     mip.solve()
