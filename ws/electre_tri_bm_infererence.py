@@ -47,6 +47,24 @@ def parse_xmcda_file(filepath, tagname, mcda_type):
 
     return mcda_object
 
+def parse_xmcda_file_lbda(filepath):
+    if not os.path.isfile(filepath):
+        log_error("No %s file" % filepath)
+        return None
+
+    try:
+        tree = ElementTree.parse(filepath)
+        root = tree.getroot()
+        #ElementTree.dump(root)
+        tag = root.find("methodParameters/parameter/value/real")
+        value = float(tag.text)
+    except:
+        log_error("Cannot parse %s" % filepath)
+        log_error(traceback.format_exc())
+        mcda_object = None
+
+    return value
+
 def parse_input_files(indir):
     criteria = parse_xmcda_file(indir + '/criteria.xml',
                                 "criteria", Criteria)
@@ -60,9 +78,26 @@ def parse_input_files(indir):
                                    "alternativesAffectations",
                                    AlternativesAssignments)
 
+    # Partial inference
+    categories_profiles = parse_xmcda_file(indir + '/cat_profiles.xml',
+                                           "categoriesProfiles",
+                                           CategoriesProfiles)
+    bpt = parse_xmcda_file(indir + '/reference_alts.xml',
+                           "performanceTable", PerformanceTable)
+    criteria_values = parse_xmcda_file(indir + '/crit_weights.xml',
+                                       "criteriaValues",
+                                       CriteriaValues)
+    if criteria_values:
+        criteria_values.normalize()
+
+    lbda = parse_xmcda_file_lbda(indir + '/lambda.xml')
+
+    if categories_profiles is None:
+        categories_profiles = generate_categories_profiles(categories)
+
     if categories and criteria and pt:
-        bpt = generate_categories_profiles(categories)
-        model = MRSort(criteria, None, None, None, bpt)
+        model = MRSort(criteria, criteria_values, bpt, lbda,
+                       categories_profiles)
     else:
         model = None
 
@@ -153,15 +188,18 @@ def main():
         write_xmcda_file(outdir + '/lambda.xml', xmcda_lbda)
         write_xmcda_file(outdir + '/cat_profiles.xml',
                          model.categories_profiles.to_xmcda())
-        write_xmcda_file(outdir + '/crit_weights.xml', model.cv.to_xmcda())
-        write_xmcda_file(outdir + '/reference_alts.xml', profiles.to_xmcda())
-        write_xmcda_file(outdir + '/compatible_alts.xml', compat.to_xmcda())
+        write_xmcda_file(outdir + '/crit_weights.xml',
+                         model.cv.to_xmcda())
+        write_xmcda_file(outdir + '/reference_alts.xml',
+                         profiles.to_xmcda())
+        write_xmcda_file(outdir + '/compatible_alts.xml',
+                         compat.to_xmcda())
 
         write_message_ok(outdir + '/messages.xml')
     except:
         log_error("Cannot solve problem")
         log_error(traceback.format_exc())
-        write_message_error(outdir + '/message.xml')
+        write_message_error(outdir + '/messages.xml')
 
     return 0
 
