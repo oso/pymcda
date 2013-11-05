@@ -154,12 +154,7 @@ def write_message_ok(filepath):
     f.write(buf)
     f.close()
 
-def main():
-    (options, args) = parse_cmdline()
-
-    indir = options.indir
-    outdir = options.outdir
-
+def main(indir, outdir):
     if indir is None or not os.path.isdir(indir):
         log_error("Invalid input directory (%s)" % indir)
         return 1
@@ -204,5 +199,9 @@ def main():
     return 0
 
 if __name__ == "__main__":
-    rc = main()
+    (options, args) = parse_cmdline()
+    indir = options.indir
+    outdir = options.outdir
+
+    rc = main(indir, outdir)
     sys.exit(rc)
