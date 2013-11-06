@@ -120,7 +120,6 @@ def get_compat_alternatives(aa, aa2):
             l.append(a.id)
     return l
 
-
 def to_alternatives(ids):
     return Alternatives([Alternative(id) for id in ids])
 
