@@ -154,7 +154,7 @@ def write_message_ok(filepath):
     f.write(buf)
     f.close()
 
-def main(indir, outdir):
+def electre_tri_bm_infererence(indir, outdir):
     if indir is None or not os.path.isdir(indir):
         log_error("Invalid input directory (%s)" % indir)
         return 1
@@ -203,5 +203,5 @@ if __name__ == "__main__":
     indir = options.indir
     outdir = options.outdir
 
-    rc = main(indir, outdir)
+    rc = electre_tri_bm_infererence(indir, outdir)
     sys.exit(rc)
