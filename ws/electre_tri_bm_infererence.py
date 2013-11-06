@@ -186,7 +186,7 @@ def main(indir, outdir):
         write_xmcda_file(outdir + '/crit_weights.xml',
                          model.cv.to_xmcda())
         write_xmcda_file(outdir + '/reference_alts.xml',
-                         profiles.to_xmcda())
+                         model.bpt.to_xmcda())
         write_xmcda_file(outdir + '/compatible_alts.xml',
                          compat.to_xmcda())
 
