@@ -111,7 +111,7 @@ class tests_electre_tri_bm_inference(unittest.TestCase):
         self.assertEqual(aa, aa2)
 
     def test002(self):
-        model = generate_random_mrsort_model(5, 2, seed = 1)
+        model = generate_random_mrsort_model(5, 2, seed = 2)
         a = generate_alternatives(10)
         pt = generate_random_performance_table(a, model.criteria)
         aa = model.get_assignments(pt)
@@ -140,7 +140,7 @@ class tests_electre_tri_bm_inference(unittest.TestCase):
         self.assertEqual(model.lbda, model2.lbda)
 
     def test003(self):
-        model = generate_random_mrsort_model(5, 2, seed = 1)
+        model = generate_random_mrsort_model(5, 2, seed = 3)
         a = generate_alternatives(10)
         pt = generate_random_performance_table(a, model.criteria)
         aa = model.get_assignments(pt)
