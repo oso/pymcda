@@ -206,6 +206,9 @@ class Criteria(McdaDict):
 
         return "criteria(%s)" % self.values()
 
+    def get_active(self):
+        return Criteria([c for c in self if c.disabled is not True])
+
     def to_xmcda(self):
         """Convert the MCDA dictionnary into XMCDA output"""
 
