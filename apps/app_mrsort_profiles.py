@@ -287,7 +287,7 @@ class qt_mainwindow(QtGui.QMainWindow):
 
         self.layout_tloop = QtGui.QHBoxLayout()
         self.label_tloop = QtGui.QLabel(self.groupbox_result)
-        self.label_tloop.setText("Total loop:")
+        self.label_tloop.setText("# Iterations:")
         self.label_tloop2 = QtGui.QLabel(self.groupbox_result)
         self.label_tloop2.setText("")
         self.layout_tloop.addWidget(self.label_tloop)
