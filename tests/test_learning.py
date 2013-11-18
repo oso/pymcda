@@ -219,8 +219,9 @@ class tests_mip_mrsort(unittest.TestCase):
         add_errors_in_assignments(aa_err, model.categories, pcerrors / 100)
 
         model2 = model.copy()
-        bids = model2.categories_profiles.get_ordered_profiles()
-        model2.bpt = generate_random_profiles(bids, model.criteria)
+        model2.bpt = None
+        model2.cv = None
+        model2.lbda = None
 
         mip = MipMRSort(model2, pt, aa_err)
         obj = mip.solve()
