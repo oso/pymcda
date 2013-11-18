@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="xmcdaXSL.xsl"?>
+<xmcda:XMCDA xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.decision-deck.org/2009/XMCDA-2.0.0 file:../XMCDA-2.0.0.xsd" xmlns:xmcda="http://www.decision-deck.org/2009/XMCDA-2.0.0" instanceID="void">
+
+<alternativesAffectations> 
+<alternativeAffectation><alternativeID>F1</alternativeID>
+<categoryID>satisfied</categoryID></alternativeAffectation>
+<alternativeAffectation><alternativeID>F2</alternativeID>
+<categoryID>urgent</categoryID></alternativeAffectation>
+<alternativeAffectation><alternativeID>F3</alternativeID>
+<categoryID>acceptable</categoryID></alternativeAffectation>
+<alternativeAffectation><alternativeID>F4</alternativeID>
+<categoryID>urgent</categoryID></alternativeAffectation>
+<alternativeAffectation><alternativeID>F5</alternativeID>
+<categoryID>urgent</categoryID></alternativeAffectation>
+<alternativeAffectation><alternativeID>F6</alternativeID>
+<categoryID>acceptable</categoryID></alternativeAffectation>
+<alternativeAffectation><alternativeID>F7</alternativeID>
+<categoryID>acceptable</categoryID></alternativeAffectation>
+<alternativeAffectation><alternativeID>F8</alternativeID>
+<categoryID>serious</categoryID></alternativeAffectation>
+<alternativeAffectation><alternativeID>F9</alternativeID>
+<categoryID>serious</categoryID></alternativeAffectation>
+<alternativeAffectation><alternativeID>fictitiousWorst</alternativeID>
+<categoryID>serious</categoryID></alternativeAffectation>
+<alternativeAffectation><alternativeID>fictitiousBest</alternativeID>
+<categoryID>satisfied</categoryID></alternativeAffectation>
+</alternativesAffectations>
+
+</xmcda:XMCDA>
