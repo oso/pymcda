@@ -651,10 +651,6 @@ class PerformanceTable(McdaDict):
 
         return self.__mathop(value, "div")
 
-    def get_by_alternative_id(self, alternative_id):
-        d = {ap.altid: ap for ap in self}
-        return d[alternative_id]
-
     def get_criteria_ids(self):
         return next(self.itervalues()).performances.keys()
 
