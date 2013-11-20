@@ -250,7 +250,7 @@ class tests_mrsort_vc(unittest.TestCase):
         cat = generate_categories(2)
         cps = generate_categories_profiles(cat)
 
-        vb1 = AlternativePerformances('vb1', {'c1': 2, 'c2': 2, 'c3': 2, 'c4': 2, 'c5': 2}, 'b1')
+        vb1 = AlternativePerformances('b1', {'c1': 2, 'c2': 2, 'c3': 2, 'c4': 2, 'c5': 2}, 'b1')
         v = PerformanceTable([vb1])
         vw = w.copy()
 
