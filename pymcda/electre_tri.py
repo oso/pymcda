@@ -64,7 +64,7 @@ class ElectreTri(McdaObject):
             return self._get_threshold_by_profile(c, threshold_id,
                                                   profile)
 
-        return thresholds.get_by_alternative_id(profile).performances[c.id]
+        return thresholds[profile].performances[c.id]
 
     def _get_threshold_by_profile(self, c, threshold_id, profile):
         profile_rank = self.profiles.index(profile) + 1
