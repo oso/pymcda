@@ -86,18 +86,18 @@ competition.thresholds = Thresholds([q_competition, p_competition, v_competition
 
 # New manner to define thresholds
 q2perfs = {'prix': 15, 'transport': 80, 'envir': 1, 'residents': 0.5, 'competition': 1}
-q2b1 = AlternativePerformances('qb1', q2perfs, 'b1')
-q2b2 = AlternativePerformances('qb2', q2perfs, 'b2')
+q2b1 = AlternativePerformances('b1', q2perfs, 'b1')
+q2b2 = AlternativePerformances('b2', q2perfs, 'b2')
 q2 = PerformanceTable([q2b1, q2b2], "q")
 
 p2perfs = {'prix': 40, 'transport': 350, 'envir': 3, 'residents': 3.5, 'competition': 5}
-p2b1 = AlternativePerformances('pb1', p2perfs, 'b1')
-p2b2 = AlternativePerformances('pb2', p2perfs, 'b2')
+p2b1 = AlternativePerformances('b1', p2perfs, 'b1')
+p2b2 = AlternativePerformances('b2', p2perfs, 'b2')
 p2 = PerformanceTable([p2b1, p2b2], "q")
 
 v2perfs = {'prix': 40, 'transport': 350, 'envir': 3, 'residents': 3.5, 'competition': 5}
-v2b1 = AlternativePerformances('pb1', v2perfs, 'b1')
-v2b2 = AlternativePerformances('pb2', v2perfs, 'b2')
+v2b1 = AlternativePerformances('b1', v2perfs, 'b1')
+v2b2 = AlternativePerformances('b2', v2perfs, 'b2')
 v2 = PerformanceTable([v2b1, v2b2], "q")
 
 # Lambda

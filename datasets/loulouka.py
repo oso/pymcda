@@ -615,21 +615,21 @@ g11.thresholds = Thresholds([q_g11, p_g11, v_g11])
 
 # New manner to define the thresholds
 q2perfs = {'g01': 0, 'g02': 0, 'g03': 0, 'g04': 0, 'g05': 0, 'g06': 0, 'g07': 0, 'g08': 0, 'g09': 0, 'g10': 0, 'g11': 0}
-q2b1 = AlternativePerformances('qb1', q2perfs, 'b1')
-q2b2 = AlternativePerformances('qb2', q2perfs, 'b2')
-q2b3 = AlternativePerformances('qb3', q2perfs, 'b3')
+q2b1 = AlternativePerformances('b1', q2perfs, 'b1')
+q2b2 = AlternativePerformances('b2', q2perfs, 'b2')
+q2b3 = AlternativePerformances('b3', q2perfs, 'b3')
 q2 = PerformanceTable([q2b1, q2b2, q2b3])
 
 p2perfs = {'g01': 1, 'g02': 1, 'g03': 1, 'g04': 1, 'g05': 1, 'g06': 1, 'g07': 1, 'g08': 1, 'g09': 1, 'g10': 1, 'g11': 1}
-p2b1 = AlternativePerformances('pb1', p2perfs, 'b1')
-p2b2 = AlternativePerformances('pb2', p2perfs, 'b2')
-p2b3 = AlternativePerformances('pb3', p2perfs, 'b3')
+p2b1 = AlternativePerformances('b1', p2perfs, 'b1')
+p2b2 = AlternativePerformances('b2', p2perfs, 'b2')
+p2b3 = AlternativePerformances('b3', p2perfs, 'b3')
 p2 = PerformanceTable([q2b1, q2b2, q2b3])
 
 v2perfs = {'g01': None, 'g02': None, 'g03': None, 'g04': None, 'g05': None, 'g06': None, 'g07': None, 'g08': None, 'g09': None, 'g10': None, 'g11': 4}
-v2b1 = AlternativePerformances('vb1', v2perfs, 'b1')
-v2b2 = AlternativePerformances('vb2', v2perfs, 'b2')
-v2b3 = AlternativePerformances('vb3', v2perfs, 'b3')
+v2b1 = AlternativePerformances('b1', v2perfs, 'b1')
+v2b2 = AlternativePerformances('b2', v2perfs, 'b2')
+v2b3 = AlternativePerformances('b3', v2perfs, 'b3')
 v2 = PerformanceTable([v2b1, v2b2, v2b3])
 
 # Lambda
