@@ -25,7 +25,7 @@ class MipMRSort():
         self.pt = pt
         self.aa = aa
         self.model = model
-        self.criteria = model.criteria
+        self.criteria = model.criteria.get_active()
         self.cps = model.categories_profiles
 
         self.epsilon = epsilon
@@ -242,8 +242,8 @@ class MipMRSort():
             self.lp.st(self.lbda == self.model.lbda)
 
         if self.model.cv is not None:
-            for cv in self.model.cv:
-                self.lp.st(self.w[cv.id] == cv.value)
+            for c in self.criteria:
+                self.lp.st(self.w[c.id] == self.model.cv[c.id].value)
 
         if self.model.bpt is not None:
             for bp, c in product(self.model.bpt, self.model.criteria):
@@ -476,15 +476,15 @@ class MipMRSort():
                            )
 
         if self.model.cv is not None:
-            for cv in self.model.cv:
-                constraints.add(names = ["w_%s" % cv.id],
+            for c in self.criteria:
+                constraints.add(names = ["w_%s" % c.id],
                                 lin_expr =
                                     [
-                                     [["w_%s" % cv.id],
+                                     [["w_%s" % c.id],
                                       [1]]
                                      ],
                                 senses = ["E"],
-                                rhs = [cv.value]
+                                rhs = [self.model.cv[c.id].value]
                                )
 
         if self.model.bpt is not None:
