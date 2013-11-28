@@ -6,7 +6,7 @@ from pymcda.types import CriterionValue, CriteriaValues
 verbose = False
 
 solver = os.getenv('SOLVER', 'cplex')
-solver_max_threads = os.getenv('SOLVER_MAX_THREADS', 0)
+solver_max_threads = int(os.getenv('SOLVER_MAX_THREADS', 0))
 
 if solver == 'glpk':
     import pymprog
