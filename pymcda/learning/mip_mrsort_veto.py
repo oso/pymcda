@@ -7,10 +7,8 @@ from pymcda.types import AlternativePerformances, PerformanceTable
 
 verbose = False
 
-try:
-    solver = os.environ['SOLVER']
-except:
-    solver = 'cplex'
+solver = os.getenv('SOLVER', 'cplex')
+solver_max_threads = os.getenv('SOLVER_MAX_THREADS', 0)
 
 if solver == 'cplex':
     import cplex
@@ -32,6 +30,7 @@ class MipMRSortVC():
         self.__categories = self.cps.get_ordered_categories()
 
         self.lp = cplex.Cplex()
+        self.lp.parameters.threads.set(solver_max_threads)
         if verbose is False:
             self.lp.set_log_stream(None)
             self.lp.set_results_stream(None)
