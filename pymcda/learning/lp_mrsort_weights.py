@@ -5,18 +5,6 @@ from pymcda.types import CriterionValue, CriteriaValues
 
 verbose = False
 
-solver = os.getenv('SOLVER', 'cplex')
-solver_max_threads = int(os.getenv('SOLVER_MAX_THREADS', 0))
-
-if solver == 'glpk':
-    import pymprog
-elif solver == 'scip':
-    from zibopt import scip
-elif solver == 'cplex':
-    import cplex
-else:
-    raise NameError('Invalid solver selected')
-
 class LpMRSortWeights():
 
     def __init__(self, model, pt, aa_ori, delta=0.0001):
@@ -33,18 +21,25 @@ class LpMRSortWeights():
     def update_linear_program(self):
         self.compute_constraints(self.aa_ori, self.model.bpt)
 
+        solver = os.getenv('SOLVER', 'cplex')
         if solver == 'glpk':
+            import pymprog
             self.lp = pymprog.model('lp_elecre_tri_weights')
             self.lp.verb = verbose
             self.add_variables_glpk()
             self.add_constraints_glpk()
             self.add_objective_glpk()
+            self.solve_function = self.solve_glpk
         elif solver == 'scip':
+            from zibopt import scip
             self.lp = scip.solver(quiet=not verbose)
             self.add_variables_scip()
             self.add_constraints_scip()
             self.add_objective_scip()
+            self.solve_function = self.solve_scip
         elif solver == 'cplex':
+            import cplex
+            solver_max_threads = int(os.getenv('SOLVER_MAX_THREADS', 0))
             self.lp = cplex.Cplex()
             self.lp.parameters.threads.set(solver_max_threads)
             if verbose is False:
@@ -55,6 +50,10 @@ class LpMRSortWeights():
             self.add_variables_cplex()
             self.add_constraints_cplex()
             self.add_objective_cplex()
+            self.solve_function = self.solve_cplex
+        else:
+            raise NameError('Invalid solver selected')
+
 
     def compute_constraints(self, aa, bpt):
         aa = { a.id: self.cat_ranks[a.category_id] \
@@ -341,16 +340,7 @@ class LpMRSortWeights():
         return obj
 
     def solve(self):
-        if solver == 'glpk':
-            sol = self.solve_glpk()
-        elif solver == 'scip':
-            sol = self.solve_scip()
-        elif solver == 'cplex':
-            sol = self.solve_cplex()
-        else:
-            raise NameError('Invalid solver selected')
-
-        return sol
+        return self.solve_function()
 
 if __name__ == "__main__":
     import time
@@ -362,8 +352,6 @@ if __name__ == "__main__":
     from pymcda.utils import display_assignments_and_pt
     from pymcda.utils import compute_winning_coalitions
     from pymcda.types import AlternativesAssignments, PerformanceTable
-
-    print("Solver used: %s" % solver)
 
     # Original Electre Tri model
     model = generate_random_mrsort_model(10, 5, 890)
