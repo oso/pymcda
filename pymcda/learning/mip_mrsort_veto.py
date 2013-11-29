@@ -606,7 +606,7 @@ class MipMRSortVC():
 
         v = PerformanceTable()
         for p in self.__profiles:
-            vp = AlternativePerformances("v%s" % p, {}, p)
+            vp = AlternativePerformances(p, {})
             for c in self.criteria:
                 perf = self.lp.solution.get_values('v_%s_%s' % (p, c.id))
                 vp.performances[c.id] = round(perf, 5)
