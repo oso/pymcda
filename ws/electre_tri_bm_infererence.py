@@ -9,6 +9,9 @@ from pymcda.electre_tri import MRSort
 from pymcda.generate import generate_categories_profiles
 from pymcda.learning.mip_mrsort import MipMRSort
 
+SOLVERS_LIST = [ 'cplex', 'glpk' ]
+DEFAULT_SOLVER = 'glpk'
+
 XMCDA_URL = 'http://www.decision-deck.org/2009/XMCDA-2.1.0'
 ElementTree.register_namespace('xmcda', XMCDA_URL)
 
@@ -47,7 +50,7 @@ def parse_xmcda_file(filepath, tagname, mcda_type):
 
     return mcda_object
 
-def parse_xmcda_file_lbda(filepath):
+def parse_xmcda_file_elem(filepath, elem):
     if not os.path.isfile(filepath):
         log_error("No %s file" % filepath)
         return None
@@ -56,7 +59,7 @@ def parse_xmcda_file_lbda(filepath):
         tree = ElementTree.parse(filepath)
         root = tree.getroot()
         #ElementTree.dump(root)
-        tag = root.find("methodParameters/parameter/value/real")
+        tag = root.find("methodParameters/parameter/value/%s" % elem)
         value = float(tag.text)
     except:
         log_error("Cannot parse %s" % filepath)
@@ -90,7 +93,7 @@ def parse_input_files(indir):
     if criteria_values:
         criteria_values.normalize()
 
-    lbda = parse_xmcda_file_lbda(indir + '/lambda.xml')
+    lbda = parse_xmcda_file_elem(indir + '/lambda.xml', 'real')
 
     if categories_profiles is None:
         categories_profiles = generate_categories_profiles(categories)
@@ -101,7 +104,12 @@ def parse_input_files(indir):
     else:
         model = None
 
-    return model, assignments, pt
+    # Get solver (optional)
+    solver = parse_xmcda_file_elem(indir + '/solver.xml', 'label')
+    if solver is None:
+        solver = DEFAULT_SOLVER
+
+    return solver, model, assignments, pt
 
 def lambda_to_xmcda(lbda):
     root = ElementTree.Element('methodParameters')
@@ -162,7 +170,15 @@ def electre_tri_bm_infererence(indir, outdir):
         log_error("Invalid output directory (%s)" % outdir)
         return 1
 
-    model, assignments, pt = parse_input_files(indir)
+    solver, model, assignments, pt = parse_input_files(indir)
+
+    if solver not in SOLVERS_LIST:
+        log_error("Invalid solver selected (%s)" % solver)
+        write_message_error(outdir + '/messages.xml')
+        return 1
+
+    os.environ["SOLVER"] = solver
+
     if model is None or assignments is None or pt is None:
         log_error("Error while parsing input files")
         write_message_error(outdir + '/messages.xml')
