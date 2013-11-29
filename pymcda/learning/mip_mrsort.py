@@ -7,16 +7,6 @@ from pymcda.types import AlternativePerformances, PerformanceTable
 
 verbose = False
 
-solver = os.getenv('SOLVER', 'cplex')
-solver_max_threads = int(os.getenv('SOLVER_MAX_THREADS', 0))
-
-if solver == 'cplex':
-    import cplex
-elif solver == 'glpk':
-    import pymprog
-else:
-    raise NameError('Invalid solver selected')
-
 class MipMRSort():
 
     def __init__(self, model, pt, aa, epsilon = 0.0001):
@@ -53,25 +43,34 @@ class MipMRSort():
             self.ap_max.performances[c.id] += self.epsilon
             self.ap_range.performances[c.id] += 2 * self.epsilon * 100
 
+        solver = os.getenv('SOLVER', 'cplex')
         if solver == 'glpk':
+            import pymprog
             self.lp = pymprog.model('lp_elecre_tri_weights')
             self.lp.verb = verbose
             self.add_variables_glpk()
             self.add_constraints_glpk()
             self.add_extra_constraints_glpk()
             self.add_objective_glpk()
+            self.solve_function = self.solve_glpk
         elif solver == 'cplex':
+            import cplex
+            solver_max_threads = int(os.getenv('SOLVER_MAX_THREADS', 0))
             self.lp = cplex.Cplex()
             self.lp.parameters.threads.set(solver_max_threads)
             self.add_variables_cplex()
             self.add_constraints_cplex()
             self.add_extra_constraints_cplex()
             self.add_objective_cplex()
+            self.solve_function = self.solve_cplex
             if verbose is False:
                 self.lp.set_log_stream(None)
                 self.lp.set_results_stream(None)
 #                self.lp.set_warning_stream(None)
 #                self.lp.set_error_stream(None)
+        else:
+            raise NameError('Invalid solver selected')
+
 
         self.pt.update_direction(model.criteria)
         if self.model.bpt is not None:
@@ -570,10 +569,7 @@ class MipMRSort():
         return obj
 
     def solve(self):
-        if solver == 'glpk':
-            return self.solve_glpk()
-        elif solver == 'cplex':
-            return self.solve_cplex()
+        return self.solve_function()
 
 if __name__ == "__main__":
     from pymcda.generate import generate_random_mrsort_model
