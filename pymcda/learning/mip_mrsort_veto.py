@@ -7,14 +7,6 @@ from pymcda.types import AlternativePerformances, PerformanceTable
 
 verbose = False
 
-solver = os.getenv('SOLVER', 'cplex')
-solver_max_threads = int(os.getenv('SOLVER_MAX_THREADS', 0))
-
-if solver == 'cplex':
-    import cplex
-else:
-    raise NameError('Invalid solver selected')
-
 class MipMRSortVC():
 
     def __init__(self, model, pt, aa, epsilon = 0.0001):
@@ -29,13 +21,19 @@ class MipMRSortVC():
         self.__profiles = self.cps.get_ordered_profiles()
         self.__categories = self.cps.get_ordered_categories()
 
-        self.lp = cplex.Cplex()
-        self.lp.parameters.threads.set(solver_max_threads)
-        if verbose is False:
-            self.lp.set_log_stream(None)
-            self.lp.set_results_stream(None)
-#            self.lp.set_warning_stream(None)
-#            self.lp.set_error_stream(None)
+        solver = os.getenv('SOLVER', 'cplex')
+        if solver == 'cplex':
+            import cplex
+            solver_max_threads = int(os.getenv('SOLVER_MAX_THREADS', 0))
+            self.lp = cplex.Cplex()
+            self.lp.parameters.threads.set(solver_max_threads)
+            if verbose is False:
+                self.lp.set_log_stream(None)
+                self.lp.set_results_stream(None)
+#                self.lp.set_warning_stream(None)
+#                self.lp.set_error_stream(None)
+        else:
+            raise NameError('Invalid solver selected')
 
         self.pt.update_direction(model.criteria)
         self.add_variables()
