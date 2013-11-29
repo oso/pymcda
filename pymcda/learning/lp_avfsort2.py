@@ -12,18 +12,6 @@ from pymcda.generate import generate_random_criteria_functions
 
 verbose = False
 
-solver = os.getenv('SOLVER', 'cplex')
-solver_max_threads = int(os.getenv('SOLVER_MAX_THREADS', 0))
-
-if solver == 'glpk':
-    import pymprog
-#elif solver == 'scip':
-#    from zibopt import scip
-elif solver == 'cplex':
-    import cplex
-else:
-    raise NameError('Invalid solver selected')
-
 class LpAVFSort2(object):
 
     def __init__(self, cat, gi_worst, gi_best):
@@ -32,15 +20,28 @@ class LpAVFSort2(object):
         self.gi_worst = gi_worst
         self.gi_best = gi_best
 
+        solver = os.getenv('SOLVER', 'cplex')
         if solver == 'cplex':
+            import cplex
+            solver_max_threads = int(os.getenv('SOLVER_MAX_THREADS', 0))
             self.lp = cplex.Cplex()
             self.lp.parameters.threads.set(solver_max_threads)
+            self.encode_constraints = self.encode_constraints_cplex
+            self.add_objective = self.add_objective_cplex
+            self.solve_function = self.solve_cplex
             if verbose is False:
                 self.lp.set_log_stream(None)
                 self.lp.set_results_stream(None)
         elif solver == 'glpk':
+            import pymprog
             self.lp = pymprog.model('lp_avfsort')
             self.lp.verb = verbose
+            self.encode_constraints = self.encode_constraints_glpk
+            self.add_objective = self.add_objective_glpk
+            self.solve_function = self.solve_glpk
+        else:
+            raise NameError('Invalid solver selected')
+
 
     def __compute_abscissa(self, pt):
         self.points = {}
@@ -315,17 +316,9 @@ class LpAVFSort2(object):
 
     def solve(self, aa, pt):
         self.__compute_abscissa(pt)
-
-        if solver == 'cplex':
-            self.encode_constraints_cplex(aa, pt)
-            self.add_objective_cplex(aa)
-            solution = self.solve_cplex(aa, pt)
-        elif solver == 'glpk':
-            self.encode_constraints_glpk(aa, pt)
-            self.add_objective_glpk(aa)
-            solution = self.solve_glpk(aa, pt)
-
-        return solution
+        self.encode_constraints_cplex(aa, pt)
+        self.add_objective_cplex(aa)
+        return self.solve_cplex(aa, pt)
 
 if __name__ == "__main__":
     from pymcda.types import CriteriaValues, CriterionValue
