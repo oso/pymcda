@@ -354,8 +354,7 @@ class LpAVFSort(object):
     def solve(self, aa, pt):
         self.encode_constraints(aa, pt)
         self.add_objective(aa)
-        solution = self.solve_function(aa, pt)
-        return solution
+        return self.solve_function(aa, pt)
 
 if __name__ == "__main__":
     from pymcda.types import CriteriaValues, CriterionValue
