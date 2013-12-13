@@ -59,7 +59,6 @@ if __name__ == "__main__":
     import time
     from pymcda.generate import generate_alternatives
     from pymcda.generate import generate_random_performance_table
-    from pymcda.utils import display_assignments_and_pt
     from pymcda.utils import compute_winning_coalitions
     from pymcda.types import AlternativePerformances
     from pymcda.electre_tri import ElectreTri

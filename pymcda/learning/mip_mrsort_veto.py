@@ -620,7 +620,7 @@ if __name__ == "__main__":
     from pymcda.generate import generate_random_mrsort_model
     from pymcda.generate import generate_alternatives
     from pymcda.generate import generate_random_performance_table
-    from pymcda.utils import display_assignments_and_pt
+    from pymcda.utils import print_pt_and_assignments
     from pymcda.ui.graphic import display_electre_tri_models
 
     seed = 12
@@ -685,8 +685,7 @@ if __name__ == "__main__":
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
-        display_assignments_and_pt(anok, model.criteria, [aa, aa2],
-                                   [pt])
+        print_pt_and_assignments(anok, model.criteria, [aa, aa2], pt)
 
     # Display models
     display_electre_tri_models([model, model2],

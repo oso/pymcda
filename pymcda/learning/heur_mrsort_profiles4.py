@@ -268,7 +268,7 @@ if __name__ == "__main__":
     from pymcda.generate import generate_alternatives
     from pymcda.generate import generate_random_performance_table
     from pymcda.generate import generate_random_profiles
-    from pymcda.utils import display_assignments_and_pt
+    from pymcda.utils import print_pt_and_assignments
     from pymcda.utils import compute_number_of_winning_coalitions
     from pymcda.pt_sorted import SortedPerformanceTable
     from pymcda.ui.graphic import display_electre_tri_models
@@ -344,8 +344,7 @@ if __name__ == "__main__":
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
-        display_assignments_and_pt(anok, model.criteria, [aa, aa2],
-                                    [pt])
+        print_pt_and_assignments(anok, model.criteria, [aa, aa2], pt)
 
     aps = [ pt["%s" % aid] for aid in anok ]
     display_electre_tri_models([model, model2],

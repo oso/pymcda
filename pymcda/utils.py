@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import random
@@ -38,26 +39,42 @@ def add_errors_in_assignments_proba(aa, category_ids, proba):
 
     return l
 
-def display_assignments_and_pt(alternatives, criteria, aas, pts):
+def print_pt_and_assignments(alternatives, criteria, aas, pt):
+    alen = max([len(a.id) for a in alternatives] + [len("alt.")])
 
+    aaname, aalen = {}, {}
     for i, aa in enumerate(aas):
-        print("\taa%d" % i),
-    print('\t|'),
-    for i, c in enumerate(criteria):
-        print("%-7s" % c.id),
-    print('')
+        aaname[aa] = aa.id
+        if aa.id is None:
+            aaname[aa] = "assign%d" % (i + 1)
+
+        aalen[aa] = max([len(aa[a.id].category_id) for a in alternatives]
+                        + [len(aaname[aa])])
+
+    clen = {}
+    for c in criteria:
+        clen[c.id] = max([len(str(pt[a.id].performances[c.id]))
+                          for a in alternatives] + [len(c.id)])
+
+    print(" " * (alen - len("alt.")) + "alt.", end = "")
+    for aa in aas:
+        print(" " + " " * (aalen[aa] - len(aaname[aa])) + aaname[aa],
+              end = "")
+    print(" |", end = "")
+    for c in criteria:
+        print(" " + " " * (clen[c.id] - len(c.id)) + c.id, end = "")
+    print("")
 
     for a in alternatives:
-        print("%6s" % a.id),
+        print(" " * (alen - len(a.id)) + "%s" % a.id, end = "")
         for aa in aas:
-            print("\t%-6s" % aa(a.id)),
-        print('\t|'),
-
-        for c in criteria:
-            for pt in pts:
-                perfs = pt(a.id)
-                print("%-6.5f" % perfs[c.id]),
-        print('')
+            cat = aa[a.id].category_id
+            print(" " + " " * (aalen[aa] - len(cat)) + cat, end = "")
+        print(" |", end = "")
+        for c in  criteria:
+            perf = str(pt[a.id].performances[c.id])
+            print(" " + " " * (clen[c.id] - len(perf)) + "%s" % perf, end = "")
+        print("")
 
 def compute_ca(aa, aa2, alist=None):
     if alist is None:

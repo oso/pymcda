@@ -336,7 +336,7 @@ if __name__ == "__main__":
     from pymcda.generate import generate_random_criteria_functions
     from pymcda.generate import generate_random_categories_values
     from pymcda.utils import add_errors_in_assignments
-    from pymcda.utils import display_assignments_and_pt
+    from pymcda.utils import print_pt_and_assignments
 
     # Generate an avfsort model
     c = generate_criteria(2)
@@ -409,4 +409,4 @@ if __name__ == "__main__":
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
-        display_assignments_and_pt(anok, c, [aa, aa2], [pt])
+        print_pt_and_assignments(anok, c, [aa, aa2], pt)

@@ -349,7 +349,7 @@ if __name__ == "__main__":
     from pymcda.generate import generate_random_performance_table
     from pymcda.generate import generate_random_mrsort_model
     from pymcda.utils import add_errors_in_assignments
-    from pymcda.utils import display_assignments_and_pt
+    from pymcda.utils import print_pt_and_assignments
     from pymcda.utils import compute_winning_coalitions
     from pymcda.types import AlternativesAssignments, PerformanceTable
 
@@ -428,8 +428,7 @@ if __name__ == "__main__":
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
-        display_assignments_and_pt(anok, model.criteria, [aa, aa_learned],
-                                   [pt])
+        print_pt_and_assignments(anok, model.criteria, [aa, aa_learned], pt)
 
     coal1 = compute_winning_coalitions(model.cv, model.lbda)
     coal2 = compute_winning_coalitions(model2.cv, model2.lbda)

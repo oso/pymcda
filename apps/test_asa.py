@@ -14,7 +14,7 @@ from pymcda.ui.graphic_uta import display_utadis_model
 from pymcda.uta import AVFSort
 from pymcda.utils import compute_confusion_matrix
 from pymcda.utils import print_confusion_matrix
-from pymcda.utils import display_assignments_and_pt
+from pymcda.utils import print_pt_and_assignments
 from test_utils import load_mcda_input_data
 
 def usage():
@@ -91,7 +91,7 @@ for a in data.a:
 
 if len(anok) > 0:
     print("Alternatives wrongly assigned:")
-    display_assignments_and_pt(anok, data.c, [data.aa, aa2], [data.pt])
+    print_pt_and_assignments(anok, data.c, [data.aa, aa2], data.pt)
 
 print("Model parameters:")
 cids = model.criteria.keys()
@@ -99,8 +99,8 @@ if model_type == 'etri':
     model.bpt.display(criterion_ids = cids)
     model.cv.display(criterion_ids = cids)
     print("lambda: %.7s" % model.lbda)
-    display_electre_tri_models([model], [worst], [best])
+#    display_electre_tri_models([model], [worst], [best])
 elif model_type == 'utadis':
     model.cfs.display(criterion_ids = cids)
     model.cat_values.display()
-    display_utadis_model(model.cfs)
+#    display_utadis_model(model.cfs)
