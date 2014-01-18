@@ -9,7 +9,7 @@ from pymcda.types import CriteriaValues, PerformanceTable
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.generate import generate_random_mrsort_model
-from ws.electre_tri_bm_infererence import electre_tri_bm_infererence
+from ws.ElectreTriBMInference.ElectreTriBMInference import electre_tri_bm_infererence
 from xml.etree import ElementTree
 
 XMCDA_URL = 'http://www.decision-deck.org/2009/XMCDA-2.1.0'

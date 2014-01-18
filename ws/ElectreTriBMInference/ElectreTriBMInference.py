@@ -1,6 +1,6 @@
 from __future__ import print_function
 import os, sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/..")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../..")
 import traceback
 from optparse import OptionParser
 from xml.etree import ElementTree

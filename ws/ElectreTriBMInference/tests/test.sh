@@ -1,10 +1,10 @@
 #!/bin/sh
 
 NB_TEST_SETS=5
-PYTHON_SCRIPT=electre_tri_bm_infererence.py
+PYTHON_SCRIPT=ElectreTriBMInference.py
 
 CURRENT_DIR=$(pwd)
-cd ../..
+cd ..
 for i in $(seq $NB_TEST_SETS); do
 	python $PYTHON_SCRIPT --in $CURRENT_DIR/in$i --out $CURRENT_DIR/out$i
 	if [ $? == 0 ]; then
