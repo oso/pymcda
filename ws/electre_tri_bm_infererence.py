@@ -60,7 +60,7 @@ def parse_xmcda_file_elem(filepath, elem):
         root = tree.getroot()
         #ElementTree.dump(root)
         tag = root.find("methodParameters/parameter/value/%s" % elem)
-        value = float(tag.text)
+        value = tag.text
     except:
         log_error("Cannot parse %s" % filepath)
         log_error(traceback.format_exc())
@@ -94,6 +94,8 @@ def parse_input_files(indir):
         criteria_values.normalize()
 
     lbda = parse_xmcda_file_elem(indir + '/lambda.xml', 'real')
+    if lbda:
+        lbda = float(lbda)
 
     if categories_profiles is None:
         categories_profiles = generate_categories_profiles(categories)
