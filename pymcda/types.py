@@ -13,12 +13,14 @@ from collections import OrderedDict
 
 type2tag = {
     int: 'integer',
-    float: 'real'
+    float: 'real',
+    str: 'label',
 }
 
 unmarshallers = {
     'integer': lambda x: int(x.text),
     'real': lambda x: float(x.text),
+    'label': lambda x: str(x.text),
 }
 
 def marshal(value):
@@ -2104,5 +2106,75 @@ class AlternativeAssignment(McdaObject):
         self.id = altid.text
         catid = xmcda.find('categoryID')
         self.category_id = catid.text
+
+        return self
+
+class Parameters(McdaDict):
+
+    def __repr__(self):
+        """Manner to represent the MCDA dictionnary"""
+
+        return "parameters(%s)" % self.values()
+
+    def to_xmcda(self):
+        """Convert the MCDA dictionnary into XMCDA output"""
+
+        root = ElementTree.Element('methodParameters')
+
+        if self.id is not None:
+            root.set('id', self.id)
+
+        for param in self:
+            xmcda = param.to_xmcda()
+            root.append(xmcda)
+
+        return root
+
+    def from_xmcda(self, xmcda):
+        """Read the MCDA dictionnary from XMCDA input"""
+
+        if xmcda.tag != 'methodParameters':
+            raise TypeError('parameters::invalid tag')
+
+        self.id = xmcda.get('id')
+
+        tag_list = xmcda.getiterator('parameter')
+        for tag in tag_list:
+            param = Parameter()
+            param.from_xmcda(tag)
+            self.append(param)
+
+        return self
+
+class Parameter(McdaObject):
+
+    def __init__(self, id = None, value = None, name = None):
+        self.id = id
+        self.value = value
+        self.name = name
+
+    def __repr__(self):
+        """Manner to represent the MCDA object"""
+        return "%s: %s" % (self.id, self.value)
+
+    def to_xmcda(self):
+        """Convert the MCDA object into XMCDA output"""
+
+        xmcda = ElementTree.Element('parameter')
+        value = ElementTree.SubElement(xmcda, 'value')
+        value.append(marshal(self.value))
+        return xmcda
+
+    def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+
+        if xmcda.tag != 'parameter':
+            raise TypeError('parameter::invalid tag')
+
+        self.id = xmcda.get('id')
+        self.name = xmcda.get('name')
+        value = xmcda.find('value')
+        if value is not None:
+            self.value = unmarshal(value.getchildren()[0])
 
         return self
