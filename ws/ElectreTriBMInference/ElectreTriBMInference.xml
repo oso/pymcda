@@ -66,9 +66,9 @@
 			</documentation>
 			<xmcda tag="performanceTable" />
 		</input>
-		<input id="soliver" name="solver" displayName="solver" isoptional="1">
+		<input id="solver" name="solver" displayName="solver" isoptional="1">
 			<documentation>
-				<description>The solver to use. Currently cplex and glpk are supported. In none specified, glpk is used.</description>
+				<description>The solver to use. Currently CPLEX and GLPK are supported. In none specified, GLPK is used.</description>
 			</documentation>
 			<xmcda tag="methodParameters" />
 		</input>
