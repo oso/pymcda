@@ -118,6 +118,9 @@ class qt_thread_algo(QtCore.QThread):
             self.fitness.append(result[1])
             self.emit(QtCore.SIGNAL('update(int)'), i)
 
+            if result[1] == 1:
+                break
+
         parent_pipe.close()
         p.join()
 
