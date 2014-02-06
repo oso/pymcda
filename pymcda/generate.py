@@ -144,7 +144,7 @@ def generate_categories_profiles(cats, prefix='b'):
     cps = CategoriesProfiles()
     for i in range(len(cats)-1):
         l = Limits(cat_ids[i], cat_ids[i+1])
-        cp = CategoryProfile("%s%d" % (prefix, i+1), l)
+        cp = CategoryProfile("%s%d" % (prefix, len(cats) - i - 1), l)
         cps.append(cp)
     return cps
 
