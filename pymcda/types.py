@@ -1402,6 +1402,9 @@ class Segment(McdaObject):
             raise ValueError("Value out of the segment")
 
         k = self.slope()
+        if k == 0:
+            return self.pl.y
+
         return self.pl.y + k * (x - self.pl.x)
 
     def pprint(self):
