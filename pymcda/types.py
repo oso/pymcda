@@ -1311,7 +1311,7 @@ class CriterionFunction(McdaObject):
     def __repr__(self):
         """Manner to represent the MCDA object"""
 
-        return "criterion_function(%s)" % self.function
+        return "criterion_function(%s: %s)" % (self.id, self.function)
 
     def y(self, x):
         return self.function.y(x)
