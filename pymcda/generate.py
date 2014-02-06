@@ -190,6 +190,27 @@ def generate_random_criteria_functions(crits, gi_min = 0, gi_max = 1,
 
     return cfs
 
+def generate_random_plinear_preference_function(crits, ap_worst, ap_best):
+    cfs = CriteriaFunctions()
+    for crit in crits:
+        worst = ap_worst.performances[crit.id]
+        best = ap_best.performances[crit.id]
+        if crit.direction == -1:
+            worst, best = best, worst
+
+        r = sorted([random.uniform(worst, best) for i in range(2)])
+
+        a = Point(float("-inf"), 0)
+        b = Point(r[0],0)
+        c = Point(r[1],1)
+        d = Point(float("inf"), 1)
+        f = PiecewiseLinear([Segment(a, b), Segment(b, c), Segment(c, d)])
+
+        cf = CriterionFunction(crit.id, f)
+        cfs.append(cf)
+
+    return cfs
+
 def generate_random_categories_values(cats, k = 3):
     ncats = len(cats)
     r = [round(random.random(), k) for i in range(ncats - 1)]
