@@ -17,6 +17,21 @@ ElementTree.register_namespace('xmcda', XMCDA_URL)
 
 errormsg = list()
 
+def CDATA(text = None):
+    element = ElementTree.Element('![CDATA[')
+    element.text = text
+    return element
+
+ElementTree._original_serialize_xml = ElementTree._serialize_xml
+def _serialize_xml(write, elem, encoding, qnames, namespaces):
+    if elem.tag == '![CDATA[':
+        text = elem.text.encode(encoding)
+        write("<%s%s]]>" % (elem.tag, elem.text))
+        return
+    return ElementTree._original_serialize_xml(write, elem, encoding, qnames,
+                                      namespaces)
+ElementTree._serialize_xml = ElementTree._serialize['xml'] = _serialize_xml
+
 def log_error(msg):
     print(msg, file = sys.stderr)
     errormsg.append(msg)
@@ -147,7 +162,8 @@ def write_message_error(filepath):
     msg = ElementTree.SubElement(xmcda, 'methodMessages')
     msg = ElementTree.SubElement(msg, 'errorMessage')
     msg = ElementTree.SubElement(msg, 'text')
-    msg.text = "<![CDATA[" + str(errormsg) + "]]>"
+    cdata = CDATA(str(errormsg))
+    msg.append(cdata)
     buf = ElementTree.tostring(xmcda, encoding="UTF-8", method="xml")
     f.write(buf)
     f.close()
@@ -158,7 +174,8 @@ def write_message_ok(filepath):
     msg = ElementTree.SubElement(xmcda, 'methodMessages')
     msg = ElementTree.SubElement(msg, 'logMessage')
     msg = ElementTree.SubElement(msg, 'text')
-    msg.text = "<![CDATA[Execution ok]]>"
+    cdata = CDATA("Execution ok")
+    msg.append(cdata)
     buf = ElementTree.tostring(xmcda, encoding="UTF-8", method="xml")
     f.write(buf)
     f.close()
