@@ -5,31 +5,31 @@
 <alternativesAffectations>
 	<alternativeAffectation>
 		<alternativeID>x1</alternativeID>
-		<categoryID>cat3</categoryID>
+		<categoryID>cat2</categoryID>
 	</alternativeAffectation>
 	<alternativeAffectation>
 		<alternativeID>x2</alternativeID>
-		<categoryID>cat2</categoryID>
+		<categoryID>cat3</categoryID>
 	</alternativeAffectation>
 	<alternativeAffectation>
 		<alternativeID>x3</alternativeID>
-		<categoryID>cat1</categoryID>
-	</alternativeAffectation>
-	<alternativeAffectation>
-		<alternativeID>x4</alternativeID>
 		<categoryID>cat4</categoryID>
 	</alternativeAffectation>
 	<alternativeAffectation>
-		<alternativeID>x5</alternativeID>
+		<alternativeID>x4</alternativeID>
 		<categoryID>cat1</categoryID>
 	</alternativeAffectation>
 	<alternativeAffectation>
+		<alternativeID>x5</alternativeID>
+		<categoryID>cat4</categoryID>
+	</alternativeAffectation>
+	<alternativeAffectation>
 		<alternativeID>x6</alternativeID>
-		<categoryID>cat2</categoryID>
+		<categoryID>cat3</categoryID>
 	</alternativeAffectation>
 	<alternativeAffectation>
 		<alternativeID>x7</alternativeID>
-		<categoryID>cat2</categoryID>
+		<categoryID>cat3</categoryID>
 	</alternativeAffectation>
 </alternativesAffectations>
 

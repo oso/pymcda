@@ -472,6 +472,9 @@ def load_mcda_input_data(filepath):
 
     return data
 
+def process_time():
+    return sum(os.times()[0:-1])
+
 if __name__ == "__main__":
     a = test_list_example()
     tests = test_list([a])

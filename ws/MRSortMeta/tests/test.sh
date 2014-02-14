@@ -1,6 +1,6 @@
 #!/bin/sh
 
-NB_TEST_SETS=5
+NB_TEST_SETS=6
 PYTHON_SCRIPT=MRSortMeta.py
 
 CURRENT_DIR=$(pwd)
