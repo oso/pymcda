@@ -100,7 +100,7 @@ def parse_input_files(indir):
     categories_profiles = parse_xmcda_file(indir + '/cat_profiles.xml',
                                            "categoriesProfiles",
                                            CategoriesProfiles)
-    bpt = parse_xmcda_file(indir + '/reference_alts.xml',
+    bpt = parse_xmcda_file(indir + '/profiles_perfs.xml',
                            "performanceTable", PerformanceTable)
     criteria_values = parse_xmcda_file(indir + '/crit_weights.xml',
                                        "criteriaValues",
@@ -219,7 +219,7 @@ def mrsort_mip(indir, outdir):
                          model.categories_profiles.to_xmcda())
         write_xmcda_file(outdir + '/crit_weights.xml',
                          model.cv.to_xmcda())
-        write_xmcda_file(outdir + '/reference_alts.xml',
+        write_xmcda_file(outdir + '/profiles_perfs.xml',
                          model.bpt.to_xmcda())
         write_xmcda_file(outdir + '/compatible_alts.xml',
                          compat.to_xmcda())

@@ -30,7 +30,7 @@
 			</documentation>
 			<xmcda tag="performanceTable" />
 		</input>
-		<input id="assign" name="assign" displayName="alternativesAffectations" isoptional="0">
+		<input id="assign" name="assign" displayName="alternativesAssignments" isoptional="0">
 			<documentation>
 				<description>The list of the learning alternatives affectations. This inputs represents the affectations of all the learning alternatives to a category. The categorie name used should be the same as the one given in the category input.</description>
 			</documentation>
@@ -60,7 +60,7 @@
 			</documentation>
 			<xmcda tag="categoriesProfiles" />
 		</input>
-		<input id="reference_alts" name="reference_alts" displayName="referenceAlternativesPerfTable" isoptional="1">
+		<input id="reference_alts" name="reference_alts" displayName="profilesPerformances" isoptional="1">
 			<documentation>
 				<description>The performance table of containing the reference alternatives to use (optional). It contains the performance of the alternatives associated to the profiles of the model. It is combined with the cat_profiles input when wanting to infer only the weights and the credibility threshold.</description>
 			</documentation>
@@ -90,7 +90,7 @@
 			</documentation>
 			<xmcda tag="categoriesProfiles" />
 		</output>
-		<output id="reference_alts" name="reference_alts" displayName="referenceAlternativesPerfTable">
+		<output id="profiles_perfs" name="profiles_perfs" displayName="profilesPerformances">
 			<documentation>
 				<description>The profiles performance table of the profiles computed by the webservice.</description>
 			</documentation>

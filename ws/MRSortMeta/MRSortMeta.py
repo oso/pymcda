@@ -229,7 +229,7 @@ def mrsort_meta_inference(indir, outdir):
                          model.categories_profiles.to_xmcda())
         write_xmcda_file(outdir + '/crit_weights.xml',
                          model.cv.to_xmcda())
-        write_xmcda_file(outdir + '/reference_alts.xml',
+        write_xmcda_file(outdir + '/profiles_perfs.xml',
                          model.bpt.to_xmcda())
         write_xmcda_file(outdir + '/compatible_alts.xml',
                          compat.to_xmcda())
