@@ -9,7 +9,7 @@ from pymcda.types import CriteriaValues, PerformanceTable
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.generate import generate_random_mrsort_model
-from ws.ElectreTriBMInference.ElectreTriBMInference import electre_tri_bm_infererence
+from ws.MRSortMIP.MRSortMIP import mrsort_mip
 from xml.etree import ElementTree
 
 XMCDA_URL = 'http://www.decision-deck.org/2009/XMCDA-2.1.0'
@@ -101,7 +101,7 @@ class tests_electre_tri_bm_inference(unittest.TestCase):
         self.mcda_object_to_xmcda_file(pt.to_xmcda(), "perfs_table.xml")
         self.mcda_object_to_xmcda_file(aa.to_xmcda(), "assign.xml")
 
-        electre_tri_bm_infererence(self.indir, self.outdir)
+        mrsort_mip(self.indir, self.outdir)
 
         self.check_output_is_complete()
 
@@ -129,7 +129,7 @@ class tests_electre_tri_bm_inference(unittest.TestCase):
         self.mcda_object_to_xmcda_file(self.lambda_to_xmcda(model.lbda),
                                        "lambda.xml")
 
-        electre_tri_bm_infererence(self.indir, self.outdir)
+        mrsort_mip(self.indir, self.outdir)
 
         self.check_output_is_complete()
 
@@ -156,7 +156,7 @@ class tests_electre_tri_bm_inference(unittest.TestCase):
         self.mcda_object_to_xmcda_file(model.bpt.to_xmcda(),
                                        "reference_alts.xml")
 
-        electre_tri_bm_infererence(self.indir, self.outdir)
+        mrsort_mip(self.indir, self.outdir)
 
         self.check_output_is_complete()
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 NB_TEST_SETS=6
-PYTHON_SCRIPT=ElectreTriBMInference.py
+PYTHON_SCRIPT=MRSortMIP.py
 
 CURRENT_DIR=$(pwd)
 cd ..

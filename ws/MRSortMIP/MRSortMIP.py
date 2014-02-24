@@ -180,7 +180,7 @@ def write_message_ok(filepath):
     f.write(buf)
     f.close()
 
-def electre_tri_bm_infererence(indir, outdir):
+def mrsort_mip(indir, outdir):
     if indir is None or not os.path.isdir(indir):
         log_error("Invalid input directory (%s)" % indir)
         return 1
@@ -237,5 +237,5 @@ if __name__ == "__main__":
     indir = options.indir
     outdir = options.outdir
 
-    rc = electre_tri_bm_infererence(indir, outdir)
+    rc = mrsort_mip(indir, outdir)
     sys.exit(rc)
