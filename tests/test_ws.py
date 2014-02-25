@@ -42,7 +42,7 @@ class tests_electre_tri_bm_inference(unittest.TestCase):
         self.assertEqual(self.file_exists("crit_weights.xml"), True)
         self.assertEqual(self.file_exists("lambda.xml"), True)
         self.assertEqual(self.file_exists("messages.xml"), True)
-        self.assertEqual(self.file_exists("reference_alts.xml"), True)
+        self.assertEqual(self.file_exists("profiles_perfs.xml"), True)
 
     def parse_xmcda_file(self, filename, tagname, mcda_type):
         mcda_object = mcda_type()
@@ -69,12 +69,12 @@ class tests_electre_tri_bm_inference(unittest.TestCase):
         crit_weights = self.parse_xmcda_file("crit_weights.xml",
                                              "criteriaValues",
                                              CriteriaValues)
-        reference_alts = self.parse_xmcda_file("reference_alts.xml",
+        profiles_perfs = self.parse_xmcda_file("profiles_perfs.xml",
                                                "performanceTable",
                                                PerformanceTable)
         lbda = self.parse_xmcda_file_lbda("lambda.xml")
 
-        return MRSort(criteria, crit_weights, reference_alts,
+        return MRSort(criteria, crit_weights, profiles_perfs,
                       lbda, cat_profiles)
 
     def lambda_to_xmcda(self, lbda):
@@ -154,7 +154,7 @@ class tests_electre_tri_bm_inference(unittest.TestCase):
         self.mcda_object_to_xmcda_file(pt.to_xmcda(), "perfs_table.xml")
         self.mcda_object_to_xmcda_file(aa.to_xmcda(), "assign.xml")
         self.mcda_object_to_xmcda_file(model.bpt.to_xmcda(),
-                                       "reference_alts.xml")
+                                       "profiles_perfs.xml")
 
         mrsort_mip(self.indir, self.outdir)
 
