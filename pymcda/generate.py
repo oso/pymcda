@@ -110,18 +110,23 @@ def generate_random_profiles(alts, crits, seed = None, k = 3,
     if seed is not None:
         random.seed(seed)
 
+    if worst is None:
+        worst = generate_worst_ap(crits)
+    if best is None:
+        best = generate_best_ap(crits)
+
     crit_random = {}
     n = len(alts)
     pt = PerformanceTable()
     for c in crits:
         rdom = []
         for i in range(n):
-            if worst is None or best is None:
-                rdom.append(round(random.random(), k))
-            else:
-                rdom.append(round(random.uniform(worst.performances[c.id],
-                                                 best.performances[c.id]),
-                                  k))
+            minp = worst.performances[c.id]
+            maxp = best.performances[c.id]
+            if minp > maxp:
+                minp, maxp = maxp, minp
+
+            rdom.append(round(random.uniform(minp, maxp), k))
 
         if c.direction == -1:
             rdom.sort(reverse = True)
@@ -229,6 +234,16 @@ def generate_random_categories_values(cats, k = 3):
 
     return catvs
 
+def generate_worst_ap(crits):
+    return AlternativePerformances("worst", {c.id: 0
+                                             if c.direction == 1 else 1
+                                             for c in crits})
+
+def generate_best_ap(crits):
+    return AlternativePerformances("best", {c.id: 1
+                                             if c.direction == 1 else 0
+                                             for c in crits})
+
 def generate_random_mrsort_model(ncrit, ncat, seed = None, k = 3,
                                  worst = None, best = None,
                                  random_direction = False):
@@ -236,6 +251,12 @@ def generate_random_mrsort_model(ncrit, ncat, seed = None, k = 3,
         random.seed(int(seed))
 
     c = generate_criteria(ncrit, random_direction = random_direction)
+
+    if worst is None:
+        worst = generate_worst_ap(c)
+    if best is None:
+        best = generate_best_ap(c)
+
     cv = generate_random_criteria_weights(c, None, k)
     cat = generate_categories(ncat)
     cps = generate_categories_profiles(cat)
@@ -261,6 +282,54 @@ def generate_random_avfsort_model(ncrit, ncat, nseg_min, nseg_max,
 
     return AVFSort(c, cv, cfs, catv)
 
+def generate_random_veto_thresholds(worst, best, cps, crits, bpt):
+    profiles = cps.get_ordered_profiles()
+    ap_low = worst
+    vpt = PerformanceTable()
+    for profile in profiles:
+        vp = AlternativePerformances(profile)
+        ap = bpt[profile]
+        for c in crits:
+            low, high = ap_low.performances[c.id], ap.performances[c.id]
+            diff = abs(high - low)
+            off = diff * 0.2
+            r = random.uniform(0, diff * 0.8)
+            vp.performances[c.id] = off + r
+
+        vpt.append(vp)
+        ap_low = vp
+
+    return bpt
+
+def generate_random_mrsort_model_with_binary_veto(ncrit, ncat, seed = None,
+                                                  k = 3, worst = None,
+                                                  best = None,
+                                                  random_direction = False):
+    model = generate_random_mrsort_model(ncrit, ncat, seed, k, worst, best,
+                                         random_direction)
+    if worst is None:
+        worst = generate_worst_ap(model.criteria)
+    if best is None:
+        best = generate_best_ap(model.criteria)
+
+    model.veto = generate_random_veto_thresholds(worst, best,
+                                                 model.categories_profiles,
+                                                 model.criteria, model.bpt)
+    return model
+
+def generate_random_mrsort_model_with_coalition_veto(ncrit, ncat,
+                                                     seed = None,
+                                                     k = 3, worst = None,
+                                                     best = None,
+                                                     random_direction = False):
+    model = generate_random_mrsort_model_with_binary_veto(ncrit, ncat, seed,
+                                                          k, worst, best,
+                                                          random_direction)
+    model.veto_weights = model.cv.copy()
+    model.veto_lbda = random.uniform(0, 1 - model.lbda)
+
+    return model
+
 if __name__ == "__main__":
     alts = generate_alternatives(10)
     print(alts)
@@ -285,4 +354,8 @@ if __name__ == "__main__":
     model = generate_random_mrsort_model(10, 3)
     print(model)
     model = generate_random_avfsort_model(10, 3, 3, 3)
+    print(model)
+    model = generate_random_mrsort_model_with_binary_veto(10, 3)
+    print(model)
+    model = generate_random_mrsort_model_with_coalition_veto(10, 3)
     print(model)
