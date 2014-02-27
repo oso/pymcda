@@ -292,14 +292,13 @@ def generate_random_veto_thresholds(worst, best, cps, crits, bpt):
         for c in crits:
             low, high = ap_low.performances[c.id], ap.performances[c.id]
             diff = abs(high - low)
-            off = diff * 0.2
             r = random.uniform(0, diff * 0.8)
-            vp.performances[c.id] = off + r
+            vp.performances[c.id] = diff * 0.2 + r
 
         vpt.append(vp)
         ap_low = vp
 
-    return bpt
+    return vpt
 
 def generate_random_mrsort_model_with_binary_veto(ncrit, ncat, seed = None,
                                                   k = 3, worst = None,
