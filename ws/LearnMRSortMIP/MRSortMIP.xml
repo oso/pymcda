@@ -44,11 +44,11 @@
 		</input>
 		<input id="crit_weights" name="crit_weights" displayName="criteriaWeights" isoptional="1">
 			<documentation>
-				<description>The set of criteria weights to use (optional). This input is set if the user only wants to infer the profiles of the model. It should be combined with the lambda input. If set, this input should contain the weights of the criteria defined in the criteria input.</description>
+				<description>The set of criteria weights to use (optional). This input is set if the user only wants to infer the profiles of the model. It should be combined with the majorityThreshold input. If set, this input should contain the weights of the criteria defined in the criteria input.</description>
 			</documentation>
 			<xmcda tag="criteriaValues" />
 		</input>
-		<input id="lambda" name="lambda" displayName="lambda" isoptional="1">
+		<input id="lambda" name="lambda" displayName="majorityThreshold" isoptional="1">
 			<documentation>
 				<description>The credibility threshold to use (optional). This input is combined with the crit_weights inputs when wanting to perform only the inference of the profiles.</description>
 			</documentation>
@@ -98,11 +98,11 @@
 		</output>
 		<output id="compatible_alts" name="compatible_alts" displayName="compatibleAlternatives">
 			<documentation>
-				<description>The reference alternatives that are compatible with the profiles, weights and lambda computed by the webservice.</description>
+				<description>The reference alternatives that are compatible with the profiles, weights and majority threshold computed by the webservice.</description>
 			</documentation>
 			<xmcda tag="alternatives" />
 		</output>
-		<output id="lambda" name="lambda" displayName="lambda">
+		<output id="lambda" name="lambda" displayName="majorityThreshold">
 			<documentation>
 				<description>The credibility threshold computed by the webservice.</description>
 			</documentation>

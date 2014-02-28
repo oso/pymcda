@@ -81,13 +81,13 @@
 		</output>
 		<output id="compatible_alts" name="compatible_alts" displayName="compatibleAlternatives">
 			<documentation>
-				<description>The reference alternatives that are compatible with the profiles, weights and lambda computed by the webservice.</description>
+				<description>The reference alternatives that are compatible with the profiles, weights and majority threshold computed by the webservice.</description>
 			</documentation>
 			<xmcda tag="alternatives" />
 		</output>
-		<output id="lambda" name="lambda" displayName="lambda">
+		<output id="lambda" name="lambda" displayName="majorityThreshold">
 			<documentation>
-				<description>The credibility threshold computed by the webservice.</description>
+				<description>The majority threshold computed by the webservice.</description>
 			</documentation>
 			<xmcda tag="methodParameters" />
 		</output>
