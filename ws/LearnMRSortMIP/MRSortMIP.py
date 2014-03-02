@@ -139,11 +139,6 @@ def lambda_to_xmcda(lbda):
 
 def get_compat_alternatives(aa, aa2):
     return [a.id for a in aa if a.category_id == aa2[a.id].category_id]
-    l = []
-    for a in aa:
-        if a.category_id == aa2[a.id].category_id:
-            l.append(a.id)
-    return l
 
 def to_alternatives(ids):
     return Alternatives([Alternative(id) for id in ids])
@@ -168,14 +163,20 @@ def write_message_error(filepath):
     f.write(buf)
     f.close()
 
-def write_message_ok(filepath):
+def write_message_ok(filepath, messages):
     f = open(filepath, "w")
     xmcda = ElementTree.Element("{%s}XMCDA" % XMCDA_URL)
-    msg = ElementTree.SubElement(xmcda, 'methodMessages')
-    msg = ElementTree.SubElement(msg, 'logMessage')
+    mmsg = ElementTree.SubElement(xmcda, 'methodMessages')
+    msg = ElementTree.SubElement(mmsg, 'logMessage')
     msg = ElementTree.SubElement(msg, 'text')
     cdata = CDATA("Execution ok")
     msg.append(cdata)
+
+    for message in messages:
+        msg = ElementTree.SubElement(mmsg, 'logMessage')
+        msg = ElementTree.SubElement(msg, 'text')
+        msg.text = message
+
     buf = ElementTree.tostring(xmcda, encoding="UTF-8", method="xml")
     f.write(buf)
     f.close()
@@ -210,6 +211,7 @@ def mrsort_mip(indir, outdir):
         assignments2 = model.get_assignments(pt)
         compat = get_compat_alternatives(assignments, assignments2)
         compat = to_alternatives(compat)
+        msg_ca = "CA: %g" % (len(compat) / len(assignments))
 
         profiles = to_alternatives(model.categories_profiles.keys())
         xmcda_lbda = lambda_to_xmcda(model.lbda)
@@ -224,7 +226,7 @@ def mrsort_mip(indir, outdir):
         write_xmcda_file(outdir + '/compatible_alts.xml',
                          compat.to_xmcda())
 
-        write_message_ok(outdir + '/messages.xml')
+        write_message_ok(outdir + '/messages.xml', [msg_ca])
     except:
         log_error("Cannot solve problem")
         log_error(traceback.format_exc())
