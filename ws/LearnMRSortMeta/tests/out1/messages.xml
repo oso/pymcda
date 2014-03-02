@@ -1,2 +1,2 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<xmcda:XMCDA xmlns:xmcda="http://www.decision-deck.org/2009/XMCDA-2.1.0"><methodMessages><logMessage><text><![CDATA[Execution ok]]></text></logMessage></methodMessages></xmcda:XMCDA>
+<xmcda:XMCDA xmlns:xmcda="http://www.decision-deck.org/2009/XMCDA-2.1.0"><methodMessages><logMessage><text><![CDATA[Execution ok]]></text></logMessage><logMessage><text>CA: 0.857143</text></logMessage></methodMessages></xmcda:XMCDA>
