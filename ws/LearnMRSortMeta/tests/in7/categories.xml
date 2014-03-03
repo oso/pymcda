@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xmcda:XMCDA xmlns:xmcda="http://www.decision-deck.org/2009/XMCDA-2.1.0"><categories><category id="asa1"><active>true</active><rank><integer>1</integer></rank></category><category id="asa2"><active>true</active><rank><integer>2</integer></rank></category><category id="asa3"><active>true</active><rank><integer>3</integer></rank></category><category id="asa4"><active>true</active><rank><integer>4</integer></rank></category></categories></xmcda:XMCDA>
