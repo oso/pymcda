@@ -570,7 +570,6 @@ class MipMRSortVC():
         self.lp.solve()
 
         obj = self.lp.solution.get_objective_value()
-        print 'obj', obj
 
         cvs = CriteriaValues()
         for c in self.criteria:
