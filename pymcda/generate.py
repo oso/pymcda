@@ -282,7 +282,8 @@ def generate_random_avfsort_model(ncrit, ncat, nseg_min, nseg_max,
 
     return AVFSort(c, cv, cfs, catv)
 
-def generate_random_veto_thresholds(worst, best, cps, crits, bpt):
+def generate_random_veto_thresholds(worst, best, cps, crits, bpt,
+                                    veto_interval):
     profiles = cps.get_ordered_profiles()
     ap_low = worst
     vpt = PerformanceTable()
@@ -292,8 +293,8 @@ def generate_random_veto_thresholds(worst, best, cps, crits, bpt):
         for c in crits:
             low, high = ap_low.performances[c.id], ap.performances[c.id]
             diff = abs(high - low)
-            r = random.uniform(0, diff * 0.8)
-            vp.performances[c.id] = diff * 0.2 + r
+            r = random.uniform(0, diff * veto_interval)
+            vp.performances[c.id] = diff * (1 - veto_interval) + r
 
         vpt.append(vp)
         ap_low = vp
@@ -303,7 +304,8 @@ def generate_random_veto_thresholds(worst, best, cps, crits, bpt):
 def generate_random_mrsort_model_with_binary_veto(ncrit, ncat, seed = None,
                                                   k = 3, worst = None,
                                                   best = None,
-                                                  random_direction = False):
+                                                  random_direction = False,
+                                                  veto_interval = 1):
     model = generate_random_mrsort_model(ncrit, ncat, seed, k, worst, best,
                                          random_direction)
     if worst is None:
@@ -313,17 +315,20 @@ def generate_random_mrsort_model_with_binary_veto(ncrit, ncat, seed = None,
 
     model.veto = generate_random_veto_thresholds(worst, best,
                                                  model.categories_profiles,
-                                                 model.criteria, model.bpt)
+                                                 model.criteria, model.bpt,
+                                                 veto_interval)
     return model
 
 def generate_random_mrsort_model_with_coalition_veto(ncrit, ncat,
                                                      seed = None,
                                                      k = 3, worst = None,
                                                      best = None,
-                                                     random_direction = False):
+                                                     random_direction = False,
+                                                     veto_interval = 1):
     model = generate_random_mrsort_model_with_binary_veto(ncrit, ncat, seed,
                                                           k, worst, best,
-                                                          random_direction)
+                                                          random_direction,
+                                                          veto_interval)
     model.veto_weights = model.cv.copy()
     model.veto_lbda = random.uniform(0, 1 - model.lbda)
 
