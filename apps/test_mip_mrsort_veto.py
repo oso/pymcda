@@ -16,6 +16,7 @@ from pymcda.generate import generate_random_mrsort_model_with_coalition_veto
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.utils import add_errors_in_assignments_proba
+from pymcda.utils import compute_confusion_matrix
 from test_utils import test_result, test_results
 
 def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_interval, pcerrors):
@@ -53,6 +54,7 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_interval, pcerrors):
     # Determine the number of erroned alternatives badly assigned
     aa2 = model2.pessimist(pt)
     nv_m2_learning = sum([model2.count_veto_pessimist(ap) for ap in pt])
+    cmatrix_learning = compute_confusion_matrix(aa, aa2, model.categories)
 
     ok_errors = ok2_errors = ok = 0
     for alt in a:
@@ -76,6 +78,9 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_interval, pcerrors):
     aa_gen2 = model2.pessimist(pt_gen)
     nv_m1_gen = sum([model.count_veto_pessimist(ap) for ap in pt_gen])
     nv_m2_gen = sum([model2.count_veto_pessimist(ap) for ap in pt_gen])
+    if len(aa_gen) > 0:
+        cmatrix_gen = compute_confusion_matrix(aa_gen, aa_gen2,
+                                               model.categories)
     ca_gen = compute_ca(aa_gen, aa_gen2)
 
     aa_gen_err = aa_gen.copy()
@@ -109,6 +114,11 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_interval, pcerrors):
     t['ca_gen'] = ca_gen
     t['ca_gen_err'] = ca_gen_err
     t['t_total'] = t_total
+
+    for k, v in cmatrix_learning.items():
+        t['learn_%s_%s' % (k[0], k[1])] = v
+    for k, v in cmatrix_gen.items():
+        t['test_%s_%s' % (k[0], k[1])] = v
 
     return t
 
@@ -146,10 +156,7 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, veto_intervals, nseeds,
         t2 = time.time()
 
         if initialized is False:
-            fields = ['seed', 'na', 'nc', 'ncat', 'na_gen', 'veto_interval',
-                      'pcerrors', 'na_err', 'nv_m1_learning', 'nv_m2_learning',
-                      'nv_m1_gen', 'nv_m2_gen', 'ca_best', 'ca_errors',
-                      'ca_gen', 'ca_gen_err', 't_total']
+            fields = t.get_attributes()
             writer.writerow(fields)
             initialized = True
 
