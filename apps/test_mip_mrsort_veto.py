@@ -28,6 +28,7 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_interval, pcerrors):
     a = generate_alternatives(na)
     pt = generate_random_performance_table(a, model.criteria)
     aa = model.pessimist(pt)
+    nv_m1_learning = sum([model.count_veto_pessimist(ap) for ap in pt])
 
     # Add errors in assignment examples
     aa_err = aa.copy()
@@ -51,6 +52,7 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_interval, pcerrors):
 
     # Determine the number of erroned alternatives badly assigned
     aa2 = model2.pessimist(pt)
+    nv_m2_learning = sum([model2.count_veto_pessimist(ap) for ap in pt])
 
     ok_errors = ok2_errors = ok = 0
     for alt in a:
@@ -72,6 +74,8 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_interval, pcerrors):
     pt_gen = generate_random_performance_table(a_gen, model.criteria)
     aa_gen = model.pessimist(pt_gen)
     aa_gen2 = model2.pessimist(pt_gen)
+    nv_m1_gen = sum([model.count_veto_pessimist(ap) for ap in pt_gen])
+    nv_m2_gen = sum([model2.count_veto_pessimist(ap) for ap in pt_gen])
     ca_gen = compute_ca(aa_gen, aa_gen2)
 
     aa_gen_err = aa_gen.copy()
@@ -96,6 +100,10 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_interval, pcerrors):
 
     # Ouput params
     t['na_err'] = na_err
+    t['nv_m1_learning'] = nv_m1_learning
+    t['nv_m2_learning'] = nv_m2_learning
+    t['nv_m1_gen'] = nv_m1_gen
+    t['nv_m2_gen'] = nv_m2_gen
     t['ca_best'] = ca_best
     t['ca_errors'] = ca_errors
     t['ca_gen'] = ca_gen
@@ -139,8 +147,9 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, veto_intervals, nseeds,
 
         if initialized is False:
             fields = ['seed', 'na', 'nc', 'ncat', 'na_gen', 'veto_interval',
-                      'pcerrors', 'na_err', 'ca_best', 'ca_errors', 'ca_gen',
-                      'ca_gen_err', 't_total']
+                      'pcerrors', 'na_err', 'nv_m1_learning', 'nv_m2_learning',
+                      'nv_m1_gen', 'nv_m2_gen', 'ca_best', 'ca_errors',
+                      'ca_gen', 'ca_gen_err', 't_total']
             writer.writerow(fields)
             initialized = True
 
@@ -156,7 +165,8 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, veto_intervals, nseeds,
 
     t = results.summary(['na', 'nc', 'ncat', 'na_gen', 'veto_interval',
                          'pcerrors'],
-                        ['na_err', 'ca_best', 'ca_errors',
+                        ['na_err', 'nv_m1_learning', 'nv_m2_learning',
+                         'nv_m1_gen', 'nv_m2_gen', 'ca_best', 'ca_errors',
                          'ca_gen', 'ca_gen_err', 't_total'])
     t.tocsv(writer)
 
