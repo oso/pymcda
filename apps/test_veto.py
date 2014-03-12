@@ -89,6 +89,9 @@ pt = PerformanceTable([eval("a%d" % i) for i in range(1, 46)])
 aa = model.pessimist(pt)
 print(aa)
 
+nveto = [model.count_veto_pessimist(eval("a%d" % i)) for i in range(1, 46)]
+print("Number of veto effects: %d" % sum(nveto))
+
 model2 = MRSort(c, None, None, None, cps, None, None, None)
 
 mip = MipMRSortVC(model2, pt, aa)
