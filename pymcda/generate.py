@@ -325,12 +325,18 @@ def generate_random_mrsort_model_with_coalition_veto(ncrit, ncat,
                                                      k = 3, worst = None,
                                                      best = None,
                                                      random_direction = False,
+                                                     veto_weights = False,
                                                      veto_interval = 1):
     model = generate_random_mrsort_model_with_binary_veto(ncrit, ncat, seed,
                                                           k, worst, best,
                                                           random_direction,
                                                           veto_interval)
-    model.veto_weights = model.cv.copy()
+    if veto_weights is True:
+        model.veto_weights = generate_random_criteria_weights(model.criteria,
+                                                              None, k)
+    else:
+        model.veto_weights = model.cv.copy()
+
     model.veto_lbda = random.uniform(0, 1 - model.lbda)
 
     return model
