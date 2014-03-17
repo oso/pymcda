@@ -10,6 +10,7 @@ from itertools import product
 from pymcda.types import AlternativesAssignments, PerformanceTable
 from pymcda.electre_tri import ElectreTri
 from pymcda.learning.mip_mrsort_veto import MipMRSortVC
+from pymcda.learning.mip_mrsort import MipMRSort
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_mrsort_model_with_coalition_veto
@@ -207,10 +208,27 @@ if __name__ == "__main__":
     parser.add_option("-f", "--filename", action = "store", type="string",
                       dest = "filename",
                       help = "filename to save csv output")
+    parser.add_option("-m", "--model", action = "store", type="string",
+                      dest = "model",
+                      help = "learn a model with (veto) or without veto " \
+                             "(noveto)")
 
     (options, args) = parser.parse_args()
 
-    algo = MipMRSortVC
+    while options.model is None or (options.model != 'veto'
+                                    and options.model != 'noveto'):
+        print("1. Model with veto")
+        print("2. Model without veto")
+        i = raw_input("Which type of model ? ")
+        if i == '1':
+            options.model = 'veto'
+        elif i == '2':
+            options.model = 'noveto'
+
+    if options.model == 'veto':
+        algo = MipMRSortVC
+    elif options.model == 'noveto':
+        algo = MipMRSort
 
     options.na = read_multiple_integer(options.na,
                                        "Number of assignment examples")
@@ -225,7 +243,7 @@ if __name__ == "__main__":
     options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
 
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    default_filename = "data/test_%s-%s.csv" % (algo.__name__, dt)
+    default_filename = "data/test_%s-%s.csv" % ("mip_mrsort_veto", dt)
     options.filename = read_csv_filename(options.filename, default_filename)
 
     run_tests(options.na, options.nc, options.ncat, options.na_gen,
