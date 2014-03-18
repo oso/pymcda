@@ -226,17 +226,20 @@ class Criteria(McdaDict):
     def get_active(self):
         return Criteria([c for c in self if c.disabled is not True])
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA dictionnary into XMCDA output"""
 
         root = ElementTree.Element('criteria')
 
-        if self.id is not None:
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
             root.set('id', self.id)
 
         for crit in self:
             crit_xmcda = crit.to_xmcda()
             root.append(crit_xmcda)
+
         return root
 
     def from_xmcda(self, xmcda, id = None):
@@ -315,22 +318,26 @@ class Criterion(McdaObject):
             direction = "-"
         return "%s(%s)" % (self.id, direction)
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
 
-        xmcda = ElementTree.Element('criterion')
-        if self.id is not None:
-            xmcda.set('id', self.id)
-        if self.name is not None:
-            xmcda.set('name', self.name)
+        root = ElementTree.Element('criterion')
 
-        active = ElementTree.SubElement(xmcda, 'active')
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
+            root.set('id', self.id)
+
+        if self.name is not None:
+            root.set('name', self.name)
+
+        active = ElementTree.SubElement(root, 'active')
         if self.disabled is False:
             active.text = 'true'
         else:
             active.text = 'false'
 
-        scale = ElementTree.SubElement(xmcda, 'scale')
+        scale = ElementTree.SubElement(root, 'scale')
         quant = ElementTree.SubElement(scale, 'quantitative')
         prefd = ElementTree.SubElement(quant, 'preferenceDirection')
         if self.direction == 1:
@@ -339,16 +346,16 @@ class Criterion(McdaObject):
             prefd.text = 'min'
 
         if self.weight:
-            crit_val = ElementTree.SubElement(xmcda, 'criterionValue')
+            crit_val = ElementTree.SubElement(root, 'criterionValue')
             value = ElementTree.SubElement(crit_val, 'value')
             weight = marshal(self.weight)
             value.append(weight)
 
         if self.thresholds:
             thresholds = self.thresholds.to_xmcda()
-            xmcda.append(thresholds)
+            root.append(thresholds)
 
-        return xmcda
+        return root
 
     def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
@@ -400,17 +407,20 @@ class CriteriaValues(McdaDict):
         for cv in self:
             cv.value /= total
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA dictionnary into XMCDA output"""
 
         root = ElementTree.Element('criteriaValues')
 
-        if self.id is not None:
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
             root.set('id', self.id)
 
         for cval in self:
             cv = cval.to_xmcda()
             root.append(cv)
+
         return root
 
     def from_xmcda(self, xmcda, id = None):
@@ -473,14 +483,19 @@ class CriterionValue(McdaObject):
     def to_xmcda(self, id=None):
         """Convert the MCDA object into XMCDA output"""
 
-        xmcda = ElementTree.Element('criterionValue')
+        root = ElementTree.Element('criterionValue')
+
         if id is not None:
-            xmcda.set('id', id)
-        critid = ElementTree.SubElement(xmcda, 'criterionID')
+            root.set('id', id)
+        elif self.id is not None:
+            root.set('id', self.id)
+
+        critid = ElementTree.SubElement(root, 'criterionID')
         critid.text = self.id
-        val = ElementTree.SubElement(xmcda, 'value')
+        val = ElementTree.SubElement(root, 'value')
         val.append(marshal(self.value))
-        return xmcda
+
+        return root
 
     def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
@@ -505,17 +520,20 @@ class Alternatives(McdaDict):
 
         return "alternatives(%s)" % self.values()
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA dictionnary into XMCDA output"""
 
         root = ElementTree.Element('alternatives')
 
-        if self.id is not None:
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
             root.set('id', self.id)
 
         for action in self:
             alt = action.to_xmcda()
             root.append(alt)
+
         return root
 
     def from_xmcda(self, xmcda, id = None):
@@ -575,20 +593,26 @@ class Alternative(McdaObject):
 
         return "%s" % self.id
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
 
-        xmcda = ElementTree.Element('alternative', id=self.id)
-        if self.name is not None:
-            xmcda.set('name', self.name)
+        root = ElementTree.Element('alternative')
 
-        active = ElementTree.SubElement(xmcda, 'active')
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
+            root.set('id', self.id)
+
+        if self.name is not None:
+            root.set('name', self.name)
+
+        active = ElementTree.SubElement(root, 'active')
         if self.disabled is False:
             active.text = 'true'
         else:
             active.text = 'false'
 
-        return xmcda
+        return root
 
     def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
@@ -779,17 +803,20 @@ class PerformanceTable(McdaDict):
 
         return a
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA dictionnary into XMCDA output"""
 
         root = ElementTree.Element('performanceTable')
 
-        if self.id is not None:
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
             root.set('id', self.id)
 
         for alt_perfs in self:
             xmcda = alt_perfs.to_xmcda()
             root.append(xmcda)
+
         return root
 
     def from_xmcda(self, xmcda, id = None):
@@ -984,24 +1011,28 @@ class AlternativePerformances(McdaObject):
         for key in self.performances:
             self.performances[key] *= value
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
 
-        xmcda = ElementTree.Element('alternativePerformances')
-        if self.altid is not None:
-            xmcda.set('id', self.id)
-        altid = ElementTree.SubElement(xmcda, 'alternativeID')
+        root = ElementTree.Element('alternativePerformances')
+
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
+            root.set('id', self.id)
+
+        altid = ElementTree.SubElement(root, 'alternativeID')
         altid.text = self.altid
 
         for crit_id, val in self.performances.iteritems():
-            perf = ElementTree.SubElement(xmcda, 'performance')
+            perf = ElementTree.SubElement(root, 'performance')
             critid = ElementTree.SubElement(perf, 'criterionID')
             critid.text = crit_id
             value = ElementTree.SubElement(perf, 'value')
             p = marshal(val)
             value.append(p)
 
-        return xmcda
+        return root
 
     def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
@@ -1072,12 +1103,14 @@ class CategoriesValues(McdaDict):
             cats.append(cat)
         return cats
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA dictionnary into XMCDA output"""
 
         root = ElementTree.Element('categoriesValues')
 
-        if self.id is not None:
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
             root.set('id', self.id)
 
         for cat_value in self:
@@ -1119,19 +1152,22 @@ class CategoryValue(McdaObject):
     def to_xmcda(self):
         """Convert the MCDA object into XMCDA output"""
 
-        xmcda = ElementTree.Element('categoryValue')
-        catid = ElementTree.SubElement(xmcda, 'categoryID')
-        catid.text = self.id
-        value = ElementTree.SubElement(xmcda, 'value')
-        value.append(self.value.to_xmcda())
-        return xmcda
+        root = ElementTree.Element('categoryValue')
 
-    def from_xmcda(self, xmcda, id = None):
+        catid = ElementTree.SubElement(root, 'categoryID')
+        catid.text = self.id
+        value = ElementTree.SubElement(root, 'value')
+        value.append(self.value.to_xmcda())
+
+        return root
+
+    def from_xmcda(self, xmcda):
         """Read the MCDA object from XMCDA input"""
 
-        xmcda = find_xmcda_tag(xmcda, 'categoryValue', id)
+        xmcda = find_xmcda_tag(xmcda, 'categoryValue', None)
 
         self.id = xmcda.find('.//categoryID').text
+
         value = xmcda.find('.//value').getchildren()[0]
         if value.tag == 'interval':
             self.value = Interval().from_xmcda(value)
@@ -1169,22 +1205,25 @@ class Interval(McdaObject):
     def to_xmcda(self):
         """Convert the MCDA object into XMCDA output"""
 
-        xmcda = ElementTree.Element('interval')
-        lower = ElementTree.SubElement(xmcda, "lowerBound")
-        lower.append(marshal(self.lower))
-        upper = ElementTree.SubElement(xmcda, "upperBound")
-        upper.append(marshal(self.upper))
-        return xmcda
+        root = ElementTree.Element('interval')
 
-    def from_xmcda(self, xmcda, id = None):
+        lower = ElementTree.SubElement(root, "lowerBound")
+        lower.append(marshal(self.lower))
+        upper = ElementTree.SubElement(root, "upperBound")
+        upper.append(marshal(self.upper))
+
+        return root
+
+    def from_xmcda(self, xmcda):
         """Read the MCDA object from XMCDA input"""
 
-        xmcda = find_xmcda_tag(xmcda, 'interval', id)
+        xmcda = find_xmcda_tag(xmcda, 'interval')
 
         lower = xmcda.find('.//lowerBound')
         self.lower = unmarshal(lower.getchildren()[0])
         upper = xmcda.find('.//upperBound')
         self.upper = unmarshal(upper.getchildren()[0])
+
         return self
 
 class AlternativesValues(McdaDict):
@@ -1194,13 +1233,20 @@ class AlternativesValues(McdaDict):
 
         return "alternatives_values(%s)" % self.values()
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA dictionnary into XMCDA output"""
 
         root = ElementTree.Element('alternativesValues')
+
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
+            root.set('id', self.id)
+
         for a_value in self:
             xmcda = a_value.to_xmcda()
             root.append(xmcda)
+
         return root
 
     def from_xmcda(self, xmcda, id = None):
@@ -1228,15 +1274,22 @@ class AlternativeValue(McdaObject):
 
         return "%s: %s" % (self.id, self.value)
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
 
-        xmcda = ElementTree.Element('alternativeValue')
-        lower = ElementTree.SubElement(xmcda, "alternativeID")
+        root = ElementTree.Element('alternativeValue')
+
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
+            root.set('id', self.id)
+
+        lower = ElementTree.SubElement(root, "alternativeID")
         lower.text = str(self.id)
-        value = ElementTree.SubElement(xmcda, "value")
+        value = ElementTree.SubElement(root, "value")
         value.append(marshal(self.value))
-        return xmcda
+
+        return root
 
     def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
@@ -1276,17 +1329,20 @@ class CriteriaFunctions(McdaDict):
         for cf in self:
             cf.multiply_y(cvs[cf.id].value)
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA dictionnary into XMCDA output"""
 
         root = ElementTree.Element('criteriaFunctions')
 
-        if self.id is not None:
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
             root.set('id', self.id)
 
         for a_value in self:
             xmcda = a_value.to_xmcda()
             root.append(xmcda)
+
         return root
 
     def from_xmcda(self, xmcda, id = None):
@@ -1326,14 +1382,21 @@ class CriterionFunction(McdaObject):
     def multiply_y(self, value):
         self.function.multiply_y(value)
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
 
         root = ElementTree.Element('criterionFunction')
+
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
+            root.set('id', self.id)
+
         critid = ElementTree.SubElement(root, 'criterionID')
         critid.text = self.id
         function = self.function.to_xmcda()
         root.append(function)
+
         return root
 
     def from_xmcda(self, xmcda, id = None):
@@ -1413,13 +1476,20 @@ class Segment(McdaObject):
     def display(self):
         print(self.pprint())
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
 
         root = ElementTree.Element('segment')
+
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
+            root.set('id', self.id)
+
         for elem in self:
             xmcda = elem.to_xmcda()
             root.append(xmcda)
+
         return root
 
     def from_xmcda(self, xmcda, id = None):
@@ -1508,13 +1578,20 @@ class PiecewiseLinear(list):
     def display(self):
         print(self.pprint())
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
 
         root = ElementTree.Element('piecewiseLinear')
+
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
+            root.set('id', self.id)
+
         for elem in self:
             xmcda = elem.to_xmcda()
             root.append(xmcda)
+
         return root
 
     def from_xmcda(self, xmcda, id = None):
@@ -1547,12 +1624,14 @@ class Points(list):
 
     def to_xmcda(self):
         root = ElementTree.Element('points')
+
         for p in self:
             xmcda = p.to_xmcda()
             root.append(xmcda)
+
         return root
 
-    def from_xmcda(self, xmcda, id = None):
+    def from_xmcda(self, xmcda):
         xmcda = find_xmcda_tag(xmcda, 'points', id)
 
         tag_list = xmcda.getiterator('point')
@@ -1574,15 +1653,22 @@ class Point(McdaObject):
 
         return "(%g,%g)" % (self.x, self.y)
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
 
-        xmcda = ElementTree.Element('point')
-        abscissa = ElementTree.SubElement(xmcda, 'abscissa')
+        root = ElementTree.Element('point')
+
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
+            root.set('id', self.id)
+
+        abscissa = ElementTree.SubElement(root, 'abscissa')
         abscissa.append(marshal(self.x))
-        ordinate = ElementTree.SubElement(xmcda, 'ordinate')
+        ordinate = ElementTree.SubElement(root, 'ordinate')
         ordinate.append(marshal(self.y))
-        return xmcda
+
+        return root
 
     def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
@@ -1609,15 +1695,20 @@ class Constant(McdaObject):
 
         return "%s: %s", (self.id, self.value)
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
 
-        xmcda = ElementTree.Element('constant')
-        if self.id is not None:
-            xmcda.set('id', self.id)
+        root = ElementTree.Element('constant')
+
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
+            root.set('id', self.id)
+
         value = marshal(self.value)
-        xmcda.append(value)
-        return xmcda
+        root.append(value)
+
+        return root
 
     def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
@@ -1641,17 +1732,20 @@ class Thresholds(McdaDict):
 
         return False
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA dictionnary into XMCDA output"""
 
         root = ElementTree.Element('thresholds')
 
-        if self.id is not None:
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
             root.set('id', self.id)
 
         for t in self:
             xmcda = t.to_xmcda()
             root.append(xmcda)
+
         return root
 
     def from_xmcda(self, xmcda, id = None):
@@ -1681,17 +1775,23 @@ class Threshold(McdaObject):
 
         return "%s: %s" % (self.id, self.values.value)
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
 
-        xmcda = ElementTree.Element('threshold', id=self.id)
+        root = ElementTree.Element('threshold')
+
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
+            root.set('id', self.id)
+
         if self.name is not None:
-            xmcda.set('name', self.name)
+            root.set('name', self.name)
 
         values = self.values.to_xmcda()
-        xmcda.append(values)
+        root.append(values)
 
-        return xmcda
+        return root
 
     def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
@@ -1718,17 +1818,20 @@ class Categories(McdaDict):
     def get_ids(self):
         return self.keys()
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA dictionnary into XMCDA output"""
 
         root = ElementTree.Element('categories')
 
-        if self.id is not None:
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
             root.set('id', self.id)
 
         for c in self:
             xmcda = c.to_xmcda()
             root.append(xmcda)
+
         return root
 
     def get_ordered_categories(self):
@@ -1790,24 +1893,29 @@ class Category(McdaObject):
 
         return "%s: %d" % (self.id, self.rank)
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
 
-        xmcda = ElementTree.Element('category')
-        xmcda.set('id', self.id)
-        if self.name is not None:
-            xmcda.set('name', self.name)
+        root = ElementTree.Element('category')
 
-        active = ElementTree.SubElement(xmcda, 'active')
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
+            root.set('id', self.id)
+
+        if self.name is not None:
+            root.set('name', self.name)
+
+        active = ElementTree.SubElement(root, 'active')
         if self.disabled is False:
             active.text = 'true'
         else:
             active.text = 'false'
 
-        rank = ElementTree.SubElement(xmcda, 'rank')
+        rank = ElementTree.SubElement(root, 'rank')
         rank.append(marshal(self.rank))
 
-        return xmcda
+        return root
 
     def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
@@ -1842,24 +1950,24 @@ class Limits(McdaObject):
     def to_xmcda(self):
         """Convert the MCDA object into XMCDA output"""
 
-        xmcda = ElementTree.Element('limits')
+        root = ElementTree.Element('limits')
 
         if self.lower:
-            lower = ElementTree.SubElement(xmcda, 'lowerCategory')
+            lower = ElementTree.SubElement(root, 'lowerCategory')
             catid = ElementTree.SubElement(lower, 'categoryID')
             catid.text = str(self.lower)
 
         if self.upper:
-            upper = ElementTree.SubElement(xmcda, 'upperCategory')
+            upper = ElementTree.SubElement(root, 'upperCategory')
             catid = ElementTree.SubElement(upper, 'categoryID')
             catid.text = str(self.upper)
 
-        return xmcda
+        return root
 
-    def from_xmcda(self, xmcda, id = None):
+    def from_xmcda(self, xmcda):
         """Read the MCDA object from XMCDA input"""
 
-        xmcda = find_xmcda_tag(xmcda, 'limits', id)
+        xmcda = find_xmcda_tag(xmcda, 'limits', None)
 
         lower = xmcda.find('.//lowerCategory/categoryID')
         self.lower = lower.text
@@ -1903,17 +2011,20 @@ class CategoriesProfiles(McdaDict):
             cats.append(cat)
         return cats
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA dictionnary into XMCDA output"""
 
         root = ElementTree.Element('categoriesProfiles')
 
-        if self.id is not None:
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
             root.set('id', self.id)
 
         for cp in self:
             xmcda = cp.to_xmcda()
             root.append(xmcda)
+
         return root
 
     def from_xmcda(self, xmcda, id = None):
@@ -1941,15 +2052,22 @@ class CategoryProfile(McdaObject):
 
         return "%s: %s" % (self.id, self.value)
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
 
-        xmcda = ElementTree.Element('categoryProfile')
-        altid = ElementTree.SubElement(xmcda, 'alternativeID')
+        root = ElementTree.Element('categoryProfile')
+
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
+            root.set('id', self.id)
+
+        altid = ElementTree.SubElement(root, 'alternativeID')
         altid.text = str(self.id)
         value = self.value.to_xmcda()
-        xmcda.append(value)
-        return xmcda
+        root.append(value)
+
+        return root
 
     def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
@@ -2015,17 +2133,20 @@ class AlternativesAssignments(McdaDict):
                     + category_id
             print(line, file = out)
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA dictionnary into XMCDA output"""
 
         root = ElementTree.Element('alternativesAffectations')
 
-        if self.id is not None:
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
             root.set('id', self.id)
 
         for aa in self:
             xmcda = aa.to_xmcda()
             root.append(xmcda)
+
         return root
 
     def from_xmcda(self, xmcda, id = None):
@@ -2076,15 +2197,22 @@ class AlternativeAssignment(McdaObject):
 
         return False
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
 
-        xmcda = ElementTree.Element('alternativeAffectation')
-        altid = ElementTree.SubElement(xmcda, 'alternativeID')
+        root = ElementTree.Element('alternativeAffectation')
+
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
+            root.set('id', self.id)
+
+        altid = ElementTree.SubElement(root, 'alternativeID')
         altid.text = self.id
-        catid = ElementTree.SubElement(xmcda, 'categoryID')
+        catid = ElementTree.SubElement(root, 'categoryID')
         catid.text = self.category_id
-        return xmcda
+
+        return root
 
     def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
@@ -2105,12 +2233,14 @@ class Parameters(McdaDict):
 
         return "parameters(%s)" % self.values()
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA dictionnary into XMCDA output"""
 
         root = ElementTree.Element('methodParameters')
 
-        if self.id is not None:
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
             root.set('id', self.id)
 
         for param in self:
@@ -2145,13 +2275,20 @@ class Parameter(McdaObject):
         """Manner to represent the MCDA object"""
         return "%s: %s" % (self.id, self.value)
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
 
-        xmcda = ElementTree.Element('parameter')
-        value = ElementTree.SubElement(xmcda, 'value')
+        root = ElementTree.Element('parameter')
+
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
+            root.set('id', self.id)
+
+        value = ElementTree.SubElement(root, 'value')
         value.append(marshal(self.value))
-        return xmcda
+
+        return root
 
     def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
