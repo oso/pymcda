@@ -33,6 +33,21 @@ def unmarshal(xml):
     m = unmarshallers.get(xml.tag)
     return m(xml)
 
+def find_xmcda_tag(xmcda, tag, id = None):
+    if xmcda.tag == tag and (id is None or xmcda.get('id') == id):
+        return xmcda
+
+    if id is None:
+        search_str = ".//%s" % tag
+    else:
+        search_str = ".//%s[@id='%s']" % (tag, id)
+
+    xmcda = xmcda.find(search_str)
+    if xmcda is None:
+        raise TypeError("%s::invalid tag" % tag)
+
+    return xmcda
+
 class McdaDict(object):
     """This class allows to declare an MCDA dictionnary element.
     It contains usefull methods to manipulate MCDA data.
@@ -224,11 +239,10 @@ class Criteria(McdaDict):
             root.append(crit_xmcda)
         return root
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA dictionnary from XMCDA input"""
 
-        if xmcda.tag != 'criteria':
-            raise TypeError('criteria::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'criteria', id)
 
         self.id = xmcda.get('id')
 
@@ -336,11 +350,10 @@ class Criterion(McdaObject):
 
         return xmcda
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'criterion':
-            raise TypeError('criterion::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'criterion', id)
 
         self.id = xmcda.get('id')
         self.name = xmcda.get('name')
@@ -400,11 +413,10 @@ class CriteriaValues(McdaDict):
             root.append(cv)
         return root
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA dictionnary from XMCDA input"""
 
-        if xmcda.tag != 'criteriaValues':
-            raise TypeError('criteriaValues::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'criteriaValues', id)
 
         self.id = xmcda.get('id')
 
@@ -470,11 +482,10 @@ class CriterionValue(McdaObject):
         val.append(marshal(self.value))
         return xmcda
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'criterionValue':
-            raise TypeError('criterionValue::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'criterionValue', id)
 
         self.id = xmcda.get('id')
 
@@ -507,11 +518,10 @@ class Alternatives(McdaDict):
             root.append(alt)
         return root
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA dictionnary from XMCDA input"""
 
-        if xmcda.tag != 'alternatives':
-            raise TypeError('alternatives::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'alternatives', id)
 
         self.id = xmcda.get('id')
 
@@ -580,11 +590,10 @@ class Alternative(McdaObject):
 
         return xmcda
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'alternative':
-            raise TypeError('alternative::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'alternative', id)
 
         self.id = xmcda.get('id')
         self.name = xmcda.get('name')
@@ -783,11 +792,10 @@ class PerformanceTable(McdaDict):
             root.append(xmcda)
         return root
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA dictionnary from XMCDA input"""
 
-        if xmcda.tag != 'performanceTable':
-            raise TypeError('performanceTable::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'performanceTable', id)
 
         self.id = xmcda.get('id')
 
@@ -995,11 +1003,10 @@ class AlternativePerformances(McdaObject):
 
         return xmcda
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'alternativePerformances':
-            raise TypeError('alternativePerformances::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'alternativePerformances', id)
 
         self.id = xmcda.get('id')
 
@@ -1078,11 +1085,10 @@ class CategoriesValues(McdaDict):
             root.append(xmcda)
         return root
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA dictionnary from XMCDA input"""
 
-        if xmcda.tag != 'categoriesValues':
-            raise TypeError('categoriesValues::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'categoriesValues', id)
 
         self.id = xmcda.get('id')
 
@@ -1120,11 +1126,10 @@ class CategoryValue(McdaObject):
         value.append(self.value.to_xmcda())
         return xmcda
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'categoryValue':
-            raise TypeError('categoryValue::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'categoryValue', id)
 
         self.id = xmcda.find('.//categoryID').text
         value = xmcda.find('.//value').getchildren()[0]
@@ -1171,11 +1176,10 @@ class Interval(McdaObject):
         upper.append(marshal(self.upper))
         return xmcda
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'interval':
-            raise TypeError('interval::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'interval', id)
 
         lower = xmcda.find('.//lowerBound')
         self.lower = unmarshal(lower.getchildren()[0])
@@ -1199,11 +1203,10 @@ class AlternativesValues(McdaDict):
             root.append(xmcda)
         return root
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA dictionnary from XMCDA input"""
 
-        if xmcda.tag != 'alternativesValues':
-            raise TypeError('alternativesValues::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'alternativesValues', id)
 
         self.id = xmcda.get('id')
 
@@ -1235,11 +1238,10 @@ class AlternativeValue(McdaObject):
         value.append(marshal(self.value))
         return xmcda
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'alternativeValue':
-            raise TypeError('alternativesValues::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'alternativeValue', id)
 
         self.id = xmcda.find('.//alternativeID').text
         value = xmcda.find('.//value').getchildren()[0]
@@ -1287,11 +1289,10 @@ class CriteriaFunctions(McdaDict):
             root.append(xmcda)
         return root
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA dictionnary from XMCDA input"""
 
-        if xmcda.tag != 'criteriaFunctions':
-            raise TypeError('criteria_functions::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'criteriaFunctions', id)
 
         self.id = xmcda.get('id')
 
@@ -1335,11 +1336,10 @@ class CriterionFunction(McdaObject):
         root.append(function)
         return root
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'criterionFunction':
-            raise TypeError('criterion_function::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'criterionFunction', id)
 
         self.id = xmcda.find('.//criterionID').text
 
@@ -1422,11 +1422,10 @@ class Segment(McdaObject):
             root.append(xmcda)
         return root
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'segment':
-            raise TypeError('segment::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'segment', id)
 
         tag_list = xmcda.getiterator('point')
         if tag_list != 2:
@@ -1518,11 +1517,10 @@ class PiecewiseLinear(list):
             root.append(xmcda)
         return root
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'piecewiseLinear':
-            raise TypeError('piecewise_linear::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'piecewiseLinear', id)
 
         tag_list = xmcda.getiterator('segment')
         for tag in tag_list:
@@ -1554,9 +1552,8 @@ class Points(list):
             root.append(xmcda)
         return root
 
-    def from_xmcda(self, xmcda):
-        if xmcda.tag != 'points':
-            raise TypeError('points::invalid tag')
+    def from_xmcda(self, xmcda, id = None):
+        xmcda = find_xmcda_tag(xmcda, 'points', id)
 
         tag_list = xmcda.getiterator('point')
         for tag in tag_list:
@@ -1587,11 +1584,10 @@ class Point(McdaObject):
         ordinate.append(marshal(self.y))
         return xmcda
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'point':
-            raise TypeError('point::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'point', id)
 
         self.id = xmcda.get('id')
 
@@ -1623,11 +1619,10 @@ class Constant(McdaObject):
         xmcda.append(value)
         return xmcda
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'constant':
-            raise TypeError('constant::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'constant', id)
 
         self.id = xmcda.get('id')
         self.value = unmarshal(xmcda.getchildren()[0])
@@ -1659,11 +1654,10 @@ class Thresholds(McdaDict):
             root.append(xmcda)
         return root
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA dictionnary from XMCDA input"""
 
-        if xmcda.tag != 'thresholds':
-            raise TypeError('thresholds::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'thresholds', id)
 
         self.id = xmcda.get('id')
 
@@ -1699,11 +1693,10 @@ class Threshold(McdaObject):
 
         return xmcda
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'threshold':
-            raise TypeError('threshold::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'threshold', id)
 
         self.id = xmcda.get('id')
         self.name = xmcda.get('name')
@@ -1742,11 +1735,10 @@ class Categories(McdaDict):
         d = {c.id: c.rank for c in self}
         return sorted(d, key = lambda key: d[key], reverse = True)
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA dictionnary from XMCDA input"""
 
-        if xmcda.tag != 'categories':
-            raise TypeError('categories::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'categories', id)
 
         self.id = xmcda.get('id')
 
@@ -1817,11 +1809,10 @@ class Category(McdaObject):
 
         return xmcda
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'category':
-            raise TypeError('category::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'category', id)
 
         self.id = xmcda.get('id')
         self.name = xmcda.get('name')
@@ -1865,11 +1856,10 @@ class Limits(McdaObject):
 
         return xmcda
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'limits':
-            raise TypeError('limits::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'limits', id)
 
         lower = xmcda.find('.//lowerCategory/categoryID')
         self.lower = lower.text
@@ -1926,11 +1916,10 @@ class CategoriesProfiles(McdaDict):
             root.append(xmcda)
         return root
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA dictionnary from XMCDA input"""
 
-        if xmcda.tag != 'categoriesProfiles':
-            raise TypeError('categories_profiles::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'categoriesProfiles', id)
 
         self.id = xmcda.get('id')
 
@@ -1962,11 +1951,10 @@ class CategoryProfile(McdaObject):
         xmcda.append(value)
         return xmcda
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'categoryProfile':
-            raise TypeError('category_profile::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'categoryProfile', id)
 
         self.id = xmcda.find('.//alternativeID').text
 
@@ -2040,11 +2028,10 @@ class AlternativesAssignments(McdaDict):
             root.append(xmcda)
         return root
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA dictionnary from XMCDA input"""
 
-        if xmcda.tag != 'alternativesAffectations':
-            raise TypeError('alternatives_assignments::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'alternativesAffectations', id)
 
         self.id = xmcda.get('id')
 
@@ -2099,11 +2086,10 @@ class AlternativeAssignment(McdaObject):
         catid.text = self.category_id
         return xmcda
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'alternativeAffectation':
-            raise TypeError('alternativeAffectation::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'alternativeAffectation', id)
 
         altid = xmcda.find('alternativeID')
         self.id = altid.text
@@ -2133,11 +2119,10 @@ class Parameters(McdaDict):
 
         return root
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA dictionnary from XMCDA input"""
 
-        if xmcda.tag != 'methodParameters':
-            raise TypeError('parameters::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'methodParameters', id)
 
         self.id = xmcda.get('id')
 
@@ -2168,11 +2153,10 @@ class Parameter(McdaObject):
         value.append(marshal(self.value))
         return xmcda
 
-    def from_xmcda(self, xmcda):
+    def from_xmcda(self, xmcda, id = None):
         """Read the MCDA object from XMCDA input"""
 
-        if xmcda.tag != 'parameter':
-            raise TypeError('parameter::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'parameter', id)
 
         self.id = xmcda.get('id')
         self.name = xmcda.get('name')
