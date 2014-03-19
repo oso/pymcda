@@ -4,6 +4,7 @@ from xml.etree import ElementTree
 from lxml import etree
 from pymcda.types import *
 from pymcda.generate import *
+from pymcda.electre_tri import *
 import unittest
 import csv
 
@@ -119,6 +120,13 @@ class tests_xmcda(unittest.TestCase):
 
         cat_from = Categories().from_xmcda(xmcda)
         self.assertEqual(cat, cat_from)
+
+    def test010(self):
+        model = generate_random_mrsort_model(5, 3)
+        xmcda = model.to_xmcda()
+
+        model_from = MRSort().from_xmcda(xmcda)
+        self.assertEqual(model, model_from)
 
 class tests_Segment(unittest.TestCase):
 
