@@ -7,6 +7,7 @@ from pymcda.types import Criteria, CriteriaValues, PerformanceTable
 from pymcda.types import CategoriesProfiles
 from pymcda.types import McdaObject
 from pymcda.types import marshal, unmarshal
+from pymcda.types import find_xmcda_tag
 from xml.etree import ElementTree
 
 def eq(a, b, eps=10e-10):
@@ -26,6 +27,9 @@ class ElectreTri(McdaObject):
         self.preference = preference
         self.indifference = indifference
         self.id = id
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
 
     @property
     def categories_profiles(self):
@@ -257,34 +261,33 @@ class ElectreTri(McdaObject):
             root.set('id', self.id)
 
         for obj in ['criteria', 'cv', 'bpt', 'categories_profiles']:
-            xmcda = getattr(self, obj).to_xmcda()
+            mcda = getattr(self, obj)
+            mcda.id = obj
+            xmcda = mcda.to_xmcda()
             root.append(xmcda)
 
         mparams = ElementTree.SubElement(root, 'methodParameters')
         param = ElementTree.SubElement(mparams, 'parameter')
         value = ElementTree.SubElement(param, 'value')
+        value.set('id', 'lambda')
         lbda = marshal(self.lbda)
         value.append(lbda)
 
         return root
 
     def from_xmcda(self, xmcda):
-        if xmcda.tag != 'ElectreTri':
-            raise TypeError('ElectreTri::invalid tag')
+        xmcda = find_xmcda_tag(xmcda, 'ElectreTri')
 
         self.id = xmcda.get('id')
         value = xmcda.find('.//methodParameters/parameter/value')
         self.lbda = unmarshal(value.getchildren()[0])
 
-        criteria = xmcda.find('.//criteria')
-        setattr(self, 'criteria', Criteria().from_xmcda(criteria))
-        cv = xmcda.find('.//criteriaValues')
-        setattr(self, 'cv', CriteriaValues().from_xmcda(cv))
-        bpt = xmcda.find('.//performanceTable')
-        setattr(self, 'bpt', PerformanceTable().from_xmcda(bpt))
-        categories_profiles = xmcda.find('.//categoriesProfiles')
+        setattr(self, 'criteria', Criteria().from_xmcda(xmcda, 'criteria'))
+        setattr(self, 'cv', CriteriaValues().from_xmcda(xmcda, 'cv'))
+        setattr(self, 'bpt', PerformanceTable().from_xmcda(xmcda, 'bpt'))
         setattr(self, 'categories_profiles',
-                CategoriesProfiles().from_xmcda(categories_profiles))
+                CategoriesProfiles().from_xmcda(xmcda,
+                                                'categories_profiles'))
 
         return self
 
