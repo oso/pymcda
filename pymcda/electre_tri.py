@@ -354,7 +354,7 @@ class MRSort(ElectreTri):
             vc = self.veto_concordance(ap, self.bpt[profile], profile)
             if self.veto_lbda and vc >= self.veto_lbda:
                 n += 1
-            elif self.veto_lbda is None and vc >= 0:
+            elif self.veto_lbda is None and vc > 0:
                 n += 1
 
         return n
