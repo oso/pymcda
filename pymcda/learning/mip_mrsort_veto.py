@@ -38,6 +38,7 @@ class MipMRSortVC():
         self.pt.update_direction(model.criteria)
         self.add_variables()
         self.add_constraints()
+        self.add_extra_constraints()
         self.add_objective()
         self.pt.update_direction(model.criteria)
 
@@ -496,6 +497,32 @@ class MipMRSortVC():
 
             if cat != upper_cat:
                 self.__add_alternative_upper_constraints(aa)
+
+    def add_extra_constraints(self):
+        constraints = self.lp.linear_constraints
+
+        if self.model.veto_lbda is not None:
+            constraints.add(names = ["LAMBDA"],
+                            lin_expr =
+                                [
+                                 [["LAMBDA"],
+                                  [1]]
+                                 ],
+                            senses = ["E"],
+                            rhs = [self.model.veto_lbda]
+                           )
+
+        if self.model.veto_weights is not None:
+            for c in self.criteria:
+                constraints.add(names = ["z_%s" % c.id],
+                                lin_expr =
+                                    [
+                                     [["z_%s" % c.id],
+                                      [1]]
+                                     ],
+                                senses = ["E"],
+                                rhs = [self.model.veto_weights[c.id].value]
+                               )
 
     def add_constraints(self):
         constraints = self.lp.linear_constraints
