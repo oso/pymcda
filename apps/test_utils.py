@@ -359,6 +359,13 @@ def read_multiple_integer(variable, question):
     variable = [int(x) for x in variable]
     return variable
 
+def read_multiple_float(variable, question):
+    while not variable:
+        variable = raw_input(question + " ? ")
+    variable = variable.split(",")
+    variable = [float(x) for x in variable]
+    return variable
+
 def read_csv_filename(variable, default):
     while not variable:
         variable = raw_input("File to save CSV data [%s] ? " % default)
