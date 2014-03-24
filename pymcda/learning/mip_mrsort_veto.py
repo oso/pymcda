@@ -588,10 +588,15 @@ class MipMRSortVC():
         a1 = self.aa.get_alternatives_in_categories(self.__categories[1:])
         a2 = self.aa.get_alternatives_in_categories(self.__categories[:-1])
 
-        self.lp.objective.set_linear([("oinf_%s" % a, - 1 / (2 * len(a1)))
-                                      for a in a1])
-        self.lp.objective.set_linear([("osup_%s" % a, - 1 / (2 * len(a2)))
-                                      for a in a2])
+        if len(a1) > 0:
+            self.lp.objective.set_linear([("oinf_%s" % a,
+                                           - 1 / (2 * len(a1)))
+                                         for a in a1])
+
+        if len(a2) > 0:
+            self.lp.objective.set_linear([("osup_%s" % a,
+                                           - 1 / (2 * len(a2)))
+                                         for a in a2])
 
     def solve(self):
         self.lp.solve()
