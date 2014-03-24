@@ -93,6 +93,8 @@ nveto = [model.count_veto_pessimist(eval("a%d" % i)) for i in range(1, 46)]
 print("Number of veto effects: %d" % sum(nveto))
 
 model2 = MRSort(c, None, None, None, cps, None, None, None)
+#model2.veto_lbda = model.veto_lbda
+#model2.veto_weights = model.veto_weights
 
 mip = MipMRSortVC(model2, pt, aa)
 #mip = MipMRSort(model2, pt, aa)
