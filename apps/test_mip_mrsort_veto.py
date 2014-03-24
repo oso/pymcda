@@ -8,23 +8,34 @@ import random
 from itertools import product
 
 from pymcda.types import AlternativesAssignments, PerformanceTable
-from pymcda.electre_tri import ElectreTri
+from pymcda.types import CriteriaValues, CriterionValue
+from pymcda.electre_tri import MRSort
 from pymcda.learning.mip_mrsort_veto import MipMRSortVC
 from pymcda.learning.mip_mrsort import MipMRSort
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_mrsort_model_with_coalition_veto
+from pymcda.generate import generate_random_mrsort_model_with_binary_veto
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.utils import add_errors_in_assignments_proba
 from pymcda.utils import compute_confusion_matrix
 from test_utils import test_result, test_results
 
-def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_interval, pcerrors):
+def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_param, pcerrors):
 
     # Generate a random ELECTRE TRI BM model
-    model = generate_random_mrsort_model_with_coalition_veto(nc, ncat, seed,
-                                        veto_interval = veto_interval / 100)
+    if vetot == 'binary':
+        model = generate_random_mrsort_model_with_binary_veto(nc, ncat,
+                            seed,
+                            veto_func = veto_func,
+                            veto_param = veto_param)
+    elif vetot == 'coalition':
+        model = generate_random_mrsort_model_with_coalition_veto(nc, ncat,
+                            seed,
+                            veto_weights = True,
+                            veto_func = veto_func,
+                            veto_param = veto_param)
 
     # Generate a set of alternatives
     a = generate_alternatives(na)
@@ -42,10 +53,16 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_interval, pcerrors):
     # Run the MIP
     t1 = time.time()
 
-    model2 = model.copy()
-    model2.cv = None
-    model2.bpt = None
-    model2.lbda = None
+    model2 = MRSort(model.criteria, None, None, None,
+                    model.categories_profiles, None, None, None)
+    if vetot == 'binary':
+        w = {c.id: 1 / len(model.criteria) for c in model.criteria}
+        w1 = w.keys()[0]
+        w[w1] += 1 - sum(w.values())
+        model2.veto_weights = CriteriaValues([CriterionValue(c.id,
+                                                             w[c.id])
+                                              for c in model.criteria])
+        model2.veto_lbda = min(w.values())
 
     mip = MipMRSortVC(model2, pt, aa)
     mip.solve()
@@ -93,7 +110,7 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_interval, pcerrors):
 
     # Save all infos in test_result class
     t = test_result("%s-%d-%d-%d-%d-%d-%d" % (seed, na, nc, ncat,
-                    na_gen, veto_interval, pcerrors))
+                    na_gen, veto_param, pcerrors))
 
     # Input params
     t['seed'] = seed
@@ -101,7 +118,7 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_interval, pcerrors):
     t['nc'] = nc
     t['ncat'] = ncat
     t['na_gen'] = na_gen
-    t['veto_interval'] = veto_interval
+    t['veto_param'] = veto_param
     t['pcerrors'] = pcerrors
 
     # Ouput params
@@ -123,19 +140,21 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_interval, pcerrors):
 
     return t
 
-def run_tests(na, nc, ncat, na_gen, pcerrors, veto_intervals, nseeds,
-              filename):
+def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds,
+              vetot, vetom, vparam, filename):
     # Create the CSV writer
     f = open(filename, 'wb')
     writer = csv.writer(f)
 
     # Write the test options
     writer.writerow(['algorithm', algo.__name__])
+    writer.writerow(['veto type', vetot])
+    writer.writerow(['veto mode', vetom])
+    writer.writerow(['veto param', vparam])
     writer.writerow(['na', na])
     writer.writerow(['nc', nc])
     writer.writerow(['ncat', ncat])
     writer.writerow(['na_gen', na_gen])
-    writer.writerow(['veto_intervals', veto_intervals])
     writer.writerow(['pcerrors', pcerrors])
     writer.writerow(['nseeds', nseeds])
     writer.writerow(['', ''])
@@ -148,12 +167,12 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, veto_intervals, nseeds,
 
     # Run the algorithm
     initialized = False
-    for _na, _nc, _ncat, _na_gen, _veto_interval, _pcerrors, seed \
-        in product(na, nc, ncat, na_gen, veto_intervals, pcerrors, seeds):
+    for _na, _nc, _ncat, _na_gen, _vparam, _pcerrors, seed \
+        in product(na, nc, ncat, na_gen, vparam, pcerrors, seeds):
 
         t1 = time.time()
         t = test_mip_mrsort_vc(seed, _na, _nc, _ncat, _na_gen,
-                               _veto_interval, _pcerrors)
+                               _vparam, _pcerrors)
         t2 = time.time()
 
         if initialized is False:
@@ -171,7 +190,7 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, veto_intervals, nseeds,
     # Perform a summary
     writer.writerow(['', ''])
 
-    t = results.summary(['na', 'nc', 'ncat', 'na_gen', 'veto_interval',
+    t = results.summary(['na', 'nc', 'ncat', 'na_gen', 'veto_param',
                          'pcerrors'],
                         ['na_err', 'nv_m1_learning', 'nv_m2_learning',
                          'nv_m1_gen', 'nv_m2_gen', 'ca_best', 'ca_errors',
@@ -181,6 +200,7 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, veto_intervals, nseeds,
 if __name__ == "__main__":
     from optparse import OptionParser
     from test_utils import read_single_integer, read_multiple_integer
+    from test_utils import read_multiple_float
     from test_utils import read_csv_filename
 
     parser = OptionParser(usage = "python %s [options]" % sys.argv[0])
@@ -199,9 +219,6 @@ if __name__ == "__main__":
     parser.add_option("-e", "--errors", action = "store", type="string",
                       dest = "pcerrors",
                       help = "ratio of errors in the learning set")
-    parser.add_option("-v", "--veto_intervals", action = "store", type="string",
-                      dest = "vetointervals",
-                      help = "veto intervals (in percents)")
     parser.add_option("-s", "--nseeds", action = "store", type="string",
                       dest = "nseeds",
                       help = "number of seeds")
@@ -212,6 +229,15 @@ if __name__ == "__main__":
                       dest = "model",
                       help = "learn a model with (veto) or without veto " \
                              "(noveto)")
+    parser.add_option("-y", "--vetotype", action = "store", type="string",
+                      dest = "vetot",
+                      help = "Type of veto (binary/coalition) ")
+    parser.add_option("-v", "--vetomode", action = "store", type="string",
+                      dest = "vetom",
+                      help = "Mode of veto (absolute/proportional) ")
+    parser.add_option("-p", "--vetoparam", action = "store", type="string",
+                      dest = "vparam",
+                      help = "Mode of veto (absolute/proportional) ")
 
     (options, args) = parser.parse_args()
 
@@ -219,7 +245,7 @@ if __name__ == "__main__":
                                     and options.model != 'noveto'):
         print("1. Model with veto")
         print("2. Model without veto")
-        i = raw_input("Which type of model ? ")
+        i = raw_input("Which type of model to learn? ")
         if i == '1':
             options.model = 'veto'
         elif i == '2':
@@ -230,14 +256,42 @@ if __name__ == "__main__":
     elif options.model == 'noveto':
         algo = MipMRSort
 
+    while options.vetot is None or (options.vetot != 'binary'
+                                    and options.vetot != 'coalition'):
+        print("1. Model with BINARY veto")
+        print("2. Model with COALITION veto")
+        i = raw_input("What type of veto? ")
+        if i == '1':
+            options.vetot = 'binary'
+        elif i == '2':
+            options.vetot = 'coalition'
+
+    vetot = options.vetot
+
+    if options.vetom is None or (options.vetom != 'absolute'
+                                 and options.vetom != 'proportional'):
+        print("1. ABSOLUTE veto")
+        print("2. PROPORTIONAL veto")
+        i = raw_input("What mode of veto? ")
+        if i == '1':
+            options.vetom = 'absolute'
+        elif i == '2':
+            options.vetom = 'proportional'
+
+    vetom = options.vetom
+    if vetom == 'absolute':
+        veto_func = 1
+    elif vetom == 'proportional':
+        veto_func = 2
+
+    options.vparam = read_multiple_float(options.vparam,
+                                         "Value of the veto param")
     options.na = read_multiple_integer(options.na,
                                        "Number of assignment examples")
     options.nc = read_multiple_integer(options.nc, "Number of criteria")
     options.ncat = read_multiple_integer(options.ncat, "Number of categories")
     options.na_gen = read_multiple_integer(options.na_gen, "Number of " \
                                            "generalization alternatives")
-    options.vetointervals = read_multiple_integer(options.vetointervals,
-                                                  "Veto interval (in percents)")
     options.pcerrors = read_multiple_integer(options.pcerrors, "Ratio of " \
                                              "errors")
     options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
@@ -247,7 +301,8 @@ if __name__ == "__main__":
     options.filename = read_csv_filename(options.filename, default_filename)
 
     run_tests(options.na, options.nc, options.ncat, options.na_gen,
-              options.pcerrors, options.vetointervals, options.nseeds,
+              options.pcerrors, options.nseeds,
+              options.vetot, options.vetom, options.vparam,
               options.filename)
 
     print("Results saved in '%s'" % options.filename)
