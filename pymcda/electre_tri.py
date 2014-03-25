@@ -337,7 +337,7 @@ class MRSort(ElectreTri):
         vc = self.veto_concordance(x, y, profile)
         if self.veto_lbda and vc >= self.veto_lbda:
             return 0
-        elif self.veto_lbda is None and vc >= 0:
+        elif self.veto_lbda is None and vc > 0:
             return 0
 
         return c
