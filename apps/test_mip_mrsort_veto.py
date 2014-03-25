@@ -64,7 +64,7 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_param, pcerrors):
                                               for c in model.criteria])
         model2.veto_lbda = min(w.values())
 
-    mip = MipMRSortVC(model2, pt, aa)
+    mip = algo(model2, pt, aa)
     mip.solve()
 
     t_total = time.time() - t1
