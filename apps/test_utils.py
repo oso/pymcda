@@ -7,6 +7,7 @@ import time
 import traceback
 from copy import deepcopy
 from itertools import product
+from xml.etree import ElementTree
 from pymcda.types import Alternatives, Criteria, PerformanceTable
 from pymcda.types import AlternativesAssignments, Categories
 
@@ -499,3 +500,16 @@ if __name__ == "__main__":
         exit(1)
 
     tests.run(to_run)
+
+XMCDA_URL = 'http://www.decision-deck.org/2009/XMCDA-2.1.0'
+
+def save_to_xmcda(filepath, *elems):
+    f = open(filepath, "w")
+    xmcda = ElementTree.Element("{%s}XMCDA" % XMCDA_URL)
+
+    for elem in elems:
+        xmcda.append(elem.to_xmcda())
+
+    buf = ElementTree.tostring(xmcda, encoding="UTF-8", method="xml")
+    f.write(buf)
+    f.close()
