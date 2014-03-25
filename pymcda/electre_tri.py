@@ -279,7 +279,7 @@ class ElectreTri(McdaObject):
         xmcda = find_xmcda_tag(xmcda, 'ElectreTri')
 
         self.id = xmcda.get('id')
-        value = xmcda.find('.//methodParameters/parameter/value')
+        value = xmcda.find(".//methodParameters/parameter/value[@id='lambda']")
         self.lbda = unmarshal(value.getchildren()[0])
 
         setattr(self, 'criteria', Criteria().from_xmcda(xmcda, 'criteria'))
@@ -358,3 +358,42 @@ class MRSort(ElectreTri):
                 n += 1
 
         return n
+
+    def to_xmcda(self):
+        root = super(MRSort, self).to_xmcda()
+
+        for obj in ['veto', 'veto_weights']:
+            mcda = getattr(self, obj)
+            if mcda is None:
+                continue
+
+            mcda.id = obj
+            xmcda = mcda.to_xmcda()
+            root.append(xmcda)
+
+        if self.veto_lbda:
+            mparams = ElementTree.SubElement(root, 'methodParameters')
+            param = ElementTree.SubElement(mparams, 'parameter')
+            value = ElementTree.SubElement(param, 'value')
+            value.set('id', 'veto_lbda')
+            lbda = marshal(self.veto_lbda)
+            value.append(lbda)
+
+        return root
+
+    def from_xmcda(self, xmcda):
+        super(MRSort, self).from_xmcda(xmcda)
+
+        xmcda = find_xmcda_tag(xmcda, 'ElectreTri')
+        value = xmcda.find(".//methodParameters/parameter/value[@id='veto_lbda']")
+        if value is not None:
+            self.veto_lbda = unmarshal(value.getchildren()[0])
+
+        if xmcda.find(".//criteriaValues[@id='veto_weights']") is not None:
+            setattr(self, 'veto_weights',
+                    CriteriaValues().from_xmcda(xmcda, 'veto_weights'))
+        if xmcda.find(".//performanceTable[@id='veto']") is not None:
+            setattr(self, 'veto',
+                    PerformanceTable().from_xmcda(xmcda, 'veto'))
+
+        return self
