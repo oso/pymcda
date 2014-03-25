@@ -21,6 +21,7 @@ from pymcda.generate import generate_random_performance_table
 from pymcda.utils import add_errors_in_assignments_proba
 from pymcda.utils import compute_confusion_matrix
 from test_utils import test_result, test_results
+from test_utils import save_to_xmcda
 
 def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_param, pcerrors):
 
@@ -111,6 +112,11 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_param, pcerrors):
     # Save all infos in test_result class
     t = test_result("%s-%d-%d-%d-%d-%d-%d" % (seed, na, nc, ncat,
                     na_gen, veto_param, pcerrors))
+
+    model.id = 'initial'
+    model2.id = 'learned'
+    save_to_xmcda("%s/%s" % (directory, t.test_name),
+                  model, model2)
 
     # Input params
     t['seed'] = seed
@@ -299,6 +305,10 @@ if __name__ == "__main__":
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     default_filename = "data/test_%s-%s.csv" % ("mip_mrsort_veto", dt)
     options.filename = read_csv_filename(options.filename, default_filename)
+
+    directory = "data/test_%s-%s" % ("mip_mrsort_veto", dt)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
     run_tests(options.na, options.nc, options.ncat, options.na_gen,
               options.pcerrors, options.nseeds,
