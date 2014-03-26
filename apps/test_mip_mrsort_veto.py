@@ -115,6 +115,10 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_param, pcerrors):
 
     model.id = 'initial'
     model2.id = 'learned'
+    a.id, pt.id = 'learning_set', 'learning_set'
+    aa.id, aa2.id = 'learning_set_m1', 'learning_set_m2'
+    a_gen.id, pt_gen.id = 'test_set', 'test_set'
+    aa_gen.id, aa_gen2.id = 'test_set_m1', 'test_set_m2'
     save_to_xmcda("%s/%s" % (directory, t.test_name),
                   model, model2, a, a_gen, pt, pt_gen, aa, aa2,
                   aa_gen, aa_gen2)
