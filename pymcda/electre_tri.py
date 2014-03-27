@@ -320,7 +320,7 @@ class MRSort(ElectreTri):
             diff = y.performances[c.id] - x.performances[c.id]
             diff *= c.direction
             v = self.get_threshold_by_profile(c, 'v', profile)
-            if diff >= v:
+            if v is not None and diff >= v:
                 if self.veto_weights is None:
                     return 1
                 else:
