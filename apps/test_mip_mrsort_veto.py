@@ -110,7 +110,7 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_param, pcerrors):
     ca_gen_err = compute_ca(aa_gen_err, aa_gen2)
 
     # Save all infos in test_result class
-    t = test_result("%s-%d-%d-%d-%d-%d-%d" % (seed, na, nc, ncat,
+    t = test_result("%s-%d-%d-%d-%d-%s-%d" % (seed, na, nc, ncat,
                     na_gen, veto_param, pcerrors))
 
     model.id = 'initial'
