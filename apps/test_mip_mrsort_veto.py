@@ -56,7 +56,7 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_param, pcerrors):
 
     model2 = MRSort(model.criteria, None, None, None,
                     model.categories_profiles, None, None, None)
-    if vetot == 'binary':
+    if algo == MipMRSortVC and vetot == 'binary':
         w = {c.id: 1 / len(model.criteria) for c in model.criteria}
         w1 = w.keys()[0]
         w[w1] += 1 - sum(w.values())
