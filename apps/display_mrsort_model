@@ -67,9 +67,10 @@ for m in models:
 
     view = _MyGraphicsview()
     graph = QGraphicsSceneEtri(m, worst, best, view.size())
-    for veto in m.veto:
-        vb = m.bpt[veto.id] - veto
-        graph.plot_alternative_performances(vb)
+    if m.veto is not None:
+        for veto in m.veto:
+            vb = m.bpt[veto.id] - veto
+            graph.plot_alternative_performances(vb)
 
     view.setRenderHint(QtGui.QPainter.Antialiasing)
     view.setSizePolicy(sizePolicy)
