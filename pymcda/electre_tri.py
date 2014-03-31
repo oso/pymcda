@@ -275,8 +275,8 @@ class ElectreTri(McdaObject):
 
         return root
 
-    def from_xmcda(self, xmcda):
-        xmcda = find_xmcda_tag(xmcda, 'ElectreTri')
+    def from_xmcda(self, xmcda, id = None):
+        xmcda = find_xmcda_tag(xmcda, 'ElectreTri', id)
 
         self.id = xmcda.get('id')
         value = xmcda.find(".//methodParameters/parameter/value[@id='lambda']")
@@ -381,10 +381,10 @@ class MRSort(ElectreTri):
 
         return root
 
-    def from_xmcda(self, xmcda):
-        super(MRSort, self).from_xmcda(xmcda)
+    def from_xmcda(self, xmcda, id = None):
+        super(MRSort, self).from_xmcda(xmcda, id)
 
-        xmcda = find_xmcda_tag(xmcda, 'ElectreTri')
+        xmcda = find_xmcda_tag(xmcda, 'ElectreTri', id)
         value = xmcda.find(".//methodParameters/parameter/value[@id='veto_lbda']")
         if value is not None:
             self.veto_lbda = unmarshal(value.getchildren()[0])
