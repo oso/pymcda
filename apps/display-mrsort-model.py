@@ -3,6 +3,7 @@
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 from xml.etree import ElementTree
+import bz2
 
 from PyQt4 import QtCore
 from PyQt4 import QtGui
@@ -10,12 +11,16 @@ from pymcda.electre_tri import MRSort
 from pymcda.types import AlternativePerformances
 from pymcda.ui.graphic import QGraphicsSceneEtri
 from pymcda.ui.graphic import _MyGraphicsview
+from test_utils import is_bz2_file
 
 xmcda_models = []
 for f in sys.argv[1:]:
     if not os.path.isfile(f):
         printf("Invalid file %s" % f)
         sys.exit(1)
+
+    if is_bz2_file(f) is True:
+        f = bz2.BZ2File(f)
 
     tree = ElementTree.parse(f)
     root = tree.getroot()
