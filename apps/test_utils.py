@@ -1,5 +1,6 @@
 from __future__ import print_function
 from __future__ import division
+import bz2
 import csv
 import os
 import sys
@@ -504,7 +505,7 @@ if __name__ == "__main__":
 XMCDA_URL = 'http://www.decision-deck.org/2009/XMCDA-2.1.0'
 
 def save_to_xmcda(filepath, *elems):
-    f = open(filepath, "w")
+    f = bz2.BZ2File(filepath, "w")
     xmcda = ElementTree.Element("{%s}XMCDA" % XMCDA_URL)
 
     for elem in elems:
@@ -513,3 +514,27 @@ def save_to_xmcda(filepath, *elems):
     buf = ElementTree.tostring(xmcda, encoding="UTF-8", method="xml")
     f.write(buf)
     f.close()
+
+def get_file_compression(filepath):
+    magic_dict = {
+        "\x1f\x8b\x08": "gz",
+        "\x42\x5a\x68": "bz2",
+        "\x50\x4b\x03\x04": "zip"
+    }
+
+    max_len = max(len(x) for x in magic_dict)
+
+    with open(filepath) as f:
+        file_start = f.read(max_len)
+
+    for magic, filetype in magic_dict.items():
+        if file_start.startswith(magic):
+            return filetype
+
+    return "none"
+
+def is_bz2_file(filepath):
+    if get_file_compression(filepath) == 'bz2':
+        return True
+
+    return False
