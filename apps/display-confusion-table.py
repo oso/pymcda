@@ -2,6 +2,7 @@
 
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
+import bz2
 from xml.etree import ElementTree
 
 from pymcda.electre_tri import MRSort
@@ -9,11 +10,15 @@ from pymcda.types import PerformanceTable
 from pymcda.utils import compute_ca
 from pymcda.utils import compute_confusion_matrix
 from pymcda.utils import print_confusion_matrix
+from test_utils import is_bz2_file
 
 f = sys.argv[1]
 if not os.path.isfile(f):
     printf("Invalid file %s" % f)
     sys.exit(1)
+
+if is_bz2_file(f) is True:
+    f = bz2.BZ2File(f)
 
 tree = ElementTree.parse(f)
 root = tree.getroot()
