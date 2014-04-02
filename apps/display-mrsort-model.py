@@ -16,7 +16,7 @@ from test_utils import is_bz2_file
 xmcda_models = []
 for f in sys.argv[1:]:
     if not os.path.isfile(f):
-        printf("Invalid file %s" % f)
+        print("Invalid file %s" % f)
         sys.exit(1)
 
     if is_bz2_file(f) is True:
