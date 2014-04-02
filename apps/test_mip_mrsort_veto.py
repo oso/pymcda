@@ -34,7 +34,7 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_param, pcerrors):
     elif vetot == 'coalition':
         model = generate_random_mrsort_model_with_coalition_veto(nc, ncat,
                             seed,
-                            veto_weights = True,
+                            veto_weights = indep_veto_weights,
                             veto_func = veto_func,
                             veto_param = veto_param)
 
@@ -65,7 +65,11 @@ def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_param, pcerrors):
                                               for c in model.criteria])
         model2.veto_lbda = min(w.values())
 
-    mip = algo(model2, pt, aa)
+    if algo == MipMRSortVC:
+        mip = MipMRSortVC(model2, pt, aa, indep_veto_weights)
+    else:
+        mip = MipMRSort(model2, pt, aa)
+
     mip.solve()
 
     t_total = time.time() - t1
@@ -161,6 +165,7 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds,
     writer.writerow(['algorithm', algo.__name__])
     writer.writerow(['veto type', vetot])
     writer.writerow(['veto mode', vetom])
+    writer.writerow(['veto weights', indep_veto_weights])
     writer.writerow(['veto param', vparam])
     writer.writerow(['na', na])
     writer.writerow(['nc', nc])
@@ -242,13 +247,17 @@ if __name__ == "__main__":
                              "(noveto)")
     parser.add_option("-y", "--vetotype", action = "store", type="string",
                       dest = "vetot",
-                      help = "Type of veto (binary/coalition) ")
+                      help = "Type of veto (binary/coalition)")
     parser.add_option("-v", "--vetomode", action = "store", type="string",
                       dest = "vetom",
-                      help = "Mode of veto (absolute/proportional) ")
+                      help = "Mode of veto (absolute/proportional)")
     parser.add_option("-p", "--vetoparam", action = "store", type="string",
                       dest = "vparam",
-                      help = "Mode of veto (absolute/proportional) ")
+                      help = "Mode of veto (absolute/proportional)")
+    parser.add_option("-i", "--indep_veto_weights", action = "store",
+                      type="string",
+                      dest = "indep_veto_weights",
+                      help = "Independent veto weights")
 
     (options, args) = parser.parse_args()
 
@@ -278,6 +287,20 @@ if __name__ == "__main__":
             options.vetot = 'coalition'
 
     vetot = options.vetot
+
+    while options.vetot == 'coalition' and \
+            (options.indep_veto_weights is None \
+                or (options.indep_veto_weights != True \
+                    and options.indep_veto_weights != False)):
+        print("1. Model with different concordance and veto weights")
+        print("2. Model with same concordance and veto weights")
+        i = raw_input("What kind of weights? ")
+        if i == '1':
+            options.indep_veto_weights = True
+        elif i == '2':
+            options.indep_veto_weights = False
+
+    indep_veto_weights = options.indep_veto_weights
 
     if options.vetom is None or (options.vetom != 'absolute'
                                  and options.vetom != 'proportional'):
