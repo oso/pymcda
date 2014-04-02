@@ -9,7 +9,7 @@ verbose = False
 
 class MipMRSortVC():
 
-    def __init__(self, model, pt, aa, same_veto_and_conc_weights = False,
+    def __init__(self, model, pt, aa, indep_veto_weights = True,
                  epsilon = 0.0001):
         self.pt = pt
         self.aa = aa
@@ -17,7 +17,7 @@ class MipMRSortVC():
         self.criteria = model.criteria
         self.cps = model.categories_profiles
 
-        self.same_veto_and_conc_weights = same_veto_and_conc_weights
+        self.indep_veto_weights = indep_veto_weights
         self.epsilon = epsilon
 
         self.__profiles = self.cps.get_ordered_profiles()
@@ -526,7 +526,7 @@ class MipMRSortVC():
                                 rhs = [self.model.veto_weights[c.id].value]
                                )
 
-        if self.same_veto_and_conc_weights is True:
+        if self.indep_veto_weights is False:
             for c in self.criteria:
                 constraints.add(names = ["z_%s" % c.id],
                                 lin_expr =
@@ -703,7 +703,7 @@ if __name__ == "__main__":
     model2.veto_weights = None
     model2.veto_lbda = None
 
-    mip = MipMRSortVC(model2, pt, aa, True)
+    mip = MipMRSortVC(model2, pt, aa, False)
     mip.solve()
 
     print model2.veto
