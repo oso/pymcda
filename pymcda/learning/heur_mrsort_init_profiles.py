@@ -68,10 +68,13 @@ class HeurMRSortInitProfiles():
         cats = self.model.categories[:]
         cats.reverse()
 
+        profiles = self.model.profiles[:]
+        profiles.reverse()
+
         bpt = PerformanceTable()
         pabove = self.pt_sorted.pt.get_best(self.model.criteria)
         for i in range(len(cats) - 1):
-            profile_id = "b%d" % (len(cats) - (i + 1))
+            profile_id = profiles[i]
             bp = self.init_profile(profile_id, cats[i], cats[i+1], pabove)
             bpt.append(bp)
             pabove = bp
