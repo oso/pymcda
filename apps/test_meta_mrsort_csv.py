@@ -224,7 +224,7 @@ if __name__ == "__main__":
                        % (data.name, dt)
     options.filename = read_csv_filename(options.filename, default_filename)
 
-    directory = "data/test_meta_mrsort3-%s-%s" % (data.name, dt)
+    directory = options.filename + "-data"
     if not os.path.exists(directory):
         os.makedirs(directory)
 
