@@ -48,7 +48,7 @@ def run_test(seed, data, pclearning, nseg):
 
     model = AVFSort(data.c, cvs, cfs, catv)
 
-    ordered_categories = model.categories()
+    ordered_categories = model.categories
 
     # CA learning set
     aa_learning2 = model.get_assignments(pt_learning)
