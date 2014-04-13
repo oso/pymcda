@@ -85,7 +85,7 @@ class AVFSort(Uta):
 
     @property
     def categories(self):
-        return self.cat_values.to_categories()
+        return self.cat_values.to_categories().get_ordered_categories()
 
     @property
     def cat_values(self):

@@ -167,7 +167,7 @@ class tests_indicators(unittest.TestCase):
         alts = generate_alternatives(1000)
         pt = generate_random_performance_table(alts, crits)
         aa = model.get_assignments(pt)
-        categories = model.categories.get_ordered_categories()
+        categories = model.categories
         aa_err = add_errors_in_assignments(aa, categories, 1)
 
         auck = model.auck(aa_err, pt, 1)
