@@ -253,7 +253,7 @@ class LpAVFSort2(object):
 
                 p1 = p2
 
-            s.ph_in = True
+            s.p2_in = True
             cf = CriterionFunction(cid, f)
             cfs.append(cf)
 
@@ -298,7 +298,7 @@ class LpAVFSort2(object):
 
                 p1 = p2
 
-            s.ph_in = True
+            s.p2_in = True
             cf = CriterionFunction(cid, f)
             cfs.append(cf)
 

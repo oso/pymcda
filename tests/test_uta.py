@@ -19,15 +19,15 @@ class tests_uta(unittest.TestCase):
         cv3 = CriterionValue("c3", 0.25)
         cvs = CriteriaValues([cv1, cv2, cv3])
 
-        f1 = PiecewiseLinear([Segment(Point(0, 0), Point(2.5, 0.2)),
-                               Segment(Point(2.5, 0.2), Point(5, 1), True,
-                                                              True)])
-        f2 = PiecewiseLinear([Segment(Point(0, 0), Point(2.5, 0.8)),
-                               Segment(Point(2.5, 0.8), Point(5, 1), True,
-                                                              True)])
-        f3 = PiecewiseLinear([Segment(Point(0, 0), Point(2.5, 0.5)),
-                               Segment(Point(2.5, 0.5), Point(5, 1), True,
-                                                              True)])
+        f1 = PiecewiseLinear([Segment('s1', Point(0, 0), Point(2.5, 0.2)),
+                               Segment('s2', Point(2.5, 0.2), Point(5, 1),
+                                       True, True)])
+        f2 = PiecewiseLinear([Segment('s1', Point(0, 0), Point(2.5, 0.8)),
+                               Segment('s2', Point(2.5, 0.8), Point(5, 1),
+                                       True, True)])
+        f3 = PiecewiseLinear([Segment('s1', Point(0, 0), Point(2.5, 0.5)),
+                               Segment('s2', Point(2.5, 0.5), Point(5, 1),
+                                       True, True)])
         cf1 = CriterionFunction("c1", f1)
         cf2 = CriterionFunction("c2", f2)
         cf3 = CriterionFunction("c3", f3)
@@ -65,15 +65,15 @@ class tests_avfsort(unittest.TestCase):
         cv3 = CriterionValue("c3", 0.25)
         cvs = CriteriaValues([cv1, cv2, cv3])
 
-        f1 = PiecewiseLinear([Segment(Point(0, 0), Point(2.5, 0.2)),
-                               Segment(Point(2.5, 0.2), Point(5, 1), True,
-                                                              True)])
-        f2 = PiecewiseLinear([Segment(Point(0, 0), Point(2.5, 0.8)),
-                               Segment(Point(2.5, 0.8), Point(5, 1), True,
-                                                              True)])
-        f3 = PiecewiseLinear([Segment(Point(0, 0), Point(2.5, 0.5)),
-                               Segment(Point(2.5, 0.5), Point(5, 1), True,
-                                                              True)])
+        f1 = PiecewiseLinear([Segment('s1', Point(0, 0), Point(2.5, 0.2)),
+                               Segment('s2', Point(2.5, 0.2), Point(5, 1),
+                                       True, True)])
+        f2 = PiecewiseLinear([Segment('s1', Point(0, 0), Point(2.5, 0.8)),
+                               Segment('s2', Point(2.5, 0.8), Point(5, 1),
+                                       True, True)])
+        f3 = PiecewiseLinear([Segment('s1', Point(0, 0), Point(2.5, 0.5)),
+                               Segment('s2', Point(2.5, 0.5), Point(5, 1),
+                                       True, True)])
         cf1 = CriterionFunction("c1", f1)
         cf2 = CriterionFunction("c2", f2)
         cf3 = CriterionFunction("c3", f3)

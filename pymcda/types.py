@@ -1361,7 +1361,7 @@ class CriteriaFunctions(McdaDict):
 
 class CriterionFunction(McdaObject):
 
-    def __init__(self, id, function):
+    def __init__(self, id = None, function = None):
         self.id = id
         self.function = function
 
@@ -1406,12 +1406,12 @@ class CriterionFunction(McdaObject):
 
         self.id = xmcda.find('.//criterionID').text
 
-        value = xmcda.find('.//piecewise_linear')
-        if value:
+        value = xmcda.find('.//piecewiseLinear')
+        if value is not None:
             self.function = PiecewiseLinear().from_xmcda(value)
 
         value = xmcda.find('.//points')
-        if value:
+        if value is not None:
             self.function = Points().from_xmcda(value)
 
         return self
@@ -1436,42 +1436,70 @@ class Linear(object):
 
 class Segment(McdaObject):
 
-    def __init__(self, p1, p2, p1_in = True, p2_in = False):
-        if p1.x <= p2.x:
-            self.pl, self.ph = p1, p2
-            self.pl_in, self.ph_in = p1_in, p2_in
-        else:
-            self.pl, self.ph = p2, p1
-            self.pl_in, self.ph_in = p2_in, p1_in
+    def __init__(self, id = None, p1 = None, p2 = None,
+                       p1_in = True, p2_in = False):
+        self.id = id
+        self.p1 = p1
+        self.p2 = p2
+        self.p1_in = p1_in
+        self.p2_in = p2_in
 
     def __repr__(self):
         """Manner to represent the MCDA object"""
 
-        return "segment(%s,%s)" % (self.pl, self.ph)
+        return "segment[%s](%s,%s)" % (self.id, self.p1, self.p2)
+
+    @property
+    def xmin(self):
+        return min([self.p1.x, self.p2.x])
+
+    @property
+    def xmax(self):
+        return max([self.p1.x, self.p2.x])
+
+    @property
+    def ymin(self):
+        return min([self.p1.y, self.p2.y])
+
+    @property
+    def ymax(self):
+        return max([self.p1.y, self.p2.y])
 
     def slope(self):
-        d = self.ph.x - self.pl.x
+        d = self.p2.x - self.p1.x
         if d == 0:
             return float("inf")
         else:
-            return (self.ph.y - self.pl.y) / d
+            return (self.p2.y - self.p1.y) / d
 
     def y(self, x):
-        if x < self.pl.x or x > self.ph.x:
+        if x < self.xmin or x > self.xmax:
             raise ValueError("Value out of the segment")
-        if x == self.pl.x and self.pl_in is False:
+        if x == self.p1.x and self.p1_in is False:
             raise ValueError("Value out of the segment")
-        if x == self.ph.x and self.ph_in is False:
+        if x == self.p2.x and self.p2_in is False:
             raise ValueError("Value out of the segment")
 
         k = self.slope()
         if k == 0:
-            return self.pl.y
+            return self.p1.y
 
-        return self.pl.y + k * (x - self.pl.x)
+        return self.p1.y + k * (x - self.p1.x)
+
+    def x_is_included(self, x):
+        if x > self.xmax or x < self.xmin:
+            return False
+
+        if x == self.p1.x and self.p1_in is False:
+            return False
+
+        if x == self.p2.x and self.p2_in is False:
+            return False
+
+        return True
 
     def pprint(self):
-        return "%s-%s" % (self.pl, self.ph)
+        return "%s-%s" % (self.p1, self.p2)
 
     def display(self):
         print(self.pprint())
@@ -1486,9 +1514,16 @@ class Segment(McdaObject):
         elif self.id is not None:
             root.set('id', self.id)
 
-        for elem in self:
-            xmcda = elem.to_xmcda()
+        for obj in ['p1', 'p2']:
+            mcda = getattr(self, obj)
+            mcda.id = obj
+            xmcda = mcda.to_xmcda()
             root.append(xmcda)
+
+        p1_in = ElementTree.SubElement(root, 'p1_in')
+        p1_in.text = str(self.p1_in)
+        p2_in = ElementTree.SubElement(root, 'p2_in')
+        p2_in.text = str(self.p2_in)
 
         return root
 
@@ -1497,37 +1532,31 @@ class Segment(McdaObject):
 
         xmcda = find_xmcda_tag(xmcda, 'segment', id)
 
+        self.id = xmcda.get('id')
+
         tag_list = xmcda.getiterator('point')
-        if tag_list != 2:
+        if len(tag_list) != 2:
             raise ValueError('segment:: invalid number of points')
 
-        p1 = Point().from_xmcda(tag_list[0])
-        p2 = Point().from_xmcda(tag_list[1])
+        self.p1 = Point().from_xmcda(tag_list[0])
+        self.p2 = Point().from_xmcda(tag_list[1])
 
-        if p1.x <= p2.x:
-            self.pl, self.ph = p1, p2
-        else:
-            self.pl, self.ph = p2, p1
+        p1_in = xmcda.find('.//p1_in')
+        self.p1_in = eval(p1_in.text)
+        p2_in = xmcda.find('.//p2_in')
+        self.p2_in = eval(p2_in.text)
 
         return self
 
-class PiecewiseLinear(list):
+class PiecewiseLinear(McdaDict):
 
     def __repr__(self):
-        return "piecewise_linear(%s)" % self[:]
+        return "piecewise_linear[%s](%s)" % (self.id, self.values())
 
     def find_segment(self, x):
         for s in self:
-            if s.pl.x > x or s.ph.x < x:
-                continue
-
-            if s.pl.x == x and s.pl_in is False:
-                continue
-
-            if s.ph.x == x and s.ph_in is False:
-                continue
-
-            return s
+            if s.x_is_included(x) is True:
+                return s
 
         return None
 
@@ -1540,33 +1569,33 @@ class PiecewiseLinear(list):
 
     def multiply_y(self, value):
         for s in self:
-            s.pl.y *= value
-            s.ph.y *= value
+            s.p1.y *= value
+            s.p2.y *= value
 
     @property
     def xmin(self):
-        x = [s.pl.x for s in self]
+        x = [s.xmin for s in self]
         return min(x)
 
     @property
     def xmax(self):
-        x = [s.ph.x for s in self]
+        x = [s.xmax for s in self]
         return max(x)
 
     @property
     def ymin(self):
-        y = [s.pl.y for s in self] + [s.ph.y for s in self]
+        y = [s.ymin for s in self]
         return min(y)
 
     @property
     def ymax(self):
-        y = [s.pl.y for s in self] + [s.ph.y for s in self]
+        y = [s.ymax for s in self]
         return max(y)
 
     def get_ordered(self):
         """Return segments ordered by x value"""
 
-        return sorted(self, key = lambda s: s.pl.x)
+        return sorted(self, key = lambda s: s.xmin)
 
     def pprint(self):
         string = "f("
@@ -1578,15 +1607,10 @@ class PiecewiseLinear(list):
     def display(self):
         print(self.pprint())
 
-    def to_xmcda(self, id = None):
+    def to_xmcda(self):
         """Convert the MCDA object into XMCDA output"""
 
         root = ElementTree.Element('piecewiseLinear')
-
-        if id is not None:
-            root.set('id', id)
-        elif self.id is not None:
-            root.set('id', self.id)
 
         for elem in self:
             xmcda = elem.to_xmcda()
@@ -1643,7 +1667,7 @@ class Points(list):
 
 class Point(McdaObject):
 
-    def __init__(self, x, y, id = None):
+    def __init__(self, x = None, y = None, id = None):
         self.id = id
         self.x = x
         self.y = y

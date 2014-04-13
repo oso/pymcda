@@ -277,13 +277,13 @@ class LpAVFSort(object):
 
                 p2 = Point(x, ui)
 
-                s = Segment(p1, p2)
+                s = Segment("s%d" % (i + 1), p1, p2)
                 f.append(s)
 
                 p1 = p2
 
-            s.pl_in = True
-            s.ph_in = True
+            s.p1_in = True
+            s.p2_in = True
             cf = CriterionFunction(cs.id, f)
             cfs.append(cf)
 
@@ -329,13 +329,13 @@ class LpAVFSort(object):
 
                 p2 = Point(x, ui)
 
-                s = Segment(p1, p2)
+                s = Segment("s%d" % (i + 1), p1, p2)
                 f.append(s)
 
                 p1 = p2
 
-            s.pl_in = True
-            s.ph_in = True
+            s.p1_in = True
+            s.p2_in = True
             cf = CriterionFunction(cs.id, f)
             cfs.append(cf)
 

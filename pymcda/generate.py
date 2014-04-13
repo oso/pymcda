@@ -169,14 +169,14 @@ def generate_random_piecewise_linear(gi_min = 0, gi_max = 1, n_segments = 3,
 
     f = PiecewiseLinear([])
     for i in range(n_segments):
-        a = Point(gi_min + i * interval, r[i])
-        b = Point(gi_min + (i + 1) * interval, r[i + 1])
-        s = Segment(a, b)
+        a = Point(round(gi_min + i * interval, k), r[i])
+        b = Point(round(gi_min + (i + 1) * interval, k), r[i + 1])
+        s = Segment("s%d" % (i + 1), a, b)
 
         f.append(s)
 
-    s.ph_in = True
-    s.pl_in = True
+    s.p1_in = True
+    s.p2_in = True
 
     return f
 
@@ -212,7 +212,9 @@ def generate_random_plinear_preference_function(crits, ap_worst, ap_best):
         b = Point(r[0],0)
         c = Point(r[1],1)
         d = Point(float("inf"), 1)
-        f = PiecewiseLinear([Segment(a, b), Segment(b, c), Segment(c, d)])
+        f = PiecewiseLinear([Segment('s1', a, b),
+                             Segment('s2', b, c),
+                             Segment('s3', c, d)])
 
         cf = CriterionFunction(crit.id, f)
         cfs.append(cf)
