@@ -45,7 +45,7 @@ def run_test(seed, data, pclearning, nseg):
 
     t_total = time.time() - t1
 
-    model = AVFSort(c, cvs, cfs, catv)
+    model = AVFSort(data.c, cvs, cfs, catv)
 
     ordered_categories = model.categories.get_ordered_categories()
 
