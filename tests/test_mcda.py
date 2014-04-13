@@ -128,6 +128,13 @@ class tests_xmcda(unittest.TestCase):
         model_from = MRSort().from_xmcda(xmcda)
         self.assertEqual(model, model_from)
 
+    def test011(self):
+        model = generate_random_avfsort_model(5, 3, 3, 3)
+        xmcda = model.to_xmcda()
+
+        model_from = AVFSort().from_xmcda(xmcda)
+        self.assertEqual(model, model_from)
+
 class tests_Segment(unittest.TestCase):
 
     def test001(self):
