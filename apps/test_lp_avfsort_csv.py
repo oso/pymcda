@@ -20,6 +20,7 @@ from pymcda.utils import compute_confusion_matrix
 from pymcda.uta import AVFSort
 from test_utils import test_result, test_results
 from test_utils import load_mcda_input_data
+from test_utils import save_to_xmcda
 
 def run_test(seed, data, pclearning, nseg):
     random.seed(seed)
@@ -78,6 +79,14 @@ def run_test(seed, data, pclearning, nseg):
                                         ordered_categories)
 
     t = test_result("%s-%d-%d" % (data.name, seed, pclearning))
+    model.id = 'learned'
+    aa_learning.id, aa_test.id = 'learning_set', 'test_set'
+    pt_learning.id, pt_test.id = 'learning_set', 'test_set'
+    print(data.c)
+    save_to_xmcda("%s/%s.bz2" % (directory, t.test_name),
+                  model, aa_learning, aa_test, pt_learning, pt_test)
+    print(data.c)
+
     t['seed'] = seed
     t['na'] = len(data.a)
     t['nc'] = len(data.c)
@@ -189,6 +198,10 @@ if __name__ == "__main__":
     default_filename = "data/test_lp_avfsort-%s-%s.csv" \
                        % (data.name, dt)
     options.filename = read_csv_filename(options.filename, default_filename)
+
+    directory = options.filename + "-data"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
     run_tests(options.nseeds, data, options.pclearning, options.ns,
               options.filename)
