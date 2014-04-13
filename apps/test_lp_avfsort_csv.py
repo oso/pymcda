@@ -82,10 +82,8 @@ def run_test(seed, data, pclearning, nseg):
     model.id = 'learned'
     aa_learning.id, aa_test.id = 'learning_set', 'test_set'
     pt_learning.id, pt_test.id = 'learning_set', 'test_set'
-    print(data.c)
     save_to_xmcda("%s/%s.bz2" % (directory, t.test_name),
                   model, aa_learning, aa_test, pt_learning, pt_test)
-    print(data.c)
 
     t['seed'] = seed
     t['na'] = len(data.a)
