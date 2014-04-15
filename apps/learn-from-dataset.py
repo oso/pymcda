@@ -16,6 +16,7 @@ from pymcda.utils import compute_confusion_matrix
 from pymcda.utils import print_confusion_matrix
 from pymcda.utils import print_pt_and_assignments
 from test_utils import load_mcda_input_data
+from test_utils import save_to_xmcda
 
 def usage():
     print("%s file.csv meta_etri|mip_etri|lp_utadis" % sys.argv[0])
@@ -70,6 +71,12 @@ else:
     sys.exit(1)
 
 t_total = time.time() - t1
+
+model.id = 'learned'
+pt.id = 'learning'
+aa.id = 'learning'
+
+save_to_xmcda("data/%s-all-%s.bz2" % (algo, data.name), aa, pt, model)
 
 aa2 = model.get_assignments(data.pt)
 
