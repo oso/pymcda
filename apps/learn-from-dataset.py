@@ -73,10 +73,11 @@ else:
 t_total = time.time() - t1
 
 model.id = 'learned'
-pt.id = 'learning'
-aa.id = 'learning'
+data.pt.id = 'learning'
+data.aa.id = 'learning'
 
-save_to_xmcda("data/%s-all-%s.bz2" % (algo, data.name), aa, pt, model)
+save_to_xmcda("data/%s-all-%s.bz2" % (algo, data.name),
+              data.aa, data.pt, model)
 
 aa2 = model.get_assignments(data.pt)
 
