@@ -1,6 +1,7 @@
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import time
+import datetime
 from pymcda.electre_tri import MRSort
 from pymcda.generate import generate_categories_profiles
 from pymcda.pt_sorted import SortedPerformanceTable
@@ -76,7 +77,8 @@ model.id = 'learned'
 data.pt.id = 'learning_set'
 data.aa.id = 'learning_set'
 
-save_to_xmcda("data/%s-all-%s.bz2" % (algo, data.name),
+dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+save_to_xmcda("data/%s-all-%s-%s.bz2" % (algo, data.name, dt),
               data.aa, data.pt, model)
 
 aa2 = model.get_assignments(data.pt)
