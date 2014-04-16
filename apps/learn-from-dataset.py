@@ -73,8 +73,8 @@ else:
 t_total = time.time() - t1
 
 model.id = 'learned'
-data.pt.id = 'learning'
-data.aa.id = 'learning'
+data.pt.id = 'learning_set'
+data.aa.id = 'learning_set'
 
 save_to_xmcda("data/%s-all-%s.bz2" % (algo, data.name),
               data.aa, data.pt, model)
