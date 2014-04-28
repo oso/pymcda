@@ -216,6 +216,38 @@ class McdaObject(object):
 
         return deepcopy(self)
 
+class CriteriaSet(object):
+
+    def __init__(self, *criteria):
+        self.criteria = set(criteria)
+
+    def __repr__(self):
+        return "%s" % self.criteria
+
+    def __eq__(self, other):
+        return set(self.criteria) == set(other.criteria)
+
+    def to_xmcda(self):
+        """Convert the CriteriaSet into XMCDA"""
+
+        root = ElementTree.Element('criteriaSet')
+        for c in self.criteria:
+            el = ElementTree.SubElement(root, 'element')
+            cid = ElementTree.SubElement(el, 'criterionID')
+            cid.text = str(c)
+
+        return root
+
+    def from_xmcda(self, xmcda):
+        """Read the MCDA object from XMCDA input"""
+        xmcda = find_xmcda_tag(xmcda, 'criteriaSet')
+
+        tag_list = xmcda.getiterator('criterionID')
+        for tag in tag_list:
+            self.criteria.add(tag.text)
+
+        return self
+
 class Criteria(McdaDict):
 
     def __repr__(self):
