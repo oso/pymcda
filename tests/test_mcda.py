@@ -510,8 +510,47 @@ class tests_mcda_methods(unittest.TestCase):
         self.assertEqual(pt2[a2.id].performances,
                          {'c1': 2, 'c2': 5, 'c3': 2})
 
+class tests_CriteriaSet(unittest.TestCase):
+
+    def test001(self):
+        cs = CriteriaSet('c1', 'c2')
+        cv = CriterionValue('c1', 10)
+
+        self.assertTrue(cv.id_issubset(cs))
+
+    def test002(self):
+        cs = CriteriaSet('c1', 'c2')
+        cv = CriterionValue('c3', 10)
+
+        self.assertFalse(cv.id_issubset(cs))
+
+    def test003(self):
+        cs = CriteriaSet('c1', 'c2')
+        cv = CriterionValue(CriteriaSet('c1', 'c2'), 10)
+
+        self.assertTrue(cv.id_issubset(cs))
+
+    def test004(self):
+        cs = CriteriaSet('c1', 'c2')
+        cv = CriterionValue(CriteriaSet('c1', 'c3'), 10)
+
+        self.assertFalse(cv.id_issubset(cs))
+
+    def test005(self):
+        cs = 'c1'
+        cv = CriterionValue(CriteriaSet('c1', 'c2'), 10)
+
+        self.assertTrue(cv.id_issubset(cs))
+
+    def test006(self):
+        cs = 'c3'
+        cv = CriterionValue(CriteriaSet('c1', 'c2'), 10)
+
+        self.assertFalse(cv.id_issubset(cs))
+
 test_classes = [tests_xmcda, tests_Segment, tests_PiecewiseLinear,
-                tests_CategoriesValues, tests_csv, tests_mcda_methods]
+                tests_CategoriesValues, tests_csv, tests_mcda_methods,
+                tests_CriteriaSet]
 
 if __name__ == "__main__":
     suite = []
