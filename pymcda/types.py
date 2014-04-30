@@ -230,6 +230,15 @@ class CriteriaSet(object):
     def __iter__(self):
         return self.criteria.__iter__()
 
+    def add(self, x):
+        return self.criteria.add(x)
+
+    def remove(self, x):
+        return self.criteria.remove(x)
+
+    def discard(self, x):
+        return self.criteria.discard(x)
+
     def issubset(self, criteria):
         if isinstance(criteria, CriteriaSet) is False:
             return criteria in self.criteria
