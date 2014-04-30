@@ -186,6 +186,36 @@ class tests_mrsort(unittest.TestCase):
                 self.assertGreaterEqual(w1, lbda)
                 self.assertGreaterEqual(w2, lbda)
 
+    def test003(self):
+        random.seed(0)
+        crits = generate_criteria(5)
+        model = generate_random_mrsort_model(len(crits), 2)
+
+        alts = generate_alternatives(1000)
+        pt = generate_random_performance_table(alts, crits)
+        aa = model.get_assignments(pt)
+
+        aa = model.get_assignments(pt)
+
+        self.assertEqual(len(aa.get_alternatives_in_categories(['cat1'])), 65)
+        self.assertEqual(len(aa.get_alternatives_in_categories(['cat2'])), 935)
+
+    def test003(self):
+        random.seed(1)
+        crits = generate_criteria(5)
+        model = generate_random_mrsort_model(len(crits), 4)
+
+        alts = generate_alternatives(1000)
+        pt = generate_random_performance_table(alts, crits)
+        aa = model.get_assignments(pt)
+
+        aa = model.get_assignments(pt)
+
+        self.assertEqual(len(aa.get_alternatives_in_categories(['cat1'])), 123)
+        self.assertEqual(len(aa.get_alternatives_in_categories(['cat2'])), 146)
+        self.assertEqual(len(aa.get_alternatives_in_categories(['cat3'])), 287)
+        self.assertEqual(len(aa.get_alternatives_in_categories(['cat4'])), 444)
+
 class test_indicator(unittest.TestCase):
 
     def test001_auck_no_errors(self):
