@@ -227,6 +227,21 @@ class CriteriaSet(object):
     def __eq__(self, other):
         return set(self.criteria) == set(other.criteria)
 
+    def __iter__(self):
+        return self.criteria.__iter__()
+
+    def issubset(self, criteria):
+        if isinstance(criteria, CriteriaSet) is False:
+            return criteria in self.criteria
+
+        return self.criteria.issubset(criteria)
+
+    def issuperset(self, criteria):
+        if isinstance(criteria, CriteriaSet) is False:
+            return criteria in self.criteria
+
+        return self.criteria.issuperset(criteria)
+
     def to_xmcda(self):
         """Convert the CriteriaSet into XMCDA"""
 
@@ -511,6 +526,14 @@ class CriterionValue(McdaObject):
         """Manner to represent the MCDA object"""
 
         return "%s: %s" % (self.id, self.value)
+
+    def id_issubset(self, ids):
+        if isinstance(self.id, CriteriaSet):
+            return self.id.issubset(ids)
+        elif isinstance(ids, CriteriaSet):
+            return ids.issuperset(self.id)
+        else:
+            return self.id is ids
 
     def to_xmcda(self, id=None):
         """Convert the MCDA object into XMCDA output"""
