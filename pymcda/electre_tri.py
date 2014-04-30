@@ -302,17 +302,20 @@ class MRSort(ElectreTri):
         self.veto_weights = veto_weights
         self.veto_lbda = veto_lbda
 
-    def concordance(self, ap, profile):
-        w = wsum = 0
+    def criteria_in_favor(self, ap1, ap2):
+        criteria_list = []
+
         for c in self.criteria:
-            diff = profile.performances[c.id] - ap.performances[c.id]
+            diff = ap2.performances[c.id] - ap1.performances[c.id]
             diff *= c.direction
             if diff <= 0:
-                w += self.cv[c.id].value
+                criteria_list.append(c.id)
 
-            wsum += self.cv[c.id].value
+        return criteria_list
 
-        return w / wsum
+    def concordance(self, ap, profile):
+        return sum([self.cv[c].value
+                   for c in self.criteria_in_favor(ap, profile)])
 
     def veto_concordance(self, x, y, profile):
         w = 0
