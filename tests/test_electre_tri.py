@@ -154,10 +154,10 @@ class tests_mrsort(unittest.TestCase):
         cat = generate_categories(3)
         cps = generate_categories_profiles(cat)
 
-        bp1 = AlternativePerformances('b1', {'c1': 0.25, 'c2': 0.25,
-                                             'c3': 0.25, 'c4': 0.25})
-        bp2 = AlternativePerformances('b2', {'c1': 0.75, 'c2': 0.75,
+        bp1 = AlternativePerformances('b1', {'c1': 0.75, 'c2': 0.75,
                                              'c3': 0.75, 'c4': 0.75})
+        bp2 = AlternativePerformances('b2', {'c1': 0.25, 'c2': 0.25,
+                                             'c3': 0.25, 'c4': 0.25})
         bpt = PerformanceTable([bp1, bp2])
         lbda = 0.5
 
@@ -180,8 +180,8 @@ class tests_mrsort(unittest.TestCase):
                 self.assertLess(w1, lbda)
                 self.assertLess(w2, lbda)
             elif aa.category_id == 'cat2':
-                self.assertGreaterEqual(w1, lbda)
-                self.assertLess(w2, lbda)
+                self.assertLess(w1, lbda)
+                self.assertGreaterEqual(w2, lbda)
             else:
                 self.assertGreaterEqual(w1, lbda)
                 self.assertGreaterEqual(w2, lbda)
