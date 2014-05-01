@@ -249,8 +249,10 @@ class CriteriaSet(object):
     def issuperset(self, criteria):
         if isinstance(criteria, CriteriaSet) is False \
            and isinstance(criteria, set) is False:
+            print(criteria, "!!")
             return criteria in self.criteria
 
+        print(criteria, "!!")
         return self.criteria.issuperset(criteria)
 
     def to_xmcda(self):
@@ -545,7 +547,10 @@ class CriterionValue(McdaObject):
         if isinstance(self.id, CriteriaSet) or isinstance(self.id, set):
             return self.id.issubset(ids)
         elif isinstance(ids, CriteriaSet) or isinstance(ids, set):
-            return ids.issuperset(self.id)
+            if isinstance(self.id, str):
+                return self.id in ids
+            else:
+                return ids.issuperset(self.id)
         else:
             return self.id is ids
 
