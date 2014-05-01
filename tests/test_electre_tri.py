@@ -7,6 +7,7 @@ from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_random_performance_table
 from pymcda.generate import generate_categories
 from pymcda.generate import generate_categories_profiles
+from pymcda.types import CriteriaSet
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import AlternativePerformances, PerformanceTable
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
@@ -384,8 +385,61 @@ class tests_mrsort_vc(unittest.TestCase):
         self.assertEqual(ok, 1, "One or more alternatives were wrongly "
                          "assigned")
 
+class tests_mrsort_choquet(unittest.TestCase):
+
+    def test001(self):
+        c = generate_criteria(3)
+        cat = generate_categories(3)
+        cps = generate_categories_profiles(cat)
+
+        bp1 = AlternativePerformances('b1', {'c1': 0.75, 'c2': 0.75, 'c3': 0.75})
+        bp2 = AlternativePerformances('b2', {'c1': 0.25, 'c2': 0.25, 'c3': 0.25})
+        bpt = PerformanceTable([bp1, bp2])
+
+        cv1 = CriterionValue('c1', 0.2)
+        cv2 = CriterionValue('c2', 0.2)
+        cv3 = CriterionValue('c3', 0.2)
+        cv12 = CriterionValue(CriteriaSet('c1', 'c2'), -0.1)
+        cv23 = CriterionValue(CriteriaSet('c2', 'c3'), 0.2)
+        cv13 = CriterionValue(CriteriaSet('c1', 'c3'), 0.3)
+        cvs = CriteriaValues([cv1, cv2, cv3, cv12, cv23, cv13])
+
+        lbda = 0.6
+
+        model = MRSort(c, cvs, bpt, lbda, cps)
+
+        ap1 = AlternativePerformances('a1',
+                                      {'c1': 0.3, 'c2': 0.3, 'c3': 0.3})
+        ap2 = AlternativePerformances('a2',
+                                      {'c1': 0.8, 'c2': 0.8, 'c3': 0.8})
+        ap3 = AlternativePerformances('a3',
+                                      {'c1': 0.3, 'c2': 0.3, 'c3': 0.1})
+        ap4 = AlternativePerformances('a4',
+                                      {'c1': 0.3, 'c2': 0.1, 'c3': 0.3})
+        ap5 = AlternativePerformances('a5',
+                                      {'c1': 0.1, 'c2': 0.3, 'c3': 0.3})
+        ap6 = AlternativePerformances('a6',
+                                      {'c1': 0.8, 'c2': 0.8, 'c3': 0.1})
+        ap7 = AlternativePerformances('a7',
+                                      {'c1': 0.8, 'c2': 0.1, 'c3': 0.8})
+        ap8 = AlternativePerformances('a8',
+                                      {'c1': 0.1, 'c2': 0.8, 'c3': 0.8})
+        pt = PerformanceTable([ap1, ap2, ap3, ap4, ap5, ap6, ap7, ap8])
+
+        aa = model.get_assignments(pt)
+
+        self.assertEqual(aa['a1'].category_id, "cat2")
+        self.assertEqual(aa['a2'].category_id, "cat1")
+        self.assertEqual(aa['a3'].category_id, "cat3")
+        self.assertEqual(aa['a4'].category_id, "cat2")
+        self.assertEqual(aa['a5'].category_id, "cat2")
+        self.assertEqual(aa['a6'].category_id, "cat3")
+        self.assertEqual(aa['a7'].category_id, "cat1")
+        self.assertEqual(aa['a8'].category_id, "cat1")
+
 test_classes = [tests_electre_tri, tests_electre_tri_new_threshold,
-                tests_mrsort, test_indicator, test_xmcda, tests_mrsort_vc]
+                tests_mrsort, test_indicator, test_xmcda,
+                tests_mrsort_vc, tests_mrsort_choquet]
 
 if __name__ == "__main__":
     suite = []
