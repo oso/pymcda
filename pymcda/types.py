@@ -240,15 +240,15 @@ class CriteriaSet(object):
         return self.criteria.discard(x)
 
     def issubset(self, criteria):
-        if isinstance(criteria, CriteriaSet) is False and
-           isinstance(criteria, set) is False:
+        if isinstance(criteria, CriteriaSet) is False \
+           and isinstance(criteria, set) is False:
             return criteria in self.criteria
 
         return self.criteria.issubset(criteria)
 
     def issuperset(self, criteria):
-        if isinstance(criteria, CriteriaSet) is False and
-           isinstance(criteria, set) is False:
+        if isinstance(criteria, CriteriaSet) is False \
+           and isinstance(criteria, set) is False:
             return criteria in self.criteria
 
         return self.criteria.issuperset(criteria)
