@@ -6,6 +6,7 @@ from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import Criteria, CriteriaValues, PerformanceTable
 from pymcda.types import CategoriesProfiles
 from pymcda.types import McdaObject
+from pymcda.types import CriteriaSet
 from pymcda.types import marshal, unmarshal
 from pymcda.types import find_xmcda_tag
 from xml.etree import ElementTree
@@ -303,19 +304,20 @@ class MRSort(ElectreTri):
         self.veto_lbda = veto_lbda
 
     def criteria_in_favor(self, ap1, ap2):
-        criteria_list = []
+        criteria_set = set()
 
         for c in self.criteria:
             diff = ap2.performances[c.id] - ap1.performances[c.id]
             diff *= c.direction
             if diff <= 0:
-                criteria_list.append(c.id)
+                criteria_set.add(c.id)
 
-        return criteria_list
+        return criteria_set
 
     def concordance(self, ap, profile):
-        return sum([self.cv[c].value
-                   for c in self.criteria_in_favor(ap, profile)])
+        criteria_in_favor = self.criteria_in_favor(ap, profile)
+        return sum([c.value for c in self.cv
+                    if c.id_issubset(criteria_in_favor) is True])
 
     def veto_concordance(self, x, y, profile):
         w = 0
