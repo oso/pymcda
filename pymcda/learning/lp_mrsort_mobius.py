@@ -59,7 +59,6 @@ class LpMRSortMobius():
     def alternative_constraint(self, ap, bp):
         criteria_combi = self.criteria_in_favor(ap, bp)
         criteria_combi += [c for c in combinations(criteria_combi, 2)]
-
         return [1 if m in criteria_combi else 0 for m in self.mindices]
 
     def compute_constraints(self):
@@ -160,7 +159,7 @@ class LpMRSortMobius():
             constraints.add(names = ["u_%s%s_%s" % (c[0], c[1], c[0])],
                             lin_expr =
                                 [
-                                 [[mc, m0], [1, -1]],
+                                 [[mc, m0], [1, 1]],
                                 ],
                             senses = ["G"],
                             rhs = [0],
@@ -169,7 +168,7 @@ class LpMRSortMobius():
             constraints.add(names = ["u_%s%s_%s" % (c[0], c[1], c[1])],
                             lin_expr =
                                 [
-                                 [[mc, m1], [1, -1]],
+                                 [[mc, m1], [1, 1]],
                                 ],
                             senses = ["G"],
                             rhs = [0],
