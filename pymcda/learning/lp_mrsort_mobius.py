@@ -195,7 +195,7 @@ class LpMRSortMobius():
             cv.value = self.lp.solution.get_values(vname)
             cvs.append(cv)
 
-        self.model.cvs = cvs
+        self.model.cv = cvs
         self.model.lbda = self.lp.solution.get_values("lambda")
 
         return obj
