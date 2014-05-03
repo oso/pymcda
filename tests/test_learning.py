@@ -381,7 +381,7 @@ class tests_lp_mrsort_choquet(unittest.TestCase):
         lp = LpMRSortMobius(model2, pt, aa)
         obj = lp.solve()
 
-        aa2 = model.get_assignments(pt)
+        aa2 = model2.get_assignments(pt)
 
         self.assertEqual(obj, 0)
         self.assertEqual(aa, aa2)
