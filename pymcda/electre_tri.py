@@ -303,7 +303,7 @@ class MRSort(ElectreTri):
         self.veto_weights = veto_weights
         self.veto_lbda = veto_lbda
 
-    def criteria_in_favor(self, ap1, ap2):
+    def criteria_coalition(self, ap1, ap2):
         criteria_set = set()
 
         for c in self.criteria:
@@ -315,9 +315,13 @@ class MRSort(ElectreTri):
         return criteria_set
 
     def concordance(self, ap, profile):
-        criteria_in_favor = self.criteria_in_favor(ap, profile)
+        criteria_set = self.criteria_coalition(ap, profile)
         return sum([c.value for c in self.cv
-                    if c.id_issubset(criteria_in_favor) is True])
+                    if c.id_issubset(criteria_set) is True])
+
+    def coalition_weight(self, criteria_coalition):
+        return sum([c.value for c in self.cv
+                   if c.id_issubset(criteria_coalition) is True])
 
     def veto_concordance(self, x, y, profile):
         w = 0
