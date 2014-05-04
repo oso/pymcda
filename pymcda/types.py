@@ -241,14 +241,16 @@ class CriteriaSet(object):
 
     def issubset(self, criteria):
         if isinstance(criteria, CriteriaSet) is False \
-           and isinstance(criteria, set) is False:
+           and isinstance(criteria, set) is False \
+           and isinstance(criteria, frozenset) is False:
             return criteria in self.criteria
 
         return self.criteria.issubset(criteria)
 
     def issuperset(self, criteria):
         if isinstance(criteria, CriteriaSet) is False \
-           and isinstance(criteria, set) is False:
+           and isinstance(criteria, set) is False \
+           and isinstance(criteria, frozenset) is False:
             print(criteria, "!!")
             return criteria in self.criteria
 
@@ -544,9 +546,11 @@ class CriterionValue(McdaObject):
         return "%s: %s" % (self.id, self.value)
 
     def id_issubset(self, ids):
-        if isinstance(self.id, CriteriaSet) or isinstance(self.id, set):
+        if isinstance(self.id, CriteriaSet) or isinstance(self.id, set) \
+           or isinstance(self.id, frozenset):
             return self.id.issubset(ids)
-        elif isinstance(ids, CriteriaSet) or isinstance(ids, set):
+        elif isinstance(ids, CriteriaSet) or isinstance(ids, set) \
+           or isinstance(ids, frozenset):
             if isinstance(self.id, str):
                 return self.id in ids
             else:
