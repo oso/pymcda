@@ -32,12 +32,19 @@ def queue_get_retry(queue):
 
 class MetaMRSortPop3():
 
-    def __init__(self, nmodels, criteria, categories, pt_sorted, aa_ori):
+    def __init__(self, nmodels, criteria, categories, pt_sorted, aa_ori,
+                 heur_init_profiles = HeurMRSortInitProfiles,
+                 lp_weights = LpMRSortWeights,
+                 heur_profiles= MetaMRSortProfiles4):
         self.nmodels = nmodels
         self.criteria = criteria
         self.categories = categories
         self.pt_sorted = pt_sorted
         self.aa_ori = aa_ori
+
+        self.heur_init_profiles = heur_init_profiles
+        self.lp_weights = lp_weights
+        self.heur_profiles = heur_profiles
 
         self.metas = list()
         for i in range(self.nmodels):
@@ -47,7 +54,10 @@ class MetaMRSortPop3():
     def init_one_meta(self, seed):
         cps = generate_categories_profiles(self.categories)
         model = MRSort(self.criteria, None, None, None, cps)
-        meta = MetaMRSort3(model, self.pt_sorted, self.aa_ori)
+        meta = MetaMRSort3(model, self.pt_sorted, self.aa_ori,
+                           self.heur_init_profiles,
+                           self.lp_weights,
+                           self.heur_profiles)
         random.seed(seed)
         meta.random_state = random.getstate()
         return meta
@@ -90,23 +100,31 @@ class MetaMRSortPop3():
 
 class MetaMRSort3():
 
-    def __init__(self, model, pt_sorted, aa_ori):
+    def __init__(self, model, pt_sorted, aa_ori,
+                 heur_init_profiles = HeurMRSortInitProfiles,
+                 lp_weights = LpMRSortWeights,
+                 heur_profiles = MetaMRSortProfiles4):
         self.model = model
         self.pt_sorted = pt_sorted
         self.aa_ori = aa_ori
+
+        self.heur_init_profiles = heur_init_profiles
+        self.lp_weights = lp_weights
+        self.heur_profiles = heur_profiles
+
         self.ca = 0
 
         self.init_profiles()
-        self.lp = LpMRSortWeights(self.model, pt_sorted.pt, self.aa_ori)
+        self.lp = self.lp_weights(self.model, pt_sorted.pt, self.aa_ori)
 
         # Because MetaMRSortProfiles4 needs weights in initialization
         self.lp.solve()
 
-        self.meta = MetaMRSortProfiles4(self.model, pt_sorted, self.aa_ori)
+        self.meta = self.heur_profiles(self.model, pt_sorted, self.aa_ori)
 
     def init_profiles(self):
         cats = self.model.categories_profiles.to_categories()
-        heur = HeurMRSortInitProfiles(self.model, self.pt_sorted, self.aa_ori)
+        heur = self.heur_init_profiles(self.model, self.pt_sorted, self.aa_ori)
         heur.solve()
 
     def optimize(self, nmeta):
