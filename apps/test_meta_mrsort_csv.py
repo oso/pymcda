@@ -7,6 +7,11 @@ import time
 from collections import OrderedDict
 from itertools import product
 from pymcda.learning.meta_mrsort3 import MetaMRSortPop3
+from pymcda.learning.heur_mrsort_init_profiles import HeurMRSortInitProfiles
+from pymcda.learning.lp_mrsort_weights import LpMRSortWeights
+from pymcda.learning.heur_mrsort_profiles4 import MetaMRSortProfiles4
+from pymcda.learning.lp_mrsort_mobius import LpMRSortMobius
+from pymcda.learning.heur_mrsort_profiles_choquet import MetaMRSortProfilesChoquet
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import Alternatives, Criteria, PerformanceTable
 from pymcda.types import AlternativesAssignments, Categories
@@ -21,6 +26,10 @@ from pymcda.utils import compute_confusion_matrix
 from test_utils import test_result, test_results
 from test_utils import load_mcda_input_data
 from test_utils import save_to_xmcda
+
+heur_init_profiles = HeurMRSortInitProfiles
+lp_weights = LpMRSortWeights
+heur_profiles = MetaMRSortProfiles4
 
 def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
     random.seed(seed)
@@ -49,7 +58,10 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
     # Algorithm
     meta = MetaMRSortPop3(nmodels, model.criteria,
                           model.categories_profiles.to_categories(),
-                          pt_sorted, aa_learning)
+                          pt_sorted, aa_learning,
+                          heur_init_profiles,
+                          lp_weights,
+                          heur_profiles)
 
     for i in range(0, nloop):
         model, ca_learning = meta.optimize(nmeta)
@@ -130,6 +142,9 @@ def run_tests(nseeds, data, pclearning, nloop, nmodels, nmeta, filename):
 
     # Write the test options
     writer.writerow(['data', data.name])
+    writer.writerow(['heur_init_profiles', heur_init_profiles.__name__])
+    writer.writerow(['lp_weights', lp_weights.__name__])
+    writer.writerow(['heur_profiles', heur_profiles.__name__])
     writer.writerow(['nloop', nloop])
     writer.writerow(['nmodels', nmodels])
     writer.writerow(['nmeta', nmeta])
@@ -175,6 +190,9 @@ if __name__ == "__main__":
     from test_utils import read_csv_filename
 
     parser = OptionParser(usage = "python %s [options]" % sys.argv[0])
+    parser.add_option("-c", "--choquet", action = "store_true",
+                      dest = "choquet", default = False,
+                      help = "use MR-Sort Choquet")
     parser.add_option("-i", "--csvfile", action = "store", type="string",
                       dest = "csvfile",
                       help = "csv file with data")
@@ -205,6 +223,10 @@ if __name__ == "__main__":
     data = load_mcda_input_data(options.csvfile)
     if data is None:
         exit(1)
+
+    if options.choquet is True:
+        lp_weights = LpMRSortMobius
+        heur_profiles = MetaMRSortProfilesChoquet
 
     options.pclearning = read_multiple_integer(options.pclearning,
                                                "Percentage of data to " \
