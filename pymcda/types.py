@@ -230,6 +230,9 @@ class CriteriaSet(object):
     def __iter__(self):
         return self.criteria.__iter__()
 
+    def __str__(self):
+        return '[%s]' % ', '.join(map(str, self.criteria))
+
     def add(self, x):
         return self.criteria.add(x)
 
@@ -564,12 +567,15 @@ class CriterionValue(McdaObject):
         root = ElementTree.Element('criterionValue')
 
         if id is not None:
-            root.set('id', id)
+            root.set('id', str(id))
         elif self.id is not None:
-            root.set('id', self.id)
+            root.set('id', str(self.id))
 
         critid = ElementTree.SubElement(root, 'criterionID')
-        critid.text = self.id
+        if isinstance(self.id, CriteriaSet):
+            critid.append(self.id.to_xmcda())
+        else:
+            critid.text = self.id
         val = ElementTree.SubElement(root, 'value')
         val.append(marshal(self.value))
 
