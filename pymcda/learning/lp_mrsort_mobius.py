@@ -2,6 +2,7 @@ from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 from pymcda.types import CriterionValue, CriteriaValues
+from pymcda.types import CriteriaSet
 from itertools import combinations
 
 verbose = False
@@ -191,7 +192,10 @@ class LpMRSortMobius():
         mindices_map = dict(zip(self.mindices, m))
         for m, vname in mindices_map.items():
             cv = CriterionValue()
-            cv.id = m
+            if isinstance(m, tuple):
+                cv.id = CriteriaSet(*m)
+            else:
+                cv.id = m
             cv.value = self.lp.solution.get_values(vname)
             cvs.append(cv)
 
