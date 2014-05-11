@@ -93,6 +93,8 @@ class MetaMRSortPop3():
             meta.model.lbda = output[3]
             meta.random_state = output[4]
 
+        self.models = {meta.model: meta.ca for meta in self.metas}
+
         metas_sorted = sorted(self.metas, key = lambda (k): k.ca,
                               reverse = True)
 
