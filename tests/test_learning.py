@@ -374,7 +374,42 @@ class tests_lp_mrsort_choquet(unittest.TestCase):
         ap7 = AlternativePerformances('a7', {'c1': 0.8, 'c2': 0.1, 'c3': 0.8})
         ap8 = AlternativePerformances('a8', {'c1': 0.1, 'c2': 0.8, 'c3': 0.8})
         pt = PerformanceTable([ap1, ap2, ap3, ap4, ap5, ap6, ap7, ap8])
+        aa = model.get_assignments(pt)
 
+        model2 = MRSort(c, None, bpt, None, cps)
+        lp = LpMRSortMobius(model2, pt, aa)
+        obj = lp.solve()
+
+        aa2 = model2.get_assignments(pt)
+
+        self.assertEqual(obj, 0)
+        self.assertEqual(aa, aa2)
+
+    def test002(self):
+        c = generate_criteria(3)
+        cat = generate_categories(3)
+        cps = generate_categories_profiles(cat)
+
+        bp1 = AlternativePerformances('b1',
+                                      {'c1': 0.75, 'c2': 0.75, 'c3': 0.75})
+        bp2 = AlternativePerformances('b2',
+                                      {'c1': 0.25, 'c2': 0.25, 'c3': 0.25})
+        bpt = PerformanceTable([bp1, bp2])
+
+        cv1 = CriterionValue('c1', 0.2)
+        cv2 = CriterionValue('c2', 0.2)
+        cv3 = CriterionValue('c3', 0.2)
+        cv12 = CriterionValue(CriteriaSet('c1', 'c2'), -0.1)
+        cv23 = CriterionValue(CriteriaSet('c2', 'c3'), 0.2)
+        cv13 = CriterionValue(CriteriaSet('c1', 'c3'), 0.3)
+        cvs = CriteriaValues([cv1, cv2, cv3, cv12, cv23, cv13])
+
+        lbda = 0.6
+
+        model = MRSort(c, cvs, bpt, lbda, cps)
+
+        a = generate_alternatives(10000)
+        pt = generate_random_performance_table(a, model.criteria)
         aa = model.get_assignments(pt)
 
         model2 = MRSort(c, None, bpt, None, cps)
@@ -391,6 +426,7 @@ test_classes = [tests_lp_mrsort_weights, tests_heur_mrsort_profiles,
                 tests_heur_mrsort_profiles4, tests_mip_mrsort,
                 tests_heur_mrsort_init_profiles, tests_lp_avfsort,
                 tests_lp_mrsort_choquet]
+test_classes = [tests_lp_mrsort_choquet]
 
 if __name__ == "__main__":
     suite = []
