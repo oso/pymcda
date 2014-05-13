@@ -5,6 +5,9 @@ from itertools import product
 import random
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 
+def eq(a, b, eps=10e-10):
+    return abs(a-b) <= eps
+
 class MetaMRSortProfiles4():
 
     def __init__(self, model, pt_sorted, aa_ori):
@@ -145,7 +148,8 @@ class MetaMRSortProfiles4():
     def get_alternative_assignment(self, aid):
         profile = self.model.profiles[0]
         for profile in reversed(self.model.profiles):
-            if self.ct[profile][aid] >= self.model.lbda:
+            if self.ct[profile][aid] >= self.model.lbda \
+               or eq(self.ct[profile][aid], self.model.lbda):
                 return self.model.categories_profiles[profile].value.upper
 
         return self.model.categories_profiles[profile].value.lower
