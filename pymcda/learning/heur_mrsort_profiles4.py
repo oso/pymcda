@@ -301,7 +301,7 @@ if __name__ == "__main__":
     model2.bpt = generate_random_profiles(model.profiles, model.criteria)
     print('Original random profiles')
     print('========================')
-    model.bpt.display(criterion_ids = cids)
+    model2.bpt.display(criterion_ids = cids)
 
     pt_sorted = SortedPerformanceTable(pt)
     meta = MetaMRSortProfiles4(model2, pt_sorted, aa)
