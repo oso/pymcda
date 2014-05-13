@@ -515,12 +515,12 @@ class CriteriaValues(McdaDict):
         # Compute max column length
         cols_max = { }
         for cid in criterion_ids:
-            cols_max[cid] = max([len(fmt % self[cid].value), len(cid)])
+            cols_max[cid] = max([len(fmt % self[cid].value), len("%s" % cid)])
 
         # Print header
         line = "  "
         for cid in criterion_ids:
-            line += " " * (cols_max[cid] - len(cid)) + str(cid) + " "
+            line += " " * (cols_max[cid] - len("%s" % cid)) + str(cid) + " "
         print(line, file = out)
 
         # Print values
