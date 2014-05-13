@@ -20,7 +20,7 @@ from test_utils import load_mcda_input_data
 from test_utils import save_to_xmcda
 
 def usage():
-    print("%s file.csv meta_etri|mip_etri|lp_utadis" % sys.argv[0])
+    print("%s file.csv meta_mrsort|mip_mrsort|lp_utadis" % sys.argv[0])
     sys.exit(1)
 
 if len(sys.argv) != 3:
@@ -41,8 +41,8 @@ best = data.pt.get_best(data.c)
 
 t1 = time.time()
 
-if algo == 'meta_etri':
-    model_type = 'etri'
+if algo == 'meta_mrsort':
+    model_type = 'mrsort'
     cat_profiles = generate_categories_profiles(data.cats)
     model = MRSort(data.c, None, None, None, cat_profiles)
     pt_sorted = SortedPerformanceTable(data.pt)
@@ -55,8 +55,8 @@ if algo == 'meta_etri':
         model, ca_learning = meta.optimize(nmeta)
         if ca_learning == 1:
             break
-elif algo == 'mip_etri':
-    model_type = 'etri'
+elif algo == 'mip_mrsort':
+    model_type = 'mrsort'
     cat_profiles = generate_categories_profiles(data.cats)
     model = MRSort(data.c, None, None, None, cat_profiles)
     mip = MipMRSort(model, data.pt, data.aa)
@@ -105,7 +105,7 @@ if len(anok) > 0:
 
 print("Model parameters:")
 cids = model.criteria.keys()
-if model_type == 'etri':
+if model_type == 'mrsort':
     model.bpt.display(criterion_ids = cids)
     model.cv.display(criterion_ids = cids)
     print("lambda: %.7s" % model.lbda)
