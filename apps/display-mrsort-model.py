@@ -52,7 +52,11 @@ for xmcda_model in xmcda_models:
         print("No veto weights")
 
     if len(m.criteria) < 10:
-        nwinning = len(compute_winning_coalitions(m.cv, m.lbda))
+        winning = compute_winning_coalitions(m.criteria, m.cv, m.lbda)
+        print("Winning coalitions:")
+        for win in winning:
+            print(win)
+        nwinning = len(winning)
         print("Number of winning concordance relations: %d (/%d)"
               % (nwinning, 2**len(m.criteria)))
 
