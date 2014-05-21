@@ -95,12 +95,14 @@ def powerset(iterable):
     s = list(iterable)
     return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
 
-def compute_winning_coalitions(weights, lbda):
+def compute_winning_coalitions(criteria, weights, lbda):
     l = []
-    for coalition in powerset(weights.keys()):
-        w = [ weights[cid].value for cid in coalition ]
-        if sum(w) >= lbda:
+    for coalition in powerset(criteria.keys()):
+        w = sum([c.value for c in weights
+                 if c.id_issubset(set(coalition)) is True])
+        if w >= lbda:
             l.append(coalition)
+
     return l
 
 def compute_number_of_winning_coalitions(weights, lbda):
