@@ -589,7 +589,11 @@ class CriterionValue(McdaObject):
         self.id = xmcda.get('id')
 
         criterion_id = xmcda.find('.//criterionID')
-        self.id = criterion_id.text
+        cset = criterion_id.find('.//criteriaSet')
+        if cset is not None:
+            self.id = CriteriaSet().from_xmcda(cset)
+        else:
+            self.id = criterion_id.text
 
         value = xmcda.find('.//value')
         if value is not None:
