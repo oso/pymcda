@@ -3,6 +3,7 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import CriteriaSet
+from pymcda.utils import powerset
 from itertools import combinations
 
 verbose = False
@@ -20,8 +21,9 @@ class LpMRSortMobius():
         self.profiles = model.categories_profiles.get_ordered_profiles()
 
         cids = self.model.criteria.keys()
-        self.mindices = [c for c in cids] + \
-                        [c for c in combinations(cids, 2)]
+        self.mindices = [frozenset([c]) for c in cids] + \
+                        [frozenset(c) for c in combinations(cids, 2)]
+        print(self.mindices)
 
         self.update_linear_program()
 
@@ -58,8 +60,10 @@ class LpMRSortMobius():
         return criteria_list
 
     def alternative_constraint(self, ap, bp):
-        criteria_combi = self.criteria_in_favor(ap, bp)
-        criteria_combi += [c for c in combinations(criteria_combi, 2)]
+        criteria_in_favor = self.criteria_in_favor(ap, bp)
+        criteria_combi = [frozenset([c]) for c in criteria_in_favor]
+        criteria_combi += [frozenset(c)
+                           for c in combinations(criteria_in_favor, 2)]
         return [1 if m in criteria_combi else 0 for m in self.mindices]
 
     def compute_constraints(self):
@@ -145,35 +149,19 @@ class LpMRSortMobius():
 
         # capa monotonicity
         mindices_map = dict(zip(self.mindices, m))
-        for c in self.model.criteria.keys():
-            constraints.add(names = ["u_%s" % c],
-                            lin_expr = [[[mindices_map[c]], [1]]],
-                            senses = ["G"],
-                            rhs = [0],
-                           )
-
-        for c in combinations(self.model.criteria.keys(), 2):
-            mc = mindices_map[c]
-            m0 = mindices_map[c[0]]
-            m1 = mindices_map[c[1]]
-
-            constraints.add(names = ["u_%s%s_%s" % (c[0], c[1], c[0])],
-                            lin_expr =
-                                [
-                                 [[mc, m0], [1, 1]],
-                                ],
-                            senses = ["G"],
-                            rhs = [0],
-                           )
-
-            constraints.add(names = ["u_%s%s_%s" % (c[0], c[1], c[1])],
-                            lin_expr =
-                                [
-                                 [[mc, m1], [1, 1]],
-                                ],
-                            senses = ["G"],
-                            rhs = [0],
-                           )
+        criteria = set(self.model.criteria.keys())
+        for c in criteria:
+            for c2 in powerset(criteria ^ set([c])):
+                cmap = [mindices_map[frozenset([c, c3])] for c3 in c2]
+                constraints.add(names = ["u_%s_%s" % (c, c2)],
+                                lin_expr = [
+                                            [[mindices_map[frozenset([c])]]
+                                              + cmap,
+                                             [1] * (len(cmap) + 1)]
+                                           ],
+                                senses = ["G"],
+                                rhs = [0],
+                               )
 
     def add_objective_cplex(self):
         self.lp.objective.set_sense(self.lp.objective.sense.minimize)
@@ -192,10 +180,10 @@ class LpMRSortMobius():
         mindices_map = dict(zip(self.mindices, m))
         for m, vname in mindices_map.items():
             cv = CriterionValue()
-            if isinstance(m, tuple):
+            if len(m) > 1:
                 cv.id = CriteriaSet(*m)
             else:
-                cv.id = m
+                cv.id = next(iter(m))
             cv.value = self.lp.solution.get_values(vname)
             cvs.append(cv)
 
