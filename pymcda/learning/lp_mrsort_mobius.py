@@ -23,7 +23,6 @@ class LpMRSortMobius():
         cids = self.model.criteria.keys()
         self.mindices = [frozenset([c]) for c in cids] + \
                         [frozenset(c) for c in combinations(cids, 2)]
-        print(self.mindices)
 
         self.update_linear_program()
 
