@@ -2,6 +2,7 @@ from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import random
+from itertools import combinations
 from pymcda.electre_tri import MRSort
 from pymcda.uta import AVFSort
 from pymcda.types import Alternative, Alternatives
@@ -13,9 +14,35 @@ from pymcda.types import Category, Categories
 from pymcda.types import CategoryProfile, CategoriesProfiles, Limits
 from pymcda.types import PiecewiseLinear, Point, Segment
 from pymcda.types import CategoryValue, CategoriesValues, Interval
+from pymcda.types import CriteriaSet
 
 VETO_ABS = 1
 VETO_PROP = 2
+
+def generate_random_capacities(criteria, seed = None, k = 3):
+    if seed is not None:
+        random.seed(seed)
+
+    r = 0
+    cvs = CriteriaValues()
+    n = len(criteria)
+    for i in range(1, n + 1):
+        combis = [c for c in combinations(criteria, i)]
+        random.shuffle(combis)
+        for combi in combis:
+            if i == 1:
+                cid = combi
+            else:
+                cid = CriteriaSet(*[c.id for c in combi])
+
+            r += random.random()
+            cv = CriterionValue(cid, r)
+            cvs.append(cv)
+
+    for cv in cvs:
+        cv.value = round(cv.value / r, k)
+
+    return cvs
 
 def generate_alternatives(number, prefix='a'):
     alts = Alternatives()
