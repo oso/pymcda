@@ -548,6 +548,12 @@ class tests_CriteriaSet(unittest.TestCase):
 
         self.assertFalse(cv.id_issubset(cs))
 
+    def test007(self):
+        cs = CriteriaSet('c1', 'c2')
+        cs2 = CriteriaSet('c1', 'c2')
+
+        self.assertEqual(cs, cs2)
+
 test_classes = [tests_xmcda, tests_Segment, tests_PiecewiseLinear,
                 tests_CategoriesValues, tests_csv, tests_mcda_methods,
                 tests_CriteriaSet]
