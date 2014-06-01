@@ -222,7 +222,7 @@ class CriteriaSet(object):
         self.criteria = set(criteria)
 
     def __repr__(self):
-        return "%s" % self.criteria
+        return "CriteriaSet(%s)" % ', '.join(map(str, self.criteria))
 
     def __eq__(self, other):
         return set(self.criteria) == set(other.criteria)
