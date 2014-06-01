@@ -27,13 +27,13 @@ def generate_random_capacities(criteria, seed = None, k = 3):
     cvs = CriteriaValues()
     n = len(criteria)
     for i in range(1, n + 1):
-        combis = [c for c in combinations(criteria, i)]
+        combis = [c for c in combinations(criteria.keys(), i)]
         random.shuffle(combis)
         for combi in combis:
             if i == 1:
-                cid = combi
+                cid = combi[0]
             else:
-                cid = CriteriaSet(*[c.id for c in combi])
+                cid = CriteriaSet(*combi)
 
             r += random.random()
             cv = CriterionValue(cid, r)
