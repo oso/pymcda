@@ -284,7 +284,7 @@ class Criteria(McdaDict):
     def __repr__(self):
         """Manner to represent the MCDA dictionnary"""
 
-        return "criteria(%s)" % self.values()
+        return "Criteria(%s)" % self.values()
 
     def get_active(self):
         return Criteria([c for c in self if c.disabled is not True])
@@ -459,7 +459,7 @@ class CriteriaValues(McdaDict):
     def __repr__(self):
         """Manner to represent the MCDA dictionnary"""
 
-        return "criteria_values(%s)" % self.values()
+        return "CriteriaValues(%s)" % self.values()
 
     def sum(self):
         return sum([cv.value for cv in self])
@@ -604,7 +604,7 @@ class Alternatives(McdaDict):
     def __repr__(self):
         """Manner to represent the MCDA dictionnary"""
 
-        return "alternatives(%s)" % self.values()
+        return "Alternatives(%s)" % self.values()
 
     def to_xmcda(self, id = None):
         """Convert the MCDA dictionnary into XMCDA output"""
@@ -724,7 +724,7 @@ class PerformanceTable(McdaDict):
     def __repr__(self):
         """Manner to represent the MCDA dictionnary"""
 
-        return "performance_table(%s)" % self.values()
+        return "PerformanceTable(%s)" % self.values()
 
     def __mathop(self, value, op):
         out = PerformanceTable([], self.id)
@@ -1146,7 +1146,7 @@ class CategoriesValues(McdaDict):
     def __repr__(self):
         """Manner to represent the MCDA dictionnary"""
 
-        return "categories_values(%s)" % self.values()
+        return "CategoriesValues(%s)" % self.values()
 
     def display(self, out = sys.stdout):
         for cv in self:
@@ -1271,7 +1271,7 @@ class Interval(McdaObject):
     def __repr__(self):
         """Manner to represent the MCDA object"""
 
-        return "interval(%s,%s)" % (self.lower, self.upper)
+        return "Interval(%s,%s)" % (self.lower, self.upper)
 
     def pprint(self):
         return "%s - %s" % (self.lower, self.upper)
@@ -1317,7 +1317,7 @@ class AlternativesValues(McdaDict):
     def __repr__(self):
         """Manner to represent the MCDA dictionnary"""
 
-        return "alternatives_values(%s)" % self.values()
+        return "AlternativesValues(%s)" % self.values()
 
     def to_xmcda(self, id = None):
         """Convert the MCDA dictionnary into XMCDA output"""
@@ -1393,7 +1393,7 @@ class CriteriaFunctions(McdaDict):
     def __repr__(self):
         """Manner to represent the MCDA dictionnary"""
 
-        return "criteria_functions(%s)" % self.values()
+        return "CriteriaFunctions(%s)" % self.values()
 
     def pprint(self, criterion_ids = None):
         if criterion_ids is None:
@@ -1454,7 +1454,7 @@ class CriterionFunction(McdaObject):
     def __repr__(self):
         """Manner to represent the MCDA object"""
 
-        return "criterion_function(%s: %s)" % (self.id, self.function)
+        return "CriterionFunction(%s: %s)" % (self.id, self.function)
 
     def y(self, x):
         return self.function.y(x)
@@ -1512,7 +1512,7 @@ class Linear(object):
         return self.__dict__ == other.__dict__
 
     def __repr__(self):
-        return "linear(%sx + %d)" % (self.slope, self.intercept)
+        return "Linear(%sx + %d)" % (self.slope, self.intercept)
 
     def y(self, x):
         return self.slope * x + self.intercept
@@ -1533,7 +1533,7 @@ class Segment(McdaObject):
     def __repr__(self):
         """Manner to represent the MCDA object"""
 
-        return "segment[%s](%s,%s)" % (self.id, self.p1, self.p2)
+        return "Segment[%s](%s,%s)" % (self.id, self.p1, self.p2)
 
     @property
     def xmin(self):
@@ -1637,7 +1637,7 @@ class Segment(McdaObject):
 class PiecewiseLinear(McdaDict):
 
     def __repr__(self):
-        return "piecewise_linear[%s](%s)" % (self.id, self.values())
+        return "PiecewiseLinear[%s](%s)" % (self.id, self.values())
 
     def find_segment(self, x):
         for s in self:
@@ -1727,7 +1727,7 @@ class Points(list):
         return p
 
     def __repr__(self):
-        return "points(%s)" % self[:]
+        return "Points(%s)" % self[:]
 
     def copy(self):
         return deepcopy(self)
@@ -1761,7 +1761,7 @@ class Point(McdaObject):
     def __repr__(self):
         """Manner to represent the MCDA object"""
 
-        return "(%g,%g)" % (self.x, self.y)
+        return "Point(%g,%g)" % (self.x, self.y)
 
     def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
@@ -1833,7 +1833,7 @@ class Thresholds(McdaDict):
     def __repr__(self):
         """Manner to represent the MCDA dictionnary"""
 
-        return "thresholds(%s)", self.values()
+        return "Thresholds(%s)", self.values()
 
     def has_threshold(self, threshold_id):
         for t in self:
@@ -1923,7 +1923,7 @@ class Categories(McdaDict):
     def __repr__(self):
         """Manner to represent the MCDA dictionnary"""
 
-        return "categories(%s)" % self.values()
+        return "Categories(%s)" % self.values()
 
     def get_ids(self):
         return self.keys()
@@ -2055,7 +2055,7 @@ class Limits(McdaObject):
     def __repr__(self):
         """Manner to represent the MCDA object"""
 
-        return "limits(%s,%s)" % (self.lower, self.upper)
+        return "Limits(%s,%s)" % (self.lower, self.upper)
 
     def to_xmcda(self):
         """Convert the MCDA object into XMCDA output"""
@@ -2091,7 +2091,7 @@ class CategoriesProfiles(McdaDict):
     def __repr__(self):
         """Manner to represent the MCDA dictionnary"""
 
-        return "categories_profiles(%s)" % self.values()
+        return "CategoriesProfiles(%s)" % self.values()
 
     def get_ordered_profiles(self):
         lower_cat = { cp.value.lower: cp.id for cp in self }
@@ -2200,7 +2200,7 @@ class AlternativesAssignments(McdaDict):
     def __repr__(self):
         """Manner to represent the MCDA dictionnary"""
 
-        return "alternatives_assignments(%s)" % self.values()
+        return "AlternativesAssignments(%s)" % self.values()
 
     def get_alternatives_in_category(self, category_id):
         l = []
@@ -2341,7 +2341,7 @@ class Parameters(McdaDict):
     def __repr__(self):
         """Manner to represent the MCDA dictionnary"""
 
-        return "parameters(%s)" % self.values()
+        return "Parameters(%s)" % self.values()
 
     def to_xmcda(self, id = None):
         """Convert the MCDA dictionnary into XMCDA output"""
