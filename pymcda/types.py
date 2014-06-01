@@ -7,6 +7,7 @@ from __future__ import division, print_function
 import random
 import sys
 from itertools import product
+from functools import cmp_to_key
 from xml.etree import ElementTree
 from copy import deepcopy
 from collections import OrderedDict
@@ -82,7 +83,10 @@ class McdaDict(object):
     def __iter__(self):
         """Return an iterator object for the MCDA dictionnary."""
 
-        return self._d.itervalues()
+        try:
+            return self._d.itervalues()
+        except:
+            return iter(self._d.values())
 
     def __getitem__(self, key):
         """Lookup for an MCDA object in the dictionnary on basis of its
@@ -210,6 +214,9 @@ class McdaObject(object):
         return False"""
 
         return self.__dict__ == other.__dict__
+
+    def __hash__(self):
+        return hash(frozenset(self.__dict__.iteritems()))
 
     def copy(self):
         """Return a copy of the current MCDA object"""
@@ -1116,7 +1123,7 @@ class AlternativePerformances(McdaObject):
         altid = ElementTree.SubElement(root, 'alternativeID')
         altid.text = self.altid
 
-        for crit_id, val in self.performances.iteritems():
+        for crit_id, val in self.performances.items():
             perf = ElementTree.SubElement(root, 'performance')
             critid = ElementTree.SubElement(perf, 'criterionID')
             critid.text = crit_id
@@ -1183,7 +1190,7 @@ class CategoriesValues(McdaDict):
     def get_ordered_categories(self):
         """Get the list of ordered categories"""
 
-        catvs = sorted(self, cmp = self.__cmp_categories_values)
+        catvs = sorted(self, key = cmp_to_key(self.__cmp_categories_values))
         return [catv.id for catv in catvs]
 
     def to_categories(self):
