@@ -233,6 +233,9 @@ class CriteriaSet(object):
     def __iter__(self):
         return self.criteria.__iter__()
 
+    def __len__(self):
+        return len(self.criteria)
+
     def __str__(self):
         return '[%s]' % ', '.join(map(str, self.criteria))
 
