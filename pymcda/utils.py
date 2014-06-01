@@ -10,7 +10,7 @@ from collections import OrderedDict
 
 def add_errors_in_assignments(aa, category_ids, errors_pc):
     n = int(len(aa)*errors_pc)
-    aa_erroned = random.sample(aa, n)
+    aa_erroned = random.sample(list(aa), n)
 
     l = AlternativesAssignments([])
     for a in aa_erroned:
