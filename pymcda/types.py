@@ -254,10 +254,8 @@ class CriteriaSet(object):
         if isinstance(criteria, CriteriaSet) is False \
            and isinstance(criteria, set) is False \
            and isinstance(criteria, frozenset) is False:
-            print(criteria, "!!")
             return criteria in self.criteria
 
-        print(criteria, "!!")
         return self.criteria.issuperset(criteria)
 
     def to_xmcda(self):
