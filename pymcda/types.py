@@ -227,6 +227,9 @@ class CriteriaSet(object):
     def __eq__(self, other):
         return set(self.criteria) == set(other.criteria)
 
+    def __hash__(self):
+        return hash(frozenset(self.criteria))
+
     def __iter__(self):
         return self.criteria.__iter__()
 
