@@ -341,7 +341,7 @@ if __name__ == "__main__":
     # Generate an avfsort model
     c = generate_criteria(2)
     cv = generate_random_criteria_values(c, seed = 6)
-    cv.normalize()
+    cv.normalize_sum_to_unity()
     cat = generate_categories(3)
 
     cfs = generate_random_criteria_functions(c, nseg_min = 3, nseg_max = 3)

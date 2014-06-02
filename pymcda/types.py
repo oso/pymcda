@@ -480,7 +480,7 @@ class CriteriaValues(McdaDict):
     def sum(self):
         return sum([cv.value for cv in self])
 
-    def normalize(self):
+    def normalize_sum_to_unity(self):
         """Method that allow to  normalize all the criteria values
         contained in the MCDA dictionnary"""
 

@@ -25,7 +25,7 @@ f = open('data/random_2.txt', 'wb')
 
 for i in range(n):
     cw = generate_random_criteria_values(c)
-    cw.normalize()
+    cw.normalize_sum_to_unity()
     for cid in cids:
         f.write(str(cw[cid].value) + "\t")
     f.write("\n")

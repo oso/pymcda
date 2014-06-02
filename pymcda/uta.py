@@ -47,7 +47,7 @@ class Uta(object):
         return au
 
     def set_equal_weights(self):
-        self.cvs.normalize()
+        self.cvs.normalize_sum_to_unity()
         self.cfs.multiply_y(self.cvs)
         for cv in self.cvs:
             cv.value = 1

@@ -106,7 +106,7 @@ def parse_input_files(indir):
                                        "criteriaValues",
                                        CriteriaValues)
     if criteria_values:
-        criteria_values.normalize()
+        criteria_values.normalize_sum_to_unity()
 
     lbda = parse_xmcda_file_elem(indir + '/lambda.xml', 'real')
     if lbda:

@@ -390,7 +390,7 @@ if __name__ == "__main__":
     a = generate_alternatives(1)
     c = generate_criteria(5)
     cv = generate_random_criteria_values(c, 1234)
-    cv.normalize()
+    cv.normalize_sum_to_unity()
 
     worst = AlternativePerformances("worst", {crit.id: 0 for crit in c})
     best = AlternativePerformances("best", {crit.id: 1 for crit in c})
