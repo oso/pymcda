@@ -330,7 +330,11 @@ class tests_mrsort_vc(unittest.TestCase):
         a43 = AlternativePerformances('a43', {'c1': 11, 'c2':  7, 'c3':  7, 'c4': 11, 'c5': 11})
         a44 = AlternativePerformances('a44', {'c1':  7, 'c2': 11, 'c3':  7, 'c4': 11, 'c5': 11})
         a45 = AlternativePerformances('a45', {'c1':  7, 'c2':  7, 'c3': 11, 'c4': 11, 'c5': 11})
-        pt = PerformanceTable([eval("a%d" % i) for i in range(1, 46)])
+        pt = PerformanceTable([a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11,
+                               a12, a13, a14, a15, a16, a17, a18, a19, a20,
+                               a21, a22, a23, a24, a25, a26, a27, a28, a29,
+                               a30, a31, a32, a33, a34, a35, a36, a37, a38,
+                               a39, a40, a41, a42, a43, a44, a45])
 
         ap1 = AlternativeAssignment('a1', 'cat2')
         ap2 = AlternativeAssignment('a2', 'cat2')
@@ -377,7 +381,13 @@ class tests_mrsort_vc(unittest.TestCase):
         ap43 = AlternativeAssignment('a43', 'cat2')
         ap44 = AlternativeAssignment('a44', 'cat2')
         ap45 = AlternativeAssignment('a45', 'cat2')
-        aa = AlternativesAssignments([eval("ap%d" % i) for i in range(1, 46)])
+        aa = AlternativesAssignments([ap1, ap2, ap3, ap4, ap5, ap6, ap7, ap8,
+                                      ap9, ap10, ap11, ap12, ap13, ap14, ap15,
+                                      ap16, ap17, ap18, ap19, ap20, ap21,
+                                      ap22, ap23, ap24, ap25, ap26, ap27,
+                                      ap28, ap29, ap30, ap31, ap32, ap33,
+                                      ap34, ap35, ap36, ap37, ap38, ap39,
+                                      ap40, ap41, ap42, ap43, ap44, ap45])
 
         model = MRSort(c, w, bpt, 0.6, cps, v, vw, 0.4)
         aa2 = model.pessimist(pt)
