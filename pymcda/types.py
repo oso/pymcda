@@ -66,19 +66,22 @@ class McdaDict(object):
         for i in l:
             self._d[i.id] = i
 
-    def __cmp__(self, mcda_dict):
-        """This method allows to compare the current MCDA dictionnary to
-        another MCDA dictionnary. If the two MCDA dictionnaries are
-        equal, then True is returned, otherwise False is returned."""
-
-        return self._d.__cmp__(mcda_dict._d)
-
     def __contains__(self, key):
         """Check if a MCDA object is present in the dictionnary. If the
         object is contained in the dictionnary, True is returned,
         otherwise False is returned."""
 
         return self._d.__contains__(key)
+
+    def __eq__(self, mcda_dict):
+        """This method allows to compare the current MCDA dictionnary to
+        another MCDA dictionnary. If the two MCDA dictionnaries are
+        equal, then True is returned, otherwise False is returned."""
+
+        return self._d.__eq__(dict(mcda_dict._d))
+
+    def __hash__(self):
+        return hash(frozenset(self._d.iteritems()))
 
     def __iter__(self):
         """Return an iterator object for the MCDA dictionnary."""
