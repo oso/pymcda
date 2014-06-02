@@ -477,8 +477,24 @@ class CriteriaValues(McdaDict):
 
         return "CriteriaValues(%s)" % self.values()
 
-    def sum(self):
+    def __min__(self):
+        return min([cv.value for cv in self])
+
+    def __max__(self):
+        return max([cv.value for cv in self])
+
+    def __sum__(self):
         return sum([cv.value for cv in self])
+
+    def sum(self):
+        return self.__sum__()
+
+    def normalize(self, vmin = None, vmax = None):
+        vmin = min(self) if vmin is None else vmin
+        vmax = max(self) if vmax is None else vmax
+
+        for cv in self:
+            cv.value = (cv.value - vmin) / (vmax - vmin)
 
     def normalize_sum_to_unity(self):
         """Method that allow to  normalize all the criteria values
