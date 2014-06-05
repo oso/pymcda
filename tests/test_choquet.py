@@ -12,7 +12,7 @@ from pymcda.choquet import capacities_are_monotone
 class tests_mobius(unittest.TestCase):
 
     def test001(self):
-        random.seed(0)
+        random.seed(3)
         c = generate_criteria(3)
         capacities = generate_random_capacities(c)
         mobius = capacities_to_mobius(c, capacities)
