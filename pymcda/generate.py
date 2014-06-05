@@ -23,9 +23,12 @@ def generate_random_capacities(criteria, seed = None, k = 3):
     if seed is not None:
         random.seed(seed)
 
-    r = 0
-    cvs = CriteriaValues()
     n = len(criteria)
+    r = [round(random.random(), k) for i in range(2 ** n - 2)] + [1.0]
+    r.sort()
+
+    j = 0
+    cvs = CriteriaValues()
     for i in range(1, n + 1):
         combis = [c for c in combinations(criteria.keys(), i)]
         random.shuffle(combis)
@@ -35,12 +38,10 @@ def generate_random_capacities(criteria, seed = None, k = 3):
             else:
                 cid = CriteriaSet(*combi)
 
-            r += random.random()
-            cv = CriterionValue(cid, r)
+            cv = CriterionValue(cid, r[j])
             cvs.append(cv)
 
-    for cv in cvs:
-        cv.value = round(cv.value / r, k)
+            j += 1
 
     return cvs
 
