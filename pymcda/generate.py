@@ -304,6 +304,28 @@ def generate_random_mrsort_model(ncrit, ncat, seed = None, k = 3,
 
     return MRSort(c, cv, bpt, lbda, cps)
 
+def generate_random_mrsort_choquet_model(ncrit, ncat, seed = None, k = 3,
+                                 worst = None, best = None,
+                                 random_direction = False):
+    if seed is not None:
+        random.seed(int(seed))
+
+    c = generate_criteria(ncrit, random_direction = random_direction)
+
+    if worst is None:
+        worst = generate_worst_ap(c)
+    if best is None:
+        best = generate_best_ap(c)
+
+    cv = generate_random_mobius_indices(c, None, k)
+    cat = generate_categories(ncat)
+    cps = generate_categories_profiles(cat)
+    b = cps.get_ordered_profiles()
+    bpt = generate_random_profiles(b, c, None, k, worst, best)
+    lbda = round(random.uniform(0.5, 1), k)
+
+    return MRSort(c, cv, bpt, lbda, cps)
+
 def generate_random_avfsort_model(ncrit, ncat, nseg_min, nseg_max,
                                   seed = None, k = 3,
                                   random_direction = False):
