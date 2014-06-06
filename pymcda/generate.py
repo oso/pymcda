@@ -3,6 +3,7 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import random
 from itertools import combinations
+from pymcda.choquet import capacities_to_mobius
 from pymcda.electre_tri import MRSort
 from pymcda.uta import AVFSort
 from pymcda.types import Alternative, Alternatives
@@ -18,6 +19,10 @@ from pymcda.types import CriteriaSet
 
 VETO_ABS = 1
 VETO_PROP = 2
+
+def generate_random_mobius_indices(criteria, seed = None, k = 3):
+    cvs = generate_random_capacities(criteria, seed, k)
+    return capacities_to_mobius(criteria, cvs)
 
 def generate_random_capacities(criteria, seed = None, k = 3):
     if seed is not None:
