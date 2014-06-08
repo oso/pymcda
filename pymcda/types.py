@@ -395,7 +395,7 @@ class Criterion(McdaObject):
             direction = "+"
         else:
             direction = "-"
-        return "%s(%s)" % (self.id, direction)
+        return "%s (%s)" % (self.id, direction)
 
     def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
@@ -573,7 +573,7 @@ class CriterionValue(McdaObject):
     def __repr__(self):
         """Manner to represent the MCDA object"""
 
-        return "%s: %s" % (self.id, self.value)
+        return "CriterionValue(%s: %s)" % (self.id, self.value)
 
     def id_issubset(self, ids):
         if isinstance(self.id, CriteriaSet) or isinstance(self.id, set) \
@@ -706,7 +706,7 @@ class Alternative(McdaObject):
     def __repr__(self):
         """Manner to represent the MCDA object"""
 
-        return "%s" % self.id
+        return "Alternative(%s)" % self.id
 
     def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
@@ -1033,7 +1033,7 @@ class AlternativePerformances(McdaObject):
 
     def __repr__(self):
         """Manner to represent the MCDA object"""
-        return "%s: %s" % (self.id, self.performances)
+        return "AlternativePerformances(%s: %s)" % (self.id, self.performances)
 
     def __mathop(self, value, op):
         out = AlternativePerformances(self.id)
@@ -1256,7 +1256,7 @@ class CategoryValue(McdaObject):
     def __repr__(self):
         """Manner to represent the MCDA object"""
 
-        return "%s: %s" % (self.id, self.value)
+        return "CategoryValue(%s: %s)" % (self.id, self.value)
 
     def pprint(self):
         return "%s: %s" % (self.id, self.value.pprint())
@@ -1387,7 +1387,7 @@ class AlternativeValue(McdaObject):
     def __repr__(self):
         """Manner to represent the MCDA object"""
 
-        return "%s: %s" % (self.id, self.value)
+        return "AlternativeValue(%s: %s)" % (self.id, self.value)
 
     def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
