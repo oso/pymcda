@@ -477,18 +477,18 @@ class CriteriaValues(McdaDict):
 
         return "CriteriaValues(%s)" % self.values()
 
-    def __min__(self):
+    def min(self):
         return min([cv.value for cv in self])
 
-    def __max__(self):
+    def max(self):
         return max([cv.value for cv in self])
 
     def sum(self):
         return sum([cv.value for cv in self])
 
     def normalize(self, vmin = None, vmax = None):
-        vmin = min(self) if vmin is None else vmin
-        vmax = max(self) if vmax is None else vmax
+        vmin = self.min() if vmin is None else vmin
+        vmax = self.max() if vmax is None else vmax
 
         for cv in self:
             cv.value = (cv.value - vmin) / (vmax - vmin)
