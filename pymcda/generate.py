@@ -20,9 +20,16 @@ from pymcda.types import CriteriaSet
 VETO_ABS = 1
 VETO_PROP = 2
 
-def generate_random_mobius_indices(criteria, seed = None, k = 3):
+def generate_random_mobius_indices(criteria, additivity = None,
+                                   seed = None, k = 3):
     cvs = generate_random_capacities(criteria, seed, k)
-    return capacities_to_mobius(criteria, cvs)
+    mobius = capacities_to_mobius(criteria, cvs)
+
+    if additivity is not None:
+        mobius_truncate(mobius, additivity)
+        mobius.normalize_sum_to_unity()
+
+    return mobius
 
 def generate_random_capacities(criteria, seed = None, k = 3):
     if seed is not None:
@@ -282,7 +289,8 @@ def generate_best_ap(crits):
                                              if c.direction == 1 else 0
                                              for c in crits})
 
-def generate_random_mrsort_model(ncrit, ncat, seed = None, k = 3,
+def generate_random_mrsort_model(ncrit, ncat, additivity = None,
+                                 seed = None, k = 3,
                                  worst = None, best = None,
                                  random_direction = False):
     if seed is not None:
@@ -299,7 +307,7 @@ def generate_random_mrsort_model(ncrit, ncat, seed = None, k = 3,
     cat = generate_categories(ncat)
     cps = generate_categories_profiles(cat)
     b = cps.get_ordered_profiles()
-    bpt = generate_random_profiles(b, c, None, k, worst, best)
+    bpt = generate_random_profiles(b, c, additivity, None, k, worst, best)
     lbda = round(random.uniform(0.5, 1), k)
 
     return MRSort(c, cv, bpt, lbda, cps)

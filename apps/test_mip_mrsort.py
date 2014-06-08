@@ -24,7 +24,7 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors):
     if random_model_type == 'default':
         model = generate_random_mrsort_model(nc, ncat, seed)
     elif random_model_type == 'choquet':
-        model = generate_random_mrsort_choquet_model(nc, ncat, seed)
+        model = generate_random_mrsort_choquet_model(nc, ncat, 2, seed)
 
     # Generate a set of alternatives
     a = generate_alternatives(na)
