@@ -3,7 +3,7 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import random
 from itertools import combinations
-from pymcda.choquet import capacities_to_mobius
+from pymcda.choquet import capacities_to_mobius, mobius_truncate
 from pymcda.electre_tri import MRSort
 from pymcda.uta import AVFSort
 from pymcda.types import Alternative, Alternatives
