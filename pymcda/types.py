@@ -483,11 +483,8 @@ class CriteriaValues(McdaDict):
     def __max__(self):
         return max([cv.value for cv in self])
 
-    def __sum__(self):
-        return sum([cv.value for cv in self])
-
     def sum(self):
-        return self.__sum__()
+        return sum([cv.value for cv in self])
 
     def normalize(self, vmin = None, vmax = None):
         vmin = min(self) if vmin is None else vmin
