@@ -289,8 +289,7 @@ def generate_best_ap(crits):
                                              if c.direction == 1 else 0
                                              for c in crits})
 
-def generate_random_mrsort_model(ncrit, ncat, additivity = None,
-                                 seed = None, k = 3,
+def generate_random_mrsort_model(ncrit, ncat, seed = None, k = 3,
                                  worst = None, best = None,
                                  random_direction = False):
     if seed is not None:
@@ -307,14 +306,15 @@ def generate_random_mrsort_model(ncrit, ncat, additivity = None,
     cat = generate_categories(ncat)
     cps = generate_categories_profiles(cat)
     b = cps.get_ordered_profiles()
-    bpt = generate_random_profiles(b, c, additivity, None, k, worst, best)
+    bpt = generate_random_profiles(b, c, None, k, worst, best)
     lbda = round(random.uniform(0.5, 1), k)
 
     return MRSort(c, cv, bpt, lbda, cps)
 
-def generate_random_mrsort_choquet_model(ncrit, ncat, seed = None, k = 3,
-                                 worst = None, best = None,
-                                 random_direction = False):
+def generate_random_mrsort_choquet_model(ncrit, ncat, additivity = None,
+                                         seed = None, k = 3,
+                                         worst = None, best = None,
+                                         random_direction = False):
     if seed is not None:
         random.seed(int(seed))
 
@@ -325,7 +325,7 @@ def generate_random_mrsort_choquet_model(ncrit, ncat, seed = None, k = 3,
     if best is None:
         best = generate_best_ap(c)
 
-    cv = generate_random_mobius_indices(c, None, k)
+    cv = generate_random_mobius_indices(c, additivity, None, k)
     cat = generate_categories(ncat)
     cps = generate_categories_profiles(cat)
     b = cps.get_ordered_profiles()
