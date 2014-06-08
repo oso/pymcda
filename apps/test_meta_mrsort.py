@@ -14,6 +14,7 @@ from pymcda.learning.meta_mrsort3 import MetaMRSort3
 from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_mrsort_model
+from pymcda.generate import generate_random_mrsort_choquet_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.utils import add_errors_in_assignments_proba
@@ -23,7 +24,10 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
                                  max_oloops, nmodels, max_loops):
 
     # Generate a random ELECTRE TRI BM model
-    model = generate_random_mrsort_model(nc, ncat, seed)
+    if random_model_type == 'default':
+        model = generate_random_mrsort_model(nc, ncat, seed)
+    elif random_model_type == 'choquet':
+        model = generate_random_mrsort_choquet_model(nc, ncat, 2, seed)
 
     # Generate a set of alternatives
     a = generate_alternatives(na)
@@ -166,6 +170,7 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, max_loops, nmodels,
     writer.writerow(['max_loops', max_loops])
     writer.writerow(['nmodels', nmodels])
     writer.writerow(['max_oloops', max_oloops])
+    writer.writerow(['random_model_type', random_model_type])
     writer.writerow(['', ''])
 
     # Create a test_results instance
@@ -261,6 +266,9 @@ if __name__ == "__main__":
                       dest = "max_oloops",
                       help = "max number of loops for the metaheuristic " \
                              "used to find the profiles")
+    parser.add_option("-r", "--random-model-type", action = "store",
+                      type = "string", dest = "random_model_type",
+                      help = "type of initial model (default, choquet)")
     parser.add_option("-f", "--filename", action = "store", type="string",
                       dest = "filename",
                       help = "filename to save csv output")
@@ -286,6 +294,18 @@ if __name__ == "__main__":
     if i > 1:
         print("Cannot select multiple algorithms at the same time")
         sys.exit(1)
+
+    while options.random_model_type != "default" \
+          and options.random_model_type != "choquet":
+        print("1. Default MR-Sort model")
+        print("2. Choquet MR-Sort model")
+        i = raw_input("Type of random model to initialize? ")
+        if i == '1':
+            options.random_model_type = 'default'
+        elif i == '2':
+            options.random_model_type = 'choquet'
+
+    random_model_type = options.random_model_type
 
     options.na = read_multiple_integer(options.na,
                                        "Number of assignment examples")
