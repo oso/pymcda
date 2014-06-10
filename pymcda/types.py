@@ -193,7 +193,7 @@ class McdaDict(object):
         else:
             raise ValueError('%s::split invalid proportions')
 
-        keys, nkeys = self._d.keys(), len(self._d.keys())
+        keys, nkeys = list(self._d.keys()), len(self._d.keys())
         j, subsets = 0, []
 
         if randomize is True:
