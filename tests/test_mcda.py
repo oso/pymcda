@@ -309,7 +309,7 @@ class tests_csv(unittest.TestCase):
     def setUp(self):
         filepath = os.path.dirname(os.path.abspath(__file__)) \
                     + "/../datasets/swd.csv"
-        csvfile = open(filepath, 'rb')
+        csvfile = open(filepath, 'rt')
         self.csvreader = csv.reader(csvfile, delimiter = ";")
 
     def test001(self):
