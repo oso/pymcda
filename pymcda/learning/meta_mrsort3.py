@@ -220,8 +220,8 @@ if __name__ == "__main__":
     print("Good assignments: %g %%" % (float(total-nok)/total*100))
     print("Bad assignments : %g %%" % (float(nok)/total*100))
 
-    coal1 = compute_winning_coalitions(model.cv, model.lbda)
-    coal2 = compute_winning_coalitions(model2.cv, model2.lbda)
+    coal1 = compute_winning_coalitions(model.criteria, model.cv, model.lbda)
+    coal2 = compute_winning_coalitions(model.criteria, model2.cv, model2.lbda)
     coali = list(set(coal1) & set(coal2))
     coal1e = list(set(coal1) ^ set(coali))
     coal2e = list(set(coal2) ^ set(coali))
