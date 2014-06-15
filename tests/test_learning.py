@@ -426,7 +426,6 @@ test_classes = [tests_lp_mrsort_weights, tests_heur_mrsort_profiles,
                 tests_heur_mrsort_profiles4, tests_mip_mrsort,
                 tests_heur_mrsort_init_profiles, tests_lp_avfsort,
                 tests_lp_mrsort_choquet]
-test_classes = [tests_lp_mrsort_choquet]
 
 if __name__ == "__main__":
     suite = []
