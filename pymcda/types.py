@@ -219,7 +219,7 @@ class McdaObject(object):
         return self.__dict__ == other.__dict__
 
     def __hash__(self):
-        return hash(frozenset(self.__dict__.items()))
+        return hash(self.id)
 
     def copy(self):
         """Return a copy of the current MCDA object"""
