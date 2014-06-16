@@ -532,7 +532,7 @@ class qt_mainwindow(QtGui.QMainWindow):
         self.model = generate_random_avfsort_model(ncrit, ncat, nseg_min,
                                                    nseg_max)
         self.model.set_equal_weights()
-        self.categories = self.model.categories
+        self.categories = self.model.cat_values.to_categories()
 
         self.plot_avf_sort_model(self.model, self.layout_original)
 
