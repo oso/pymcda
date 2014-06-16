@@ -19,6 +19,7 @@ from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.utils import add_errors_in_assignments_proba
 from test_utils import test_result, test_results
+from test_utils import save_to_xmcda
 
 def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
                                  max_oloops, nmodels, max_loops):
@@ -126,6 +127,12 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
     # Save all infos in test_result class
     t = test_result("%s-%d-%d-%d-%d-%g-%d-%d-%d" % (seed, na, nc, ncat,
                     na_gen, pcerrors, max_loops, nmodels, max_oloops))
+
+    model.id = 'learned'
+    model2.id = 'learned'
+    pt.id, pt_gen.id = 'learning_set', 'test_set'
+    save_to_xmcda("%s/%s.bz2" % (directory, t.test_name),
+                  model, model2, pt, pt_gen)
 
     # Input params
     t['seed'] = seed
@@ -328,6 +335,10 @@ if __name__ == "__main__":
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     default_filename = "data/test_%s-%s.csv" % (algo.__name__, dt)
     options.filename = read_csv_filename(options.filename, default_filename)
+
+    directory = options.filename + "-data"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
     run_tests(options.na, options.nc, options.ncat, options.na_gen,
               options.pcerrors, options.nseeds, options.max_loops,
