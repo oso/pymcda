@@ -477,6 +477,17 @@ class CriteriaValues(McdaDict):
 
         return "CriteriaValues(%s)" % self.values()
 
+    def __str__(self):
+        l = 0
+        for cv in self:
+            l = max(len(cv.id), l)
+
+        string = ""
+        for cv in self:
+            string += "%.*s: %f\n" % (l, cv.id, cv.value)
+
+        return string[:-1]
+
     def min(self):
         return min([cv.value for cv in self])
 
@@ -574,6 +585,9 @@ class CriterionValue(McdaObject):
         """Manner to represent the MCDA object"""
 
         return "CriterionValue(%s: %s)" % (self.id, self.value)
+
+    def __str__(self):
+        return "%s: %f" % (self.id, self.value)
 
     def id_issubset(self, ids):
         if isinstance(self.id, CriteriaSet) or isinstance(self.id, set) \
