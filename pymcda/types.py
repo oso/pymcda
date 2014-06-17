@@ -1049,6 +1049,20 @@ class AlternativePerformances(McdaObject):
         """Manner to represent the MCDA object"""
         return "AlternativePerformances(%s: %s)" % (self.id, self.performances)
 
+    def __str__(self):
+        l = 0
+        for k in self.performances.keys():
+            l = max(len(k), l)
+
+        l += len(self.id)
+
+        string = "%s:" % self.id
+        for k, v in self.performances.items():
+            string += " %s: %f\n" % (k, v)
+            string += " " * (len(self.id) + 1)
+
+        return string[:string.rfind('\n')]
+
     def __mathop(self, value, op):
         out = AlternativePerformances(self.id)
         if type(value) == float or type(value) == int:
