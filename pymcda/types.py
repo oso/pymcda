@@ -484,7 +484,7 @@ class CriteriaValues(McdaDict):
 
         string = ""
         for cv in self:
-            string += "%.*s: %f\n" % (l, cv.id, cv.value)
+            string += "%*s: %f\n" % (l, cv.id, cv.value)
 
         return string[:-1]
 
