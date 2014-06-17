@@ -769,6 +769,35 @@ class PerformanceTable(McdaDict):
 
         return "PerformanceTable(%s)" % self.values()
 
+    def __str__(self):
+        l = 0 if self.id is None else len(self.id)
+        col = OrderedDict()
+        for ap in self:
+            l = max(len(ap.id), l)
+            for k, v in ap.performances.items():
+                m = max(len(k), len("%s" % v))
+                col[k] = m if k not in col else max(col[k], m)
+
+        crit = list(col.keys())
+
+        string = "%*s" % (l, self.id) if self.id is not None else " " * l
+
+        for c in crit:
+            string += " %*s" % (col[c], c)
+
+        string += "\n"
+        for ap in self:
+            string += "%*s" % (l, ap.id)
+            for c in crit:
+                if c in ap.performances:
+                    string += " %*s" % (col[c], ap.performances[c])
+                else:
+                    string += " " * (col[c] + 1)
+
+            string += "\n"
+
+        return string[:-1]
+
     def __mathop(self, value, op):
         out = PerformanceTable([], self.id)
         if type(value) == float or type(value) == int \
