@@ -484,7 +484,7 @@ class CriteriaValues(McdaDict):
 
         string = ""
         for cv in self:
-            string += "%*s: %f\n" % (l, cv.id, cv.value)
+            string += "%*s: %s\n" % (l, cv.id, cv.value)
 
         return string[:-1]
 
@@ -587,7 +587,7 @@ class CriterionValue(McdaObject):
         return "CriterionValue(%s: %s)" % (self.id, self.value)
 
     def __str__(self):
-        return "%s: %f" % (self.id, self.value)
+        return "%s: %s" % (self.id, self.value)
 
     def id_issubset(self, ids):
         if isinstance(self.id, CriteriaSet) or isinstance(self.id, set) \
