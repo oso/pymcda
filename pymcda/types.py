@@ -2288,6 +2288,17 @@ class AlternativesAssignments(McdaDict):
 
         return "AlternativesAssignments(%s)" % self.values()
 
+    def __str__(self):
+        l = 0
+        for aa in self:
+            l = max(len(aa.id), l)
+
+        string = ""
+        for aa in self:
+            string += "%*s: %s\n" % (l, aa.id, aa.category_id)
+
+        return string[:-1]
+
     def get_alternatives_in_category(self, category_id):
         l = []
         for aa in self:
