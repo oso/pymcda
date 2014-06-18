@@ -2398,6 +2398,9 @@ class AlternativeAssignment(McdaObject):
 
         return "%s: %s" % (self.id, self.category_id)
 
+    def __str__(self):
+        return "%s: %s" % (self.id, self.category_id)
+
     def is_in_category(self, category_id):
         if self.category_id == category_id:
             return True
