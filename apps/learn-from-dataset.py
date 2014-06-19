@@ -103,14 +103,6 @@ aa2 = model.get_assignments(data.pt)
 ca = compute_ca(data.aa, aa2)
 auc = model.auc(data.aa, data.pt)
 
-print("t:   %g" % t_total)
-print("CA:  %g" % ca)
-print("AUC: %g" % auc)
-
-print("Confusion matrix:")
-print_confusion_matrix(compute_confusion_matrix(data.aa, aa2,
-                                                data.cats.get_ordered_categories()))
-
 anok = []
 for a in data.a:
     if data.aa[a.id].category_id != aa2[a.id].category_id:
@@ -123,11 +115,19 @@ if len(anok) > 0:
 print("Model parameters:")
 cids = model.criteria.keys()
 if model_type == 'mrsort':
-    model.bpt.display(criterion_ids = cids)
-    model.cv.display()
+    print(model.bpt)
+    print(model.cv)
     print("lambda: %.7s" % model.lbda)
 #    display_electre_tri_models([model], [worst], [best])
 elif model_type == 'utadis':
     model.cfs.display(criterion_ids = cids)
     model.cat_values.display()
 #    display_utadis_model(model.cfs)
+
+print("t:   %g" % t_total)
+print("CA:  %g" % ca)
+print("AUC: %g" % auc)
+
+print("Confusion matrix:")
+print_confusion_matrix(compute_confusion_matrix(data.aa, aa2,
+                                                data.cats.get_ordered_categories()))
