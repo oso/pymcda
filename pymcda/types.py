@@ -480,7 +480,7 @@ class CriteriaValues(McdaDict):
     def __str__(self):
         l = 0
         for cv in self:
-            l = max(len(cv.id), l)
+            l = max(len("%s" % cv.id), l)
 
         string = ""
         for cv in self:
