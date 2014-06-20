@@ -107,12 +107,7 @@ def parse_input_files(indir):
     else:
         model = None
 
-    # Get solver (optional)
-    solver = parse_xmcda_file_elem(indir + '/solver.xml', 'label')
-    if solver is None:
-        solver = DEFAULT_SOLVER
-
-    return solver, model, assignments, pt, meta_params
+    return model, assignments, pt, meta_params
 
 def lambda_to_xmcda(lbda):
     root = ElementTree.Element('methodParameters')
@@ -176,7 +171,17 @@ def mrsort_meta_inference(indir, outdir):
         log_error("Invalid output directory (%s)" % outdir)
         return 1
 
-    solver, model, assignments, pt, params = parse_input_files(indir)
+    model, assignments, pt, params = parse_input_files(indir)
+
+    if model is None or assignments is None or pt is None or params is None:
+        log_error("Error while parsing input files")
+        write_message_error(outdir + '/messages.xml')
+        return 1
+
+    if 'solver' in params:
+        solver = params['solver'].value
+    else:
+        solver = DEFAULT_SOLVER
 
     if solver not in SOLVERS_LIST:
         log_error("Invalid solver selected (%s)" % solver)
@@ -184,11 +189,6 @@ def mrsort_meta_inference(indir, outdir):
         return 1
 
     os.environ["SOLVER"] = solver
-
-    if model is None or assignments is None or pt is None or params is None:
-        log_error("Error while parsing input files")
-        write_message_error(outdir + '/messages.xml')
-        return 1
 
     if 'nmodels' in params:
         nmodels = params['nmodels'].value

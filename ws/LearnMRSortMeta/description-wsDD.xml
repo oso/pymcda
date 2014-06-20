@@ -44,13 +44,7 @@
 		</input>
 		<input id="params" name="params" displayName="params" isoptional="0">
 			<documentation>
-				<description>The parameters of the metaheuristic. 'nmodels': the size of the population; 'niter_heur': the number of iterations of the heuristic; 'niter_meta': the number of iterations of the main loop.</description>
-			</documentation>
-			<xmcda tag="methodParameters" />
-		</input>
-		<input id="solver" name="solver" displayName="solver" isoptional="1">
-			<documentation>
-				<description>The solver to use. Currently CPLEX and GLPK are supported. In none specified, GLPK is used.</description>
+				<description>The parameters of the metaheuristic. 'nmodels': the size of the population; 'niter_heur': the number of iterations of the heuristic; 'niter_meta': the number of iterations of the main loop; 'solver': the solver to use (Currently CPLEX and GLPK are supported. In none specified, GLPK is used)</description>
 			</documentation>
 			<xmcda tag="methodParameters" />
 		</input>
