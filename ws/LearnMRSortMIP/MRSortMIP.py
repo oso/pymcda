@@ -211,6 +211,7 @@ def mrsort_mip(indir, outdir):
         assignments2 = model.get_assignments(pt)
         compat = get_compat_alternatives(assignments, assignments2)
         compat = to_alternatives(compat)
+        msg_solver = "%s" % solver
         msg_ca = "CA: %g" % (len(compat) / len(assignments))
 
         profiles = to_alternatives(model.categories_profiles.keys())
@@ -226,7 +227,7 @@ def mrsort_mip(indir, outdir):
         write_xmcda_file(outdir + '/compatible_alts.xml',
                          compat.to_xmcda())
 
-        write_message_ok(outdir + '/messages.xml', [msg_ca])
+        write_message_ok(outdir + '/messages.xml', [msg_solver, msg_ca])
     except:
         log_error("Cannot solve problem")
         log_error(traceback.format_exc())
