@@ -9,17 +9,22 @@ from itertools import product
 
 from pymcda.types import AlternativesAssignments, PerformanceTable
 from pymcda.electre_tri import ElectreTri
-from pymcda.learning.lp_mrsort_weights import LpMRSortWeights
+from pymcda.learning.lp_mrsort_mobius import LpMRSortMobius
 from pymcda.generate import generate_alternatives
-from pymcda.generate import generate_random_mrsort_model
+from pymcda.generate import generate_random_mrsort_choquet_model
 from pymcda.generate import generate_random_performance_table
 from pymcda.utils import compute_ca
 from pymcda.utils import add_errors_in_assignments
 from test_utils import test_result, test_results
+from test_utils import save_to_xmcda
 
 def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
     # Generate an ELECTRE TRI model and assignment examples
-    model = generate_random_mrsort_model(nc, ncat, seed)
+    if random_model_type == 'default':
+        model = generate_random_mrsort_model(nc, ncat, seed)
+    elif random_model_type == 'choquet':
+        model = generate_random_mrsort_choquet_model(nc, ncat, 2, seed)
+
     model2 = model.copy()
 
     # Generate a first set of alternatives
@@ -35,7 +40,10 @@ def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
 
     # Run linear program
     t1 = time.time()
-    lp_weights = LpMRSortWeights(model2, pt, aa_err, 0.0001)
+    if random_model_type == 'default':
+        lp_weights = LpMRSortWeights(model2, pt, aa_err, 0.0001)
+    else:
+        lp_weights = LpMRSortMobius(model2, pt, aa_err, 0.0001)
     t2 = time.time()
     obj = lp_weights.solve()
     t3 = time.time()
@@ -73,6 +81,14 @@ def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
     t = test_result("%s-%d-%d-%d-%d-%g" % (seed, na, nc, ncat, na_gen,
                     pcerrors))
 
+    model.id = 'initial'
+    model2.id = 'learned'
+    pt.id, pt_gen.id = 'learning_set', 'test_set'
+    aa.id = 'aa'
+    aa_err.id = 'aa_err'
+    save_to_xmcda("%s/%s.bz2" % (directory, t.test_name),
+                  model, model2, pt, pt_gen, aa, aa_err)
+
     # Input params
     t['seed'] = seed
     t['na'] = na
@@ -105,6 +121,8 @@ def run_tests(na, nc, ncat, na_gen, pcerrors, nseeds, filename):
     writer.writerow(['na_gen', na_gen])
     writer.writerow(['pcerrors', pcerrors])
     writer.writerow(['nseeds', nseeds])
+    writer.writerow(['random_model_type', random_model_type])
+    writer.writerow(['learned_model_type', learned_model_type])
     writer.writerow(['', ''])
 
     # Create a test results instance
@@ -163,11 +181,41 @@ if __name__ == "__main__":
     parser.add_option("-s", "--nseeds", action = "store", type="string",
                       dest = "nseeds",
                       help = "number of seeds")
+    parser.add_option("-r", "--random-model-type", action = "store",
+                      type = "string", dest = "random_model_type",
+                      help = "type of initial model (default, choquet)")
+    parser.add_option("-l", "--learned-model-type", action = "store",
+                      type = "string", dest = "learned_model_type",
+                      help = "type of learned model (default, choquet)")
     parser.add_option("-f", "--filename", action = "store", type="string",
                       dest = "filename",
                       help = "filename to save csv output")
 
     (options, args) = parser.parse_args()
+
+    while options.random_model_type != "default" \
+          and options.random_model_type != "choquet":
+        print("1. Default MR-Sort model")
+        print("2. Choquet MR-Sort model")
+        i = raw_input("Type of random model to initialize ? ")
+        if i == '1':
+            options.random_model_type = 'default'
+        elif i == '2':
+            options.random_model_type = 'choquet'
+
+    random_model_type = options.random_model_type
+
+    while options.learned_model_type != "default" \
+          and options.learned_model_type != "choquet":
+        print("1. Default MR-Sort model")
+        print("2. Choquet MR-Sort model")
+        i = raw_input("Type of random model to learn ? ")
+        if i == '1':
+            options.learned_model_type = 'default'
+        elif i == '2':
+            options.learned_model_type = 'choquet'
+
+    learned_model_type = options.learned_model_type
 
     options.na = read_multiple_integer(options.na, "Number of " \
                                        "assignment examples")
@@ -177,12 +225,16 @@ if __name__ == "__main__":
     options.na_gen = read_multiple_integer(options.na_gen, "Number of " \
                                            "generalization alternatives")
     options.pcerrors = read_multiple_integer(options.pcerrors,
-                                             "Ratio of errors")
+                                             "Percentage of errors")
     options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
 
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    default_filename = "data/test_lp_learning_weights-%s.csv" % dt
+    default_filename = "data/test_lp_mrsortc_weights-%s.csv" % dt
     options.filename = read_csv_filename(options.filename, default_filename)
+
+    directory = options.filename + "-data"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
     run_tests(options.na, options.nc, options.ncat, options.na_gen,
               options.pcerrors, options.nseeds, options.filename)
