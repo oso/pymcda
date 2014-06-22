@@ -10,6 +10,7 @@ from itertools import product
 from pymcda.types import AlternativesAssignments, PerformanceTable
 from pymcda.electre_tri import ElectreTri
 from pymcda.learning.lp_mrsort_mobius import LpMRSortMobius
+from pymcda.learning.lp_mrsort_weights import LpMRSortWeights
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_mrsort_choquet_model
 from pymcda.generate import generate_random_mrsort_model
