@@ -128,7 +128,7 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
     t = test_result("%s-%d-%d-%d-%d-%g-%d-%d-%d" % (seed, na, nc, ncat,
                     na_gen, pcerrors, max_loops, nmodels, max_oloops))
 
-    model.id = 'learned'
+    model.id = 'initial'
     model2.id = 'learned'
     pt.id, pt_gen.id = 'learning_set', 'test_set'
     save_to_xmcda("%s/%s.bz2" % (directory, t.test_name),
