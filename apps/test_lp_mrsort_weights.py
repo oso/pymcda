@@ -12,6 +12,7 @@ from pymcda.electre_tri import ElectreTri
 from pymcda.learning.lp_mrsort_mobius import LpMRSortMobius
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_mrsort_choquet_model
+from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_random_performance_table
 from pymcda.utils import compute_ca
 from pymcda.utils import add_errors_in_assignments
