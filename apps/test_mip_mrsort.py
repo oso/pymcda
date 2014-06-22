@@ -17,6 +17,7 @@ from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.utils import add_errors_in_assignments_proba
 from test_utils import test_result, test_results
+from test_utils import save_to_xmcda
 
 def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors):
 
@@ -87,6 +88,14 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors):
     # Save all infos in test_result class
     t = test_result("%s-%d-%d-%d-%d-%g" % (seed, na, nc, ncat,
                     na_gen, pcerrors))
+
+    model.id = 'initial'
+    model2.id = 'learned'
+    pt.id, pt_gen.id = 'learning_set', 'test_set'
+    aa.id = 'aa'
+    aa_err.id = 'aa_err'
+    save_to_xmcda("%s/%s.bz2" % (directory, t.test_name),
+                  model, model2, pt, pt_gen, aa, aa_err)
 
     # Input params
     t['seed'] = seed
@@ -217,13 +226,17 @@ if __name__ == "__main__":
     options.ncat = read_multiple_integer(options.ncat, "Number of categories")
     options.na_gen = read_multiple_integer(options.na_gen, "Number of " \
                                            "generalization alternatives")
-    options.pcerrors = read_multiple_integer(options.pcerrors, "Ratio of " \
-                                             "errors")
+    options.pcerrors = read_multiple_integer(options.pcerrors, "Percentage " \
+                                             "of errors")
     options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
 
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     default_filename = "data/test_%s-%s.csv" % (algo.__name__, dt)
     options.filename = read_csv_filename(options.filename, default_filename)
+
+    directory = options.filename + "-data"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
     run_tests(options.na, options.nc, options.ncat, options.na_gen,
               options.pcerrors, options.nseeds,
