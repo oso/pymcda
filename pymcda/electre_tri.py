@@ -329,7 +329,7 @@ class MRSort(ElectreTri):
             diff = y.performances[c.id] - x.performances[c.id]
             diff *= c.direction
             v = self.get_threshold_by_profile(c, 'v', profile)
-            if v is not None and diff >= v:
+            if v is not None and (eq(diff, v) or diff > v):
                 if self.veto_weights is None:
                     return 1
                 else:
@@ -362,7 +362,8 @@ class MRSort(ElectreTri):
                 continue
 
             vc = self.veto_concordance(ap, self.bpt[profile], profile)
-            if self.veto_lbda and vc >= self.veto_lbda:
+            if self.veto_lbda and (eq(vc, self.veto_lbda)
+                                   or vc > self.veto_lbda):
                 n += 1
             elif self.veto_lbda is None and vc > 0:
                 n += 1
