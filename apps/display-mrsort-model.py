@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
@@ -36,17 +36,17 @@ for xmcda_model in xmcda_models:
     print(string)
     print('=' * len(string))
 
-    m.bpt.display()
-    m.cv.display()
+    print(m.bpt)
+    print(m.cv)
     print("lambda: %s\n" % m.lbda)
 
     if m.veto is not None:
-        m.veto.display()
+        print(m.veto)
     else:
         print("No veto profiles")
 
     if m.veto_weights is not None:
-        m.veto_weights.display()
+        print(m.veto_weights)
         print("veto_lambda: %s" % m.veto_lbda)
     else:
         print("No veto weights")
