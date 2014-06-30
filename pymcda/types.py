@@ -2315,6 +2315,13 @@ class AlternativesAssignments(McdaDict):
 
         return l
 
+    def to_alternatives(self):
+        alternatives = Alternatives()
+        for aa in self:
+            alternatives.append(Alternative(aa.id))
+
+        return alternatives
+
     def display(self, alternative_ids = None, out = sys.stdout):
         if alternative_ids is None:
             alternative_ids = self.keys()
