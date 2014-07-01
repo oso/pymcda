@@ -34,14 +34,17 @@ for i, fmin in enumerate(fmins):
     result = {}
     print("\n%d. Fmin: %s" % (i + 1, ', '.join("%s" % f for f in fmin)))
     pt, aa = generate_binary_performance_table_and_assignments(c, cat, fmin)
+    aa.id = 'aa'
     a = Alternatives([Alternative(a.id) for a in aa])
-    print_pt_and_assignments(a, c, [aa], pt)
 
     model = MRSort(c, None, bpt, None, cps)
     mip = MipMRSortWeights(model, pt, aa)
     obj = mip.solve()
     aa2 = model.pessimist(pt)
+    aa2.id = 'aa_add'
     print("MipMRSortWeights: Objective: %d (/%d)" % (obj, len(aa)))
+    anok = [a.id for a in aa if a.category_id != aa2[a.id].category_id]
+    print("Alternative not restored: %s" % ','.join("%s" % a for a in anok))
     print(model.cv)
     print("lambda: %s" % model.lbda)
     result['obj_weights'] = obj
@@ -49,15 +52,15 @@ for i, fmin in enumerate(fmins):
     mip = MipMRSortMobius(model, pt, aa)
     obj = mip.solve()
     aa3 = model.pessimist(pt)
+    aa3.id = 'aa_capa'
     print("MipMRSortMobius:  Objective: %d (/%d)" % (obj, len(aa)))
+    anok = [a.id for a in aa if a.category_id != aa3[a.id].category_id]
+    print("Alternative not restored: %s" % ','.join("%s" % a for a in anok))
     print(model.cv)
     print("lambda: %s" % model.lbda)
     result['obj_capa'] = obj
 
-    a = Alternatives([Alternative(a.id) \
-                      for a in aa
-                      if a.category_id != aa2[a.id].category_id]
-                      or a.category_id != aa3[a.id].category_id)
+    a = Alternatives([Alternative(a.id) for a in aa])
     print_pt_and_assignments(a, c, [aa, aa2, aa3], pt)
 
     results[i] = result
