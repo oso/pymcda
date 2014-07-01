@@ -44,12 +44,12 @@ def print_pt_and_assignments(alternatives, criteria, aas, pt):
 
     aaname, aalen = {}, {}
     for i, aa in enumerate(aas):
-        aaname[aa] = aa.id
+        aaname[i] = aa.id
         if aa.id is None:
-            aaname[aa] = "assign%d" % (i + 1)
+            aaname[i] = "assign%d" % (i + 1)
 
-        aalen[aa] = max([len(aa[a.id].category_id) for a in alternatives]
-                        + [len(aaname[aa])])
+        aalen[i] = max([len(aa[a.id].category_id) for a in alternatives]
+                        + [len(aaname[i])])
 
     clen = {}
     for c in criteria:
@@ -57,8 +57,8 @@ def print_pt_and_assignments(alternatives, criteria, aas, pt):
                           for a in alternatives] + [len(c.id)])
 
     print(" " * (alen - len("alt.")) + "alt.", end = "")
-    for aa in aas:
-        print(" " + " " * (aalen[aa] - len(aaname[aa])) + aaname[aa],
+    for i, aa in enumerate(aas):
+        print(" " + " " * (aalen[i] - len(aaname[i])) + aaname[i],
               end = "")
     print(" |", end = "")
     for c in criteria:
@@ -67,9 +67,9 @@ def print_pt_and_assignments(alternatives, criteria, aas, pt):
 
     for a in alternatives:
         print(" " * (alen - len(a.id)) + "%s" % a.id, end = "")
-        for aa in aas:
+        for i, aa in enumerate(aas):
             cat = aa[a.id].category_id
-            print(" " + " " * (aalen[aa] - len(cat)) + cat, end = "")
+            print(" " + " " * (aalen[i] - len(cat)) + cat, end = "")
         print(" |", end = "")
         for c in  criteria:
             perf = str(pt[a.id].performances[c.id])
