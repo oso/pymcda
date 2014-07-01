@@ -1,6 +1,7 @@
 from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
+from collections import OrderedDict
 from pymcda.types import CriteriaSet
 from pymcda.types import PerformanceTable, AlternativePerformances
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
@@ -105,8 +106,9 @@ def generate_binary_performance_table_and_assignments(criteria,
             continue
 
         aid = "a%d" % i
-        ap = AlternativePerformances(aid, {c: 1 if c in coalition else 0
-                                           for c in cids})
+        ap = AlternativePerformances(aid,
+                                     OrderedDict({c: 1 if c in coalition else 0
+                                                  for c in cids}))
         pt.append(ap)
 
         cat = cats[0]
