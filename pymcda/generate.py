@@ -57,19 +57,21 @@ def generate_random_capacities(criteria, seed = None, k = 3):
 
     return cvs
 
-def generate_alternatives(number, prefix='a'):
+def generate_alternatives(number, prefix = 'a', names = None):
     alts = Alternatives()
     for i in range(number):
-        a = Alternative()
-        a.id = "%s%d" % (prefix, i+1)
+        aid = names[i] if names is not None else "%s%d" % (prefix, i+1)
+        a = Alternative(aid)
         alts.append(a)
 
     return alts
 
-def generate_criteria(number, prefix='c', random_direction = False):
+def generate_criteria(number, prefix = 'c', random_direction = False,
+                      names = None):
     crits = Criteria()
     for i in range(number):
-        c = Criterion("%s%d" % (prefix, i+1))
+        cid = names[i] if names is not None else "%s%d" % (prefix, i+1)
+        c = Criterion(cid)
         if random_direction is True:
             c.direction = random.choice([-1, 1])
         crits.append(c)
@@ -138,12 +140,11 @@ def generate_random_performance_table(alts, crits, seed = None, k = 3,
 
     return pt
 
-def generate_categories(number, prefix='cat'):
+def generate_categories(number, prefix = 'cat', names = None):
     cats = Categories()
-    for i in range(number):
-        c = Category()
-        c.id = "%s%d" % (prefix, i+1)
-        c.rank = i+1
+    for i in reversed(range(number)):
+        cid = names[i] if names is not None else "%s%d" % (prefix, i+1)
+        c = Category(cid, i + 1)
         cats.append(c)
 
     return cats
