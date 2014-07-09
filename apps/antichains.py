@@ -6,6 +6,7 @@ from xml.etree import ElementTree
 from test_utils import save_to_xmcda
 import math
 import bz2
+from pymcda.types import Criteria, Criterion
 
 # FIXME
 class CriteriaSets(set):
@@ -16,8 +17,12 @@ class CriteriaSets(set):
     def __hash__(self):
         return hash(frozenset(self))
 
-    def to_xmcda(self):
+    def to_xmcda(self, id = None):
         root = ElementTree.Element('criteriaSets')
+
+        if id is not None:
+            root.set('id', id)
+
         for cs in self:
             root.append(cs.to_xmcda())
 
@@ -64,7 +69,7 @@ def __antichains(chain, combi, combis, antichains):
     return antichains
 
 def antichains(s):
-    antichains = set([None, CriteriaSet([])])
+    antichains = set([CriteriaSets([]), CriteriaSets([CriteriaSet([])])])
     combis = [CriteriaSet(c) for i in range(1, len(s) + 1) \
                              for c in combinations(s, i)]
     for combi in combis:
@@ -80,20 +85,23 @@ if __name__ == "__main__":
         sys.exit(1)
 
     n = int(sys.argv[1])
-    c = set(['c%d' % i for i in range(1, n + 1)])
+    c = Criteria([Criterion("c%d" % i) for i in range(1, n + 1)])
     print(c)
 
-    a = antichains(c)
+    a = antichains(c.keys())
 
     f = bz2.BZ2File("%s" % sys.argv[2], "w")
     xmcda = ElementTree.Element("{%s}XMCDA" % XMCDA_URL)
+    xmcda.append(c.to_xmcda())
 
     i = 1
     for anti in a:
+        if anti is None:
+            continue
+
         print(anti)
-        if anti is not None:
-            xmcda.append(anti.to_xmcda())
-            i += 1
+        xmcda.append(anti.to_xmcda(str(i)))
+        i += 1
 
     print(len(a))
 
