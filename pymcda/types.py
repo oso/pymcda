@@ -226,6 +226,69 @@ class McdaObject(object):
 
         return deepcopy(self)
 
+class CriteriaSets(object):
+
+    def __init__(self, cs = None, id = None):
+        self.id = id
+        self.cs = cs if cs is not None else set()
+
+    def __iter__(self):
+        """Return an iterator object for the MCDA dictionnary."""
+
+        return self.cs.__iter__()
+
+    def __len__(self):
+        return len(self.cs)
+
+    def __repr__(self):
+        """Manner to represent the MCDA dictionnary"""
+
+        return "CriteriaSets(%s)" % ', '.join(map(str, self.cs))
+
+    def add(self, cs):
+        return self.cs.add(cs)
+
+    def copy(self):
+        """Perform a full copy of the Criteria set"""
+
+        return deepcopy(self)
+
+    def remove(self, x):
+        return self.cs.remove(x)
+
+    def discard(self, x):
+        return self.cs.discard(x)
+
+    def to_xmcda(self, id = None):
+        """Convert the MCDA dictionnary into XMCDA output"""
+
+        root = ElementTree.Element('CriteriaSets')
+
+        if id is not None:
+            root.set('id', id)
+        elif self.id is not None:
+            root.set('id', self.id)
+
+        for cs in self:
+            xmcda = cs.to_xmcda()
+            root.append(xmcda)
+
+        return root
+
+    def from_xmcda(self, xmcda, id = None):
+        """Read the MCDA dictionnary from XMCDA input"""
+
+        xmcda = find_xmcda_tag(xmcda, 'criteriaSets', id)
+
+        self.id = xmcda.get('id')
+
+        tag_list = xmcda.getiterator('criteriaSet')
+        for tag in tag_list:
+            cs = CriteriaSet().from_xmcda(tag)
+            self.add(cs)
+
+        return self
+
 class CriteriaSet(object):
 
     def __init__(self, *criteria):
@@ -251,6 +314,11 @@ class CriteriaSet(object):
 
     def add(self, x):
         return self.criteria.add(x)
+
+    def copy(self):
+        """Return a copy of the current MCDA object"""
+
+        return deepcopy(self)
 
     def remove(self, x):
         return self.criteria.remove(x)
