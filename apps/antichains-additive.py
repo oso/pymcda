@@ -56,6 +56,10 @@ def cplex_lbda_minmax(cids, fmins, gmaxs, epsilon = 0.00001):
 
     lp.objective.set_sense(lp.objective.sense.minimize)
     lp.solve()
+    status = lp.solution.get_status()
+    if status != lp.solution.status.optimal:
+        return None
+
     lbdamin = lp.solution.get_objective_value()
 
     lp.objective.set_sense(lp.objective.sense.maximize)
@@ -78,6 +82,8 @@ def compute_gmax(pset, fmins):
 
     return gmaxs
 
+XMCDA_URL = 'http://www.decision-deck.org/2009/XMCDA-2.1.0'
+
 if __name__ == "__main__":
     f = bz2.BZ2File(sys.argv[1])
 
@@ -89,15 +95,24 @@ if __name__ == "__main__":
     print(c)
     cids = c.keys()
 
+    f.close()
+
     c_pset = CriteriaSets(set(CriteriaSet(*i) for i in powerset(c.keys())))
 
     xmcda_csets = root.findall(".//criteriaSets")
 
     i = 0
+    xmcda2 = ElementTree.Element("{%s}XMCDA" % XMCDA_URL)
     for xmcda in xmcda_csets:
         fmins = CriteriaSets().from_xmcda(xmcda)
         gmaxs = compute_gmax(c_pset, fmins)
-        lbdamin, lbdamax = cplex_lbda_minmax(cids, fmins, gmaxs)
-        if lbdamin > lbdamax:
+        lbdas = cplex_lbda_minmax(cids, fmins, gmaxs)
+        if lbdas is None:
             i += 1
-            print(i, fmins, lbdamin, lbdamax)
+            xmcda2.append(xmcda)
+            print("%d. %s" % (i, fmins))
+
+    if sys.argv[2] is not None:
+        f2 = bz2.BZ2File("%s" % sys.argv[2], "w")
+        f2.write(ElementTree.tostring(xmcda2, encoding="UTF-8", method="xml"))
+        f2.close()
