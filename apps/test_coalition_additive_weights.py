@@ -1,5 +1,6 @@
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
+import bz2
 from pymcda.types import *
 from pymcda.generate import generate_criteria
 from pymcda.generate import generate_categories
@@ -9,19 +10,25 @@ from pymcda.learning.mip_mrsort_weights import MipMRSortWeights
 from pymcda.learning.mip_mrsort_mobius import MipMRSortMobius
 from pymcda.utils import print_pt_and_assignments
 from coalition_additive_weights import generate_binary_performance_table_and_assignments
-from coalition_additive_weights import fmins
+
+f = bz2.BZ2File(sys.argv[1])
+
+tree = ElementTree.parse(f)
+root = tree.getroot()
+
+xmcda_criteria = root.find(".//criteria")
+criteria = Criteria().from_xmcda(xmcda_criteria)
+
+xmcda_csets = root.findall(".//criteriaSets")
+f.close()
 
 ## Weights
-c = generate_criteria(4)
-w1 = CriterionValue('c1', 0.2)
-w2 = CriterionValue('c2', 0.2)
-w3 = CriterionValue('c3', 0.2)
-w4 = CriterionValue('c4', 0.2)
-w = CriteriaValues([w1, w2, w3, w4])
+w = CriteriaValues()
+for c in criteria:
+    w.append(CriterionValue(c.id, 0.2))
 
 ## Profiles and categories
-bp1 = AlternativePerformances('b1',
-                              {'c1': 0.5, 'c2': 0.5, 'c3': 0.5, 'c4': 0.5})
+bp1 = AlternativePerformances('b1', {c.id: 0.5 for c in criteria})
 bpt = PerformanceTable([bp1])
 cat = generate_categories(2, names = ['bad', 'good'])
 cps = generate_categories_profiles(cat)
@@ -29,15 +36,19 @@ cps = generate_categories_profiles(cat)
 ## Model
 model = MRSort(c, w, bpt, 0.6, cps)
 
+fmins = []
 results = {}
-for i, fmin in enumerate(fmins):
+for i, xmcda in enumerate(xmcda_csets):
     result = {}
+    fmin = CriteriaSets().from_xmcda(xmcda)
+    fmins.append(fmin)
     print("\n%d. Fmin: %s" % (i + 1, ', '.join("%s" % f for f in fmin)))
-    pt, aa = generate_binary_performance_table_and_assignments(c, cat, fmin)
+    pt, aa = generate_binary_performance_table_and_assignments(criteria, cat,
+                                                               fmin)
     aa.id = 'aa'
     a = Alternatives([Alternative(a.id) for a in aa])
 
-    model = MRSort(c, None, bpt, None, cps)
+    model = MRSort(criteria, None, bpt, None, cps)
     mip = MipMRSortWeights(model, pt, aa)
     obj = mip.solve()
     aa2 = model.pessimist(pt)
@@ -61,7 +72,7 @@ for i, fmin in enumerate(fmins):
     result['obj_capa'] = obj
 
     a = Alternatives([Alternative(a.id) for a in aa])
-    print_pt_and_assignments(a, c, [aa, aa2, aa3], pt)
+    print_pt_and_assignments(a, criteria, [aa, aa2, aa3], pt)
 
     results[i] = result
 
