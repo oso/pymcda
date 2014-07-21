@@ -103,6 +103,7 @@ if __name__ == "__main__":
 
     i = 0
     xmcda2 = ElementTree.Element("{%s}XMCDA" % XMCDA_URL)
+    xmcda2.append(xmcda_criteria)
     for xmcda in xmcda_csets:
         fmins = CriteriaSets().from_xmcda(xmcda)
         gmaxs = compute_gmax(c_pset, fmins)
@@ -112,7 +113,7 @@ if __name__ == "__main__":
             xmcda2.append(xmcda)
             print("%d. %s" % (i, fmins))
 
-    if sys.argv[2] is not None:
+    if len(sys.argv) == 3:
         f2 = bz2.BZ2File("%s" % sys.argv[2], "w")
         f2.write(ElementTree.tostring(xmcda2, encoding="UTF-8", method="xml"))
         f2.close()
