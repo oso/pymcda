@@ -615,6 +615,10 @@ class MipMRSortVC():
     def solve(self):
         self.lp.solve()
 
+        status = self.lp.solution.get_status()
+        if status != self.lp.solution.status.MIP_optimal:
+            raise RuntimeError("Solver status: %s" % status)
+
         obj = self.lp.solution.get_objective_value()
 
         cvs = CriteriaValues()

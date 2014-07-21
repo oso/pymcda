@@ -193,6 +193,10 @@ class LpMRSortWeights():
     def solve_cplex(self):
         self.lp.solve()
 
+        status = self.lp.solution.get_status()
+        if status != self.lp.solution.status.optimal:
+            raise RuntimeError("Solver status: %s" % status)
+
         obj = self.lp.solution.get_objective_value()
 
         cvs = CriteriaValues()
