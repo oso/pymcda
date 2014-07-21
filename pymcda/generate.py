@@ -144,7 +144,7 @@ def generate_categories(number, prefix = 'cat', names = None):
     cats = Categories()
     for i in reversed(range(number)):
         cid = names[i] if names is not None else "%s%d" % (prefix, i+1)
-        c = Category(cid, i + 1)
+        c = Category(cid, rank = i + 1)
         cats.append(c)
 
     return cats
