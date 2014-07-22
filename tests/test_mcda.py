@@ -513,44 +513,44 @@ class tests_mcda_methods(unittest.TestCase):
 class tests_CriteriaSet(unittest.TestCase):
 
     def test001(self):
-        cs = CriteriaSet('c1', 'c2')
+        cs = CriteriaSet(['c1', 'c2'])
         cv = CriterionValue('c1', 10)
 
         self.assertTrue(cv.id_issubset(cs))
 
     def test002(self):
-        cs = CriteriaSet('c1', 'c2')
+        cs = CriteriaSet(['c1', 'c2'])
         cv = CriterionValue('c3', 10)
 
         self.assertFalse(cv.id_issubset(cs))
 
     def test003(self):
-        cs = CriteriaSet('c1', 'c2')
-        cv = CriterionValue(CriteriaSet('c1', 'c2'), 10)
+        cs = CriteriaSet(['c1', 'c2'])
+        cv = CriterionValue(CriteriaSet(['c1', 'c2']), 10)
 
         self.assertTrue(cv.id_issubset(cs))
 
     def test004(self):
-        cs = CriteriaSet('c1', 'c2')
-        cv = CriterionValue(CriteriaSet('c1', 'c3'), 10)
+        cs = CriteriaSet(['c1', 'c2'])
+        cv = CriterionValue(CriteriaSet(['c1', 'c3']), 10)
 
         self.assertFalse(cv.id_issubset(cs))
 
     def test005(self):
         cs = 'c1'
-        cv = CriterionValue(CriteriaSet('c1', 'c2'), 10)
+        cv = CriterionValue(CriteriaSet(['c1', 'c2']), 10)
 
         self.assertTrue(cv.id_issubset(cs))
 
     def test006(self):
         cs = 'c3'
-        cv = CriterionValue(CriteriaSet('c1', 'c2'), 10)
+        cv = CriterionValue(CriteriaSet(['c1', 'c2']), 10)
 
         self.assertFalse(cv.id_issubset(cs))
 
     def test007(self):
-        cs = CriteriaSet('c1', 'c2')
-        cs2 = CriteriaSet('c1', 'c2')
+        cs = CriteriaSet(['c1', 'c2'])
+        cs2 = CriteriaSet(['c1', 'c2'])
 
         self.assertEqual(cs, cs2)
 

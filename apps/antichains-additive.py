@@ -97,7 +97,7 @@ if __name__ == "__main__":
 
     f.close()
 
-    c_pset = CriteriaSets(set(CriteriaSet(*i) for i in powerset(c.keys())))
+    c_pset = CriteriaSets(set(CriteriaSet(i) for i in powerset(c.keys())))
 
     xmcda_csets = root.findall(".//criteriaSets")
 

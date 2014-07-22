@@ -7,89 +7,89 @@ from pymcda.types import PerformanceTable, AlternativePerformances
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.utils import powerset
 
-fmin1 = [CriteriaSet('c1', 'c2'), CriteriaSet('c1', 'c3'),
-         CriteriaSet('c2', 'c4'), CriteriaSet('c3', 'c4')]
-gmax1 = [CriteriaSet('c2', 'c3'), CriteriaSet('c1', 'c4')]
+fmin1 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c1', 'c3']),
+         CriteriaSet(['c2', 'c4']), CriteriaSet(['c3', 'c4'])]
+gmax1 = [CriteriaSet(['c2', 'c3']), CriteriaSet(['c1', 'c4'])]
 
-fmin2 = [CriteriaSet('c1', 'c2'), CriteriaSet('c1', 'c3'),
-         CriteriaSet('c2', 'c4')]
-gmax2 = [CriteriaSet('c2', 'c3'), CriteriaSet('c1', 'c4'),
-         CriteriaSet('c3', 'c4')]
+fmin2 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c1', 'c3']),
+         CriteriaSet(['c2', 'c4'])]
+gmax2 = [CriteriaSet(['c2', 'c3']), CriteriaSet(['c1', 'c4']),
+         CriteriaSet(['c3', 'c4'])]
 
-fmin3 = [CriteriaSet('c1', 'c2'), CriteriaSet('c1', 'c3'),
-         CriteriaSet('c3', 'c4')]
-gmax3 = [CriteriaSet('c2', 'c3'), CriteriaSet('c1', 'c4'),
-         CriteriaSet('c2', 'c4')]
+fmin3 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c1', 'c3']),
+         CriteriaSet(['c3', 'c4'])]
+gmax3 = [CriteriaSet(['c2', 'c3']), CriteriaSet(['c1', 'c4']),
+         CriteriaSet(['c2', 'c4'])]
 
-fmin4 = [CriteriaSet('c1', 'c2'), CriteriaSet('c2', 'c3'),
-         CriteriaSet('c1', 'c4'), CriteriaSet('c3', 'c4')]
-gmax4 = [CriteriaSet('c1', 'c3'), CriteriaSet('c2', 'c4')]
+fmin4 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c2', 'c3']),
+         CriteriaSet(['c1', 'c4']), CriteriaSet(['c3', 'c4'])]
+gmax4 = [CriteriaSet(['c1', 'c3']), CriteriaSet(['c2', 'c4'])]
 
-fmin5 = [CriteriaSet('c1', 'c2'), CriteriaSet('c2', 'c3'),
-         CriteriaSet('c1', 'c4')]
-gmax5 = [CriteriaSet('c1', 'c3'), CriteriaSet('c2', 'c4'),
-         CriteriaSet('c3', 'c4')]
+fmin5 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c2', 'c3']),
+         CriteriaSet(['c1', 'c4'])]
+gmax5 = [CriteriaSet(['c1', 'c3']), CriteriaSet(['c2', 'c4']),
+         CriteriaSet(['c3', 'c4'])]
 
-fmin6 = [CriteriaSet('c1', 'c2'), CriteriaSet('c2', 'c3'),
-         CriteriaSet('c3', 'c4')]
-gmax6 = [CriteriaSet('c1', 'c3'), CriteriaSet('c1', 'c4'),
-         CriteriaSet('c2', 'c4')]
+fmin6 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c2', 'c3']),
+         CriteriaSet(['c3', 'c4'])]
+gmax6 = [CriteriaSet(['c1', 'c3']), CriteriaSet(['c1', 'c4']),
+         CriteriaSet(['c2', 'c4'])]
 
-fmin7 = [CriteriaSet('c1', 'c2'), CriteriaSet('c1', 'c4'),
-         CriteriaSet('c3', 'c4')]
-gmax7 = [CriteriaSet('c1', 'c3'), CriteriaSet('c2', 'c3'),
-         CriteriaSet('c2', 'c4')]
+fmin7 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c1', 'c4']),
+         CriteriaSet(['c3', 'c4'])]
+gmax7 = [CriteriaSet(['c1', 'c3']), CriteriaSet(['c2', 'c3']),
+         CriteriaSet(['c2', 'c4'])]
 
-fmin8 = [CriteriaSet('c1', 'c2'), CriteriaSet('c2', 'c4'),
-         CriteriaSet('c3', 'c4')]
-gmax8 = [CriteriaSet('c1', 'c3'), CriteriaSet('c2', 'c3'),
-         CriteriaSet('c1', 'c4')]
+fmin8 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c2', 'c4']),
+         CriteriaSet(['c3', 'c4'])]
+gmax8 = [CriteriaSet(['c1', 'c3']), CriteriaSet(['c2', 'c3']),
+         CriteriaSet(['c1', 'c4'])]
 
-fmin9 = [CriteriaSet('c1', 'c2'), CriteriaSet('c3', 'c4')]
-gmax9 = [CriteriaSet('c1', 'c3'), CriteriaSet('c2', 'c3'),
-         CriteriaSet('c1', 'c4'), CriteriaSet('c2', 'c4')]
+fmin9 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c3', 'c4'])]
+gmax9 = [CriteriaSet(['c1', 'c3']), CriteriaSet(['c2', 'c3']),
+         CriteriaSet(['c1', 'c4']), CriteriaSet(['c2', 'c4'])]
 
-fmin10 = [CriteriaSet('c1', 'c3'), CriteriaSet('c2', 'c3'),
-          CriteriaSet('c1', 'c4'), CriteriaSet('c2', 'c4')]
-gmax10 = [CriteriaSet('c1', 'c2'), CriteriaSet('c3', 'c4')]
+fmin10 = [CriteriaSet(['c1', 'c3']), CriteriaSet(['c2', 'c3']),
+          CriteriaSet(['c1', 'c4']), CriteriaSet(['c2', 'c4'])]
+gmax10 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c3', 'c4'])]
 
-fmin11 = [CriteriaSet('c1', 'c3'), CriteriaSet('c2', 'c3'),
-          CriteriaSet('c1', 'c4')]
-gmax11 = [CriteriaSet('c1', 'c2'), CriteriaSet('c2', 'c4'),
-          CriteriaSet('c3', 'c4')]
+fmin11 = [CriteriaSet(['c1', 'c3']), CriteriaSet(['c2', 'c3']),
+          CriteriaSet(['c1', 'c4'])]
+gmax11 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c2', 'c4']),
+          CriteriaSet(['c3', 'c4'])]
 
-fmin12 = [CriteriaSet('c1', 'c3'), CriteriaSet('c2', 'c3'),
-          CriteriaSet('c2', 'c4')]
-gmax12 = [CriteriaSet('c1', 'c2'), CriteriaSet('c1', 'c4'),
-          CriteriaSet('c3', 'c4')]
+fmin12 = [CriteriaSet(['c1', 'c3']), CriteriaSet(['c2', 'c3']),
+          CriteriaSet(['c2', 'c4'])]
+gmax12 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c1', 'c4']),
+          CriteriaSet(['c3', 'c4'])]
 
-fmin13 = [CriteriaSet('c1', 'c3'), CriteriaSet('c1', 'c4'),
-          CriteriaSet('c2', 'c4')]
-gmax13 = [CriteriaSet('c1', 'c2'), CriteriaSet('c2', 'c3'),
-          CriteriaSet('c3', 'c4')]
+fmin13 = [CriteriaSet(['c1', 'c3']), CriteriaSet(['c1', 'c4']),
+          CriteriaSet(['c2', 'c4'])]
+gmax13 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c2', 'c3']),
+          CriteriaSet(['c3', 'c4'])]
 
-fmin14 = [CriteriaSet('c1', 'c3'), CriteriaSet('c2', 'c4'),
-          CriteriaSet('c3', 'c4')]
-gmax14 = [CriteriaSet('c1', 'c2'), CriteriaSet('c2', 'c3'),
-          CriteriaSet('c1', 'c4')]
+fmin14 = [CriteriaSet(['c1', 'c3']), CriteriaSet(['c2', 'c4']),
+          CriteriaSet(['c3', 'c4'])]
+gmax14 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c2', 'c3']),
+          CriteriaSet(['c1', 'c4'])]
 
-fmin15 = [CriteriaSet('c1', 'c3'), CriteriaSet('c2', 'c4')]
-gmax15 = [CriteriaSet('c1', 'c2'), CriteriaSet('c2', 'c3'),
-          CriteriaSet('c1', 'c4'), CriteriaSet('c3', 'c4')]
+fmin15 = [CriteriaSet(['c1', 'c3']), CriteriaSet(['c2', 'c4'])]
+gmax15 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c2', 'c3']),
+          CriteriaSet(['c1', 'c4']), CriteriaSet(['c3', 'c4'])]
 
-fmin16 = [CriteriaSet('c2', 'c3'), CriteriaSet('c1', 'c4'),
-          CriteriaSet('c2', 'c4')]
-gmax16 = [CriteriaSet('c1', 'c2'), CriteriaSet('c1', 'c3'),
-          CriteriaSet('c3', 'c4')]
+fmin16 = [CriteriaSet(['c2', 'c3']), CriteriaSet(['c1', 'c4']),
+          CriteriaSet(['c2', 'c4'])]
+gmax16 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c1', 'c3']),
+          CriteriaSet(['c3', 'c4'])]
 
-fmin17 = [CriteriaSet('c2', 'c3'), CriteriaSet('c1', 'c4'),
-          CriteriaSet('c3', 'c4')]
-gmax17 = [CriteriaSet('c1', 'c2'), CriteriaSet('c1', 'c3'),
-          CriteriaSet('c2', 'c4')]
+fmin17 = [CriteriaSet(['c2', 'c3']), CriteriaSet(['c1', 'c4']),
+          CriteriaSet(['c3', 'c4'])]
+gmax17 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c1', 'c3']),
+          CriteriaSet(['c2', 'c4'])]
 
-fmin18 = [CriteriaSet('c2', 'c3'), CriteriaSet('c1', 'c4')]
-gmax18 = [CriteriaSet('c1', 'c2'), CriteriaSet('c1', 'c3'),
-          CriteriaSet('c2', 'c4'), CriteriaSet('c3', 'c4')]
+fmin18 = [CriteriaSet(['c2', 'c3']), CriteriaSet(['c1', 'c4'])]
+gmax18 = [CriteriaSet(['c1', 'c2']), CriteriaSet(['c1', 'c3']),
+          CriteriaSet(['c2', 'c4']), CriteriaSet(['c3', 'c4'])]
 fmins = [fmin1, fmin2, fmin3, fmin4, fmin5, fmin6, fmin7, fmin8, fmin9,
          fmin10, fmin11, fmin12, fmin13, fmin14, fmin15, fmin16, fmin17,
          fmin18]

@@ -291,8 +291,8 @@ class CriteriaSets(object):
 
 class CriteriaSet(object):
 
-    def __init__(self, *criteria):
-        self.criteria = set(criteria)
+    def __init__(self, criteria = None):
+        self.criteria = set(criteria) if criteria is not None else set()
 
     def __repr__(self):
         return "CriteriaSet(%s)" % ', '.join(map(str, self.criteria))

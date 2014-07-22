@@ -356,9 +356,9 @@ class tests_lp_mrsort_choquet(unittest.TestCase):
         cv1 = CriterionValue('c1', 0.2)
         cv2 = CriterionValue('c2', 0.2)
         cv3 = CriterionValue('c3', 0.2)
-        cv12 = CriterionValue(CriteriaSet('c1', 'c2'), -0.1)
-        cv23 = CriterionValue(CriteriaSet('c2', 'c3'), 0.2)
-        cv13 = CriterionValue(CriteriaSet('c1', 'c3'), 0.3)
+        cv12 = CriterionValue(CriteriaSet(['c1', 'c2']), -0.1)
+        cv23 = CriterionValue(CriteriaSet(['c2', 'c3']), 0.2)
+        cv13 = CriterionValue(CriteriaSet(['c1', 'c3']), 0.3)
         cvs = CriteriaValues([cv1, cv2, cv3, cv12, cv23, cv13])
 
         lbda = 0.6
@@ -399,9 +399,9 @@ class tests_lp_mrsort_choquet(unittest.TestCase):
         cv1 = CriterionValue('c1', 0.2)
         cv2 = CriterionValue('c2', 0.2)
         cv3 = CriterionValue('c3', 0.2)
-        cv12 = CriterionValue(CriteriaSet('c1', 'c2'), -0.1)
-        cv23 = CriterionValue(CriteriaSet('c2', 'c3'), 0.2)
-        cv13 = CriterionValue(CriteriaSet('c1', 'c3'), 0.3)
+        cv12 = CriterionValue(CriteriaSet(['c1', 'c2']), -0.1)
+        cv23 = CriterionValue(CriteriaSet(['c2', 'c3']), 0.2)
+        cv13 = CriterionValue(CriteriaSet(['c1', 'c3']), 0.3)
         cvs = CriteriaValues([cv1, cv2, cv3, cv12, cv23, cv13])
 
         lbda = 0.6

@@ -48,7 +48,7 @@ def generate_random_capacities(criteria, seed = None, k = 3):
             if i == 1:
                 cid = combi[0]
             else:
-                cid = CriteriaSet(*combi)
+                cid = CriteriaSet(combi)
 
             cv = CriterionValue(cid, r[j])
             cvs.append(cv)
