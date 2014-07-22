@@ -6,7 +6,6 @@ from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import Criteria, CriteriaValues, PerformanceTable
 from pymcda.types import CategoriesProfiles
 from pymcda.types import McdaObject
-from pymcda.types import CriteriaSet
 from pymcda.types import marshal, unmarshal
 from pymcda.types import find_xmcda_tag
 from xml.etree import ElementTree
