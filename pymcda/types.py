@@ -459,10 +459,7 @@ class Criterion(McdaObject):
 
     def __repr__(self):
         """Manner to represent the MCDA object"""
-        if self.direction == 1:
-            direction = "+"
-        else:
-            direction = "-"
+        direction = "+" if self.direction == 1 else "-"
         return "%s (%s)" % (self.id, direction)
 
     def to_xmcda(self, id = None):
@@ -479,18 +476,12 @@ class Criterion(McdaObject):
             root.set('name', self.name)
 
         active = ElementTree.SubElement(root, 'active')
-        if self.disabled is False:
-            active.text = 'true'
-        else:
-            active.text = 'false'
+        active.text = 'true' if self.disabled is False else 'false'
 
         scale = ElementTree.SubElement(root, 'scale')
         quant = ElementTree.SubElement(scale, 'quantitative')
         prefd = ElementTree.SubElement(quant, 'preferenceDirection')
-        if self.direction == 1:
-            prefd.text = 'max'
-        else:
-            prefd.text = 'min'
+        prefd.text = 'max' if self.direction == 1 else 'min'
 
         if self.weight:
             crit_val = ElementTree.SubElement(root, 'criterionValue')
@@ -514,10 +505,7 @@ class Criterion(McdaObject):
 
         active = xmcda.find('.//active')
         if active is not None:
-            if active.text == 'false':
-                self.disabled = True
-            else:
-                self.disabled = False
+            self.disabled = True if active.text == 'false' else False
 
         pdir = xmcda.find('.//scale/quantitative/preferenceDirection')
         if pdir is not None:
@@ -697,12 +685,10 @@ class CriterionValue(McdaObject):
 
         self.id = xmcda.get('id')
 
-        criterion_id = xmcda.find('.//criterionID')
-        cset = criterion_id.find('.//criteriaSet')
-        if cset is not None:
-            self.id = CriteriaSet().from_xmcda(cset)
-        else:
-            self.id = criterion_id.text
+        cid = xmcda.find('.//criterionID')
+        cset = cid.find('.//criteriaSet')
+        self.id = CriteriaSet().from_xmcda(cset) if cset is not None \
+                                                 else cid.text
 
         value = xmcda.find('.//value')
         if value is not None:
@@ -804,10 +790,7 @@ class Alternative(McdaObject):
             root.set('name', self.name)
 
         active = ElementTree.SubElement(root, 'active')
-        if self.disabled is False:
-            active.text = 'true'
-        else:
-            active.text = 'false'
+        active.text = 'true' if self.disabled is False else 'false'
 
         return root
 
@@ -820,10 +803,8 @@ class Alternative(McdaObject):
         self.name = xmcda.get('name')
 
         active = xmcda.find('active')
-        if active is not None and active.text == 'false':
-            self.disabled = True
-        else:
-            self.disabled = False
+        self.disabled = True if active is not None and active.text == 'false' \
+                             else False
 
         return self
 
@@ -1133,10 +1114,7 @@ class AlternativePerformances(McdaObject):
         if self.altid is None:
             self.altid = id
 
-        if performances is None:
-            self.performances = {}
-        else:
-            self.performances = performances
+        self.performances = {} if performances is None else performances
 
     def __call__(self, criterion_id):
         """Return the performance of the alternative on criterion_id"""
@@ -1707,10 +1685,7 @@ class Segment(McdaObject):
 
     def slope(self):
         d = self.p2.x - self.p1.x
-        if d == 0:
-            return float("inf")
-        else:
-            return (self.p2.y - self.p1.y) / d
+        return float("inf") if d == 0 else (self.p2.y - self.p1.y) / d
 
     def y(self, x):
         if x < self.xmin or x > self.xmax:
@@ -2171,10 +2146,7 @@ class Category(McdaObject):
             root.set('name', self.name)
 
         active = ElementTree.SubElement(root, 'active')
-        if self.disabled is False:
-            active.text = 'true'
-        else:
-            active.text = 'false'
+        active.text = 'true' if self.disabled is False else 'false'
 
         rank = ElementTree.SubElement(root, 'rank')
         rank.append(marshal(self.rank))
