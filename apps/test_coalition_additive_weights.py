@@ -30,7 +30,7 @@ for c in criteria:
 ## Profiles and categories
 bp1 = AlternativePerformances('b1', {c.id: 0.5 for c in criteria})
 bpt = PerformanceTable([bp1])
-cat = generate_categories(2, names = ['bad', 'good'])
+cat = generate_categories(2, names = ['good', 'bad'])
 cps = generate_categories_profiles(cat)
 
 ## Model
