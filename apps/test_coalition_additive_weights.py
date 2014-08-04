@@ -37,14 +37,16 @@ cps = generate_categories_profiles(cat)
 model = MRSort(c, w, bpt, 0.6, cps)
 
 fmins = []
-results = {}
+results = []
 for i, xmcda in enumerate(xmcda_csets):
     result = {}
-    fmin = CriteriaSets().from_xmcda(xmcda)
-    fmins.append(fmin)
-    print("\n%d. Fmin: %s" % (i + 1, ', '.join("%s" % f for f in fmin)))
+    fmins = CriteriaSets().from_xmcda(xmcda)
+    result['fmins'] = fmins
+    result['vector'] = "".join(map(str, sorted([len(fmin)
+                                   for fmin in sorted(fmins, key = len)])))
+    print("\n%d. Fmin: %s" % (i + 1, ', '.join("%s" % f for f in fmins)))
     pt, aa = generate_binary_performance_table_and_assignments(criteria, cat,
-                                                               fmin)
+                                                               fmins)
     aa.id = 'aa'
     a = Alternatives([Alternative(a.id) for a in aa])
 
@@ -74,11 +76,16 @@ for i, xmcda in enumerate(xmcda_csets):
     a = Alternatives([Alternative(a.id) for a in aa])
     print_pt_and_assignments(a, criteria, [aa, aa2, aa3], pt)
 
-    results[i] = result
+    results.append(result)
 
-maxlen = max([len(', '.join("%s" % f for f in fmin)) for fmin in fmins])
+results.sort(key = lambda x: x['vector'])
+results.sort(key = lambda x: len(x['vector']))
+
+maxlen = max([len(', '.join("%s" % f for f in result['fmins']))
+                                     for result in results])
 print("\n%*s obj_weights obj_capa" % (maxlen, "Fmin"))
-for i, result in results.items():
-    print("%*s %*s %*s" % (maxlen, ', '.join("%s" % f for f in fmins[i]),
+for result in results:
+    print("%*s %*s %*s" % (maxlen, ', '.join("%s" % f
+                                   for f in sorted(result['fmins'], key = len)),
                            len('obj_weights'), result['obj_weights'],
                            len('obj_capa'), result['obj_capa']))
