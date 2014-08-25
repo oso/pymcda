@@ -65,24 +65,6 @@ def parse_xmcda_file(filepath, tagname, mcda_type):
 
     return mcda_object
 
-def parse_xmcda_file_elem(filepath, elem):
-    if not os.path.isfile(filepath):
-        log_error("No %s file" % filepath)
-        return None
-
-    try:
-        tree = ElementTree.parse(filepath)
-        root = tree.getroot()
-        #ElementTree.dump(root)
-        tag = root.find("methodParameters/parameter/value/%s" % elem)
-        value = tag.text
-    except:
-        log_error("Cannot parse %s" % filepath)
-        log_error(traceback.format_exc())
-        mcda_object = None
-
-    return value
-
 def parse_input_files(indir):
     criteria = parse_xmcda_file(indir + '/criteria.xml',
                                 "criteria", Criteria)
@@ -96,6 +78,10 @@ def parse_input_files(indir):
                                    "alternativesAffectations",
                                    AlternativesAssignments)
 
+    # Optional parameters
+    params = parse_xmcda_file(indir + '/params.xml',
+                              "methodParameters", Parameters)
+
     # Partial inference
     categories_profiles = parse_xmcda_file(indir + '/cat_profiles.xml',
                                            "categoriesProfiles",
@@ -108,9 +94,14 @@ def parse_input_files(indir):
     if criteria_values:
         criteria_values.normalize_sum_to_unity()
 
-    lbda = parse_xmcda_file_elem(indir + '/lambda.xml', 'real')
-    if lbda:
-        lbda = float(lbda)
+    lbda = None
+    solver = DEFAULT_SOLVER
+    if params is not None:
+        if 'lambda' in params:
+            lbda = params['lambda'].value
+
+        if 'solver' in params:
+            solver = params['solver'].value
 
     if categories_profiles is None:
         categories_profiles = generate_categories_profiles(categories)
@@ -120,11 +111,6 @@ def parse_input_files(indir):
                        categories_profiles)
     else:
         model = None
-
-    # Get solver (optional)
-    solver = parse_xmcda_file_elem(indir + '/solver.xml', 'label')
-    if solver is None:
-        solver = DEFAULT_SOLVER
 
     return solver, model, assignments, pt
 
