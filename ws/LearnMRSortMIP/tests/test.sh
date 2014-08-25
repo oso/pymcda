@@ -6,7 +6,7 @@ PYTHON_SCRIPT=MRSortMIP.py
 CURRENT_DIR=$(pwd)
 cd ..
 for i in $(seq $NB_TEST_SETS); do
-	python $PYTHON_SCRIPT --in $CURRENT_DIR/in$i --out $CURRENT_DIR/out$i
+	python $PYTHON_SCRIPT --in $CURRENT_DIR/in$i --out $CURRENT_DIR/out$i &>tests.log
 	if [ $? == 0 ]; then
 		echo "Test $i ok";
 	else
