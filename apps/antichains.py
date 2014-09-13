@@ -48,10 +48,10 @@ class CriteriaSet(set):
 def remove_supersets_and_smaller_sets(combis, combi):
     combis2 = []
     for combi2 in combis:
-        if combi2.issuperset(combi):
+        if len(combi2) < len(combi):
             continue
 
-        if len(combi2) < len(combi):
+        if combi2.issuperset(combi):
             continue
 
         combis2.append(combi2)
