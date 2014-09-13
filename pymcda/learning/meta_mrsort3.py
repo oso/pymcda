@@ -35,7 +35,8 @@ class MetaMRSortPop3():
     def __init__(self, nmodels, criteria, categories, pt_sorted, aa_ori,
                  heur_init_profiles = HeurMRSortInitProfiles,
                  lp_weights = LpMRSortWeights,
-                 heur_profiles= MetaMRSortProfiles4):
+                 heur_profiles= MetaMRSortProfiles4,
+                 seed = 0):
         self.nmodels = nmodels
         self.criteria = criteria
         self.categories = categories
@@ -48,7 +49,7 @@ class MetaMRSortPop3():
 
         self.metas = list()
         for i in range(self.nmodels):
-            meta = self.init_one_meta(i)
+            meta = self.init_one_meta(i + seed)
             self.metas.append(meta)
 
     def init_one_meta(self, seed):
