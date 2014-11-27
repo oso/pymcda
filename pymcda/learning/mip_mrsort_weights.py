@@ -45,7 +45,7 @@ class MipMRSortWeights():
         self.lp.variables.add(names = ["w_" + c.id for c in self.criteria],
                               lb = [0 for c in self.criteria],
                               ub = [1 for c in self.criteria])
-        self.lp.variables.add(names = ["lambda"], lb = [0.5], ub = [1])
+        self.lp.variables.add(names = ["lambda"], lb = [0], ub = [1])
         self.lp.variables.add(names = ["x_%s" % a for a in a1],
                               lb = [0 for a in a1],
                               ub = [1 for a in a1])
