@@ -101,7 +101,7 @@ class MipMRSortMobius():
                                      for i in self.upper_constraint],
                               lb = [0 for i in self.upper_constraint],
                               ub = [1 for i in self.upper_constraint])
-        self.lp.variables.add(names=['lambda'], lb = [0.5], ub = [1])
+        self.lp.variables.add(names=['lambda'], lb = [0], ub = [1])
         self.lp.variables.add(names = ["gamma" + i for i in self.aa_ori.keys()],
                               types = [self.lp.variables.type.binary
                                        for a in self.aa_ori])
