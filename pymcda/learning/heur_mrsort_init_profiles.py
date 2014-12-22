@@ -1,6 +1,7 @@
 from __future__ import division
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
+import random
 from pymcda.types import AlternativePerformances
 from pymcda.types import PerformanceTable
 
@@ -53,13 +54,24 @@ class HeurMRSortInitProfiles():
 
         return { key: h1[key] + h2[key] for key in h1 }
 
+    def weighted_choice(self, h):
+        total = sum(h.values())
+        r = random.uniform(0, total)
+        tmp = 0
+        for perf, proba in h.items():
+            tmp += proba
+            if tmp > r:
+                break
+
+        return perf
+
     def init_profile(self, profile_id, cat_above, cat_below, pabove):
         ap = AlternativePerformances(profile_id, {})
         for c in self.model.criteria:
             perf = pabove.performances[c.id]
             h = self.compute_histogram(c, cat_above, cat_below, perf)
             if h:
-                perf = max(h, key = lambda key: h[key])
+                perf = self.weighted_choice(h)
             ap.performances[c.id] = perf
 
         return ap
