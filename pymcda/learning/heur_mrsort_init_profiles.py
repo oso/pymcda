@@ -94,7 +94,7 @@ if __name__ == "__main__":
     from pymcda.ui.graphic import display_electre_tri_models
 
     model = generate_random_mrsort_model(10, 3, 17)
-    coal = compute_winning_coalitions(model.cv, model.lbda)
+    coal = compute_winning_coalitions(model.criteria, model.cv, model.lbda)
     print("Number of coalitions: %d" % len(coal))
 
     a = generate_alternatives(1000)
@@ -119,7 +119,7 @@ if __name__ == "__main__":
         aa2 = model2.pessimist(pt)
         ca2 = compute_ca(aa, aa2)
 
-        coal2 = compute_winning_coalitions(model2.cv, model2.lbda)
+        coal2 = compute_winning_coalitions(model2.criteria, model2.cv, model2.lbda)
         coal2_ni = list((set(coal) ^ set(coal2)) & set(coal))
         coal2_add = list((set(coal) ^ set(coal2)) & set(coal2))
 
@@ -138,7 +138,7 @@ if __name__ == "__main__":
     aa3 = model3.pessimist(pt)
     ca3 = compute_ca(aa, aa3)
 
-    coal3 = compute_winning_coalitions(model3.cv, model3.lbda)
+    coal3 = compute_winning_coalitions(model3.criteria, model3.cv, model3.lbda)
     coal3_ni = list((set(coal) ^ set(coal3)) & set(coal))
     coal3_add = list((set(coal) ^ set(coal3)) & set(coal3))
 
