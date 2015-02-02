@@ -4,42 +4,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 from itertools import product
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.utils import powerset
+from pymcda.utils import compute_winning_and_loosing_coalitions
+from pymcda.utils import compute_minimal_winning_coalitions
+from pymcda.utils import compute_maximal_loosing_coalitions
 
 verbose = False
-
-def compute_winning_and_loosing_coalitions(cvs, lbda):
-    sufficient = set()
-    insufficient = set()
-
-    c = cvs.keys()
-    for coa in powerset(c):
-        l = cvs.get_subset(coa)
-        if sum([cv.value for cv in l]) >= lbda:
-            sufficient.add(frozenset(coa))
-        else:
-            insufficient.add(frozenset(coa))
-
-    return sufficient, insufficient
-
-def compute_minimal_winning_coalitions(coalitions):
-    fmins = coalitions
-    for fmin, fmin2 in product(fmins, fmins):
-        if fmin == fmin2:
-            continue
-        elif fmin2.issuperset(fmin):
-            fmins.discard(fmin2)
-
-    return fmins
-
-def compute_maximal_loosing_coalitions(coalitions):
-    gmaxs = coalitions
-    for gmax, gmax2 in product(gmaxs, gmaxs):
-        if gmax == gmax2:
-            continue
-        elif gmax2.issubset(gmax):
-            gmaxs.discard(gmax2)
-
-    return gmaxs
 
 class LpMRSortPostWeights(object):
 
