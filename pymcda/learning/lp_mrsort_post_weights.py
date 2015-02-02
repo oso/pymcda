@@ -144,7 +144,7 @@ class LpMRSortPostWeights(object):
 
     def __add_objective_cplex(self):
         self.lp.objective.set_sense(self.lp.objective.sense.minimize)
-        for cv in cvs:
+        for cv in self.cvs:
             self.lp.objective.set_linear("wp_%s" % cv.id, 1)
             self.lp.objective.set_linear("wm_%s" % cv.id, 1)
 
