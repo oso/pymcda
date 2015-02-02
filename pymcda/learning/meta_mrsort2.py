@@ -59,7 +59,7 @@ if __name__ == "__main__":
     import time
     from pymcda.generate import generate_alternatives
     from pymcda.generate import generate_random_performance_table
-    from pymcda.utils import compute_winning_coalitions
+    from pymcda.utils import compute_winning_and_loosing_coalitions
     from pymcda.types import AlternativePerformances
     from pymcda.electre_tri import ElectreTri
     from pymcda.ui.graphic import display_electre_tri_models
@@ -149,16 +149,18 @@ if __name__ == "__main__":
     print("Good assignments: %g %%" % (float(total-nok)/total*100))
     print("Bad assignments : %g %%" % (float(nok)/total*100))
 
-    coal1 = compute_winning_coalitions(model.cv, model.lbda)
-    coal2 = compute_winning_coalitions(model2.cv, model2.lbda)
-    coali = list(set(coal1) & set(coal2))
-    coal1e = list(set(coal1) ^ set(coali))
-    coal2e = list(set(coal2) ^ set(coali))
+    win1, loose1 = compute_winning_and_loosing_coalitions(model.cv,
+                                                          model.lbda)
+    win2, loose2 = compute_winning_and_loosing_coalitions(model2.cv,
+                                                          model2.lbda)
+    coali = list(set(win1) & set(win2))
+    coal1e = list(set(win1) ^ set(coali))
+    coal2e = list(set(win2) ^ set(coali))
 
     print("Number of coalitions original: %d"
-          % len(coal1))
+          % len(win1))
     print("Number of coalitions learned: %d"
-          % len(coal2))
+          % len(win2))
     print("Number of common coalitions: %d"
           % len(coali))
     print("Coallitions in original and not in learned: %s"

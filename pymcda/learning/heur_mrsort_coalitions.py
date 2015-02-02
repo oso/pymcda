@@ -5,7 +5,7 @@ from collections import defaultdict
 from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_random_performance_table
 from pymcda.generate import generate_alternatives
-from pymcda.utils import compute_winning_coalitions
+from pymcda.utils import compute_winning_and_loosing_coalitions
 from pymcda.utils import compute_degree_of_extremality
 from pymcda.utils import compute_number_of_winning_coalitions
 from pymcda.utils import display_coalitions
@@ -79,10 +79,10 @@ class HeurMRSortCoalitions():
 if __name__ == "__main__":
     m = generate_random_mrsort_model(5, 2, 123)
 
-    coal = compute_winning_coalitions(m.cv, m.lbda)
-    print("Number of winning coalitions: %d" % len(coal))
+    winning, loosing = compute_winning_and_loosing_coalitions(m.cv, m.lbda)
+    print("Number of winning coalitions: %d" % len(winning))
     print("List of coalitions:")
-    display_coalitions(coal)
+    display_coalitions(winning)
 
     a = generate_alternatives(1000)
     pt = generate_random_performance_table(a, m.criteria)
@@ -99,10 +99,10 @@ if __name__ == "__main__":
     print("List of coalitions found:")
     display_coalitions(coal2)
 
-    coal_ni = list((set(coal) ^ set(coal2)) & set(coal))
+    coal_ni = list((set(winning) ^ set(coal2)) & set(winning))
     print("List of coalitions not identified (%d):" % len(coal_ni))
     display_coalitions(coal_ni)
 
-    coal_add = list((set(coal) ^ set(coal2)) & set(coal2))
+    coal_add = list((set(winning) ^ set(coal2)) & set(coal2))
     print("List of coalitions added (%s):" % len(coal_add))
     display_coalitions(coal_add)

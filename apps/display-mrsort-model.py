@@ -11,7 +11,9 @@ from pymcda.electre_tri import MRSort
 from pymcda.types import AlternativePerformances
 from pymcda.ui.graphic import QGraphicsSceneEtri
 from pymcda.ui.graphic import _MyGraphicsview
-from pymcda.utils import compute_winning_coalitions
+from pymcda.utils import compute_winning_and_loosing_coalitions
+from pymcda.utils import compute_minimal_winning_coalitions
+from pymcda.utils import compute_maximal_loosing_coalitions
 from test_utils import is_bz2_file
 
 xmcda_models = []
@@ -51,10 +53,11 @@ for xmcda_model in xmcda_models:
     else:
         print("No veto weights")
 
-    if len(m.criteria) < 10:
-        winning = compute_winning_coalitions(m.criteria, m.cv, m.lbda)
-        print("Winning coalitions:")
-        for win in winning:
+    if len(m.criteria) < 15:
+        winning, loosing = compute_winning_and_loosing_coalitions(m.cv, m.lbda)
+        mwinning = compute_minimal_winning_coalitions(winning)
+        print("Minimal winning coalitions:")
+        for win in mwinning:
             print(win)
         nwinning = len(winning)
         print("Number of winning concordance relations: %d (/%d)"

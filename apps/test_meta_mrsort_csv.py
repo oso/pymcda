@@ -61,7 +61,8 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
                           pt_sorted, aa_learning,
                           heur_init_profiles,
                           lp_weights,
-                          heur_profiles)
+                          heur_profiles,
+                          seed * 100)
 
     for i in range(0, nloop):
         model, ca_learning = meta.optimize(nmeta)

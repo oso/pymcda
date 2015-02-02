@@ -354,7 +354,7 @@ if __name__ == "__main__":
     from pymcda.generate import generate_random_mrsort_model
     from pymcda.utils import add_errors_in_assignments
     from pymcda.utils import print_pt_and_assignments
-    from pymcda.utils import compute_winning_coalitions
+    from pymcda.utils import compute_winning_and_loosing_coalitions
     from pymcda.types import AlternativesAssignments, PerformanceTable
 
     # Original Electre Tri model
@@ -434,16 +434,18 @@ if __name__ == "__main__":
         print("Alternatives wrongly assigned:")
         print_pt_and_assignments(anok, model.criteria, [aa, aa_learned], pt)
 
-    coal1 = compute_winning_coalitions(model.cv, model.lbda)
-    coal2 = compute_winning_coalitions(model2.cv, model2.lbda)
-    coali = list(set(coal1) & set(coal2))
-    coal1e = list(set(coal1) ^ set(coali))
-    coal2e = list(set(coal2) ^ set(coali))
+    win1, loose1 = compute_winning_and_loosing_coalitions(model.cv,
+                                                          model.lbda)
+    win2, loose2 = compute_winning_and_loosing_coalitions(model2.cv,
+                                                          model2.lbda)
+    coali = list(set(win1) & set(win2))
+    coal1e = list(set(win1) ^ set(coali))
+    coal2e = list(set(win2) ^ set(coali))
 
     print("Number of coalitions original: %d"
-          % len(coal1))
+          % len(win1))
     print("Number of coalitions learned: %d"
-          % len(coal2))
+          % len(win2))
     print("Number of common coalitions: %d"
           % len(coali))
     print("Coalitions in original and not in learned: %s"

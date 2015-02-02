@@ -9,7 +9,7 @@ from pymcda.learning.heur_mrsort_coalitions import HeurMRSortCoalitions
 from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
-from pymcda.utils import compute_winning_coalitions
+from pymcda.utils import compute_winning_and_loosing_coalitions
 from pymcda.utils import add_errors_in_assignments
 from test_utils import test_result, test_results
 
@@ -30,11 +30,12 @@ def test_heur_mrsort_coalitions(seed, na, nc, ncat, pcexamples, pcerrors):
     coal2 = heur.find_coalitions(int(na * pcexamples))
 
     # Compute the original winning coalitions
-    coal = compute_winning_coalitions(model.cv, model.lbda)
+    winning, loosing = compute_winning_and_loosing_coalitions(model.cv,
+                                                              model.lbda)
 
     # Compare orignal and computed coalitions
-    coal_ni = list((set(coal) ^ set(coal2)) & set(coal))
-    coal_add = list((set(coal) ^ set(coal2)) & set(coal2))
+    coal_ni = list((set(winning) ^ set(coal2)) & set(winning))
+    coal_add = list((set(winning) ^ set(coal2)) & set(coal2))
 
     # Save all infos in test_result class
     t = test_result("%s-%d-%d-%d-%g-%g" % (seed, na, nc, ncat, pcexamples,
@@ -49,7 +50,7 @@ def test_heur_mrsort_coalitions(seed, na, nc, ncat, pcexamples, pcerrors):
     t['pcerrors'] = pcerrors
 
     # Output params
-    t['ncoal'] = len(coal)
+    t['ncoal'] = len(winning)
     t['ncoal_ni'] = len(coal_ni)
     t['ncoal_add'] = len(coal_add)
 
