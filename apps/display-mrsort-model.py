@@ -101,7 +101,7 @@ for m in models:
                     worst.performances[c.id] += 1
 
     view = _MyGraphicsview()
-    graph = QGraphicsSceneEtri(m, worst, best, view.size())
+    graph = QGraphicsSceneEtri(m, worst, best, view.size(), parent = view)
     if m.veto is not None:
         for veto in m.veto:
             vb = m.bpt[veto.id] - veto
