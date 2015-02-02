@@ -14,6 +14,7 @@ from pymcda.ui.graphic import _MyGraphicsview
 from pymcda.utils import compute_winning_and_loosing_coalitions
 from pymcda.utils import compute_minimal_winning_coalitions
 from pymcda.utils import compute_maximal_loosing_coalitions
+from pymcda.learning.lp_mrsort_post_weights import LpMRSortPostWeights
 from test_utils import is_bz2_file
 
 xmcda_models = []
@@ -49,19 +50,30 @@ for xmcda_model in xmcda_models:
 
     if m.veto_weights is not None:
         print(m.veto_weights)
-        print("veto_lambda: %s" % m.veto_lbda)
+        print("veto_lambda: %s\n" % m.veto_lbda)
     else:
-        print("No veto weights")
+        print("No veto weights\n")
+
+    print("Adjusted weights and lambda")
+    lp = LpMRSortPostWeights(m.cv, m.lbda)
+    obj, cv, lbda = lp.solve()
+    print(cv)
+    print("lambda: %s\n" % lbda)
 
     if len(m.criteria) < 15:
         winning, loosing = compute_winning_and_loosing_coalitions(m.cv, m.lbda)
-        mwinning = compute_minimal_winning_coalitions(winning)
-        print("Minimal winning coalitions:")
-        for win in mwinning:
-            print(win)
         nwinning = len(winning)
         print("Number of winning concordance relations: %d (/%d)"
               % (nwinning, 2**len(m.criteria)))
+
+        mwinning = compute_minimal_winning_coalitions(winning)
+        mloosing = compute_maximal_loosing_coalitions(loosing)
+        print("Minimal winning coalitions:")
+        for win in mwinning:
+            print(win)
+        print("Maximal loosing coalitions:")
+        for loose in mloosing:
+            print(loose)
 
     print("\n\n")
 
