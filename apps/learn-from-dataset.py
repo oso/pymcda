@@ -16,6 +16,7 @@ from pymcda.learning.heur_mrsort_profiles_choquet import MetaMRSortProfilesChoqu
 from pymcda.learning.mip_mrsort import MipMRSort
 from pymcda.learning.lp_avfsort import LpAVFSort
 from pymcda.learning.lp_avfsort_compat import LpAVFSortCompat
+from pymcda.learning.lp_mrsort_post_weights import LpMRSortPostWeights
 from pymcda.ui.graphic import display_electre_tri_models
 from pymcda.ui.graphic_uta import display_utadis_model
 from pymcda.uta import AVFSort
@@ -35,9 +36,9 @@ if len(sys.argv) != 3:
 algo = sys.argv[2]
 
 nseg = 4
-nmodels = 10
-nloop = 10
-nmeta = 20
+nmodels = 20
+nloop = 7
+nmeta = 40
 
 data = load_mcda_input_data(sys.argv[1])
 
@@ -71,6 +72,7 @@ if algo == 'meta_mrsort' or algo == 'meta_mrsortc':
 
     for i in range(0, nloop):
         model, ca_learning = meta.optimize(nmeta)
+        print(ca_learning)
         if ca_learning == 1:
             break
 elif algo == 'mip_mrsort':
@@ -126,6 +128,14 @@ if model_type == 'mrsort':
     print(model.bpt)
     print(model.cv)
     print("lambda: %.7s" % model.lbda)
+
+    print("Weights and lambda optimization:")
+    if algo == 'meta_mrsort':
+        lp = LpMRSortPostWeights(model.cv, model.lbda)
+        obj, model.cv, model.lbda = lp.solve()
+    print(model.cv)
+    print(model.lbda)
+
 #    display_electre_tri_models([model], [worst], [best])
 elif model_type == 'utadis':
     model.cfs.display(criterion_ids = cids)
