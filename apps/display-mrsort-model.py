@@ -76,10 +76,29 @@ sizePolicy.setHeightForWidth(sizePolicy.hasHeightForWidth())
 layout = QtGui.QGridLayout()
 
 for m in models:
-    worst = AlternativePerformances("worst", {crit.id: 0
-                                              for crit in m.criteria})
-    best = AlternativePerformances("best", {crit.id: 1
-                                            for crit in m.criteria})
+    worst = m.bpt.get_worst(m.criteria)
+    best = m.bpt.get_best(m.criteria)
+
+    for c in m.criteria:
+        if worst.performances[c.id] >= 0 and worst.performances[c.id] <= 1:
+            if c.direction == 1:
+                worst.performances[c.id] = 0
+                best.performances[c.id] = 1
+            else:
+                worst.performances[c.id] = 1
+                best.performances[c.id] = 0
+        else:
+            diff = best.performances[c.id] - worst.performances[c.id]
+            worst.performances[c.id] -= diff
+            best.performances[c.id] += diff
+
+            if diff == 0:
+                if c.direction == 1:
+                    best.performances[c.id] += 1
+                    worst.performances[c.id] -= 1
+                else:
+                    best.performances[c.id] -= 1
+                    worst.performances[c.id] += 1
 
     view = _MyGraphicsview()
     graph = QGraphicsSceneEtri(m, worst, best, view.size())
