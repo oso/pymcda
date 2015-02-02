@@ -196,8 +196,6 @@ class QGraphicsSceneEtri(QtGui.QGraphicsScene):
         path = item.path()
         for i, cid in enumerate(self.criteria_order):
             y = self.__compute_y(ap, cid)
-            if cid == 'age':
-                print(ap.id, cid, y)
 
             if i == 0:
                 x = 0
