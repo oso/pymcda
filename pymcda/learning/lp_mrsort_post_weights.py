@@ -7,7 +7,7 @@ from pymcda.utils import powerset
 
 verbose = False
 
-def compute_sufficient_and_insufficient_coalitions(cvs, lbda):
+def compute_winning_and_loosing_coalitions(cvs, lbda):
     sufficient = set()
     insufficient = set()
 
@@ -21,7 +21,7 @@ def compute_sufficient_and_insufficient_coalitions(cvs, lbda):
 
     return sufficient, insufficient
 
-def compute_fmins(coalitions):
+def compute_minimal_winning_coalitions(coalitions):
     fmins = coalitions
     for fmin, fmin2 in product(fmins, fmins):
         if fmin == fmin2:
@@ -31,7 +31,7 @@ def compute_fmins(coalitions):
 
     return fmins
 
-def compute_gmaxs(coalitions):
+def compute_maximal_loosing_coalitions(coalitions):
     gmaxs = coalitions
     for gmax, gmax2 in product(gmaxs, gmaxs):
         if gmax == gmax2:
@@ -59,22 +59,6 @@ class LpMRSortPostWeights(object):
                 self.lp.set_results_stream(None)
         else:
             raise NameError('Invalid solver selected')
-
-    def __compute_fmins(self):
-        fmins = self.__sufficient
-        for fmin, fmin2 in product(fmins, fmins):
-            if fmin == fmin2:
-                continue
-            elif fmin2.issuperset(fmin):
-                fmins.discard(fmin2)
-
-    def __compute_gmaxs(self):
-        gmaxs = self.__insufficient
-        for gmax, gmax2 in product(gmaxs, gmaxs):
-            if gmax == gmax2:
-                continue
-            elif gmax2.issubset(gmax):
-                gmaxs.discard(gmax2)
 
     def __add_variables_cplex(self):
         self.lp.variables.add(names=["w_%s" % c.id for c in self.cvs],
@@ -173,10 +157,10 @@ class LpMRSortPostWeights(object):
 
     def solve(self):
         self.__fmins, self.__gmaxs = \
-            compute_sufficient_and_insufficient_coalitions(self.cvs,
+            compute_winning_and_loosing_coalitions(self.cvs,
                                                            self.lbda)
-#        self.__fmins = compute_fmins(self.__fmins)
-#        self.__gmaxs = compute_gmaxs(self.__gmaxs)
+#        self.__fmins = compute_minimal_winning_coalitions(self.__fmins)
+#        self.__gmaxs = compute_maximal_loosing_coalitions(self.__gmaxs)
 
         if self.solver == 'cplex':
             return self.solve_cplex()
@@ -192,7 +176,7 @@ if __name__ == "__main__":
     cvs = generate_random_criteria_weights(c)
     lbda = round(random.uniform(0.5, 1), 3)
 
-    suf, insuf = compute_sufficient_and_insufficient_coalitions(cvs, lbda)
+    suf, insuf = compute_winning_and_loosing_coalitions(cvs, lbda)
 
     print(c)
     print(cvs)
@@ -205,7 +189,7 @@ if __name__ == "__main__":
     print(cvs2)
     print("lbda2: %f" % lbda2)
 
-    suf2, insuf2 = compute_sufficient_and_insufficient_coalitions(cvs2, lbda2)
+    suf2, insuf2 = compute_winning_and_loosing_coalitions(cvs2, lbda2)
 
     for coa in suf ^ suf2:
         print(coa)
