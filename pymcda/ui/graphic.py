@@ -40,7 +40,8 @@ def display_electre_tri_models(etri, worst = list(), best = list(),
     dialog.resize(1024, 768)
 
     for i, m in enumerate(etri):
-        graph = QGraphicsSceneEtri(m, worst[i], best[i], views[m].size())
+        graph = QGraphicsSceneEtri(m, worst[i], best[i], views[m].size(),
+                                   parent = views[m])
         views[m].setScene(graph)
         if aps and aps[i]:
             for ap in aps[i]:
@@ -195,6 +196,8 @@ class QGraphicsSceneEtri(QtGui.QGraphicsScene):
         path = item.path()
         for i, cid in enumerate(self.criteria_order):
             y = self.__compute_y(ap, cid)
+            if cid == 'age':
+                print(ap.id, cid, y)
 
             if i == 0:
                 x = 0

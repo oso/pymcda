@@ -212,7 +212,7 @@ def display_utadis_model(cfs):
         view = _MyGraphicsview()
         view.setRenderHint(QtGui.QPainter.Antialiasing)
         view.setSizePolicy(sizePolicy)
-        graph = QGraphCriterionFunction(cf, view.size())
+        graph = QGraphCriterionFunction(cf, view.size(), parent = view)
 
         layout.addWidget(view, i / n_per_row, i % n_per_row)
         i = i + 1
@@ -280,9 +280,9 @@ if __name__ == "__main__":
     hbox.addWidget(view2)
     hbox.addWidget(view3)
 
-    graph = QGraphCriterionFunction(cf1, view.size())
-    graph2 = QGraphCriterionFunction(cf2, view.size())
-    graph3 = QGraphCriterionFunction(cf3, view.size())
+    graph = QGraphCriterionFunction(cf1, view.size(), parent = view)
+    graph2 = QGraphCriterionFunction(cf2, view2.size(), parent = view2)
+    graph3 = QGraphCriterionFunction(cf3, view3.size(), parent = view3)
 
     view.setScene(graph)
     view2.setScene(graph2)
