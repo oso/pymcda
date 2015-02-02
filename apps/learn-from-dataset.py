@@ -15,6 +15,7 @@ from pymcda.learning.lp_mrsort_mobius import LpMRSortMobius
 from pymcda.learning.heur_mrsort_profiles_choquet import MetaMRSortProfilesChoquet
 from pymcda.learning.mip_mrsort import MipMRSort
 from pymcda.learning.lp_avfsort import LpAVFSort
+from pymcda.learning.lp_avfsort_compat import LpAVFSortCompat
 from pymcda.ui.graphic import display_electre_tri_models
 from pymcda.ui.graphic_uta import display_utadis_model
 from pymcda.uta import AVFSort
@@ -25,7 +26,7 @@ from test_utils import load_mcda_input_data
 from test_utils import save_to_xmcda
 
 def usage():
-    print("%s file.csv meta_mrsort|meta_mrsortc|mip_mrsort|lp_utadis" % sys.argv[0])
+    print("%s file.csv meta_mrsort|meta_mrsortc|mip_mrsort|lp_utadis|lp_utadis_compat" % sys.argv[0])
     sys.exit(1)
 
 if len(sys.argv) != 3:
@@ -82,6 +83,13 @@ elif algo == 'lp_utadis':
     model_type = 'utadis'
     css = CriteriaValues(CriterionValue(c.id, nseg) for c in data.c)
     lp = LpAVFSort(data.c, css, data.cats, worst, best)
+    obj, cvs, cfs, catv = lp.solve(data.aa, data.pt)
+    model = AVFSort(data.c, cvs, cfs, catv)
+elif algo == 'lp_utadis_compat':
+    model_type = 'utadis'
+    css = CriteriaValues(CriterionValue(c.id, nseg) for c in data.c)
+    print("LpAVFSortCompat")
+    lp = LpAVFSortCompat(data.c, css, data.cats, worst, best)
     obj, cvs, cfs, catv = lp.solve(data.aa, data.pt)
     model = AVFSort(data.c, cvs, cfs, catv)
 else:
