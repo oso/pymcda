@@ -1080,7 +1080,7 @@ class PerformanceTable(McdaDict):
         cols = None
         for row in csvreader:
             if row[0] == alt_col:
-                cols = {}
+                cols = OrderedDict({})
                 for i, val in enumerate(row[1:]):
                     if val not in perf_cols:
                         continue
@@ -1114,7 +1114,7 @@ class AlternativePerformances(McdaObject):
         if self.altid is None:
             self.altid = id
 
-        self.performances = {} if performances is None else performances
+        self.performances = OrderedDict({}) if performances is None else performances
 
     def __call__(self, criterion_id):
         """Return the performance of the alternative on criterion_id"""
