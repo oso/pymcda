@@ -4,6 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 import random
 from pymcda.types import AlternativePerformances
 from pymcda.types import PerformanceTable
+from collections import OrderedDict
 
 class HeurMRSortInitProfiles():
 
@@ -66,7 +67,7 @@ class HeurMRSortInitProfiles():
         return perf
 
     def init_profile(self, profile_id, cat_above, cat_below, pabove):
-        ap = AlternativePerformances(profile_id, {})
+        ap = AlternativePerformances(profile_id, OrderedDict({}))
         for c in self.model.criteria:
             perf = pabove.performances[c.id]
             h = self.compute_histogram(c, cat_above, cat_below, perf)
