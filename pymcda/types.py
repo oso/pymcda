@@ -410,7 +410,7 @@ class Criteria(McdaDict):
         cols = None
         for row in csvreader:
             if row[0] == crit_col:
-                cols = {}
+                cols = OrderedDict({})
                 for i, val in enumerate(row[1:]):
                     if val == name_col:
                         cols[i + 1] = "name"
@@ -740,7 +740,7 @@ class Alternatives(McdaDict):
         cols = None
         for row in csvreader:
             if row[0] == alt_col:
-                cols = {}
+                cols = OrderedDict({})
                 for i, val in enumerate(row[1:]):
                     if val == name_col:
                         cols[i + 1] = "name"
@@ -2099,7 +2099,7 @@ class Categories(McdaDict):
         cols = None
         for row in csvreader:
             if row[0] == cat_col:
-                cols = {}
+                cols = OrderedDict({})
                 for i, val in enumerate(row[1:]):
                     if val == rank_col:
                         cols[i + 1] = "rank"
