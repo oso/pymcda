@@ -81,7 +81,7 @@ if aa_learning_m1 is not None:
                                       m2.categories)
     print_confusion_matrix(matrix)
 
-if aa_test_m1 is not None:
+if aa_test_m1 is not None and len(aa_test_m1) > 0:
     ca_test = compute_ca(aa_test_m1, aa_test_m2)
 
     print("\n\nTest set")
