@@ -78,7 +78,7 @@ def run_test(seed, data, pclearning, nseg):
     diff_all = compute_confusion_matrix(data.aa, aa2,
                                         ordered_categories)
 
-    t = test_result("%s-%d-%d" % (data.name, seed, pclearning))
+    t = test_result("%s-%d-%d-%d" % (data.name, seed, nseg, pclearning))
     model.id = 'learned'
     aa_learning.id, aa_test.id = 'learning_set', 'test_set'
     pt_learning.id, pt_test.id = 'learning_set', 'test_set'
