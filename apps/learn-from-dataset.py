@@ -120,7 +120,7 @@ for a in data.a:
 
 if len(anok) > 0:
     print("Alternatives wrongly assigned:")
-    print_pt_and_assignments(anok, data.c, [data.aa, aa2], data.pt)
+    print_pt_and_assignments(anok.keys(), data.c.keys(), [data.aa, aa2], data.pt)
 
 print("Model parameters:")
 cids = model.criteria.keys()

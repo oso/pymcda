@@ -450,4 +450,4 @@ if __name__ == "__main__":
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
-        print_pt_and_assignments(anok, c, [aa, aa2], pt)
+        print_pt_and_assignments(anok.keys(), c.keys(), [aa, aa2], pt)

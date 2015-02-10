@@ -74,7 +74,7 @@ for i, xmcda in enumerate(xmcda_csets):
     result['obj_capa'] = obj
 
     a = Alternatives([Alternative(a.id) for a in aa])
-    print_pt_and_assignments(a, criteria, [aa, aa2, aa3], pt)
+    print_pt_and_assignments(a.keys(), criteria.keys(), [aa, aa2, aa3], pt)
 
     results.append(result)
 

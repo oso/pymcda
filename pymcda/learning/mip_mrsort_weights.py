@@ -225,7 +225,8 @@ if __name__ == "__main__":
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
-        print_pt_and_assignments(anok, model.criteria, [aa, aa2], pt)
+        print_pt_and_assignments(anok.keys(), model.criteria.keys(),
+                                 [aa, aa2], pt)
 
 #    # Display models
 #    display_electre_tri_models([model, model2],

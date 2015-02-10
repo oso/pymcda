@@ -39,41 +39,47 @@ def add_errors_in_assignments_proba(aa, category_ids, proba):
 
     return l
 
-def print_pt_and_assignments(alternatives, criteria, aas, pt):
-    alen = max([len(a.id) for a in alternatives] + [len("alt.")])
+def print_pt_and_assignments(alternatives, cids, aas, pt):
+    alen = max([len(aid) for aid in alternatives] + [len("alt.")])
+
+    if alternatives is None:
+        alternatives = pt.keys()
+
+    if cids is None:
+        cids = pt[alternatives[0]].performances.keys()
 
     aaname, aalen = {}, {}
     for i, aa in enumerate(aas):
-        aaname[i] = aa.id
-        if aa.id is None:
+        aaname[i] = aid
+        if aid is None:
             aaname[i] = "assign%d" % (i + 1)
 
-        aalen[i] = max([len(aa[a.id].category_id) for a in alternatives]
+        aalen[i] = max([len(aa[aid].category_id) for aid in alternatives]
                         + [len(aaname[i])])
 
     clen = {}
-    for c in criteria:
-        clen[c.id] = max([len(str(pt[a.id].performances[c.id]))
-                          for a in alternatives] + [len(c.id)])
+    for cid in cids:
+        clen[cid] = max([len(str(pt[aid].performances[cid]))
+                          for aid in alternatives] + [len(cid)])
 
     print(" " * (alen - len("alt.")) + "alt.", end = "")
     for i, aa in enumerate(aas):
         print(" " + " " * (aalen[i] - len(aaname[i])) + aaname[i],
               end = "")
     print(" |", end = "")
-    for c in criteria:
-        print(" " + " " * (clen[c.id] - len(c.id)) + c.id, end = "")
+    for cid in cids:
+        print(" " + " " * (clen[cid] - len(cid)) + cid, end = "")
     print("")
 
-    for a in alternatives:
-        print(" " * (alen - len(a.id)) + "%s" % a.id, end = "")
+    for aid in alternatives:
+        print(" " * (alen - len(aid)) + "%s" % aid, end = "")
         for i, aa in enumerate(aas):
-            cat = aa[a.id].category_id
+            cat = aa[aid].category_id
             print(" " + " " * (aalen[i] - len(cat)) + cat, end = "")
         print(" |", end = "")
-        for c in  criteria:
-            perf = str(pt[a.id].performances[c.id])
-            print(" " + " " * (clen[c.id] - len(perf)) + "%s" % perf, end = "")
+        for cid in  cids:
+            perf = str(pt[aid].performances[cid])
+            print(" " + " " * (clen[cid] - len(perf)) + "%s" % perf, end = "")
         print("")
 
 def compute_ca(aa, aa2, alist=None):

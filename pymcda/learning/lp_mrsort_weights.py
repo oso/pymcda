@@ -432,7 +432,8 @@ if __name__ == "__main__":
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
-        print_pt_and_assignments(anok, model.criteria, [aa, aa_learned], pt)
+        print_pt_and_assignments(anok.keys(), model.criteria.keys(),
+                                 [aa, aa_learned], pt)
 
     win1, loose1 = compute_winning_and_loosing_coalitions(model.cv,
                                                           model.lbda)

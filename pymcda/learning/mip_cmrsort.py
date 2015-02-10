@@ -687,7 +687,7 @@ if __name__ == "__main__":
     aa5 = AlternativeAssignment('a5', 'cat2')
     aa6 = AlternativeAssignment('a6', 'cat2')
     aa = AlternativesAssignments([aa1, aa2, aa3, aa4, aa5, aa6])
-    print_pt_and_assignments(aa, c, [aa], pt)
+    print_pt_and_assignments(aa.keys(), c.keys(), [aa], pt)
 
     model = MRSort(c, None, None, None, cps)
 
@@ -722,7 +722,8 @@ if __name__ == "__main__":
 
     if len(anok) > 0:
         print("Alternatives wrongly assigned:")
-        print_pt_and_assignments(anok, model.criteria, [aa, aa2], pt)
+        print_pt_and_assignments(anok.keys(), model.criteria.keys(),
+                                 [aa, aa2], pt)
 
     # Display models
     display_electre_tri_models([model], [worst], [best])
