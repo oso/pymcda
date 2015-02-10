@@ -6,6 +6,7 @@ import os
 import sys
 import time
 import traceback
+from collections import OrderedDict
 from copy import deepcopy
 from itertools import product
 from xml.etree import ElementTree
@@ -449,7 +450,7 @@ def load_mcda_data(csvfile, obj, *field):
     csvfile.seek(0)
     csvreader = csv.reader(csvfile, delimiter = ";")
     try:
-        obj = obj().from_csv(csvreader, *field)
+        obj = obj(OrderedDict({})).from_csv(csvreader, *field)
     except:
         print("Cannot get %s" % obj())
         return None
