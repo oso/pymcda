@@ -17,11 +17,12 @@ from pymcda.utils import compute_maximal_loosing_coalitions
 from pymcda.learning.lp_mrsort_post_weights import LpMRSortPostWeights
 from test_utils import is_bz2_file
 
+xmcda_models_toshow = []
 xmcda_models = []
 for f in sys.argv[1:]:
     if not os.path.isfile(f):
-        print("Invalid file %s" % f)
-        sys.exit(1)
+        xmcda_models_toshow.append(f)
+        continue
 
     if is_bz2_file(f) is True:
         f = bz2.BZ2File(f)
@@ -34,6 +35,9 @@ for f in sys.argv[1:]:
 models = []
 for xmcda_model in xmcda_models:
     m = MRSort().from_xmcda(xmcda_model)
+
+    if len(xmcda_models_toshow) > 0 and m.id not in xmcda_models_toshow:
+        continue
 
     string = "Model '%s'" % m.id
     print(string)
