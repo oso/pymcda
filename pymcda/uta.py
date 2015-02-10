@@ -42,7 +42,7 @@ class Uta(object):
 
         for ap in pt:
             av = self.global_utility(ap)
-            au[av.id] = av
+            au.append(av)
 
         return au
 
