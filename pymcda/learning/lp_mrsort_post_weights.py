@@ -36,10 +36,10 @@ class LpMRSortPostWeights(object):
                               ub=[int(self.wsum / 2) for c in self.cvs],
                               types=[self.lp.variables.type.integer
                                      for c in self.cvs])
-        self.lp.variables.add(names=["x_%s" % fmin for fmin in self.__fmins],
-                              lb=[0 for fmin in self.__fmins])
-        self.lp.variables.add(names=["y_%s" % gmax for gmax in self.__gmaxs],
-                              lb=[0 for gmax in self.__gmaxs])
+        self.lp.variables.add(names=["x_%s" % fmin for fmin in self.fmins],
+                              lb=[0 for fmin in self.fmins])
+        self.lp.variables.add(names=["y_%s" % gmax for gmax in self.gmaxs],
+                              lb=[0 for gmax in self.gmaxs])
         self.lp.variables.add(names=["alpha"], lb=[0])
         self.lp.variables.add(names=['lambda'],
                               lb = [0], ub = [self.wsum],
@@ -60,7 +60,7 @@ class LpMRSortPostWeights(object):
                        )
 
         # fmins
-        for fmin in self.__fmins:
+        for fmin in self.fmins:
             wvars = ["w_%s" % cv.id for cv in self.cvs.get_subset(fmin)]
             constraints.add(names = ["fmin_%s" % fmin],
                             lin_expr =
@@ -73,7 +73,7 @@ class LpMRSortPostWeights(object):
                            )
 
         # gmaxs
-        for gmax in self.__gmaxs:
+        for gmax in self.gmaxs:
             wvars = ["w_%s" % cv.id for cv in self.cvs.get_subset(gmax)]
             constraints.add(names = ["gmax_%s" % gmax],
                             lin_expr =
@@ -86,7 +86,7 @@ class LpMRSortPostWeights(object):
                            )
 
         # alpha
-        for fmin in self.__fmins:
+        for fmin in self.fmins:
             constraints.add(names = ["alpha_%s" % fmin],
                             lin_expr =
                                 [
@@ -97,7 +97,7 @@ class LpMRSortPostWeights(object):
                             rhs = [0],
                            )
 
-        for gmax in self.__gmaxs:
+        for gmax in self.gmaxs:
             constraints.add(names = ["alpha_%s" % fmin],
                             lin_expr =
                                 [
@@ -111,9 +111,9 @@ class LpMRSortPostWeights(object):
     def __add_objective_cplex(self):
         self.lp.objective.set_sense(self.lp.objective.sense.maximize)
         self.lp.objective.set_linear("alpha", 1)
-#        for fmin in self.__fmins:
+#        for fmin in self.fmins:
 #            self.lp.objective.set_linear("x_%s" % fmin, 1)
-#        for gmax in self.__gmaxs:
+#        for gmax in self.gmaxs:
 #            self.lp.objective.set_linear("y_%s" % gmax, 1)
 
     def solve_cplex(self):
@@ -144,11 +144,11 @@ class LpMRSortPostWeights(object):
         return obj, cvs2, lbda2
 
     def solve(self):
-        self.__fmins, self.__gmaxs = \
+        self.fmins, self.gmaxs = \
             compute_winning_and_loosing_coalitions(self.cvs,
                                                    self.lbda)
-#        self.__fmins = compute_minimal_winning_coalitions(self.__fmins)
-#        self.__gmaxs = compute_maximal_loosing_coalitions(self.__gmaxs)
+#        self.fmins = compute_minimal_winning_coalitions(self.fmins)
+#        self.gmaxs = compute_maximal_loosing_coalitions(self.gmaxs)
 
         if self.solver == 'cplex':
             return self.solve_cplex()
