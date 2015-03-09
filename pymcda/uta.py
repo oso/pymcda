@@ -101,11 +101,22 @@ class AVFSort(Uta):
 
     def get_assignment(self, ap):
         av = self.global_utility(ap)
-        i = bisect.bisect_left(self.limits, av.value)
-        if i == len(self.limits):
-            cat = self.ordered_cat[-1]
-        else:
-            cat = self.ordered_cat[i]
+        cat = self.ordered_cat[0]
+        for i, l in enumerate(self.limits):
+            if abs(av.value - l) < 1e-6:
+                cat = self.ordered_cat[i + 1]
+                continue
+
+            if av.value - l < 0:
+                break
+
+            cat = self.ordered_cat[i + 1]
+
+#        i = bisect.bisect_left(self.limits, av.value)
+#        if i == len(self.limits):
+#            cat = self.ordered_cat[-1]
+#        else:
+#            cat = self.ordered_cat[i]
         return AlternativeAssignment(ap.id, cat)
 
     def get_assignments(self, pt):
@@ -134,10 +145,11 @@ class AVFSort(Uta):
         score = 0
         for a_up, a_low in product(upper_aa.keys(), lower_aa.keys()):
             a_up_cred, a_low_cred = upper_aa[a_up], lower_aa[a_low]
-            if a_up_cred > a_low_cred:
-                score += 1
-            elif a_up_cred == a_low_cred:
+            diff = a_up_cred - a_low_cred
+            if abs(diff) < 1e-8:
                 score += 0.5
+            elif diff > 0:
+                score += 1
 
         return score / (nlower * nupper)
 
