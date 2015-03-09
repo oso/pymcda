@@ -240,10 +240,11 @@ class ElectreTri(McdaObject):
         score = 0
         for a_up, a_low in product(upper_aa.keys(), lower_aa.keys()):
             a_up_cred, a_low_cred = upper_aa[a_up], lower_aa[a_low]
-            if a_up_cred > a_low_cred:
-                score += 1
-            elif a_up_cred == a_low_cred:
+            diff = a_up_cred - a_low_cred
+            if abs(diff) < 1e-8:
                 score += 0.5
+            elif diff > 0:
+                score += 1
 
         return score / (nlower * nupper)
 
