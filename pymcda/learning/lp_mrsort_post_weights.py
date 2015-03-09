@@ -33,7 +33,7 @@ class LpMRSortPostWeights(object):
     def __add_variables_cplex(self):
         self.lp.variables.add(names=["w_%s" % c.id for c in self.cvs],
                               lb=[0 for c in self.cvs],
-                              ub=[int(self.wsum / 2) for c in self.cvs],
+                              ub=[int(self.wsum / 2 + 1) for c in self.cvs],
                               types=[self.lp.variables.type.integer
                                      for c in self.cvs])
         self.lp.variables.add(names=["x_%s" % fmin for fmin in self.fmins],
@@ -111,10 +111,6 @@ class LpMRSortPostWeights(object):
     def __add_objective_cplex(self):
         self.lp.objective.set_sense(self.lp.objective.sense.maximize)
         self.lp.objective.set_linear("alpha", 1)
-#        for fmin in self.fmins:
-#            self.lp.objective.set_linear("x_%s" % fmin, 1)
-#        for gmax in self.gmaxs:
-#            self.lp.objective.set_linear("y_%s" % gmax, 1)
 
     def solve_cplex(self):
         self.__add_variables_cplex()
