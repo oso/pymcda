@@ -94,6 +94,8 @@ for f in sys.argv[1:]:
     fweights = open('%s-w.dat' % bname, 'w+')
     fprofiles = open('%s-p.dat' % bname, 'w+')
 
+    print("Processing %s..." % bname)
+
     criteria = m.criteria.keys()
     for c in criteria:
         print("{%s} " % criteria_names[c], end = '', file = fprofiles)
@@ -119,9 +121,16 @@ for f in sys.argv[1:]:
         print("%s " % criteria_worst[c], end = '', file = fprofiles)
     print('', file = fprofiles)
 
-    print("{lambda} %.4f" % m.lbda, file = fweights)
+    try:
+        lp = LpMRSortPostWeights(m.cv, m.lbda, 100)
+        obj, m.cv, m.lbda = lp.solve()
+    except:
+        lp = LpMRSortPostWeights(m.cv, m.lbda, 1000)
+        obj, m.cv, m.lbda = lp.solve()
+
+    print("{lambda} %d" % m.lbda, file = fweights)
     for c in criteria:
-        print("{%s} %.4f" % (criteria_names[c], m.cv[c].value), file = fweights)
+        print("{%s} %d" % (criteria_names[c], m.cv[c].value), file = fweights)
 
     fweights.close()
     fprofiles.close()
