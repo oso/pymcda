@@ -5,7 +5,7 @@ from pymcda.types import CriterionValue, CriteriaValues
 
 verbose = False
 
-class LpMRSortWeights2():
+class LpMRSortWeightsAUC():
 
     def __init__(self, model, pt, aa_ori, delta=0.0001):
         self.model = model
