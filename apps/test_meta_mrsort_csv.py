@@ -9,6 +9,7 @@ from itertools import product
 from pymcda.learning.meta_mrsort3 import MetaMRSortPop3
 from pymcda.learning.heur_mrsort_init_profiles import HeurMRSortInitProfiles
 from pymcda.learning.lp_mrsort_weights import LpMRSortWeights
+from pymcda.learning.lp_mrsort_weights_auc import LpMRSortWeightsAUC
 from pymcda.learning.heur_mrsort_profiles4 import MetaMRSortProfiles4
 from pymcda.learning.lp_mrsort_mobius import LpMRSortMobius
 from pymcda.learning.heur_mrsort_profiles_choquet import MetaMRSortProfilesChoquet
