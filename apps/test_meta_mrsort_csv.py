@@ -6,7 +6,7 @@ import random
 import time
 from collections import OrderedDict
 from itertools import product
-from pymcda.learning.meta_mrsort3 import MetaMRSortPop3
+from pymcda.learning.meta_mrsort3 import MetaMRSortPop3, MetaMRSortPop3AUC
 from pymcda.learning.heur_mrsort_init_profiles import HeurMRSortInitProfiles
 from pymcda.learning.lp_mrsort_weights import LpMRSortWeights
 from pymcda.learning.lp_mrsort_weights_auc import LpMRSortWeightsAUC
@@ -28,6 +28,7 @@ from test_utils import test_result, test_results
 from test_utils import load_mcda_input_data
 from test_utils import save_to_xmcda
 
+meta_mrsort = MetaMRSortPop3
 heur_init_profiles = HeurMRSortInitProfiles
 lp_weights = LpMRSortWeights
 heur_profiles = MetaMRSortProfiles4
@@ -57,13 +58,13 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
     pt_sorted = SortedPerformanceTable(pt_learning)
 
     # Algorithm
-    meta = MetaMRSortPop3(nmodels, model.criteria,
-                          model.categories_profiles.to_categories(),
-                          pt_sorted, aa_learning,
-                          heur_init_profiles,
-                          lp_weights,
-                          heur_profiles,
-                          seed * 100)
+    meta = meta_mrsort(nmodels, model.criteria,
+                       model.categories_profiles.to_categories(),
+                       pt_sorted, aa_learning,
+                       heur_init_profiles,
+                       lp_weights,
+                       heur_profiles,
+                       seed * 100)
 
     for i in range(0, nloop):
         model, ca_learning = meta.optimize(nmeta)
@@ -144,6 +145,7 @@ def run_tests(nseeds, data, pclearning, nloop, nmodels, nmeta, filename):
 
     # Write the test options
     writer.writerow(['data', data.name])
+    writer.writerow(['meta_mrsort', meta_mrsort.__name__])
     writer.writerow(['heur_init_profiles', heur_init_profiles.__name__])
     writer.writerow(['lp_weights', lp_weights.__name__])
     writer.writerow(['heur_profiles', heur_profiles.__name__])
