@@ -61,11 +61,16 @@ class MetaMRSortPop3():
                            self.heur_profiles)
         random.seed(seed)
         meta.random_state = random.getstate()
+        meta.auc = meta.model.auc(self.aa_ori, self.pt_sorted.pt)
         return meta
 
-    def reinit_worst_models(self):
+    def sort_models(self):
         metas_sorted = sorted(self.metas, key = lambda (k): k.ca,
                               reverse = True)
+        return metas_sorted
+
+    def reinit_worst_models(self):
+        metas_sorted = self.sort_models()
         nmeta_to_reinit = int(math.ceil(self.nmodels / 2))
         for meta in metas_sorted[nmeta_to_reinit:]:
             meta.init_profiles()
@@ -93,13 +98,20 @@ class MetaMRSortPop3():
             meta.model.cv = output[2]
             meta.model.lbda = output[3]
             meta.random_state = output[4]
+            meta.auc = meta.model.auc(self.aa_ori, self.pt_sorted.pt)
 
         self.models = {meta.model: meta.ca for meta in self.metas}
 
-        metas_sorted = sorted(self.metas, key = lambda (k): k.ca,
-                              reverse = True)
+        metas_sorted = self.sort_models()
 
         return metas_sorted[0].model, metas_sorted[0].ca
+
+class MetaMRSortPop3AUC(MetaMRSortPop3):
+
+    def sort_models(self):
+        metas_sorted = sorted(self.metas, key = lambda (k): k.auc,
+                              reverse = True)
+        return metas_sorted
 
 class MetaMRSort3():
 
