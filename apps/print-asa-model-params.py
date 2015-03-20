@@ -20,8 +20,9 @@ from pymcda.learning.lp_mrsort_post_weights import LpMRSortPostWeights
 from test_utils import is_bz2_file
 
 criteria_order = ['age', 'diabetic', 'hypertension', 'respiratory_failure',
-                  'heart_failure', 'hr2', 'cardiac_steadiness', 'pacemaker',
-                  'avb', 'lvh', 'spo2', 'gly', 'sys', 'dia']
+                  'heart_failure', 'bradycardia', 'tachycardia',
+                  'cardiac_steadiness', 'pacemaker', 'avb', 'lvh', 'spo2',
+                  'hypoglycemia', 'hyperglycemia', 'sys', 'dia']
 
 criteria_discarded = {c: 0 for c in criteria_order}
 
@@ -31,13 +32,15 @@ criteria_names['diabetic'] = "Diabetic"
 criteria_names['hypertension'] = "Hypertension"
 criteria_names['respiratory_failure'] = "Respiratory failure"
 criteria_names['heart_failure'] = "Heart rate failure"
-criteria_names['hr2'] = "Heart rate"
+criteria_names['bradycardia'] = "Bradycardia"
+criteria_names['tachycardia'] = "Tachycardia"
 criteria_names['cardiac_steadiness'] = "Heart rate steadiness"
 criteria_names['pacemaker'] = "Pacemaker"
 criteria_names['avb'] = "Atrio-ventricular block"
 criteria_names['lvh'] = "Left-ventricular hypertrophy"
 criteria_names['spo2'] = "Oxygen saturation"
-criteria_names['gly'] = "Blood glucose level"
+criteria_names['hypoglycemia'] = "Hypoglycemia"
+criteria_names['hyperglycemia'] = "Hyperglycemia"
 criteria_names['sys'] = "Systole"
 criteria_names['dia'] = "Diastole"
 
@@ -47,13 +50,15 @@ criteria_worst['diabetic'] = 1
 criteria_worst['hypertension'] = 1
 criteria_worst['respiratory_failure'] = 1
 criteria_worst['heart_failure'] = 1
-criteria_worst['hr2'] = 123
+criteria_worst['tachycardia'] = 123
+criteria_worst['bradycardia'] = 55
 criteria_worst['cardiac_steadiness'] = 0
 criteria_worst['pacemaker'] = 1
 criteria_worst['avb'] = 1
 criteria_worst['lvh'] = 1
 criteria_worst['spo2'] = 43
-criteria_worst['gly'] = 3.8
+criteria_worst['hypoglycemia'] = 0.5
+criteria_worst['hyperglycemia'] = 3.8
 criteria_worst['sys'] = 20.5
 criteria_worst['dia'] = 13
 
@@ -63,13 +68,15 @@ criteria_best['diabetic'] = 0
 criteria_best['hypertension'] = 0
 criteria_best['respiratory_failure'] = 0
 criteria_best['heart_failure'] = 0
-criteria_best['hr2'] = 55
+criteria_best['bradycardia'] = 70
+criteria_best['tachycardia'] = 70
 criteria_best['cardiac_steadiness'] = 1
 criteria_best['pacemaker'] = 0
 criteria_best['avb'] = 0
 criteria_best['lvh'] = 0
 criteria_best['spo2'] = 100
-criteria_best['gly'] = 0.5
+criteria_best['hypoglycemia'] = 0.92
+criteria_best['hyperglycemia'] = 0.92
 criteria_best['sys'] = 9
 criteria_best['dia'] = 5
 
