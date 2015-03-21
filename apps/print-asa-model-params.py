@@ -10,8 +10,8 @@ import bz2
 from pymcda.electre_tri import MRSort
 from pymcda.types import AlternativePerformances, PerformanceTable
 from pymcda.types import AlternativesAssignments
-from pymcda.ui.graphic import QGraphicsSceneEtri
-from pymcda.ui.graphic import _MyGraphicsview
+#from pymcda.ui.graphic import QGraphicsSceneEtri
+#from pymcda.ui.graphic import _MyGraphicsview
 from pymcda.utils import compute_winning_and_loosing_coalitions
 from pymcda.utils import compute_minimal_winning_coalitions
 from pymcda.utils import compute_maximal_loosing_coalitions
@@ -132,8 +132,12 @@ for f in sys.argv[1:]:
         lp = LpMRSortPostWeights(m.cv, m.lbda, 100)
         obj, m.cv, m.lbda = lp.solve()
     except:
-        lp = LpMRSortPostWeights(m.cv, m.lbda, 1000)
-        obj, m.cv, m.lbda = lp.solve()
+        try:
+            lp = LpMRSortPostWeights(m.cv, m.lbda, 1000)
+            obj, m.cv, m.lbda = lp.solve()
+        except:
+            lp = LpMRSortPostWeights(m.cv, m.lbda, 10000)
+            obj, m.cv, m.lbda = lp.solve()
 
     print("{lambda} %d" % m.lbda, file = fweights)
     for c in criteria:
@@ -144,8 +148,7 @@ for f in sys.argv[1:]:
 
     fcoalitions = open('%s-wcoalitions.dat' % bname, 'w+')
 
-    winning, loosing = compute_winning_and_loosing_coalitions(m.cv, m.lbda)
-    mwinning = compute_minimal_winning_coalitions(winning)
+    mwinning = compute_minimal_winning_coalitions(lp.fmins)
     for win in mwinning:
         win = list(win)
         win.sort(key=criteria_order.index)
@@ -171,5 +174,36 @@ for f in sys.argv[1:]:
     print("%.4f" % auc, end = '', file=fauc)
     fauc.close()
 
-for c in criteria_order:
+    fmisclassified = open('%s-misclassified.dat' % bname, 'w+')
+    print("{Alternative} ", file = fmisclassified, end = '')
+    print("{Original assignment} ", file = fmisclassified, end = '')
+    print("{Model assignment}", file = fmisclassified, end = '')
+    for c in criteria:
+        print(" {%s}" % criteria_names[c], file = fmisclassified, end = '')
+    print("\n", file = fmisclassified, end = '')
+
+    misclassified_aids = []
+    for aid in aa_learning.keys():
+        aa1 = aa_learning[aid].category_id
+        aa2 = aa_learned[aid].category_id
+        if aa1 == aa2:
+            continue
+
+        misclassified_aids.append(aid)
+
+    misclassified_aids.sort(key = lambda item: (len(item), item))
+
+    for aid in misclassified_aids:
+        ap = pt_learning[aid]
+        aa1 = aa_learning[aid].category_id
+        aa2 = aa_learned[aid].category_id
+        print("%s " % aid, file = fmisclassified, end = '')
+        print("%s %s" % (aa1, aa2), file = fmisclassified, end = '')
+        for c in criteria:
+            print(" %s" % ap.performances[c], file = fmisclassified, end = '')
+        print("\n", file = fmisclassified, end = '')
+
+    fmisclassified.close()
+
+for c in criteria:
     print("%s: %d" % (c, criteria_discarded[c]))
