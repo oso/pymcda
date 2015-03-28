@@ -97,7 +97,7 @@ class AVFSort(Uta):
         if self.cvalues:
             self.ordered_cat = self.cat_values.get_ordered_categories()
             lower = cat_values.get_upper_limits()
-            self.limits = sorted(lower.values())
+            self.limits = sorted(lower.values())[:-1]
 
     def get_assignment(self, ap):
         av = self.global_utility(ap)
