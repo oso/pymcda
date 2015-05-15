@@ -1010,6 +1010,20 @@ class PerformanceTable(McdaDict):
 
         return a
 
+    def get_unique_values(self):
+        """Return the unique values on each criterion"""
+
+        cids = next(self.itervalues()).performances.keys()
+        a = {cid: set() for cid in cids}
+        for ap, cid in product(self, cids):
+            perf = ap.performances[cid]
+            a[cid].add(perf)
+
+        for key, val in a.items():
+            a[key] = sorted(list(val))
+
+        return a
+
     def to_xmcda(self, id = None):
         """Convert the MCDA dictionnary into XMCDA output"""
 
