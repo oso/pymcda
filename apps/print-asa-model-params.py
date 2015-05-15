@@ -97,6 +97,12 @@ for f in sys.argv[1:]:
 
     m = MRSort().from_xmcda(xmcda_models[0])
 
+    pt_learning = PerformanceTable().from_xmcda(root, 'learning_set')
+    aa_learning = AlternativesAssignments().from_xmcda(root,
+                                                       'learning_set')
+
+    uniquevalues = pt_learning.get_unique_values()
+
     bname = os.path.basename(os.path.splitext(f.name)[0])
     fweights = open('%s-w.dat' % bname, 'w+')
     fprofiles = open('%s-p.dat' % bname, 'w+')
@@ -120,6 +126,27 @@ for f in sys.argv[1:]:
             if m.cv[c].value == 0:
                 print("%s " % criteria_worst[c], end = '', file = fprofiles)
             else:
+                if m.criteria[c].direction == -1:
+                    for val in reversed(uniquevalues[c]):
+                        if val == m.bpt[p].performances[c]:
+                            break
+
+                        if val < m.bpt[p].performances[c]:
+                            break
+
+                    if val < m.bpt[p].performances[c]:
+                        m.bpt[p].performances[c] = val
+                else:
+                    for val in uniquevalues[c]:
+                        if val == m.bpt[p].performances[c]:
+                            break
+
+                        if val > m.bpt[p].performances[c]:
+                            break
+
+                    if val > m.bpt[p].performances[c]:
+                        m.bpt[p].performances[c] = val
+
                 print("%s " % m.bpt[p].performances[c], end = '',
                       file = fprofiles)
         print('', file = fprofiles)
@@ -159,9 +186,6 @@ for f in sys.argv[1:]:
 
     fcoalitions.close()
 
-    pt_learning = PerformanceTable().from_xmcda(root, 'learning_set')
-    aa_learning = AlternativesAssignments().from_xmcda(root,
-                                                       'learning_set')
     aa_learned = m.pessimist(pt_learning)
 
     fca = open('%s-ca.dat' % bname, 'w+')
