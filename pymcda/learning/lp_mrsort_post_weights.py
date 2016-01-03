@@ -15,7 +15,7 @@ class LpMRSortPostWeights(object):
     def __init__(self, cvs, lbda, wsum):
         self.cvs = cvs
         self.lbda = lbda
-        self.epsilon = 0.01
+        self.epsilon = 1
         self.wsum = wsum
 
         self.solver = os.getenv('SOLVER', 'cplex')
@@ -123,10 +123,6 @@ class LpMRSortPostWeights(object):
         if status != self.lp.solution.status.MIP_optimal:
             raise RuntimeError("Solver status: %s" % status)
 
-#        if status != self.lp.solution.status.MIP_optimal and \
-#           status != self.lp.solution.status.optimal_tolerance:
-#            raise RuntimeError("Solver status: %s" % status)
-
         obj = self.lp.solution.get_objective_value()
 
         cvs2 = CriteriaValues()
@@ -147,18 +143,30 @@ class LpMRSortPostWeights(object):
 #        self.gmaxs = compute_maximal_loosing_coalitions(self.gmaxs)
 
         if self.solver == 'cplex':
-            return self.solve_cplex()
+            obj, cvs2, lbda2 = self.solve_cplex()
+
+        self.fmins2, self.gmaxs2 = \
+            compute_winning_and_loosing_coalitions(cvs2,
+                                                   lbda2)
+
+        if self.fmins2 != self.fmins:
+            raise RuntimeError("fmins")
+        if self.gmaxs2 != self.gmaxs:
+            raise RuntimeError("gmaxs")
+
+        return obj, cvs2, lbda2
 
 if __name__ == "__main__":
     import random
     from pymcda.generate import generate_random_criteria_weights
     from pymcda.generate import generate_criteria
 
-    random.seed(1)
+    random.seed(3)
 
-    c = generate_criteria(5)
+    c = generate_criteria(3)
     cvs = generate_random_criteria_weights(c)
-    lbda = round(random.uniform(0.5, 1), 3)
+#    lbda = round(random.uniform(0.5, 1), 3)
+    lbda = 0.5
 
     suf, insuf = compute_winning_and_loosing_coalitions(cvs, lbda)
 
@@ -166,7 +174,7 @@ if __name__ == "__main__":
     print(cvs)
     print("lbda: %f" % lbda)
 
-    lp = LpMRSortPostWeights(cvs, lbda)
+    lp = LpMRSortPostWeights(cvs, lbda, 100)
     obj, cvs2, lbda2 = lp.solve()
 
     print("objective: %f" % obj)
