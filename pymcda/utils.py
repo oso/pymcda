@@ -120,7 +120,8 @@ def compute_winning_and_loosing_coalitions(cvs, lbda):
     for coa in powerset(c):
         l = cvs.get_subset(coa)
         diff = sum([cv.value for cv in l]) - lbda
-        if abs(diff) < 10e-8 or diff > 0:
+        if abs(diff) < 10e-9 or diff > 0:
+#        if diff >= 0:
             sufficient.add(frozenset(coa))
         else:
             insufficient.add(frozenset(coa))
