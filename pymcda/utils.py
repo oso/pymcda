@@ -39,7 +39,7 @@ def add_errors_in_assignments_proba(aa, category_ids, proba):
 
     return l
 
-def print_pt_and_assignments(alternatives, cids, aas, pt):
+def print_pt_and_assignments(alternatives, cids, aas, pt, aus):
     alen = max([len(aid) for aid in alternatives] + [len("alt.")])
 
     if alternatives is None:
@@ -80,7 +80,7 @@ def print_pt_and_assignments(alternatives, cids, aas, pt):
         for cid in  cids:
             perf = str(pt[aid].performances[cid])
             print(" " + " " * (clen[cid] - len(perf)) + "%s" % perf, end = "")
-        print("")
+        print(" %s" % str(aus[aid].value))
 
 def compute_ca(aa, aa2, alist=None):
     if alist is None:
