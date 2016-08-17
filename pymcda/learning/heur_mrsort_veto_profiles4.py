@@ -8,7 +8,7 @@ from pymcda.types import AlternativeAssignment, AlternativesAssignments
 def eq(a, b, eps=10e-10):
     return abs(a-b) <= eps
 
-class MetaMRSortProfiles4():
+class MetaMRSortVetoProfiles4():
 
     def __init__(self, model, pt_sorted, aa_ori):
         self.na = len(aa_ori)
@@ -353,7 +353,7 @@ if __name__ == "__main__":
     model2.vpt.display(criterion_ids = cids)
 
     pt_sorted = SortedPerformanceTable(pt)
-    meta = MetaMRSortProfiles4(model2, pt_sorted, aa)
+    meta = MetaMRSortVetoProfiles4(model2, pt_sorted, aa)
 
     t1 = time.time()
 
