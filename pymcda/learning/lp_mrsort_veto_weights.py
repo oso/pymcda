@@ -193,8 +193,6 @@ class LpMRSortVetoWeights():
 
         self.model.veto_weights = cvs
         self.model.veto_lbda = self.lp.solution.get_values("lambda")
-        print(self.model.veto_weights)
-        print(self.model.veto_lbda)
 
         return obj
 
