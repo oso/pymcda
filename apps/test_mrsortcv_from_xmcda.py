@@ -61,7 +61,7 @@ for f in sys.argv[1:]:
     ca_learning_noveto = compute_ca(aa_learning, aa_learning_m2)
     ca_learning_veto = compute_ca(aa_learning, aa_learning_m3)
 
-    print(m2.veto)
-    print(m2.veto_lbda)
-    print(m2.veto_weights)
+#    print(m2.veto)
+#    print(m2.veto_lbda)
+#    print(m2.veto_weights)
     print(ca_learning_noveto, ca_learning_veto)
