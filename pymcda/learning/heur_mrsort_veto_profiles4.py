@@ -53,6 +53,9 @@ class MetaMRSortVetoProfiles4():
                                                 True, True)
 
         for i, a in enumerate(alts):
+            if a not in self.aa_ori:
+                continue
+
             if (perfs[i] + delta) * direction > perf_above * direction:
                 continue
 
@@ -100,6 +103,9 @@ class MetaMRSortVetoProfiles4():
                                                 True, True)
 
         for i, a in enumerate(alts):
+            if a not in self.aa_ori:
+                continue
+
             conc = ct[a]
             aa_ori = self.aa_ori._d[a].category_id
             aa = self.aa._d[a].category_id
