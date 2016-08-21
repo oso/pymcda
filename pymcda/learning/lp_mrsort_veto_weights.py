@@ -50,7 +50,7 @@ class LpMRSortVetoWeights():
         self.c_yi = dict()
         self.a_c_xi = dict()
         self.a_c_yi = dict()
-        for a_id in self.pt.keys():
+        for a_id in aa.keys():
             ap = self.pt[a_id]
             cat_rank = aa[a_id]
 
