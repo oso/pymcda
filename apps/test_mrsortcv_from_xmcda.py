@@ -37,10 +37,10 @@ for f in sys.argv[1:]:
     aa_test = AlternativesAssignments().from_xmcda(root,
                                                   'test_set')
 
+    aa_learning_m2 = m.pessimist(pt_learning)
+    aa_test_m2 = m.pessimist(pt_test)
+
 #    # Remove alternatives that cannot be corrected with a veto rule
-#    aa_learning_m2 = m.pessimist(pt_learning)
-#    aa_test_m2 = m.pessimist(pt_test)
-#
 #    aa_learning_m2p = discard_undersorted_alternatives(m.categories,
 #                                                      aa_learning,
 #                                                      aa_learning_m2)
