@@ -242,3 +242,25 @@ def print_confusion_matrix(matrix):
             string += " " * (len_cols[catb] - len(val))
             string += "%s " % val
         print(string)
+
+def discard_undersorted_alternatives(categories, aa, aa2):
+    out = AlternativesAssignments()
+    cat_order = {cat: i + 1 for i, cat in enumerate(categories)}
+    for a in aa:
+        aid = a.id
+        acat = cat_order[a.category_id]
+        a2 = aa2[aid]
+        a2cat = cat_order[a2.category_id]
+        if a2cat >= acat:
+            out.append(a)
+
+    return out
+
+def discard_alternatives_in_category(aa, category):
+    out = AlternativesAssignments()
+
+    for a in aa:
+        if a.category_id != category:
+            out.append(a)
+
+    return out
