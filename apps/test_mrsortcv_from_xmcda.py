@@ -22,7 +22,7 @@ table_auc_test = []
 cmatrix_learning = {}
 cmatrix_test = {}
 
-directory='data/test-veto'
+directory='data/test-veto2'
 
 for f in sys.argv[1:]:
     fname = os.path.splitext(os.path.basename(f))[0]
@@ -60,8 +60,17 @@ for f in sys.argv[1:]:
     for i in range(nloops):
         m2, ca = meta.optimize(nmeta)
 
-    m2.id = 'learned'
+    ca_learning_m2 = compute_ca(aa_learning, aa_learning_m2)
+    aa_learning_m3 = m2.pessimist(pt_learning)
+    ca_learning_m3 = compute_ca(aa_learning, aa_learning_m3)
+
+    if ca_learning_m2 > ca_learning_m3:
+        model = m
+    else:
+        model = m2
+
+    model.id = 'learned'
     aa_learning.id, aa_test.id = 'learning_set', 'test_set'
     pt_learning.id, pt_test.id = 'learning_set', 'test_set'
     save_to_xmcda("%s/%s.bz2" % (directory, fname),
-                  m2, aa_learning, aa_test, pt_learning, pt_test)
+                  model, aa_learning, aa_test, pt_learning, pt_test)
