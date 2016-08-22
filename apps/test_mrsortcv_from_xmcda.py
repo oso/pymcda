@@ -13,6 +13,7 @@ from pymcda.utils import discard_alternatives_in_category
 from test_utils import is_bz2_file
 from pymcda.learning.meta_mrsortvc3 import MetaMRSortVCPop3
 from pymcda.pt_sorted import SortedPerformanceTable
+from test_utils import save_to_xmcda
 
 table_ca_learning = []
 table_ca_test = []
@@ -21,7 +22,11 @@ table_auc_test = []
 cmatrix_learning = {}
 cmatrix_test = {}
 
+directory='data/test-veto'
+
 for f in sys.argv[1:]:
+    fname = os.path.splitext(os.path.basename(f))[0]
+
     if is_bz2_file(f) is True:
         f = bz2.BZ2File(f)
 
@@ -55,13 +60,8 @@ for f in sys.argv[1:]:
     for i in range(nloops):
         m2, ca = meta.optimize(nmeta)
 
-    aa_learning_m3 = m2.pessimist(pt_learning)
-    aa_test_m3 = m2.pessimist(pt_test)
-
-    ca_learning_noveto = compute_ca(aa_learning, aa_learning_m2)
-    ca_learning_veto = compute_ca(aa_learning, aa_learning_m3)
-
-#    print(m2.veto)
-#    print(m2.veto_lbda)
-#    print(m2.veto_weights)
-    print(ca_learning_noveto, ca_learning_veto)
+    m2.id = 'learned'
+    aa_learning.id, aa_test.id = 'learning_set', 'test_set'
+    pt_learning.id, pt_test.id = 'learning_set', 'test_set'
+    save_to_xmcda("%s/%s.bz2" % (directory, fname),
+                  m2, aa_learning, aa_test, pt_learning, pt_test)
