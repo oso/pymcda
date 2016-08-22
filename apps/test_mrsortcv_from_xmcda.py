@@ -64,7 +64,7 @@ for f in sys.argv[1:]:
     aa_learning_m3 = m2.pessimist(pt_learning)
     ca_learning_m3 = compute_ca(aa_learning, aa_learning_m3)
 
-    if ca_learning_m2 > ca_learning_m3:
+    if ca_learning_m2 >= ca_learning_m3:
         model = m
     else:
         model = m2
