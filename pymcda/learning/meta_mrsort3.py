@@ -20,6 +20,19 @@ from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_categories_profiles
 
+def compute_ca_prime(categories, aa, aa2):
+    ca = 0
+    cat_order = {cat: i + 1 for cat in categories}
+    for a in aa:
+        aid = a.id
+        cat = a.category_id
+        if cat < aa2(aid):
+            ca += 0.2
+        elif cat == aa2(aid):
+            ca += 1
+
+    return ca / len(aa)
+
 def queue_get_retry(queue):
     while True:
         try:
@@ -147,18 +160,22 @@ class MetaMRSort3():
         obj = self.lp.solve()
 
         self.meta.rebuild_tables()
-        ca = self.meta.good / self.meta.na
+#        ca = self.meta.good / self.meta.na
+        aa2 = self.model.pessimist(self.pt_sorted.pt)
+        ca = compute_ca_prime(self.model.categories, aa, aa2)
 
         best_bpt = self.model.bpt.copy()
         best_ca = ca
 
         for i in range(nmeta):
-            ca = self.meta.optimize()
+            cah = self.meta.optimize()
+            aa2 = self.model.pessimist(self.pt_sorted.pt)
+            ca = compute_ca_prime(self.model.categories, aa, aa2)
             if ca > best_ca:
                 best_ca = ca
                 best_bpt = self.model.bpt.copy()
 
-            if ca == 1:
+            if cah == 1:
                 break
 
         self.model.bpt = best_bpt
