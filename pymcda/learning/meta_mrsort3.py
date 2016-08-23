@@ -22,7 +22,7 @@ from pymcda.generate import generate_categories_profiles
 
 def compute_ca_prime(categories, aa, aa2):
     ca = 0
-    cat_order = {cat: i + 1 for i, cat in enumerate(categories})
+    cat_order = {cat: i + 1 for i, cat in enumerate(categories)}
     for a in aa:
         aid = a.id
         cat = a.category_id
