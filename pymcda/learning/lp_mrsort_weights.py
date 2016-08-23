@@ -186,7 +186,7 @@ class LpMRSortWeights():
     def add_objective_cplex(self):
         self.lp.objective.set_sense(self.lp.objective.sense.minimize)
         for dj, coef in self.c_xi.iteritems():
-            self.lp.objective.set_linear('xp'+dj, coef)
+            self.lp.objective.set_linear('xp'+dj, coef * 10)
         for dj, coef in self.c_yi.iteritems():
             self.lp.objective.set_linear('yp'+dj, coef)
 
