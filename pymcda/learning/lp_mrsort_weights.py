@@ -141,7 +141,7 @@ class LpMRSortWeights():
         self.lp.variables.add(names=['yp'+dj for dj in self.c_yi],
                               lb = [0 for dj in self.c_yi],
                               ub = [1 for dj in self.c_yi])
-        self.lp.variables.add(names=['lambda'], lb = [0.5], ub = [1])
+        self.lp.variables.add(names=['lambda'], lb = [0], ub = [1])
 
     def add_constraints_cplex(self):
         constraints = self.lp.linear_constraints
