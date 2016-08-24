@@ -98,9 +98,11 @@ print_confusion_matrix(cmatrix_learning)
 print("Confusion matrix test set")
 print_confusion_matrix(cmatrix_test)
 
-cmatrix_learning.update((x, 100 * y / sum(cmatrix_learning.values()))
+cmatrix_learning_total = sum(cmatrix_learning.values())
+cmatrix_test_total = sum(cmatrix_test.values())
+cmatrix_learning.update((x, 100 * y / cmatrix_learning_total)
                         for x, y in cmatrix_learning.items())
-cmatrix_test.update((x, 100 * y / sum(cmatrix_test.values()))
+cmatrix_test.update((x, 100 * y / cmatrix_test_total)
                     for x, y in cmatrix_test.items())
 
 print("Confusion matrix learning set")
