@@ -21,6 +21,7 @@ table_auc_test = []
 cmatrix_learning = {}
 cmatrix_test = {}
 
+nveto = 0
 for f in sys.argv[1:]:
     if is_bz2_file(f) is True:
         f = bz2.BZ2File(f)
@@ -54,6 +55,9 @@ for f in sys.argv[1:]:
     table_auc_learning.append(auc_learning)
     table_auc_test.append(auc_test)
 
+    if m.veto_lbda is not None:
+        nveto += 1
+
     # Compute confusion matrices
     for a in aa_learning.keys():
         key = (aa_learning[a].category_id, aa_learning_m2[a].category_id)
@@ -69,6 +73,7 @@ for f in sys.argv[1:]:
         else:
             cmatrix_test[key] = 1
 
+print("nveto: %d" % nveto)
 avg_ca_learning = sum(table_ca_learning) / float(len(table_ca_learning))
 avg_ca_test = sum(table_ca_test) / float(len(table_ca_test))
 avg_auc_learning = sum(table_auc_learning) / float(len(table_auc_learning))
