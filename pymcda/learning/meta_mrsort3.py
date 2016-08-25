@@ -180,7 +180,8 @@ class MetaMRSort3():
 
         self.model.bpt = best_bpt
         self.ca = best_ca
-        return best_ca
+        aa2 = self.model.pessimist(self.pt_sorted.pt)
+        return compute_ca(self.aa_ori, aa2)
 
 if __name__ == "__main__":
     import time
