@@ -11,7 +11,7 @@ from threading import Thread
 from pymcda.electre_tri import MRSort
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import PerformanceTable
-from pymcda.learning.heur_mrsort_init_profiles import HeurMRSortInitProfiles
+from pymcda.learning.heur_mrsort_init_veto_profiles import HeurMRSortInitVetoProfiles
 from pymcda.learning.lp_mrsort_veto_weights import LpMRSortVetoWeights
 from pymcda.learning.heur_mrsort_veto_profiles4 import MetaMRSortVetoProfiles4
 from pymcda.utils import compute_ca
@@ -34,13 +34,12 @@ def queue_get_retry(queue):
 class MetaMRSortVCPop3():
 
     def __init__(self, nmodels, model, pt_sorted, aa_ori,
-                 heur_init_profiles = HeurMRSortInitProfiles,
+                 heur_init_profiles = HeurMRSortInitVetoProfiles,
                  lp_veto_weights = LpMRSortVetoWeights,
                  heur_veto_profiles= MetaMRSortVetoProfiles4,
                  seed = 0):
         self.nmodels = nmodels
         self.model = model
-#        self.criteria = model.criteria
         self.categories = model.categories_profiles.to_categories()
         self.pt_sorted = pt_sorted
         self.aa_ori = aa_ori
@@ -57,10 +56,10 @@ class MetaMRSortVCPop3():
     def init_one_meta(self, seed):
         cps = generate_categories_profiles(self.categories)
         model = self.model.copy()
-        meta = MetaMRSort3(model, self.pt_sorted, self.aa_ori,
-                           self.heur_init_profiles,
-                           self.lp_veto_weights,
-                           self.heur_veto_profiles)
+        meta = MetaMRSortCV3(model, self.pt_sorted, self.aa_ori,
+                             self.heur_init_profiles,
+                             self.lp_veto_weights,
+                             self.heur_veto_profiles)
         random.seed(seed)
         meta.random_state = random.getstate()
         meta.auc = meta.model.auc(self.aa_ori, self.pt_sorted.pt)
@@ -115,10 +114,10 @@ class MetaMRSortVCPop3AUC(MetaMRSortVCPop3):
                               reverse = True)
         return metas_sorted
 
-class MetaMRSort3():
+class MetaMRSortCV3():
 
     def __init__(self, model, pt_sorted, aa_ori,
-                 heur_init_profiles = HeurMRSortInitProfiles,
+                 heur_init_profiles = HeurMRSortInitVetoProfiles,
                  lp_weights = LpMRSortVetoWeights,
                  heur_profiles = MetaMRSortVetoProfiles4):
         self.model = model
@@ -140,12 +139,14 @@ class MetaMRSort3():
         self.meta = self.heur_profiles(self.model, pt_sorted, self.aa_ori)
 
     def init_profiles(self):
-        cats = self.model.categories_profiles.to_categories()
-        vpt = generate_random_profiles(self.model.profiles,
-                                       self.model.criteria, None, 3,
-                                       self.pt_sorted.pt.get_worst(self.model.criteria),
-                                       self.model.bpt['b1'])
-        self.model.veto = PerformanceTable([self.model.bpt['b1'] - vpt['b1']])
+        heur = self.heur_init_profiles(self.model, self.pt_sorted, self.aa_ori)
+        heur.solve()
+        #cats = self.model.categories_profiles.to_categories()
+        #vpt = generate_random_profiles(self.model.profiles,
+        #                               self.model.criteria, None, 3,
+        #                               self.pt_sorted.pt.get_worst(self.model.criteria),
+        #                               self.model.bpt['b1'])
+        #self.model.veto = PerformanceTable([self.model.bpt['b1'] - vpt['b1']])
 
     def optimize(self, nmeta):
         self.lp.update_linear_program()
