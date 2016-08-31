@@ -7,6 +7,7 @@ import time
 from collections import OrderedDict
 from itertools import product
 from pymcda.learning.mip_mrsort import MipMRSort
+from pymcda.learning.mip_mrsort_veto import MipMRSortVC
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import Alternatives, Criteria, PerformanceTable
 from pymcda.types import AlternativesAssignments, Categories
@@ -21,6 +22,9 @@ from pymcda.utils import compute_confusion_matrix
 from test_utils import test_result, test_results
 from test_utils import load_mcda_input_data
 from test_utils import save_to_xmcda
+
+mip_mrsort = MipMRSort
+#mip_mrsort = MipMRSortVC
 
 def run_test(seed, data, pclearning):
     random.seed(seed)
@@ -117,6 +121,7 @@ def run_tests(nseeds, data, pclearning, filename):
 
     # Write the test options
     writer.writerow(['data', data.name])
+    writer.writerow(['mip_mrsort', mip_mrsort.__name__])
     writer.writerow(['pclearning', pclearning])
 
     # Create a test_results instance
