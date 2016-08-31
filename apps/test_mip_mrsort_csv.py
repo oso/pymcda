@@ -48,7 +48,7 @@ def run_test(seed, data, pclearning):
     # Run the linear program
     t1 = time.time()
 
-    mip = MipMRSort(model, pt_learning, aa_learning)
+    mip = mip_mrsort(model, pt_learning, aa_learning)
     obj = mip.solve()
 
     t_total = time.time() - t1
