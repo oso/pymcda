@@ -304,13 +304,23 @@ class MRSort(ElectreTri):
         self.veto_lbda = veto_lbda
 
     @property
-    def vpt(self):
-        vpt = PerformanceTable()
+    def veto(self):
+        veto = PerformanceTable()
         for bp in self.bpt:
-            vb = self.veto[bp.id]
-            vbp = bp - vb
-            vpt.append(vbp)
-        return vpt
+            vbp = bp - self.vpt[bp.id]
+            veto.append(vbp)
+        return veto
+
+    @veto.setter
+    def veto(self, veto):
+        if veto is None:
+            self.vpt = None
+            return
+
+        self.vpt = PerformanceTable()
+        for bp in self.bpt:
+            vbp = bp - veto[bp.id]
+            self.vpt.append(vbp)
 
     def criteria_coalition(self, ap1, ap2):
         criteria_set = set()
