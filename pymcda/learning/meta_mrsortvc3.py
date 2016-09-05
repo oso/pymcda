@@ -139,20 +139,20 @@ class MetaMRSortCV3():
         self.meta = self.heur_profiles(self.model, pt_sorted, self.aa_ori)
 
     def init_profiles(self):
-        heur = self.heur_init_profiles(self.model, self.pt_sorted, self.aa_ori)
-        heur.solve()
-        #cats = self.model.categories_profiles.to_categories()
-        #vpt = generate_random_profiles(self.model.profiles,
-        #                               self.model.criteria, None, 3,
-        #                               self.pt_sorted.pt.get_worst(self.model.criteria),
-        #                               self.model.bpt['b1'])
-        #self.model.veto = PerformanceTable([self.model.bpt['b1'] - vpt['b1']])
+#        heur = self.heur_init_profiles(self.model, self.pt_sorted, self.aa_ori)
+#        heur.solve()
+        cats = self.model.categories_profiles.to_categories()
+        vpt = generate_random_profiles(self.model.profiles,
+                                       self.model.criteria, None, 3,
+                                       self.pt_sorted.pt.get_worst(self.model.criteria),
+                                       self.model.bpt['b1'])
+        self.model.veto = PerformanceTable([self.model.bpt['b1'] - vpt['b1']])
 
     def optimize(self, nmeta):
         self.lp.update_linear_program()
         obj = self.lp.solve()
 
-        self.meta.rebuild_tables()
+        self.meta.update_tables()
         ca = self.meta.good / self.meta.na
 
         best_veto = self.model.veto.copy()
