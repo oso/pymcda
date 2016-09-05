@@ -183,7 +183,7 @@ if __name__ == "__main__":
     from pymcda.ui.graphic import display_electre_tri_models
 
     # Generate a random ELECTRE TRI BM model
-    model = generate_random_mrsort_model(5, 2, 1)
+    model = generate_random_mrsort_model(7, 2, 5)
     worst = AlternativePerformances("worst",
                                      {c.id: 0 for c in model.criteria})
     best = AlternativePerformances("best",
@@ -232,6 +232,8 @@ if __name__ == "__main__":
     for i in range(nloops):
         model2, ca = meta.optimize(nmeta)
         print("%d: ca: %f" % (i, ca))
+        if ca == 1:
+            break
 
     t2 = time.time()
     print("Computation time: %g secs" % (t2-t1))
