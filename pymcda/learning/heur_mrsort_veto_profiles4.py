@@ -75,12 +75,12 @@ class MetaMRSortVetoProfiles4():
                     # +
                     num += 0.5
                     total += 1
-                    h_above[perfs[i] + delta] = num / total
+                    h_above[perfs[i]] = num / total
                 else:
                     # ++
                     num += 2
                     total += 1
-                    h_above[perfs[i] + delta] = num / total
+                    h_above[perfs[i]] = num / total
 #            elif self.aa_ori(a) < self.aa(a) and \
             elif aa_ori != aa and \
                  self.cat[aa] > self.cat[cat_a] and \
@@ -95,6 +95,8 @@ class MetaMRSortVetoProfiles4():
                                 cat_b, cat_a, ct):
         w = self.model.cv[cid].value
         lbda = self.model.lbda
+        direction = self.model.criteria[cid].direction
+        delta = 0.00001 * direction
 
         h_below = {}
         num = total = 0
@@ -115,12 +117,12 @@ class MetaMRSortVetoProfiles4():
                     # ++
                     num += 2
                     total += 1
-                    h_below[perfs[i]] = num / total
+                    h_below[perfs[i] - delta] = num / total
                 else:
                     # +
                     num += 0.5
                     total += 1
-                    h_below[perfs[i]] = num / total
+                    h_below[perfs[i] - delta] = num / total
             elif aa_ori == cat_b:
                 if aa == cat_b and diff < lbda:
                     # --
@@ -166,76 +168,9 @@ class MetaMRSortVetoProfiles4():
             conc = 1 - self.model.concordance(ap, bp)
             self.ct[bp.id][aid] = conc
 
-    def rebuild_tables(self):
+    def update_tables(self, profile, cid, old, new):
         self.build_concordance_table()
         self.build_assignments_table()
-
-    def update_tables(self, profile, cid, old, new):
-        self.rebuild_tables()
-
-#    def get_alternative_assignment(self, aid):
-#        profile = self.model.profiles[0]
-#        for profile in reversed(self.model.profiles):
-#            if self.ct[profile][aid] >= self.model.vet_lbda \
-#               or eq(self.ct[profile][aid], self.model.veto_lbda):
-#                return self.model.categories_profiles[profile].value.upper
-#
-#        return self.model.categories_profiles[profile].value.lower
-#
-#    def build_assignments_table(self):
-#        self.good = 0
-#        self.aa = AlternativesAssignments()
-#        for aa in self.aa_ori.values():
-#            aid = aa.id
-#            cat = self.get_alternative_assignment(aid)
-#            self.aa.append(AlternativeAssignment(aid, cat))
-#
-#            cat_ori = aa.category_id
-#            if cat == cat_ori:
-#                self.good += 1
-#
-#    def build_concordance_table(self):
-#        self.ct = { bp.id: dict() for bp in self.model.vpt }
-#        for aid, bp in product(self.aa_ori.keys(), self.model.bpt):
-#            ap = self.pt_sorted[aid]
-#            conc = 1 - self.model.concordance(ap, bp)
-#            self.ct[bp.id][aid] = conc
-#
-#    def rebuild_tables(self):
-#        self.build_concordance_table()
-#        self.build_assignments_table()
-#
-#    def update_tables(self, profile, cid, old, new):
-#        direction = self.model.criteria[cid].direction
-#        if old > new:
-#            if direction == 1:
-#                down, up = True, False
-#            else:
-#                down, up = False, True
-#            w = self.model.cv[cid].value * direction
-#        else:
-#            if direction == 1:
-#                down, up = False, True
-#            else:
-#                down, up = True, False
-#            w = -self.model.cv[cid].value * direction
-#
-#        alts, perfs = self.pt_sorted.get_middle(cid, old, new, up, down)
-#
-#        for a in alts:
-#            self.ct[profile][a] += w
-#            old_cat = self.aa[a].category_id
-#            new_cat = self.get_alternative_assignment(a)
-#            ori_cat = self.aa_ori[a].category_id
-#
-#            if old_cat == new_cat:
-#                continue
-#            elif old_cat == ori_cat:
-#                self.good -= 1
-#            elif new_cat == ori_cat:
-#                self.good += 1
-#
-#            self.aa[a].category_id = new_cat
 
     def optimize_profile(self, profile, below, above, cat_b, cat_a):
         cids = self.model.criteria.keys()
@@ -265,10 +200,10 @@ class MetaMRSortVetoProfiles4():
             r = random.uniform(0, 1)
 
             if r <= h[i]:
-                self.update_tables(profile.id, cid, perf_profile, i)
                 profile.performances[cid] = i
                 newveto = above - profile
                 self.model.veto[profile.id].performances = newveto.performances
+                self.update_tables(profile.id, cid, perf_profile, i)
 
             return profile
 
@@ -315,7 +250,7 @@ if __name__ == "__main__":
     from pymcda.types import AlternativeAssignment, AlternativesAssignments
 
     # Generate a random ELECTRE TRI BM model
-    random.seed(123)
+    random.seed(127890123456789)
     ncriteria = 5
     model = MRSort()
     model.criteria = generate_criteria(ncriteria)
@@ -327,7 +262,7 @@ if __name__ == "__main__":
     cat = generate_categories(2)
     model.categories_profiles = generate_categories_profiles(cat)
     model.lbda = 0.6
-    vb1 = AlternativePerformances('b1', {'c%d' % (i + 1): 0.1
+    vb1 = AlternativePerformances('b1', {'c%d' % (i + 1): random.uniform(0,0.4)
                                          for i in range(ncriteria)})
     model.veto = PerformanceTable([vb1])
     model.veto_weights = model.cv.copy()
@@ -347,8 +282,8 @@ if __name__ == "__main__":
     model.bpt.display(criterion_ids=cids)
     model.cv.display(criterion_ids=cids)
     print("lambda: %.7s" % model.lbda)
-    print("number of possible coalitions: %d" %
-          compute_number_of_winning_coalitions(model.cv, model.lbda))
+    model.vpt.display(criterion_ids=cids)
+    model.veto_weights.display(criterion_ids=cids)
 
     model2 = model.copy()
     vpt = generate_random_profiles(model.profiles, model.criteria, None, 3,
@@ -364,10 +299,10 @@ if __name__ == "__main__":
     t1 = time.time()
 
     i = 0
-    for i in range(0, 101):
+    for i in range(0, 100):
         f = meta.good / meta.na
         print('%d: fitness: %g' % (i, f))
-        model2.vpt.display(criterion_ids=cids)
+#        model2.vpt.display(criterion_ids=cids)
         if f == 1:
             break
 
@@ -410,4 +345,5 @@ if __name__ == "__main__":
     worst = pt.get_worst(model.criteria)
     best = pt.get_best(model.criteria)
     display_electre_tri_models([model, model2],
-                               [worst, worst], [best, best], [[vb1], [vb1]])
+                               [worst, worst], [best, best],
+                               [[vb1], [vb1]])
