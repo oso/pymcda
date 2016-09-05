@@ -23,6 +23,8 @@ from pymcda.utils import compute_confusion_matrix
 from test_utils import test_result, test_results
 from test_utils import save_to_xmcda
 
+DATADIR = os.getenv('DATADIR', '%s/pymcda-data' % os.path.expanduser('~'))
+
 def test_mip_mrsort_vc(seed, na, nc, ncat, na_gen, veto_param, pcerrors):
 
     # Generate a random ELECTRE TRI BM model
@@ -331,10 +333,10 @@ if __name__ == "__main__":
     options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
 
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    default_filename = "data/test_%s-%s.csv" % ("mip_mrsort_veto", dt)
+    default_filename = "%s/test_%s-%s.csv" % (DATADIR, "mip_mrsort_veto", dt)
     options.filename = read_csv_filename(options.filename, default_filename)
 
-    directory = "data/test_%s-%s" % ("mip_mrsort_veto", dt)
+    directory = "%s/test_%s-%s" % (DATADIR, "mip_mrsort_veto", dt)
     if not os.path.exists(directory):
         os.makedirs(directory)
 

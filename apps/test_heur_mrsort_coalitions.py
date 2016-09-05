@@ -10,6 +10,8 @@ from pymcda.generate import generate_criteria
 from pymcda.generate import generate_random_criteria_weights
 from test_utils import test_result, test_results
 
+DATADIR = os.getenv('DATADIR', '%s/pymcda-data' % os.path.expanduser('~'))
+
 def powerset(iterable):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
     s = list(iterable)
@@ -144,7 +146,7 @@ if __name__ == "__main__":
 
     while not options.filename:
         dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        default_filename = "data/test_etri_coalitions-%s.csv" % dt
+        default_filename = "%s/test_etri_coalitions-%s.csv" % (DATADIR, dt)
         options.filename = raw_input("File to save CSV data [%s] ? " \
                                      % default_filename)
         if not options.filename:

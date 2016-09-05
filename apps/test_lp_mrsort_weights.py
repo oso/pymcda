@@ -20,6 +20,8 @@ from pymcda.utils import add_errors_in_assignments
 from test_utils import test_result, test_results
 from test_utils import save_to_xmcda
 
+DATADIR = os.getenv('DATADIR', '%s/pymcda-data' % os.path.expanduser('~'))
+
 def test_lp_learning_weights(seed, na, nc, ncat, na_gen, pcerrors):
     # Generate an ELECTRE TRI model and assignment examples
     if random_model_type == 'default':
@@ -231,7 +233,7 @@ if __name__ == "__main__":
     options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
 
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    default_filename = "data/test_lp_mrsort_weights-%s.csv" % dt
+    default_filename = "%s/test_lp_mrsort_weights-%s.csv" % (DATADIR, dt)
     options.filename = read_csv_filename(options.filename, default_filename)
 
     directory = options.filename + "-data"

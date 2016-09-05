@@ -22,7 +22,8 @@ table_auc_test = []
 cmatrix_learning = {}
 cmatrix_test = {}
 
-directory='data/test-veto2'
+DATADIR = os.getenv('DATADIR', '%s/pymcda-data' % os.path.expanduser('~'))
+directory='%s/test-veto2' % (DATADIR)
 
 for f in sys.argv[1:]:
     fname = os.path.splitext(os.path.basename(f))[0]

@@ -21,6 +21,8 @@ from pymcda.generate import generate_random_profiles
 from pymcda.utils import add_errors_in_assignments
 from test_utils import test_result, test_results
 
+DATADIR = os.getenv('DATADIR', '%s/pymcda-data' % os.path.expanduser('~'))
+
 algo = None
 
 def test_meta_electre_tri_profiles(seed, na, nc, ncat, na_gen, pcerrors,
@@ -265,8 +267,8 @@ if __name__ == "__main__":
     options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
 
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    default_filename = "data/test_%s-%s.csv" \
-                       % (algo.__name__, dt)
+    default_filename = "%s/test_%s-%s.csv" \
+                       % (DATADIR, algo.__name__, dt)
     options.filename = read_csv_filename(options.filename, default_filename)
 
     run_tests(options.na, options.nc, options.ncat, options.na_gen,

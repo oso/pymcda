@@ -11,7 +11,7 @@ cw = generate_random_criteria_weights(c)
 
 cids = c.keys()
 
-f = open('data/random_1.txt', 'wb')
+f = open('random_1.txt', 'wb')
 
 for i in range(n):
     cw = generate_random_criteria_weights(c)
@@ -21,7 +21,7 @@ for i in range(n):
 
 f.close()
 
-f = open('data/random_2.txt', 'wb')
+f = open('random_2.txt', 'wb')
 
 for i in range(n):
     cw = generate_random_criteria_values(c)

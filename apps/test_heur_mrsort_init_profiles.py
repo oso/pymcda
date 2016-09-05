@@ -17,6 +17,8 @@ from pymcda.learning.heur_mrsort_coalitions import HeurMRSortCoalitions
 from pymcda.learning.lp_mrsort_weights import LpMRSortWeights
 from test_utils import test_result, test_results
 
+DATADIR = os.getenv('DATADIR', '%s/pymcda-data' % os.path.expanduser('~'))
+
 def test_heur_mrsort_init_profiles(seed, na, nc, ncat, pcerrors):
     # Generate an ELECTRE TRI model and assignment examples
     model = generate_random_mrsort_model(nc, ncat, seed)
@@ -169,7 +171,8 @@ if __name__ == "__main__":
 
     while not options.filename:
         dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        default_filename = "data/test_heur_mrsort_init_profiles-%s.csv" % dt
+        default_filename = "%s/test_heur_mrsort_init_profiles-%s.csv" \
+                            % (DATADIR, dt)
         options.filename = raw_input("File to save CSV data [%s] ? " \
                                      % default_filename)
         if not options.filename:

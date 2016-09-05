@@ -19,6 +19,8 @@ from pymcda.utils import compute_ca
 from pymcda.utils import add_errors_in_assignments_proba
 from test_utils import test_result, test_results
 
+DATADIR = os.getenv('DATADIR', '%s/pymcda-data' % os.path.expanduser('~'))
+
 def test_lp_avfsort(seed, na, nc, ncat, ns, na_gen, pcerrors):
     # Generate a random UTADIS model and assignment examples
     model = generate_random_avfsort_model(nc, ncat, ns, ns)
@@ -216,7 +218,7 @@ if __name__ == "__main__":
                                        "segments")
 
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    default_filename = "data/test_lp_avfsort-%s.csv" % dt
+    default_filename = "%s/test_lp_avfsort-%s.csv" % (DATADIR, dt)
     options.filename = read_csv_filename(options.filename, default_filename)
 
     run_tests(options.na, options.nc, options.ncat, options.ns,

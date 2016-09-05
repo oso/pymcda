@@ -28,6 +28,8 @@ from test_utils import test_result, test_results
 from test_utils import load_mcda_input_data
 from test_utils import save_to_xmcda
 
+DATADIR = os.getenv('DATADIR', '%s/pymcda-data' % os.path.expanduser('~'))
+
 meta_mrsort = MetaMRSortPop3
 heur_init_profiles = HeurMRSortInitProfiles
 lp_weights = LpMRSortWeights
@@ -246,8 +248,8 @@ if __name__ == "__main__":
     options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
 
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    default_filename = "data/test_meta_mrsort3-%s-%s.csv" \
-                       % (data.name, dt)
+    default_filename = "%s/test_meta_mrsort3-%s-%s.csv" \
+                       % (DATADIR, data.name, dt)
     options.filename = read_csv_filename(options.filename, default_filename)
 
     directory = options.filename + "-data"

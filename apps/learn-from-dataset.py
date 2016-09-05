@@ -26,6 +26,8 @@ from pymcda.utils import print_pt_and_assignments
 from test_utils import load_mcda_input_data
 from test_utils import save_to_xmcda
 
+DATADIR = os.getenv('DATADIR', '%s/pymcda-data' % os.path.expanduser('~'))
+
 def usage():
     print("%s file.csv meta_mrsort|meta_mrsortc|mip_mrsort|lp_utadis|lp_utadis_compat" % sys.argv[0])
     sys.exit(1)
@@ -105,7 +107,7 @@ data.pt.id = 'learning_set'
 data.aa.id = 'learning_set'
 
 dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-save_to_xmcda("data/%s-all-%s-%s.bz2" % (algo, data.name, dt),
+save_to_xmcda("%s/%s-all-%s-%s.bz2" % (DATADIR, algo, data.name, dt),
               data.aa, data.pt, model)
 
 aa2 = model.get_assignments(data.pt)

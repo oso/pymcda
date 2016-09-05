@@ -21,6 +21,8 @@ from pymcda.utils import add_errors_in_assignments_proba
 from test_utils import test_result, test_results
 from test_utils import save_to_xmcda
 
+DATADIR = os.getenv('DATADIR', '%s/pymcda-data' % os.path.expanduser('~'))
+
 def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
                                  max_oloops, nmodels, max_loops):
 
@@ -333,7 +335,7 @@ if __name__ == "__main__":
     options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
 
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    default_filename = "data/test_%s-%s.csv" % (algo.__name__, dt)
+    default_filename = "%s/test_%s-%s.csv" % (DATADIR, algo.__name__, dt)
     options.filename = read_csv_filename(options.filename, default_filename)
 
     directory = options.filename + "-data"
