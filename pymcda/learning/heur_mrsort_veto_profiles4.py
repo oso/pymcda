@@ -172,6 +172,10 @@ class MetaMRSortVetoProfiles4():
         self.build_concordance_table()
         self.build_assignments_table()
 
+    def rebuild_tables(self):
+        self.build_concordance_table()
+        self.build_assignments_table()
+
     def optimize_profile(self, profile, below, above, cat_b, cat_a):
         cids = self.model.criteria.keys()
         random.shuffle(cids)
