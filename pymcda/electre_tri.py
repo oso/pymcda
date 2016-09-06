@@ -3,6 +3,7 @@ import math
 from copy import deepcopy
 from itertools import product
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
+from pymcda.types import AlternativePerformances
 from pymcda.types import Criteria, CriteriaValues, PerformanceTable
 from pymcda.types import CategoriesProfiles
 from pymcda.types import McdaObject
@@ -388,6 +389,58 @@ class MRSort(ElectreTri):
                 n += 1
 
         return n
+
+    def get_profile_upper_limit(self, bid):
+        index = self.profiles.index(bid)
+        if index == (len(self.profiles) - 1):
+            return None
+
+        return self.bpt[self.profiles[index + 1]]
+
+    def get_profile_lower_limit(self, bid):
+        index = self.profiles.index(bid)
+        if self.vpt is None:
+            if index == 0:
+                return None
+            else:
+                return self.bpt[self.profiles[index - 1]]
+
+        if index == 0:
+            return self.vpt[bid]
+
+        bp = self.bpt[self.profiles[index - 1]]
+        vp = self.vpt[self.profiles[index]]
+
+        ap = AlternativePerformances(bid, {})
+        for crit in bp.performances.keys():
+            bperf = bp.performances[crit]
+            vperf = vp.performances[crit]
+            ap.performances[crit] = max(bperf, vperf)
+
+        return ap
+
+    def get_veto_profile_upper_limit(self, bid):
+        index = self.profiles.index(bid)
+        if index == (len(self.profiles) - 1):
+            return self.bpt[self.profiles[index]]
+
+        bp = self.bpt[bid]
+        vp = self.vpt[self.profiles[index + 1]]
+
+        ap = AlternativePerformances(bid, {})
+        for crit in bp.performances.keys():
+            bperf = bp.performances[crit]
+            vperf = vp.performances[crit]
+            ap.performances[crit] = min(bperf, vperf)
+
+        return ap
+
+    def get_veto_profile_lower_limit(self, bid):
+        index = self.profiles.index(bid)
+        if index == 0:
+            return None
+
+        return self.vpt[self.profiles[index - 1]]
 
     def to_xmcda(self):
         root = super(MRSort, self).to_xmcda()
