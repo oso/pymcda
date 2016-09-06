@@ -406,7 +406,7 @@ if __name__ == "__main__":
     print(cv)
     pt = generate_random_performance_table(alts, crits)
     print(pt)
-    bpt = generate_random_profiles(alts, crits)
+    bpt = generate_random_profiles(alts.keys(), crits)
     print(bpt)
     cats = generate_categories(3)
     print(cats)
