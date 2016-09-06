@@ -351,62 +351,23 @@ def generate_random_avfsort_model(ncrit, ncat, nseg_min, nseg_max,
 
     return AVFSort(c, cv, cfs, catv)
 
-def generate_random_veto_thresholds(worst, best, cps, crits, bpt,
-                                    veto_interval, k = 3):
-    profiles = cps.get_ordered_profiles()
-    ap_low = worst
+def generate_random_veto_profiles(worst, model, k = 3):
     vpt = PerformanceTable()
-    for profile in profiles:
-        vp = AlternativePerformances(profile)
-        ap = bpt[profile]
-        for c in crits:
-            low, high = ap_low.performances[c.id], ap.performances[c.id]
-            diff = abs(high - low)
-            r = random.uniform(0, diff * veto_interval)
-            vp.performances[c.id] = round(diff * (1 - veto_interval) + r,
-                                          k)
-
-        vpt.append(vp)
-        ap_low = ap - vp
-
-    return vpt
-
-def generate_random_veto_thresholds_abs(worst, best, cps, crits, bpt,
-                                        binf = 0, k = 3):
-    veto_thresholds = {c.id: random.uniform(binf, 1) for c in crits}
-    profiles = cps.get_ordered_profiles()
-    vpt = PerformanceTable()
-    for profile in profiles:
-        vp = AlternativePerformances(profile)
-        for c in crits:
-            vp.performances[c.id] = veto_thresholds[c.id]
-
-        vpt.append(vp)
-
-    return vpt
-
-def generate_random_veto_thresholds_prop(worst, best, cps, crits, bpt,
-                                         bsup = 1, k = 3):
-    veto_thresholds = {c.id: random.uniform(0, bsup) for c in crits}
-    profiles = cps.get_ordered_profiles()
-    vpt = PerformanceTable()
-    for profile in profiles:
-        ap = bpt[profile]
-        vp = AlternativePerformances(profile)
-        for c in crits:
-            p = ap.performances[c.id]
-            vp.performances[c.id] = p * (1 - veto_thresholds[c.id])
-
-        vpt.append(vp)
+    for bid in model.profiles:
+        ap = AlternativePerformances(bid, {})
+        for c in model.criteria:
+            a = model.bpt[bid].performances[c.id]
+            b = worst.performances[c.id]
+            ap.performances[c.id] = round(random.uniform(a, b), k)
+        vpt.append(ap)
+        worst = ap
 
     return vpt
 
 def generate_random_mrsort_model_with_binary_veto(ncrit, ncat, seed = None,
                                                   k = 3, worst = None,
                                                   best = None,
-                                                  random_direction = False,
-                                                  veto_func = VETO_ABS,
-                                                  veto_param = 1):
+                                                  random_direction = False):
     model = generate_random_mrsort_model(ncrit, ncat, seed, k, worst, best,
                                          random_direction)
     if worst is None:
@@ -414,19 +375,7 @@ def generate_random_mrsort_model_with_binary_veto(ncrit, ncat, seed = None,
     if best is None:
         best = generate_best_ap(model.criteria)
 
-    if veto_func == VETO_ABS:
-        model.veto = generate_random_veto_thresholds_abs(worst, best,
-                                                 model.categories_profiles,
-                                                 model.criteria, model.bpt,
-                                                 veto_param, k)
-    elif veto_func == VETO_PROP:
-        model.veto = generate_random_veto_thresholds_prop(worst, best,
-                                                 model.categories_profiles,
-                                                 model.criteria, model.bpt,
-                                                 veto_param, k)
-    else:
-        raise TypeError('invalid type of veto function')
-
+    model.vpt = generate_random_veto_profiles(worst, model)
     return model
 
 def generate_random_mrsort_model_with_coalition_veto(ncrit, ncat,
@@ -434,21 +383,17 @@ def generate_random_mrsort_model_with_coalition_veto(ncrit, ncat,
                                                      k = 3, worst = None,
                                                      best = None,
                                                      random_direction = False,
-                                                     veto_weights = False,
-                                                     veto_func = VETO_ABS,
-                                                     veto_param = 1):
+                                                     veto_weights = False):
     model = generate_random_mrsort_model_with_binary_veto(ncrit, ncat, seed,
                                                           k, worst, best,
-                                                          random_direction,
-                                                          veto_func,
-                                                          veto_param)
+                                                          random_direction)
     if veto_weights is True:
         model.veto_weights = generate_random_criteria_weights(model.criteria,
                                                               None, k)
+        model.veto_lbda = random.uniform(0, 1 - model.lbda)
     else:
         model.veto_weights = model.cv.copy()
-
-    model.veto_lbda = random.uniform(0, 1 - model.lbda)
+        model.veto_lbda = random.uniform(0, 1)
 
     return model
 
