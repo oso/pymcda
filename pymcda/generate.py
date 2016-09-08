@@ -351,7 +351,10 @@ def generate_random_avfsort_model(ncrit, ncat, nseg_min, nseg_max,
 
     return AVFSort(c, cv, cfs, catv)
 
-def generate_random_veto_profiles(worst, model, k = 3):
+def generate_random_veto_profiles(model, worst = None, k = 3):
+    if worst is None:
+        worst = generate_worst_ap(model.criteria)
+
     vpt = PerformanceTable()
     for bid in model.profiles:
         ap = AlternativePerformances(bid, {})
@@ -375,7 +378,7 @@ def generate_random_mrsort_model_with_binary_veto(ncrit, ncat, seed = None,
     if best is None:
         best = generate_best_ap(model.criteria)
 
-    model.vpt = generate_random_veto_profiles(worst, model)
+    model.vpt = generate_random_veto_profiles(model, worst = None)
     return model
 
 def generate_random_mrsort_model_with_coalition_veto(ncrit, ncat,
