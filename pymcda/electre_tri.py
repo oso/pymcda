@@ -346,27 +346,28 @@ class MRSort(ElectreTri):
         return sum([c.value for c in self.cv
                    if c.id_issubset(criteria_coalition) is True])
 
-    def veto_concordance(self, x, y, profile):
-        w = 0
-        for c in self.criteria:
-            diff = y.performances[c.id] - x.performances[c.id]
-            diff *= c.direction
-            v = self.get_threshold_by_profile(c, 'v', profile)
-            if v is not None and (eq(diff, v) or diff > v):
-                if self.veto_weights is None:
-                    return 1
-                else:
-                    w += self.veto_weights[c.id].value
+    def veto_concordance(self, ap, profile):
+        if self.bpt is None:
+            return 0
 
-        return w
+        criteria_set = self.criteria_coalition(profile, ap)
+        if self.veto_weights is None:
+            if len(criteria_set) > 0:
+                return 1
+            else:
+                return 0
+
+        return sum([c.value for c in self.veto_weights
+                    if c.id_issubset(criteria_set) is True])
 
     def credibility(self, x, y, profile):
         c = self.concordance(x, y)
 
-        if self.veto is None:
+        if self.vpt is None:
             return c
 
-        vc = self.veto_concordance(x, y, profile)
+        vp = self.vpt[profile]
+        vc = self.veto_concordance(x, vp)
         if self.veto_lbda and (eq(vc, self.veto_lbda)
                                or vc > self.veto_lbda):
             return 0
@@ -384,7 +385,7 @@ class MRSort(ElectreTri):
             if c < self.lbda:
                 continue
 
-            vc = self.veto_concordance(ap, self.bpt[profile], profile)
+            vc = self.veto_concordance(ap, self.bpt[profile])
             if self.veto_lbda and (eq(vc, self.veto_lbda)
                                    or vc > self.veto_lbda):
                 n += 1
