@@ -417,9 +417,10 @@ class MRSort(ElectreTri):
 
         ap = AlternativePerformances(bid, {})
         for crit in bp.performances.keys():
-            bperf = bp.performances[crit]
-            vperf = vp.performances[crit]
-            ap.performances[crit] = max(bperf, vperf)
+            direction = self.criteria[crit].direction
+            bperf = bp.performances[crit] * direction
+            vperf = vp.performances[crit] * direction
+            ap.performances[crit] = max(bperf, vperf) * direction
 
         return ap
 
@@ -433,9 +434,10 @@ class MRSort(ElectreTri):
 
         ap = AlternativePerformances(bid, {})
         for crit in bp.performances.keys():
-            bperf = bp.performances[crit]
-            vperf = vp.performances[crit]
-            ap.performances[crit] = min(bperf, vperf)
+            direction = self.criteria[crit].direction
+            bperf = bp.performances[crit] * direction
+            vperf = vp.performances[crit] * direction
+            ap.performances[crit] = min(bperf, vperf) * direction
 
         return ap
 
