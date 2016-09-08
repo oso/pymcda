@@ -306,6 +306,9 @@ class MRSort(ElectreTri):
 
     @property
     def veto(self):
+        if self.vpt is None:
+            return None
+
         veto = PerformanceTable()
         for bp in self.bpt:
             vbp = bp - self.vpt[bp.id]
