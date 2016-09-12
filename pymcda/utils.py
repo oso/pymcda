@@ -50,6 +50,7 @@ def print_pt_and_assignments(alternatives, cids, aas, pt):
 
     aaname, aalen = {}, {}
     for i, aa in enumerate(aas):
+        aid = aa.id
         aaname[i] = aid
         if aid is None:
             aaname[i] = "assign%d" % (i + 1)
