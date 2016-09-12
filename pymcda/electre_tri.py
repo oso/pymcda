@@ -360,6 +360,35 @@ class MRSort(ElectreTri):
         return sum([c.value for c in self.veto_weights
                     if c.id_issubset(criteria_set) is True])
 
+    def get_assignment(self, ap):
+        categories = list(reversed(self.categories))
+        cat = categories[0]
+        for i, profile in enumerate(reversed(self.profiles)):
+            bp = self.bpt[profile]
+            cw = self.concordance(ap, bp)
+            if cw >= self.lbda:
+                if self.vpt is None:
+                    break
+                else:
+                    vp = self.vpt[profile]
+                    vw = self.veto_concordance(ap, vp)
+                    if self.veto_lbda and vw < self.veto_lbda:
+                        break
+
+                    if vw == 0:
+                        break
+
+            cat = categories[i + 1]
+
+        return AlternativeAssignment(ap.id, cat)
+
+    def get_assignments(self, pt):
+        aa = AlternativesAssignments()
+        for ap in pt:
+            a = self.get_assignment(ap)
+            aa.append(a)
+        return aa
+
     def credibility(self, x, y, profile):
         c = self.concordance(x, y)
 
