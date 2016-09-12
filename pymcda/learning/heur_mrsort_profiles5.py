@@ -106,12 +106,12 @@ class MetaMRSortProfiles5():
             if aa_ori == cat_a and aa == cat_b:
                 if diff >= lbda:
                     # ++
-                    num += 2
+                    num += 3
                     total += 1
                     h_below[perfs[i]] = num / total
                 else:
                     # +
-                    num += 0.5
+                    num += 1.0
                     total += 1
                     h_below[perfs[i]] = num / total
             elif aa_ori == cat_b:
@@ -145,25 +145,19 @@ class MetaMRSortProfiles5():
         return key
 
     def get_alternative_assignment(self, aid):
-        profile = self.model.profiles[0]
-        for profile in reversed(self.model.profiles):
-            if self.ct[profile][aid] >= self.model.lbda \
-               or eq(self.ct[profile][aid], self.model.lbda):
-                return self.model.categories_profiles[profile].value.upper
-
-        return self.model.categories_profiles[profile].value.lower
+        ap = self.pt_sorted.pt[aid]
+        return self.model.get_assignment(ap).category_id
 
     def build_assignments_table(self):
         self.good = 0
-        self.aa = AlternativesAssignments()
-        for aa in self.aa_ori.values():
-            aid = aa.id
-            cat = self.get_alternative_assignment(aid)
-            self.aa.append(AlternativeAssignment(aid, cat))
-
-            cat_ori = aa.category_id
-            if cat == cat_ori:
+        self.aa = self.model.get_assignments(self.pt_sorted.pt)
+        for a in self.aa:
+            cat1 = a.category_id
+            cat2 = self.aa_ori[a.id].category_id
+            if cat1 == cat2:
                 self.good += 1
+
+        print("good: %d" % self.good)
 
     def build_concordance_table(self):
         self.ct = { bp.id: dict() for bp in self.model.bpt }
@@ -191,19 +185,11 @@ class MetaMRSortProfiles5():
     def update_tables(self, profile, cid, old, new):
         direction = self.model.criteria[cid].direction
         if old > new:
-            if direction == 1:
-                down, up = True, False
-            else:
-                down, up = False, True
             w = self.model.cv[cid].value * direction
         else:
-            if direction == 1:
-                down, up = False, True
-            else:
-                down, up = True, False
             w = -self.model.cv[cid].value * direction
 
-        alts, perfs = self.pt_sorted.get_middle(cid, old, new, up, down)
+        alts, perfs = self.pt_sorted.get_middle(cid, old, new, True, True)
 
         for a in alts:
             self.ct[profile][a] += w
@@ -248,8 +234,8 @@ class MetaMRSortProfiles5():
             r = random.uniform(0, 1)
 
             if r <= h[i]:
-                self.update_tables(profile.id, cid, perf_profile, i)
                 profile.performances[cid] = i
+                self.update_tables(profile.id, cid, perf_profile, i)
 
     def get_profile_limits(self, i):
         profiles = self.model.profiles
@@ -293,7 +279,7 @@ if __name__ == "__main__":
     # Generate a set of alternatives
     a = generate_alternatives(1000)
     pt = generate_random_performance_table(a, model.criteria)
-    aa = model.pessimist(pt)
+    aa = model.get_assignments(pt)
 
     worst = pt.get_worst(model.criteria)
     best = pt.get_best(model.criteria)
@@ -308,6 +294,14 @@ if __name__ == "__main__":
           compute_number_of_winning_coalitions(model.cv, model.lbda))
 
     model2 = model.copy()
+    model2.bpt['b1'].performances['c1'] = 0.880
+    model.bpt['b1'].performances['c2'] = 0.880
+    model.bpt['b1'].performances['c3'] = 0.880
+    model.bpt['b1'].performances['c4'] = 0.880
+    model2.bpt['b1'].performances['c5'] = 0.880
+    model.bpt['b1'].performances['c6'] = 0.880
+    model.bpt['b1'].performances['c7'] = 0.880
+    model2.bpt['b1'].performances['c8'] = 0.880
     model2.bpt = generate_random_profiles(model.profiles, model.criteria)
     print('Original random profiles')
     print('========================')
@@ -341,7 +335,7 @@ if __name__ == "__main__":
     model2.cv.display(criterion_ids = cids)
     print("lambda: %.7s" % model.lbda)
 
-    aa2 = model2.pessimist(pt)
+    aa2 = model2.get_assignments(pt)
     if aa2 != meta.aa:
         print('Error in classification accuracy computation!')
 
