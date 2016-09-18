@@ -168,8 +168,6 @@ class MetaMRSortVetoProfiles5():
             if cat1 == cat2:
                 self.good += 1
 
-        print("good: %d" % self.good)
-
     def build_concordance_table(self):
         self.ct = { bp.id: dict() for bp in self.model.bpt }
         for aid, bp in product(self.aa_ori.keys(), self.model.bpt):
