@@ -139,9 +139,9 @@ class MetaMRSortCV4():
 
         self.init_profiles()
 
-        self.lp = self.lp_weights(self.model, pt_sorted.pt, self.aa_ori)
+        self.lp = self.lp_weights(self.model, self.pt_sorted.pt, self.aa_ori)
         self.lp.solve()
-        self.meta = self.heur_profiles(self.model, pt_sorted, self.aa_ori)
+        self.meta = self.heur_profiles(self.model, self.pt_sorted, self.aa_ori)
 
     def init_profiles(self):
         bpt = generate_random_profiles(self.model.profiles,
@@ -179,10 +179,10 @@ class MetaMRSortCV4():
         else:
             best_vpt = self.model.vpt.copy()
 
-        self.vlp = self.lp_veto_weights(self.model, pt_sorted.pt, self.aa_ori)
+        self.vlp = self.lp_veto_weights(self.model, self.pt_sorted.pt, self.aa_ori)
         self.vlp.solve()
 
-        self.vmeta = self.heur_veto_profiles(self.model, pt_sorted,
+        self.vmeta = self.heur_veto_profiles(self.model, self.pt_sorted,
                                                  self.aa_ori)
 
 #        self.vlp.update_linear_program()
