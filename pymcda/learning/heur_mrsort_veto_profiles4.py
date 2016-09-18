@@ -163,7 +163,7 @@ class MetaMRSortVetoProfiles4():
 
     def build_concordance_table(self):
         self.ct = { bp.id: dict() for bp in self.model.vpt }
-        for aid, bp in product(self.aa_ori.keys(), self.model.bpt):
+        for aid, bp in product(self.aa_ori.keys(), self.model.vpt):
             ap = self.pt_sorted[aid]
             conc = 1 - self.model.concordance(ap, bp)
             self.ct[bp.id][aid] = conc
@@ -303,7 +303,7 @@ if __name__ == "__main__":
     t1 = time.time()
 
     i = 0
-    for i in range(0, 100):
+    for i in range(0, 1000):
         f = meta.good / meta.na
         print('%d: fitness: %g' % (i, f))
 #        model2.vpt.display(criterion_ids=cids)
@@ -350,4 +350,5 @@ if __name__ == "__main__":
     best = pt.get_best(model.criteria)
     display_electre_tri_models([model, model2],
                                [worst, worst], [best, best],
-                               [[vb1], [vb1]])
+                               [[ap for ap in model.vpt],
+                                [ap for ap in model2.vpt]])
