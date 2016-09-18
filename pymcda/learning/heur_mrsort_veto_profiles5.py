@@ -86,7 +86,7 @@ class MetaMRSortVetoProfiles5():
                  self.cat[aa_ori] > self.cat[cat_a]:
                 num += 0.1
                 total += 1
-                h_above[perfs[i] + delta] = num / total
+                h_above[perfs[i]] = num / total
 
         return h_above
 
@@ -105,6 +105,9 @@ class MetaMRSortVetoProfiles5():
 
         for i, a in enumerate(alts):
             if a not in self.aa_ori:
+                continue
+
+            if (perfs[i] - delta) * direction < perf_below * direction:
                 continue
 
             conc = ct[a]
@@ -135,7 +138,7 @@ class MetaMRSortVetoProfiles5():
                  self.cat[aa_ori] < self.cat[cat_b]:
                 num += 0.1
                 total += 1
-                h_below[perfs[i]] = num / total
+                h_below[perfs[i] - delta] = num / total
 
         return h_below
 
