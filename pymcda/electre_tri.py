@@ -390,7 +390,7 @@ class MRSort(ElectreTri):
         return aa
 
     def pessimist(self, pt):
-        return self.assignments(pt)
+        return self.get_assignments(pt)
 
     def credibility(self, x, y, profile):
         c = self.concordance(x, y)
