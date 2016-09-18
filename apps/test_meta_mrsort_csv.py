@@ -7,10 +7,14 @@ import time
 from collections import OrderedDict
 from itertools import product
 from pymcda.learning.meta_mrsort3 import MetaMRSortPop3, MetaMRSortPop3AUC
+from pymcda.learning.meta_mrsortvc4 import MetaMRSortVCPop4
 from pymcda.learning.heur_mrsort_init_profiles import HeurMRSortInitProfiles
 from pymcda.learning.lp_mrsort_weights import LpMRSortWeights
+from pymcda.learning.lp_mrsort_veto_weights import LpMRSortVetoWeights
 from pymcda.learning.lp_mrsort_weights_auc import LpMRSortWeightsAUC
 from pymcda.learning.heur_mrsort_profiles4 import MetaMRSortProfiles4
+from pymcda.learning.heur_mrsort_profiles5 import MetaMRSortProfiles5
+from pymcda.learning.heur_mrsort_veto_profiles5 import MetaMRSortVetoProfiles5
 from pymcda.learning.lp_mrsort_mobius import LpMRSortMobius
 from pymcda.learning.heur_mrsort_profiles_choquet import MetaMRSortProfilesChoquet
 from pymcda.types import CriterionValue, CriteriaValues
@@ -30,10 +34,12 @@ from test_utils import save_to_xmcda
 
 DATADIR = os.getenv('DATADIR', '%s/pymcda-data' % os.path.expanduser('~'))
 
-meta_mrsort = MetaMRSortPop3
+meta_mrsort = MetaMRSortVCPop4
 heur_init_profiles = HeurMRSortInitProfiles
 lp_weights = LpMRSortWeights
-heur_profiles = MetaMRSortProfiles4
+heur_profiles = MetaMRSortProfiles5
+lp_veto_weights = LpMRSortVetoWeights
+heur_veto_profiles = MetaMRSortVetoProfiles5
 
 def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
     random.seed(seed)
@@ -63,10 +69,11 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
     meta = meta_mrsort(nmodels, model.criteria,
                        model.categories_profiles.to_categories(),
                        pt_sorted, aa_learning,
-                       heur_init_profiles,
-                       lp_weights,
-                       heur_profiles,
-                       seed * 100)
+                       lp_weights = lp_weights,
+                       heur_profiles = heur_profiles,
+                       lp_veto_weights = lp_veto_weights,
+                       heur_veto_profiles = heur_veto_profiles,
+                       seed = seed * 100)
 
     for i in range(0, nloop):
         model, ca_learning = meta.optimize(nmeta)
