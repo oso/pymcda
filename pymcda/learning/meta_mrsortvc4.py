@@ -37,14 +37,15 @@ def queue_get_retry(queue):
 
 class MetaMRSortVCPop4():
 
-    def __init__(self, nmodels, model, pt_sorted, aa_ori,
+    def __init__(self, nmodels, criteria, categories, pt_sorted, aa_ori,
                  lp_weights = LpMRSortWeights,
                  heur_profiles = MetaMRSortProfiles5,
                  lp_veto_weights = LpMRSortVetoWeights,
                  heur_veto_profiles= MetaMRSortVetoProfiles5,
                  seed = 0):
         self.nmodels = nmodels
-        self.model = model
+        self.criteria = criteria
+        self.categories = categories
         self.pt_sorted = pt_sorted
         self.aa_ori = aa_ori
 
@@ -59,7 +60,8 @@ class MetaMRSortVCPop4():
             self.metas.append(meta)
 
     def init_one_meta(self, seed):
-        model = self.model.copy()
+        cps = generate_categories_profiles(self.categories)
+        model = MRSort(self.criteria, None, None, None, cps)
         model.id = 'model_%d' % seed
         meta = MetaMRSortCV4(model, self.pt_sorted, self.aa_ori,
                              self.lp_weights,
@@ -247,16 +249,10 @@ if __name__ == "__main__":
     ncategories = len(model.categories)
     pt_sorted = SortedPerformanceTable(pt)
 
-    model2 = model.copy()
-    model2.vpt = None
-    model2.veto_weights = None
-    model2.veto_lambda = None
-#    aa2 = model2.pessimist(pt)
-#    print(compute_ca(aa, aa2))
-
     t1 = time.time()
 
-    meta = MetaMRSortVCPop4(10, model2, pt_sorted, aa)
+    categories = model.categories_profiles.to_categories()
+    meta = MetaMRSortVCPop4(10, model.criteria, categories, pt_sorted, aa)
     for i in range(nloops):
         model2, ca = meta.optimize(nmeta)
         print("%d: ca: %f" % (i, ca))
