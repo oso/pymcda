@@ -7,19 +7,19 @@ verbose = False
 
 class LpMRSortVetoWeights():
 
-    def __init__(self, model, pt, aa_ori, delta=0.0001):
+    def __init__(self, model, pt, aa_ori, aa, delta=0.0001):
         self.model = model
         self.categories = model.categories_profiles.get_ordered_categories()
         self.profiles = model.categories_profiles.get_ordered_profiles()
         self.delta = delta
         self.cat_ranks = { c: i+1 for i, c in enumerate(self.categories) }
-        self.pt = { a.id: a.performances \
-                    for a in pt }
+        self.pt = { a.id: a.performances for a in pt }
         self.aa_ori = aa_ori
+        self.aa = aa
         self.update_linear_program()
 
     def update_linear_program(self):
-        self.compute_constraints(self.aa_ori, self.model.vpt)
+        self.compute_constraints(self.aa_ori, self.aa, self.model.vpt)
 
         solver = os.getenv('SOLVER', 'cplex')
         if solver == 'cplex':
@@ -40,19 +40,19 @@ class LpMRSortVetoWeights():
             raise NameError('Invalid solver selected')
 
 
-    def compute_constraints(self, aa, bpt):
-        aa = { a.id: self.cat_ranks[a.category_id] \
-               for a in aa }
-        bpt = { a.id: a.performances \
-                for a in bpt }
+    def compute_constraints(self, aa_ori, aa, bpt):
+        aa_ori = { a.id: self.cat_ranks[a.category_id] for a in aa_ori }
+        aa = { a.id: self.cat_ranks[a.category_id] for a in aa }
+        bpt = { a.id: a.performances for a in bpt }
 
         self.c_xi = dict()
         self.c_yi = dict()
         self.a_c_xi = dict()
         self.a_c_yi = dict()
-        for a_id in aa.keys():
+        for a_id in aa_ori.keys():
             ap = self.pt[a_id]
-            cat_rank = aa[a_id]
+            cat_rank = aa_ori[a_id]
+            cat_rank2 = aa[a_id]
 
             if cat_rank > 1:
                 lower_profile = self.profiles[cat_rank-2]
@@ -82,7 +82,7 @@ class LpMRSortVetoWeights():
                 else:
                     self.c_xi[dj] += 1
 
-            if cat_rank < len(self.categories):
+            if cat_rank < len(self.categories) and cat_rank < cat_rank2:
                 upper_profile = self.profiles[cat_rank-1]
                 bp = bpt[upper_profile]
 
@@ -205,6 +205,7 @@ if __name__ == "__main__":
     from pymcda.generate import generate_alternatives
     from pymcda.generate import generate_random_performance_table
     from pymcda.generate import generate_random_mrsort_model
+    from pymcda.generate import generate_random_mrsort_model_with_coalition_veto
     from pymcda.generate import generate_criteria
     from pymcda.generate import generate_categories
     from pymcda.generate import generate_categories_profiles
@@ -217,24 +218,7 @@ if __name__ == "__main__":
     from pymcda.electre_tri import MRSort
 
     # MR-Sort model
-    ncriteria = 5
-    model = MRSort()
-    model.criteria = generate_criteria(ncriteria)
-    model.cv = CriteriaValues([CriterionValue('c%d' % (i + 1), 0.2)
-                               for i in range(ncriteria)])
-    b1 = AlternativePerformances('b1', {'c%d' % (i + 1): 0.5
-                                        for i in range(ncriteria)})
-    model.bpt = PerformanceTable([b1])
-    cat = generate_categories(2)
-    model.categories_profiles = generate_categories_profiles(cat)
-    model.lbda = 0.6
-    vb1 = AlternativePerformances('b1', {'c%d' % (i + 1): 0.1
-                                         for i in range(ncriteria)})
-    model.veto = PerformanceTable([vb1])
-    model.veto_weights = model.cv.copy()
-    model.veto_lbda = 0.4
-
-    print(model.vpt)
+    model = generate_random_mrsort_model_with_coalition_veto(5, 3, 4)
 
     # Generate random alternatives
     a = generate_alternatives(15000)
@@ -266,12 +250,18 @@ if __name__ == "__main__":
     print("delta: %g" % delta)
     #print(aa)
 
+    vpt = model.vpt
     model2 = model.copy()
+    model2.vpt = None
     model2.veto_weights = None
-#    model2.veto = None
     model2.veto_lbda = None
+
+    aa2 = model2.pessimist(pt)
+
+    model2.vpt = vpt
+
     t1 = time.time()
-    lp_weights = LpMRSortVetoWeights(model2, pt_learn, aa_err, delta)
+    lp_weights = LpMRSortVetoWeights(model2, pt_learn, aa_err, aa2, delta)
     t2 = time.time()
     obj = lp_weights.solve()
     t3 = time.time()
