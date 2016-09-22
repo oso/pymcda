@@ -7,18 +7,18 @@ verbose = False
 
 class LpMRSortVetoWeights():
 
-    def __init__(self, model, pt, aa_ori, aa, delta=0.0001):
+    def __init__(self, model, pt, aa_ori, delta=0.0001):
         self.model = model
         self.categories = model.categories_profiles.get_ordered_categories()
         self.profiles = model.categories_profiles.get_ordered_profiles()
         self.delta = delta
         self.cat_ranks = { c: i+1 for i, c in enumerate(self.categories) }
-        self.pt = { a.id: a.performances for a in pt }
+        self.pt = pt
         self.aa_ori = aa_ori
-        self.aa = aa
         self.update_linear_program()
 
     def update_linear_program(self):
+        self.compute_assignment_without_veto()
         self.compute_constraints(self.aa_ori, self.aa, self.model.vpt)
 
         solver = os.getenv('SOLVER', 'cplex')
@@ -39,6 +39,10 @@ class LpMRSortVetoWeights():
         else:
             raise NameError('Invalid solver selected')
 
+    def compute_assignment_without_veto(self):
+        model = self.model.copy()
+        model.veto = None
+        self.aa = model.get_assignments(self.pt)
 
     def compute_constraints(self, aa_ori, aa, bpt):
         aa_ori = { a.id: self.cat_ranks[a.category_id] for a in aa_ori }
@@ -50,7 +54,7 @@ class LpMRSortVetoWeights():
         self.a_c_xi = dict()
         self.a_c_yi = dict()
         for a_id in aa_ori.keys():
-            ap = self.pt[a_id]
+            ap = self.pt[a_id].performances
             cat_rank = aa_ori[a_id]
             cat_rank2 = aa[a_id]
 
@@ -261,7 +265,7 @@ if __name__ == "__main__":
     model2.vpt = vpt
 
     t1 = time.time()
-    lp_weights = LpMRSortVetoWeights(model2, pt_learn, aa_err, aa2, delta)
+    lp_weights = LpMRSortVetoWeights(model2, pt_learn, aa_err, delta)
     t2 = time.time()
     obj = lp_weights.solve()
     t3 = time.time()
