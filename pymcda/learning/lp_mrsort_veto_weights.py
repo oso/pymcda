@@ -58,7 +58,7 @@ class LpMRSortVetoWeights():
             cat_rank = aa_ori[a_id]
             cat_rank2 = aa[a_id]
 
-            if cat_rank > 1:
+            if cat_rank > 1 and cat_rank2 >= cat_rank:
                 lower_profile = self.profiles[cat_rank-2]
                 bp = bpt[lower_profile]
 
