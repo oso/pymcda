@@ -448,7 +448,7 @@ class dataset(object):
 
 def load_mcda_data(csvfile, obj, *field):
     csvfile.seek(0)
-    csvreader = csv.reader(csvfile, delimiter = ";")
+    csvreader = csv.reader(csvfile, delimiter = ",")
     try:
         obj = obj(OrderedDict({})).from_csv(csvreader, *field)
     except:
@@ -460,7 +460,7 @@ def load_mcda_data(csvfile, obj, *field):
 def load_mcda_input_data(filepath):
     try:
         csvfile = open(filepath, 'rb')
-        csvreader = csv.reader(csvfile, delimiter = ";")
+        csvreader = csv.reader(csvfile, delimiter = ",")
     except:
         print("Cannot open file '%s'" % filepath)
         return None
