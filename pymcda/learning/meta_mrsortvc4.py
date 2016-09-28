@@ -213,6 +213,7 @@ if __name__ == "__main__":
     from pymcda.generate import generate_random_criteria_weights
     from pymcda.generate import generate_random_mrsort_model_with_coalition_veto
     from pymcda.utils import compute_winning_and_loosing_coalitions
+    from pymcda.utils import compute_confusion_matrix, print_confusion_matrix
     from pymcda.types import AlternativePerformances
     from pymcda.ui.graphic import display_electre_tri_models
 
@@ -285,6 +286,9 @@ if __name__ == "__main__":
 
     print("Good assignments: %g %%" % (float(total-nok)/total*100))
     print("Bad assignments : %g %%" % (float(nok)/total*100))
+
+    matrix = compute_confusion_matrix(aa, aa_learned, model.categories)
+    print_confusion_matrix(matrix, model.categories)
 
     model.id = "original"
     model2.id = "learned"
