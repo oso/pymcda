@@ -100,7 +100,7 @@ if aa_learning_m1 is not None:
     print("AUC: %g\n" % auc_learning)
     matrix = compute_confusion_matrix(aa_learning_m1, aa_learning_m2,
                                       m2.categories)
-    print_confusion_matrix(matrix)
+    print_confusion_matrix(matrix, m2.categories)
 
 if aa_test_m1 is not None and len(aa_test_m1) > 0:
     ca_test = compute_ca(aa_test_m1, aa_test_m2)
@@ -111,4 +111,4 @@ if aa_test_m1 is not None and len(aa_test_m1) > 0:
     print("CA : %g" % ca_test)
     print("AUC: %g\n" % auc_test)
     matrix = compute_confusion_matrix(aa_test_m1, aa_test_m2, m2.categories)
-    print_confusion_matrix(matrix)
+    print_confusion_matrix(matrix, m2.categories)
