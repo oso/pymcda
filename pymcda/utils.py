@@ -229,6 +229,10 @@ def print_confusion_matrix(matrix, categories = None):
     else:
         list_categories = ["%s" % cat for cat in categories]
 
+    for cat, cat2 in product(list_categories, list_categories):
+        if (cat, cat2) not in matrix:
+            matrix[(cat, cat2)] = 0
+
     len_cols = {cat: max([len(cat)] + [len(str(matrix[cat, cat2])) \
                           for cat2 in list_categories]) \
                 for cat in list_categories}
