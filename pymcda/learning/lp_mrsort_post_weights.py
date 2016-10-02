@@ -12,7 +12,7 @@ verbose = False
 
 class LpMRSortPostWeights(object):
 
-    def __init__(self, cvs, lbda, wsum):
+    def __init__(self, cvs, lbda, wsum = 100):
         self.cvs = cvs
         self.lbda = lbda
         self.epsilon = 1
