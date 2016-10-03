@@ -12,7 +12,7 @@ from pymcda.electre_tri import MRSort
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
 from pymcda.types import PerformanceTable
 from pymcda.learning.heur_mrsort_init_veto_profiles import HeurMRSortInitVetoProfiles
-from pymcda.learning.lp_mrsort_weights import LpMRSortWeights
+from pymcda.learning.lp_mrsort_weights import LpMRSortWeightsPositive
 from pymcda.learning.lp_mrsort_veto_weights import LpMRSortVetoWeights
 from pymcda.learning.heur_mrsort_profiles5 import MetaMRSortProfiles5
 from pymcda.learning.heur_mrsort_veto_profiles5 import MetaMRSortVetoProfiles5
@@ -38,7 +38,7 @@ def queue_get_retry(queue):
 class MetaMRSortVCPop4():
 
     def __init__(self, nmodels, criteria, categories, pt_sorted, aa_ori,
-                 lp_weights = LpMRSortWeights,
+                 lp_weights = LpMRSortWeightsPositive,
                  heur_profiles = MetaMRSortProfiles5,
                  lp_veto_weights = LpMRSortVetoWeights,
                  heur_veto_profiles= MetaMRSortVetoProfiles5,
