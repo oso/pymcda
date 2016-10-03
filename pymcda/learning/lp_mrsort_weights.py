@@ -5,7 +5,7 @@ from pymcda.types import CriterionValue, CriteriaValues
 
 verbose = False
 
-class LpMRSortWeights():
+class LpMRSortWeights(object):
 
     def __init__(self, model, pt, aa_ori, delta=0.0001):
         self.model = model
@@ -186,7 +186,7 @@ class LpMRSortWeights():
     def add_objective_cplex(self):
         self.lp.objective.set_sense(self.lp.objective.sense.minimize)
         for dj, coef in self.c_xi.iteritems():
-            self.lp.objective.set_linear('xp'+dj, coef * 10)
+            self.lp.objective.set_linear('xp'+dj, coef)
         for dj, coef in self.c_yi.iteritems():
             self.lp.objective.set_linear('yp'+dj, coef)
 
@@ -345,6 +345,27 @@ class LpMRSortWeights():
 
     def solve(self):
         return self.solve_function()
+
+class LpMRSortWeightsPositive(LpMRSortWeights):
+
+    def add_objective_cplex(self):
+        self.lp.objective.set_sense(self.lp.objective.sense.minimize)
+        for dj, coef in self.c_xi.iteritems():
+            self.lp.objective.set_linear('xp'+dj, coef * 10)
+        for dj, coef in self.c_yi.iteritems():
+            self.lp.objective.set_linear('yp'+dj, coef)
+
+    def add_objective_scip(self):
+        self.obj = sum([self.xp[dj]*coef * 10 \
+                       for dj, coef in self.c_xi.items()]) \
+                   + sum([self.yp[dj]*coef \
+                         for dj, coef in self.c_yi.items()])
+
+    def add_objective_glpk(self):
+        self.lp.min(sum([k*self.xp[i] * 10
+                         for i, k in enumerate(self.c_xi.values())])
+                    + sum([k*self.yp[i]
+                          for i, k in enumerate(self.c_yi.values())]))
 
 if __name__ == "__main__":
     import time
