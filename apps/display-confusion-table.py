@@ -12,6 +12,7 @@ from pymcda.types import AlternativesAssignments
 from pymcda.utils import compute_ca
 from pymcda.utils import compute_confusion_matrix
 from pymcda.utils import print_confusion_matrix
+from pymcda.utils import print_pt_and_assignments
 from test_utils import is_bz2_file
 
 f = sys.argv[1]
@@ -97,10 +98,16 @@ if aa_learning_m1 is not None:
     print("Learning set")
     print("============")
     print("CA : %g" % ca_learning)
-    print("AUC: %g\n" % auc_learning)
+    print("AUC: %g" % auc_learning)
+    print("Confusion table:")
     matrix = compute_confusion_matrix(aa_learning_m1, aa_learning_m2,
                                       m2.categories)
     print_confusion_matrix(matrix, m2.categories)
+    print("List of alternatives wrongly assigned:")
+    aids = [a.id for a in aa_learning_m1 \
+            if aa_learning_m1[a.id].category_id != aa_learning_m2[a.id].category_id]
+    print_pt_and_assignments(aids, None, [aa_learning_m1, aa_learning_m2],
+                             pt_learning)
 
 if aa_test_m1 is not None and len(aa_test_m1) > 0:
     ca_test = compute_ca(aa_test_m1, aa_test_m2)
@@ -109,6 +116,12 @@ if aa_test_m1 is not None and len(aa_test_m1) > 0:
     print("\n\nTest set")
     print("========")
     print("CA : %g" % ca_test)
-    print("AUC: %g\n" % auc_test)
+    print("AUC: %g" % auc_test)
+    print("Confusion table:")
     matrix = compute_confusion_matrix(aa_test_m1, aa_test_m2, m2.categories)
     print_confusion_matrix(matrix, m2.categories)
+    print("List of alternatives wrongly assigned:")
+    aids = [a.id for a in aa_test_m1 \
+            if aa_test_m1[a.id].category_id != aa_test_m2[a.id].category_id]
+    print_pt_and_assignments(aids, None, [aa_test_m1, aa_test_m2],
+                             pt_test)
