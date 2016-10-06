@@ -280,13 +280,13 @@ def generate_random_categories_values(cats, k = 3):
 
     return catvs
 
-def generate_worst_ap(crits):
-    return AlternativePerformances("worst", {c.id: 0
+def generate_worst_ap(crits, value = 0):
+    return AlternativePerformances("worst", {c.id: value
                                              if c.direction == 1 else 1
                                              for c in crits})
 
-def generate_best_ap(crits):
-    return AlternativePerformances("best", {c.id: 1
+def generate_best_ap(crits, value = 1):
+    return AlternativePerformances("best", {c.id: value
                                              if c.direction == 1 else 0
                                              for c in crits})
 
@@ -396,7 +396,22 @@ def generate_random_mrsort_model_with_coalition_veto(ncrit, ncat,
         model.veto_lbda = random.uniform(0, 1 - model.lbda)
     else:
         model.veto_weights = model.cv.copy()
-        model.veto_lbda = random.uniform(0, 1)
+        model.veto_lbda = random.uniform(0, 0.5)
+
+    return model
+
+def generate_random_mrsort_model_with_coalition_veto2(ncrit, ncat,
+                                                      seed = None, k = 3):
+
+    criteria = generate_criteria(ncrit)
+    worst = generate_worst_ap(criteria, 0.3)
+    best = generate_best_ap(criteria, 0.7)
+    model = generate_random_mrsort_model(ncrit, ncat, seed, k, worst, best)
+    model.lbda = random.uniform(0.4, 0.7)
+    model.vpt = model.bpt.copy() / 2
+    model.veto_weights = generate_random_criteria_weights(model.criteria,
+                                                          None, k)
+    model.veto_lbda = random.uniform(0, 1 - model.lbda)
 
     return model
 
@@ -428,4 +443,6 @@ if __name__ == "__main__":
     model = generate_random_mrsort_model_with_binary_veto(10, 3)
     print(model)
     model = generate_random_mrsort_model_with_coalition_veto(10, 3)
+    print(model)
+    model = generate_random_mrsort_model_with_coalition_veto2(10, 3)
     print(model)
