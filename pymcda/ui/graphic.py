@@ -7,7 +7,8 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 def display_electre_tri_models(etri, worst = list(), best = list(),
-                               aps = list()):
+                               aps = list(), aps2 = list(), aps3 = list(),
+                               aps4 = list()):
     app = QtGui.QApplication(sys.argv)
 
     sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,
@@ -21,7 +22,7 @@ def display_electre_tri_models(etri, worst = list(), best = list(),
     ncol = len(etri) / 2
     i = j = 0
     views = {}
-    for m in etri:
+    for n, m in enumerate(etri):
         view = _MyGraphicsview()
         view.setRenderHint(QtGui.QPainter.Antialiasing)
         view.setSizePolicy(sizePolicy)
@@ -32,7 +33,7 @@ def display_electre_tri_models(etri, worst = list(), best = list(),
         else:
             j += 1
 
-        views[m] = view
+        views[n] = view
         layout.addWidget(view, i, j, 1, 1)
 
     dialog = QtGui.QDialog()
@@ -40,12 +41,31 @@ def display_electre_tri_models(etri, worst = list(), best = list(),
     dialog.resize(1024, 768)
 
     for i, m in enumerate(etri):
-        graph = QGraphicsSceneEtri(m, worst[i], best[i], views[m].size(),
-                                   parent = views[m])
-        views[m].setScene(graph)
+        graph = QGraphicsSceneEtri(m, worst[i], best[i], views[i].size(),
+                                   parent = views[i])
         if aps and aps[i]:
             for ap in aps[i]:
-                graph.plot_alternative_performances(ap)
+                graph.plot_alternative_performances(ap, False,
+                                                    QtGui.QColor("blue"))
+
+        if aps2 and aps2[i]:
+            for ap in aps2[i]:
+                graph.plot_alternative_performances(ap, False,
+                                                    QtGui.QColor("red"),
+                                                    False)
+
+        if aps3 and aps3[i]:
+            for ap in aps3[i]:
+                graph.plot_alternative_performances(ap, False,
+                                                    QtGui.QColor("yellow"),
+                                                    False)
+        if aps4 and aps4[i]:
+            for ap in aps4[i]:
+                graph.plot_alternative_performances(ap, False,
+                                                    QtGui.QColor("orange"),
+                                                    False)
+
+        views[i].setScene(graph)
 
     dialog.show()
     app.exec_()
@@ -80,7 +100,7 @@ class QGraphicsSceneEtri(QtGui.QGraphicsScene):
 
     def update(self, size):
         self.size = size
-        self.axis_height = self.size.height() - 60
+        self.axis_height = self.size.height() - 80
         self.ymax = -self.axis_height + 25 / 2
         self.ymin = -25 / 2
 
@@ -140,10 +160,11 @@ class QGraphicsSceneEtri(QtGui.QGraphicsScene):
             self.addItem(axis)
             self.axis_items[id] = axis
 
-            if criterion.name:
-                txt = "%s\n(%g)" % (criterion.name, self.model.cv[id].value)
+            if self.model.veto_weights is None:
+                txt = "%s<br>(%g)" % (criterion.id, self.model.cv[id].value)
             else:
-                txt = "%s (%g)" % (criterion.id, self.model.cv[id].value)
+                txt = "%s<br>(%g)<br>(%g)" % (criterion.id, self.model.cv[id].value,
+                                   self.model.veto_weights[id].value)
 
             text = QtGui.QGraphicsTextItem()
             text.setHtml("<div align=\"center\">%s</div>" % txt)
@@ -183,8 +204,10 @@ class QGraphicsSceneEtri(QtGui.QGraphicsScene):
 
         return item
 
-    def __create_profile(self, ap, print_values = False,
-                         color = QtGui.QColor("red")):
+    def __create_profile(self, ap, print_values,
+                         color = QtGui.QColor("red"),
+                         link = True,
+                         points = False):
         item = QtGui.QGraphicsPathItem()
 
         pen = QtGui.QPen()
@@ -202,7 +225,12 @@ class QGraphicsSceneEtri(QtGui.QGraphicsScene):
                 path.moveTo(0, y)
             else:
                 x += self.hspacing
-                path.lineTo(x, y)
+                if link is True:
+                    path.lineTo(x, y)
+
+            if points is True:
+                it = self.addEllipse(x - 3, y - 3, 6, 6, pen, pen.brush())
+                it.setZValue(2)
 
             if print_values is True:
                 txt = "%g" % ap.performances[cid]
@@ -228,7 +256,7 @@ class QGraphicsSceneEtri(QtGui.QGraphicsScene):
                 self.addItem(txtitem)
 
         for profile in [self.worst, self.best]:
-            item, text_items = self.__create_profile(profile)
+            item, text_items = self.__create_profile(profile, False)
             self.addItem(item)
             self.profiles_items[profile.id] = item
             self.profiles_text_items[profile.id] = text_items
@@ -297,8 +325,8 @@ class QGraphicsSceneEtri(QtGui.QGraphicsScene):
         self.__higlight_intersections()
 
     def __plot_alternatives(self):
-        for ap, item in self.ap_items.items():
-            item, text_items = self.__create_profile(ap)
+        for ap, (item, print_values, color, link) in self.ap_items.items():
+            item, text_items = self.__create_profile(ap, print_values, color, link, True)
             self.addItem(item)
 
     def __update_category(self, i, cat, ap_below, ap_above):
@@ -370,11 +398,15 @@ class QGraphicsSceneEtri(QtGui.QGraphicsScene):
         for profile in self.profiles_items.keys():
             self.update_profile(profile)
 
-    def plot_alternative_performances(self, ap):
-        item, text_items = self.__create_profile(ap)
+    def plot_alternative_performances(self, ap,
+                                      print_values = False,
+                                      color = QtGui.QColor("red"),
+                                      link = True):
+        item, text_items = self.__create_profile(ap, print_values, color,
+                                                 link, True)
         self.addItem(item)
 
-        self.ap_items[ap] = item
+        self.ap_items[ap] = (item, print_values, color, link)
 
 if __name__ == "__main__":
     import random
@@ -388,7 +420,7 @@ if __name__ == "__main__":
     from pymcda.electre_tri import ElectreTri
     from pymcda.types import AlternativePerformances
 
-    a = generate_alternatives(1)
+    a = generate_alternatives(2)
     c = generate_criteria(5)
     cv = generate_random_criteria_values(c, 1234)
     cv.normalize_sum_to_unity()
@@ -423,6 +455,7 @@ if __name__ == "__main__":
 
     view.setScene(graph)
     view.show()
-    graph.plot_alternative_performances(pt['a1'])
+    graph.plot_alternative_performances(pt['a1'], False, QtGui.QColor("red"))
+    graph.plot_alternative_performances(pt['a2'], False, QtGui.QColor("blue"))
 
     app.exec_()
