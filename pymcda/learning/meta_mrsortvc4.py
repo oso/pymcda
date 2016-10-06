@@ -135,13 +135,13 @@ class MetaMRSortCV4():
         self.lp_veto_weights = lp_veto_weights
         self.heur_veto_profiles = heur_veto_profiles
 
-        self.ca = 0
-
         self.init_profiles()
 
         self.lp = self.lp_weights(self.model, self.pt_sorted.pt, self.aa_ori)
         self.lp.solve()
         self.meta = self.heur_profiles(self.model, self.pt_sorted, self.aa_ori)
+
+        self.ca = self.meta.good / self.meta.na
 
     def init_profiles(self):
         bpt = generate_random_profiles(self.model.profiles,

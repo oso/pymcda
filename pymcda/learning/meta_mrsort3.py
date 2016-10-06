@@ -140,8 +140,6 @@ class MetaMRSort3():
         self.lp_weights = lp_weights
         self.heur_profiles = heur_profiles
 
-        self.ca = 0
-
         self.init_profiles()
         self.lp = self.lp_weights(self.model, pt_sorted.pt, self.aa_ori)
 
@@ -149,6 +147,8 @@ class MetaMRSort3():
         self.lp.solve()
 
         self.meta = self.heur_profiles(self.model, pt_sorted, self.aa_ori)
+
+        self.ca = self.meta.good / self.meta.na
 
     def init_profiles(self):
         cats = self.model.categories_profiles.to_categories()
