@@ -162,7 +162,7 @@ class MetaMRSort3():
         self.meta.rebuild_tables()
 #        ca = self.meta.good / self.meta.na
         aa2 = self.model.pessimist(self.pt_sorted.pt)
-        ca = compute_ca_prime(self.model.categories, self.aa_ori, aa2)
+        ca = compute_ca(self.model.categories, self.aa_ori, aa2)
 
         best_bpt = self.model.bpt.copy()
         best_ca = ca
@@ -170,7 +170,7 @@ class MetaMRSort3():
         for i in range(nmeta):
             cah = self.meta.optimize()
             aa2 = self.model.pessimist(self.pt_sorted.pt)
-            ca = compute_ca_prime(self.model.categories, self.aa_ori, aa2)
+            ca = compute_ca(self.model.categories, self.aa_ori, aa2)
             if ca > best_ca:
                 best_ca = ca
                 best_bpt = self.model.bpt.copy()
