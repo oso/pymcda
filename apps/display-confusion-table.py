@@ -105,11 +105,12 @@ if aa_learning_m1 is not None:
     matrix = compute_confusion_matrix(aa_learning_m1, aa_learning_m2,
                                       m2.categories)
     print_confusion_matrix(matrix, m2.categories)
-    print("List of alternatives wrongly assigned:")
     aids = [a.id for a in aa_learning_m1 \
             if aa_learning_m1[a.id].category_id != aa_learning_m2[a.id].category_id]
-    print_pt_and_assignments(aids, None, [aa_learning_m1, aa_learning_m2],
-                             pt_learning)
+    if len(aids) > 0:
+        print("List of alternatives wrongly assigned:")
+        print_pt_and_assignments(aids, None, [aa_learning_m1, aa_learning_m2],
+                                 pt_learning)
 
 if aa_test_m1 is not None and len(aa_test_m1) > 0:
     ca_test = compute_ca(aa_test_m1, aa_test_m2)
@@ -122,11 +123,12 @@ if aa_test_m1 is not None and len(aa_test_m1) > 0:
     print("Confusion table:")
     matrix = compute_confusion_matrix(aa_test_m1, aa_test_m2, m2.categories)
     print_confusion_matrix(matrix, m2.categories)
-    print("List of alternatives wrongly assigned:")
     aids = [a.id for a in aa_test_m1 \
             if aa_test_m1[a.id].category_id != aa_test_m2[a.id].category_id]
-    print_pt_and_assignments(aids, None, [aa_test_m1, aa_test_m2],
-                             pt_test)
+    if len(aids) > 0:
+        print("List of alternatives wrongly assigned:")
+        print_pt_and_assignments(aids, None, [aa_test_m1, aa_test_m2],
+                                 pt_test)
 
 if type(m2) == MRSort:
     worst = AlternativePerformances('worst', {c.id: 0 for c in m2.criteria})
