@@ -9,10 +9,12 @@ from pymcda.electre_tri import MRSort
 from pymcda.uta import AVFSort
 from pymcda.types import PerformanceTable
 from pymcda.types import AlternativesAssignments
+from pymcda.types import AlternativePerformances
 from pymcda.utils import compute_ca
 from pymcda.utils import compute_confusion_matrix
 from pymcda.utils import print_confusion_matrix
 from pymcda.utils import print_pt_and_assignments
+from pymcda.ui.graphic import display_electre_tri_models
 from test_utils import is_bz2_file
 
 f = sys.argv[1]
@@ -125,3 +127,43 @@ if aa_test_m1 is not None and len(aa_test_m1) > 0:
             if aa_test_m1[a.id].category_id != aa_test_m2[a.id].category_id]
     print_pt_and_assignments(aids, None, [aa_test_m1, aa_test_m2],
                              pt_test)
+
+if type(m2) == MRSort:
+    worst = AlternativePerformances('worst', {c.id: 0 for c in m2.criteria})
+    best = AlternativePerformances('best', {c.id: 1 for c in m2.criteria})
+
+    categories = m2.categories
+
+    a_learning = aa_learning_m1.keys()
+    pt_learning_ok = []
+    pt_learning_too_low = []
+    pt_learning_too_high = []
+    for a in a_learning:
+        i1 = categories.index(aa_learning_m1[a].category_id)
+        i2 = categories.index(aa_learning_m2[a].category_id)
+        if i1 == i2:
+            pt_learning_ok.append(pt_learning[a])
+        elif i1 < i2:
+            pt_learning_too_high.append(pt_learning[a])
+        elif i1 > i2:
+            pt_learning_too_low.append(pt_learning[a])
+
+    a_test = aa_test_m1.keys()
+    pt_test_ok = []
+    pt_test_too_low = []
+    pt_test_too_high = []
+    for a in a_test:
+        i1 = categories.index(aa_test_m1[a].category_id)
+        i2 = categories.index(aa_test_m2[a].category_id)
+        if i1 == i2:
+            pt_test_ok.append(pt_test[a])
+        elif i1 < i2:
+            pt_test_too_high.append(pt_test[a])
+        elif i1 > i2:
+            pt_test_too_low.append(pt_test[a])
+
+    display_electre_tri_models([m2, m2], [worst, worst], [best, best],
+                               [m2.vpt, m2.vpt],
+                               [pt_learning_too_low, pt_test_too_low],
+                               None,
+                               [pt_learning_too_high, pt_test_too_high])
