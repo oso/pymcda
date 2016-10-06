@@ -68,54 +68,6 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
 
     t_total = time.time() - t1
 
-#    # Initialize nmodels meta instances
-#    ncriteria = len(model.criteria)
-#    ncategories = len(model.categories)
-#    pt_sorted = SortedPerformanceTable(pt)
-#    model_metas = {}
-#    model_cas = {}
-#    for i in range(nmodels):
-#        m = generate_random_mrsort_model(ncriteria, ncategories)
-#        meta = algo(m, pt_sorted, aa_err)
-#        model_metas[m] = meta
-#        model_cas[meta.model] = meta.meta.good / meta.meta.na
-#
-#    model_cas = sorted(model_cas.iteritems(),
-#                       key = lambda (k,v): (v,k),
-#                       reverse = True)
-#    t1 = time.time()
-#
-#    # Perform at max oloops on the set of metas
-#    ca2_iter = [model_cas[0][1]] + [1] * (max_loops)
-#    nloops = 0
-#    for i in range(0, max_loops):
-#        model_cas = {}
-#        for m, meta in model_metas.items():
-#            model_cas[m] = meta.optimize(max_oloops)
-#            if model_cas[m] == 1:
-#                break
-#
-#        model_cas = sorted(model_cas.iteritems(),
-#                           key = lambda (k,v): (v,k),
-#                           reverse = True)
-#
-#        nloops += 1
-#        ca2_best = model_cas[0][1]
-#
-#        ca2_iter[i + 1] = ca2_best
-#
-#        if ca2_best == 1:
-#            break
-#
-#        for model_ca in model_cas[int((nmodels + 1) / 2):]:
-#            m = model_ca[0]
-#            model_metas[m].init_profiles()
-#
-#    t_total = time.time() - t1
-#
-#    model2 = model_cas[0][0]
-
-    # Determine the number of erroned alternatives badly assigned
     aa2 = model2.pessimist(pt)
 
     ok_errors = ok2_errors = ok = 0
