@@ -85,8 +85,10 @@ stdev_auc_learning = np.std(np.array(table_auc_learning), axis=0)
 stdev_auc_test = np.std(np.array(table_auc_test), axis=0)
 
 nfiles = len(sys.argv) - 1
-cmatrix_learning.update((x, y / nfiles) for x, y in cmatrix_learning.items())
-cmatrix_test.update((x, y / nfiles) for x, y in cmatrix_test.items())
+cmatrix_learning.update((x, round(y / float(nfiles), 2))
+                        for x, y in cmatrix_learning.items())
+cmatrix_test.update((x, round(y / float(nfiles), 2))
+                    for x, y in cmatrix_test.items())
 
 print("CA learning avg: %g +- %g" % (avg_ca_learning, stdev_ca_learning))
 print("CA test avg: %g +- %g" % (avg_ca_test, stdev_ca_test))
@@ -100,9 +102,9 @@ print_confusion_matrix(cmatrix_test, m.categories)
 
 cmatrix_learning_total = sum(cmatrix_learning.values())
 cmatrix_test_total = sum(cmatrix_test.values())
-cmatrix_learning.update((x, 100 * y / cmatrix_learning_total)
+cmatrix_learning.update((x, round(100 * y / float(cmatrix_learning_total), 2))
                         for x, y in cmatrix_learning.items())
-cmatrix_test.update((x, 100 * y / cmatrix_test_total)
+cmatrix_test.update((x, round(100 * y / float(cmatrix_test_total), 2))
                     for x, y in cmatrix_test.items())
 
 print("Confusion matrix learning set")
