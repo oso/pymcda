@@ -15,6 +15,7 @@ from pymcda.utils import compute_ca
 from pymcda.pt_sorted import SortedPerformanceTable
 from pymcda.generate import generate_random_mrsort_model
 from pymcda.generate import generate_random_mrsort_choquet_model
+from pymcda.generate import generate_random_mrsort_model_with_coalition_veto2
 from pymcda.generate import generate_alternatives
 from pymcda.generate import generate_random_performance_table
 from pymcda.utils import add_errors_in_assignments_proba
@@ -27,12 +28,13 @@ def test_meta_electre_tri_global(seed, na, nc, ncat, na_gen, pcerrors,
                                  max_oloops, nmodels, max_loops):
 
     # Generate a random ELECTRE TRI BM model
-    if random_model_type == 'default':
+    if random_model_type == 'mrsort':
         model = generate_random_mrsort_model(nc, ncat, seed)
-    elif random_model_type == 'choquet':
+    elif random_model_type == 'ncs':
         model = generate_random_mrsort_choquet_model(nc, ncat, 2, seed)
     elif random_model_type == 'mrsortcv':
-        model = generate_random_mrsort_choqu
+        model = generate_random_mrsort_model_with_coalition_veto2(nc, ncat,
+                                                                  seed)
 
     # Generate a set of alternatives
     a = generate_alternatives(na)
@@ -311,15 +313,17 @@ if __name__ == "__main__":
 
     algo = eval(options.algo)
 
-    while options.random_model_type != "default" \
-          and options.random_model_type != "choquet":
-        print("1. Default MR-Sort model")
-        print("2. Choquet MR-Sort model")
+    while options.random_model_type not in ["mrsort", "ncs", "mrsortcv"]:
+        print("1. MR-Sort model")
+        print("2. NCS model")
+        print("3. MR-SortCV model")
         i = raw_input("Type of random model to initialize? ")
         if i == '1':
-            options.random_model_type = 'default'
+            options.random_model_type = 'mrsort'
         elif i == '2':
-            options.random_model_type = 'choquet'
+            options.random_model_type = 'ncs'
+        elif i == '3':
+            options.random_model_type = 'mrsortcv'
 
     random_model_type = options.random_model_type
 
