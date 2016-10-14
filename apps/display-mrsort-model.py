@@ -60,9 +60,16 @@ for xmcda_model in xmcda_models:
 
     print("Adjusted weights and lambda")
     lp = LpMRSortPostWeights(m.cv, m.lbda)
-    obj, cv, lbda = lp.solve()
-    print(cv)
-    print("lambda: %s\n" % lbda)
+    obj, m.cv, m.lbda = lp.solve()
+    print(m.cv)
+    print("lambda: %s\n" % m.lbda)
+
+    if m.veto is not None:
+        print("Adjusted veto weights and lambda")
+        lp = LpMRSortPostWeights(m.veto_weights, m.veto_lbda)
+        obj, m.veto_weights, m.veto_lbda = lp.solve()
+        print(m.veto_weights)
+        print("lambda: %s\n" % m.veto_lbda)
 
     if len(m.criteria) < 15:
         winning, loosing = compute_winning_and_loosing_coalitions(m.cv, m.lbda)
