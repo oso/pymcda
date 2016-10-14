@@ -43,9 +43,13 @@ def mobius_truncate(mobius, k):
     if k < 1:
         raise ValueError("Invalid cut value (%d)" % k)
 
+    toremove = []
     for m in mobius:
         if isinstance(m.id, CriteriaSet) and len(m.id) > k:
-            mobius.remove(m.id)
+            toremove.append(m)
+
+    for m in toremove:
+        mobius.remove(m.id)
 
 def capacities_are_monotone(criteria, capacities):
     n = len(criteria)
