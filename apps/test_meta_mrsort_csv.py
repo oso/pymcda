@@ -35,11 +35,12 @@ from test_utils import save_to_xmcda
 DATADIR = os.getenv('DATADIR', '%s/pymcda-data' % os.path.expanduser('~'))
 
 meta_mrsort = MetaMRSortVCPop4
-heur_init_profiles = HeurMRSortInitProfiles
-lp_weights = LpMRSortWeights
-heur_profiles = MetaMRSortProfiles5
-lp_veto_weights = LpMRSortVetoWeights
-heur_veto_profiles = MetaMRSortVetoProfiles5
+#meta_mrsort = MetaMRSortPop3
+#heur_init_profiles = HeurMRSortInitProfiles
+#lp_weights = LpMRSortWeights
+#heur_profiles = MetaMRSortProfiles5
+#lp_veto_weights = LpMRSortVetoWeights
+#heur_veto_profiles = MetaMRSortVetoProfiles5
 
 def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
     random.seed(seed)
@@ -69,11 +70,11 @@ def run_test(seed, data, pclearning, nloop, nmodels, nmeta):
     meta = meta_mrsort(nmodels, model.criteria,
                        model.categories_profiles.to_categories(),
                        pt_sorted, aa_learning,
-                       lp_weights = lp_weights,
-                       heur_profiles = heur_profiles,
-                       lp_veto_weights = lp_veto_weights,
-                       heur_veto_profiles = heur_veto_profiles,
                        seed = seed * 100)
+#lp_weights = lp_weights,
+#heur_profiles = heur_profiles,
+#lp_veto_weights = lp_veto_weights,
+#heur_veto_profiles = heur_veto_profiles,
 
     for i in range(0, nloop):
         model, ca_learning = meta.optimize(nmeta)
@@ -155,9 +156,6 @@ def run_tests(nseeds, data, pclearning, nloop, nmodels, nmeta, filename):
     # Write the test options
     writer.writerow(['data', data.name])
     writer.writerow(['meta_mrsort', meta_mrsort.__name__])
-    writer.writerow(['heur_init_profiles', heur_init_profiles.__name__])
-    writer.writerow(['lp_weights', lp_weights.__name__])
-    writer.writerow(['heur_profiles', heur_profiles.__name__])
     writer.writerow(['nloop', nloop])
     writer.writerow(['nmodels', nmodels])
     writer.writerow(['nmeta', nmeta])
