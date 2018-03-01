@@ -1243,6 +1243,16 @@ class AlternativePerformances(McdaObject):
         for key in self.performances:
             self.performances[key] *= value
 
+    def is_as_good_as(self, ap, criteria):
+        for crit_id, val in self.performances.items():
+            direction = criteria[crit_id].direction
+            val2 = ap.performances[crit_id] * direction
+            val = val * direction
+            if val2 > val:
+                return False
+
+        return True
+
     def to_xmcda(self, id = None):
         """Convert the MCDA object into XMCDA output"""
 
