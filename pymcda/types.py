@@ -1243,7 +1243,7 @@ class AlternativePerformances(McdaObject):
         for key in self.performances:
             self.performances[key] *= value
 
-    def is_as_good_as(self, ap, criteria):
+    def dominates(self, ap, criteria):
         for crit_id, val in self.performances.items():
             direction = criteria[crit_id].direction
             val2 = ap.performances[crit_id] * direction
