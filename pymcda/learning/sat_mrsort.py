@@ -5,65 +5,24 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 
 from itertools import combinations
 
-from pymcda.types import PerformanceTable
 from pymcda.types import AlternativePerformances
-from pymcda.types import AlternativesAssignments
 from pymcda.types import CriteriaValues, CriterionValue
-from pymcda.types import AlternativePerformances
+from pymcda.types import CriteriaSet
 from pymcda.types import PerformanceTable
-from pymcda.types import AlternativeAssignment
 
-from pymcda.generate import generate_random_mrsort_model
-from pymcda.generate import generate_alternatives
-from pymcda.generate import generate_criteria
-from pymcda.generate import generate_categories
-from pymcda.generate import generate_categories_profiles
-from pymcda.generate import generate_random_performance_table
+from pymcda.choquet import capacities_to_mobius
 
-from pymcda.utils import print_pt_and_assignments
 from pymcda.utils import powerset
-
-from pymcda.electre_tri import MRSort
 
 import pycryptosat
 
-# Define the MR-Sort model
-ncriteria = 3
-ncategories = 2
+class SatMRSort():
 
-c = generate_criteria(ncriteria)
-cv = CriteriaValues(CriterionValue(crit.id, float(1) / ncriteria) for crit in c)
-cat = generate_categories(ncategories)
-cps = generate_categories_profiles(cat)
-b1 = AlternativePerformances('b1', {crit.id: 5 for crit in c})
-bpt = PerformanceTable([b1])
-lbda = 0.6
-model = MRSort(c, cv, bpt, lbda, cps)
-
-# Define the alternatives
-a = generate_alternatives(8)
-a1 = AlternativePerformances('a1', {'c1': 1, 'c2': 1, 'c3': 1})
-a2 = AlternativePerformances('a2', {'c1': 9, 'c2': 1, 'c3': 1})
-a3 = AlternativePerformances('a3', {'c1': 1, 'c2': 9, 'c3': 1})
-a4 = AlternativePerformances('a4', {'c1': 1, 'c2': 1, 'c3': 9})
-a5 = AlternativePerformances('a5', {'c1': 9, 'c2': 9, 'c3': 9})
-a6 = AlternativePerformances('a6', {'c1': 9, 'c2': 9, 'c3': 1})
-a7 = AlternativePerformances('a7', {'c1': 1, 'c2': 9, 'c3': 9})
-a8 = AlternativePerformances('a8', {'c1': 9, 'c2': 1, 'c3': 9})
-pt = PerformanceTable([a1, a2, a3, a4, a5, a6, a7, a8])
-
-aa = model.pessimist(pt)
-
-print_pt_and_assignments([alt.id for alt in a], None, [aa], pt)
-
-# Learn the parameters
-class MRSortSAT():
-
-    def __init__(self, criteria, categories, categories_profiles,
-                 performance_table, assignments):
-        self.criteria = criteria
-        self.categories = categories
-        self.categories_profiles = categories_profiles
+    def __init__(self, model, performance_table, assignments):
+        self.model = model
+        self.criteria = model.criteria
+        self.categories = model.categories
+        self.categories_profiles = model.categories_profiles
         self.performance_table = performance_table
         self.assignments = assignments
 
@@ -72,7 +31,6 @@ class MRSortSAT():
     def __add_variable(self, name):
         self.nvariables += 1
         self.variables[name] = self.nvariables
-        print(self.nvariables, name)
 
     def __create_variables(self):
         self.variables = {}
@@ -132,7 +90,6 @@ class MRSortSAT():
             for coalition in combinations(self.criteria.keys(), i):
                 coainv = tuple(sorted(list(set(self.criteria.keys()) ^ set(coalition))))
                 v2 = self.variables[coainv]
-                print(coalition, v2)
                 for cp in self.categories_profiles:
                     cat = cp.value.upper
                     aids = self.assignments.get_alternatives_in_category(cat)
@@ -163,23 +120,104 @@ class MRSortSAT():
         self.__create_variables()
         self.__update_constraints()
 
-    def __parse_solution(self):
-        for c in self.criteria:
-            for cp in self.categories_profiles:
+    def __parse_solution(self, solution):
+        # Get capacities
+        cv = CriteriaValues()
+        for c in self.criteria.keys():
+            var = self.variables[(c,)]
+            val = 1 if solution[var] is True else 0
+            cval = CriterionValue(c, val)
+            cv.append(cval)
+
+        for i in range(2, len(self.criteria) + 1):
+            for coalition in combinations(self.criteria.keys(), i):
+                coalition = tuple(sorted(list(coalition)))
+                var = self.variables[coalition]
+                val = 1 if solution[var] is True else 0
+                cval = CriterionValue(CriteriaSet(coalition), 1)
+                cv.append(cval)
+
+        cv = capacities_to_mobius(self.criteria, cv)
+        self.model.cv = cv
+        self.model.lbda = 1
+
+        # Get profiles
+        bpt = PerformanceTable()
+        for cp in self.categories_profiles:
+            bp = AlternativePerformances(cp.id, {})
+            for c in self.criteria:
                 xi = sorted(self.x[c.id])
                 for xij in xi:
-                    print(xij)
+                    var = self.variables[c.id, cp.id, xij]
+                    val = solution[var]
+                    if val is True:
+                        bp.performances[c.id] = xij
+            bpt.append(bp)
+        self.model.bpt = bpt
 
     def solve(self):
         sat, solution = self.solver.solve()
         if sat is False:
             return False
 
-        for i in range(1, len(solution)):
-            print(i, solution[i])
-        self.__parse_solution()
+        self.__parse_solution(solution)
 
         return True
 
-sat = MRSortSAT(c, cat, cps, pt, aa)
-print(sat.solve())
+if __name__ == "__main__":
+    from pymcda.utils import print_pt_and_assignments
+    from pymcda.generate import generate_random_mrsort_model
+    from pymcda.generate import generate_alternatives
+    from pymcda.generate import generate_criteria
+    from pymcda.generate import generate_categories
+    from pymcda.generate import generate_categories_profiles
+    from pymcda.generate import generate_random_performance_table
+    from pymcda.electre_tri import MRSort
+
+    # Define the MR-Sort model
+    ncriteria = 3
+    ncategories = 2
+
+    c = generate_criteria(ncriteria)
+    cv = CriteriaValues(CriterionValue(crit.id, float(1) / ncriteria) for crit in c)
+    cat = generate_categories(ncategories)
+    cps = generate_categories_profiles(cat)
+    b1 = AlternativePerformances('b1', {crit.id: 5 for crit in c})
+    bpt = PerformanceTable([b1])
+    lbda = 0.6
+    model = MRSort(c, cv, bpt, lbda, cps)
+
+    # Define the alternatives
+    a = generate_alternatives(8)
+    a1 = AlternativePerformances('a1', {'c1': 1, 'c2': 1, 'c3': 1})
+    a2 = AlternativePerformances('a2', {'c1': 9, 'c2': 1, 'c3': 1})
+    a3 = AlternativePerformances('a3', {'c1': 1, 'c2': 9, 'c3': 1})
+    a4 = AlternativePerformances('a4', {'c1': 1, 'c2': 1, 'c3': 9})
+    a5 = AlternativePerformances('a5', {'c1': 9, 'c2': 9, 'c3': 9})
+    a6 = AlternativePerformances('a6', {'c1': 9, 'c2': 9, 'c3': 1})
+    a7 = AlternativePerformances('a7', {'c1': 1, 'c2': 9, 'c3': 9})
+    a8 = AlternativePerformances('a8', {'c1': 9, 'c2': 1, 'c3': 9})
+    pt = PerformanceTable([a1, a2, a3, a4, a5, a6, a7, a8])
+
+    aa = model.pessimist(pt)
+
+    ## random model
+    #model = generate_random_mrsort_model(ncriteria, ncategories, 123)
+    #a = generate_alternatives(1000)
+    #pt = generate_random_performance_table(a, model.criteria)
+    #aa = model.pessimist(pt)
+
+    # Learn the parameters
+    sat = SatMRSort(model, pt, aa)
+    aa2 = model.pessimist(pt)
+
+    # Check that all the alternatives are correctly assigned
+    alist = []
+    for alt in a:
+        if aa(alt.id) != aa2(alt.id):
+            alist.append(alt.id)
+
+    if len(alist) == 0:
+        print("All the alternatives are correcly assigned")
+    else:
+       print_pt_and_assignments(alist, None, [aa, aa2], pt)
