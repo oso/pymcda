@@ -68,8 +68,8 @@ class SatMRSort():
             xi = self.x[c.id]
             for xij in xi:
                 for i in range(len(profiles) - 1):
-                    v1 = self.variables[(c.id, profile[i], xij)]
-                    v2 = self.variables[(c.id, profile[i + 1], xij)]
+                    v1 = self.variables[(c.id, profiles[i], xij)]
+                    v2 = self.variables[(c.id, profiles[i + 1], xij)]
                     self.solver.add_clause([v1, -v2])
 
         # Add clause 3
@@ -201,7 +201,9 @@ if __name__ == "__main__":
 
     aa = model.pessimist(pt)
 
-    ## random model
+    ### random model
+    #ncriteria = 10
+    #ncategories = 5
     #model = generate_random_mrsort_model(ncriteria, ncategories, 123)
     #a = generate_alternatives(1000)
     #pt = generate_random_performance_table(a, model.criteria)
