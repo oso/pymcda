@@ -6,6 +6,7 @@ from itertools import combinations
 from pymcda.choquet import capacities_to_mobius, mobius_truncate
 from pymcda.electre_tri import MRSort
 from pymcda.uta import AVFSort
+from pymcda.rmp import RMP
 from pymcda.types import Alternative, Alternatives
 from pymcda.types import AlternativePerformances, PerformanceTable
 from pymcda.types import Criterion, Criteria
@@ -415,6 +416,17 @@ def generate_random_mrsort_model_with_coalition_veto2(ncrit, ncat,
 
     return model
 
+def generate_random_rmp_model(ncrit, nprofiles, seed = None):
+    if seed:
+        random.seed(seed)
+
+    c = generate_criteria(ncrit)
+    cvs = generate_random_criteria_weights(c)
+    b = ["b%d" % (i + 1) for i in range(nprofiles)]
+    bpt = generate_random_profiles(b, c)
+
+    return RMP(c, cvs, b, bpt)
+
 if __name__ == "__main__":
     alts = generate_alternatives(10)
     print(alts)
@@ -445,4 +457,6 @@ if __name__ == "__main__":
     model = generate_random_mrsort_model_with_coalition_veto(10, 3)
     print(model)
     model = generate_random_mrsort_model_with_coalition_veto2(10, 3)
+    print(model)
+    model = generate_random_rmp_model(10, 2)
     print(model)
