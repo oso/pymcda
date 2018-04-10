@@ -16,7 +16,7 @@ from pymcda.utils import powerset
 
 import pycryptosat
 
-class SatMRSort():
+class SatNCS():
 
     def __init__(self, model, performance_table, assignments):
         self.model = model
@@ -210,7 +210,7 @@ if __name__ == "__main__":
     #aa = model.pessimist(pt)
 
     # Learn the parameters
-    sat = SatMRSort(model, pt, aa)
+    sat = SatNCS(model, pt, aa)
     aa2 = model.pessimist(pt)
 
     # Check that all the alternatives are correctly assigned
