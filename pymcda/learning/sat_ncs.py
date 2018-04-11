@@ -18,6 +18,8 @@ import pycryptosat
 
 class SatNCS():
 
+    epsilon = 1e-5
+
     def __init__(self, model, performance_table, assignments):
         self.model = model
         self.criteria = model.criteria
@@ -47,8 +49,7 @@ class SatNCS():
         # y_{C}
         for i in range(0, len(self.criteria) + 1):
             for c in combinations(self.criteria.keys(), i):
-                clist = list(c)
-                clist.sort()
+                clist = sorted(list(c))
                 self.__add_variable(tuple(clist))
 
     def __update_constraints(self):
@@ -134,7 +135,7 @@ class SatNCS():
                 coalition = tuple(sorted(list(coalition)))
                 var = self.variables[coalition]
                 val = 1 if solution[var] is True else 0
-                cval = CriterionValue(CriteriaSet(coalition), 1)
+                cval = CriterionValue(CriteriaSet(coalition), val)
                 cv.append(cval)
 
         cv = capacities_to_mobius(self.criteria, cv)
@@ -147,13 +148,21 @@ class SatNCS():
             bp = AlternativePerformances(cp.id, {})
             for c in self.criteria:
                 xi = sorted(self.x[c.id])
+                bp.performances[c.id] = xi[-1]
                 for xij in xi:
                     var = self.variables[c.id, cp.id, xij]
                     val = solution[var]
                     if val is True:
                         bp.performances[c.id] = xij
+                        break
             bpt.append(bp)
         self.model.bpt = bpt
+
+    def print_clause(self, clause):
+        var_map = {v: k for k, v in self.variables.items()}
+        sign = lambda a: '' if a > 0 else '-' if a < 0 else 0
+        txt = map(lambda x: sign(x) + str(var_map[abs(x)]), clause)
+        print(txt)
 
     def solve(self):
         sat, solution = self.solver.solve()
@@ -174,43 +183,55 @@ if __name__ == "__main__":
     from pymcda.generate import generate_random_performance_table
     from pymcda.electre_tri import MRSort
 
-    # Define the MR-Sort model
-    ncriteria = 3
-    ncategories = 2
+#    # Define the MR-Sort model
+#    ncriteria = 3
+#    ncategories = 2
+#
+#    c = generate_criteria(ncriteria)
+#    cv = CriteriaValues(CriterionValue(crit.id, float(1) / ncriteria) for crit in c)
+#    cat = generate_categories(ncategories)
+#    cps = generate_categories_profiles(cat)
+#    b1 = AlternativePerformances('b1', {crit.id: 0.5 for crit in c})
+#    bpt = PerformanceTable([b1])
+#    lbda = 0.6
+#    model = MRSort(c, cv, bpt, lbda, cps)
+#
+#    # Define the alternatives
+#    a = generate_alternatives(8)
+#    a1 = AlternativePerformances('a1', {'c1': 0, 'c2': 0, 'c3': 0})
+#    a2 = AlternativePerformances('a2', {'c1': 1, 'c2': 0, 'c3': 0})
+#    a3 = AlternativePerformances('a3', {'c1': 0, 'c2': 1, 'c3': 0})
+#    a4 = AlternativePerformances('a4', {'c1': 0, 'c2': 0, 'c3': 1})
+#    a5 = AlternativePerformances('a5', {'c1': 1, 'c2': 1, 'c3': 1})
+#    a6 = AlternativePerformances('a6', {'c1': 1, 'c2': 1, 'c3': 0})
+#    a7 = AlternativePerformances('a7', {'c1': 0, 'c2': 1, 'c3': 1})
+#    a8 = AlternativePerformances('a8', {'c1': 1, 'c2': 0, 'c3': 1})
+#    pt = PerformanceTable([a1, a2, a3, a4, a5, a6, a7, a8])
+#
+#    aa = model.pessimist(pt)
 
-    c = generate_criteria(ncriteria)
-    cv = CriteriaValues(CriterionValue(crit.id, float(1) / ncriteria) for crit in c)
-    cat = generate_categories(ncategories)
-    cps = generate_categories_profiles(cat)
-    b1 = AlternativePerformances('b1', {crit.id: 5 for crit in c})
-    bpt = PerformanceTable([b1])
-    lbda = 0.6
-    model = MRSort(c, cv, bpt, lbda, cps)
-
-    # Define the alternatives
-    a = generate_alternatives(8)
-    a1 = AlternativePerformances('a1', {'c1': 1, 'c2': 1, 'c3': 1})
-    a2 = AlternativePerformances('a2', {'c1': 9, 'c2': 1, 'c3': 1})
-    a3 = AlternativePerformances('a3', {'c1': 1, 'c2': 9, 'c3': 1})
-    a4 = AlternativePerformances('a4', {'c1': 1, 'c2': 1, 'c3': 9})
-    a5 = AlternativePerformances('a5', {'c1': 9, 'c2': 9, 'c3': 9})
-    a6 = AlternativePerformances('a6', {'c1': 9, 'c2': 9, 'c3': 1})
-    a7 = AlternativePerformances('a7', {'c1': 1, 'c2': 9, 'c3': 9})
-    a8 = AlternativePerformances('a8', {'c1': 9, 'c2': 1, 'c3': 9})
-    pt = PerformanceTable([a1, a2, a3, a4, a5, a6, a7, a8])
-
+    ## random model
+    ncriteria = 10
+    ncategories = 5
+    model = generate_random_mrsort_model(ncriteria, ncategories, 13)
+    a = generate_alternatives(10000)
+    pt = generate_random_performance_table(a, model.criteria)
     aa = model.pessimist(pt)
 
-    ### random model
-    #ncriteria = 10
-    #ncategories = 5
-    #model = generate_random_mrsort_model(ncriteria, ncategories, 123)
-    #a = generate_alternatives(1000)
-    #pt = generate_random_performance_table(a, model.criteria)
-    #aa = model.pessimist(pt)
-
     # Learn the parameters
+    #print(model.bpt)
+    #print(model.cv)
+    #print(model.lbda)
     sat = SatNCS(model, pt, aa)
+    result = sat.solve()
+    if result is False:
+        print("Result is UNSAT")
+        sys.exit(1)
+
+    print("Result is SAT")
+    #print(model.bpt)
+    #print(model.cv)
+    #print(model.lbda)
     aa2 = model.pessimist(pt)
 
     # Check that all the alternatives are correctly assigned
