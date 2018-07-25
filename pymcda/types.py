@@ -80,6 +80,9 @@ class McdaDict(object):
 
         return self._d.__eq__(dict(mcda_dict._d))
 
+    def __ne__(self, other):
+        return not self == other
+
     def __hash__(self):
         return hash(frozenset(self._d.iteritems()))
 
@@ -218,6 +221,9 @@ class McdaObject(object):
 
         return self.__dict__ == other.__dict__
 
+    def __ne__(self, other):
+        return not self == other
+
     def __hash__(self):
         return hash(self.id)
 
@@ -299,6 +305,9 @@ class CriteriaSet(object):
 
     def __eq__(self, other):
         return set(self.criteria) == set(other.criteria)
+
+    def __ne__(self, other):
+        return not self == other
 
     def __hash__(self):
         return hash(frozenset(self.criteria))
@@ -429,7 +438,6 @@ class Criteria(McdaDict):
                 self.append(c)
 
         return self
-
 
 class Criterion(McdaObject):
 
@@ -1667,6 +1675,9 @@ class Linear(object):
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
+    def __ne__(self, other):
+        return not self == other
+
     def __repr__(self):
         return "Linear(%sx + %d)" % (self.slope, self.intercept)
 
@@ -2583,3 +2594,65 @@ class Parameter(McdaObject):
             self.value = unmarshal(value.getchildren()[0])
 
         return self
+
+class PairwiseRelations(McdaDict):
+
+    def __repr__(self):
+        return "PairwiseRelations(%s)" % self.values()
+
+    def weaker_to_preferred(self):
+        for val in self.values():
+            val.weaker_to_preferred();
+
+    def get_preferred(self):
+        pws = PairwiseRelations()
+        for val in self.values():
+            if val.relation != val.PREFERRED:
+                continue
+
+            pws.append(val)
+
+        return pws
+
+class PairwiseRelation(McdaObject):
+
+    WEAKER = 0
+    INDIFFERENT = 1
+    PREFERRED = 2
+
+    def __init__(self, a = None, b = None, relation = None):
+        self.id = tuple([a,b])
+        self.a = a
+        self.b = b
+        self.relation = relation
+
+    def __repr__(self):
+        """Manner to represent the MCDA object"""
+        if self.relation == self.WEAKER:
+            rel = "<"
+        elif self.relation == self.INDIFFERENT:
+            rel = "="
+        elif self.relation == self.PREFERRED:
+            rel = ">"
+        else:
+            rel = "?"
+
+        return "PairwiseRelation(%s %s %s)" % (self.a, rel, self.b)
+
+    def __eq__(self, other):
+        if self.a != other.a:
+            return False
+
+        if self.b != other.b:
+            return False
+
+        if self.relation != other.relation:
+            return False
+
+        return True
+
+    def weaker_to_preferred(self):
+        if self.relation == self.WEAKER:
+            self.id = tuple([self.b, self.a])
+            self.a, self.b = self.b, self.a
+            self.relation = self.PREFERRED
