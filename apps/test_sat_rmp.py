@@ -25,7 +25,7 @@ DATADIR = os.getenv('DATADIR', '%s/pymcda-data' % os.path.expanduser('~'))
 
 def test_sat_rmp(seed, na, nc, nprofiles, na_gen):
 
-    random.seed(seed)
+    random.seed(2 ** seed + 3 ** na + 5 ** nc + 7 ** nprofiles)
 
     # Generate random RMP model
     c = generate_criteria(nc)
