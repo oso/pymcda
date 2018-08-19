@@ -119,6 +119,23 @@ def generate_random_criteria_values(crits, seed = None, k = 3,
 
     return cvals
 
+def generate_random_alternative_performances(a, crits, seed = None, k = 3,
+                                             worst = None, best = None):
+    if seed is not None:
+        random.seed(seed)
+
+    perfs = {}
+    for c in crits:
+        if worst is None or best is None:
+            rdom = round(random.random(), k)
+        else:
+            rdom = round(random.uniform(worst.performances[c.id],
+                                        best.performances[c.id]), k)
+        perfs[c.id] = rdom
+
+    return AlternativePerformances(a.id, perfs)
+
+
 def generate_random_performance_table(alts, crits, seed = None, k = 3,
                                       worst = None, best = None):
     if seed is not None:
@@ -126,17 +143,8 @@ def generate_random_performance_table(alts, crits, seed = None, k = 3,
 
     pt = PerformanceTable()
     for a in alts:
-        perfs = {}
-        for c in crits:
-            if worst is None or best is None:
-                rdom = round(random.random(), k)
-            else:
-                rdom = round(random.uniform(worst.performances[c.id],
-                                            best.performances[c.id]), k)
-
-            perfs[c.id] = rdom
-
-        ap = AlternativePerformances(a.id, perfs)
+        ap = generate_random_alternative_performances(a, crits, None, k,
+                                                      worst, best)
         pt.append(ap)
 
     return pt
