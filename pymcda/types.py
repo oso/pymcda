@@ -1221,6 +1221,17 @@ class AlternativePerformances(McdaObject):
         for crit in c:
             self.performances[crit.id] *= crit.direction
 
+    def dominates(self, ap, c):
+        for crit in c:
+            perf1 = self.performances[crit.id]
+            perf2 = ap.performances[crit.id]
+            if c.direction > 0 and perf1 < perf2:
+                return False
+            elif c.direction < 0 and perf1 > perf2:
+                return False
+
+        return True
+
     def round(self, k = 3, cids = None):
         """Round all performances on criteria cids to maximum k digit
         Kwargs:
