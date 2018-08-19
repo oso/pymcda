@@ -18,6 +18,8 @@ import pycryptosat
 
 class SatRMP():
 
+    epsilon = 0.001
+
     def __init__(self, model, pt, pw_comparisons):
         self.model = model
         self.criteria = model.criteria
@@ -261,11 +263,16 @@ class SatRMP():
 
         # Add phi preference
         for pwc in self.pw_comparisons:
-            clause = []
-            for h in self.model.profiles:
-                v = self.variables['s', pwc.id, h]
-                clause.append(v)
-            self.add_clause(clause)
+            if pwc.relation == pwc.INDIFFERENT:
+                for h in self.model.profiles:
+                    v = self.variables['s', pwc.id, h]
+                    self.add_clause([-v])
+            else:
+                clause = []
+                for h in self.model.profiles:
+                    v = self.variables['s', pwc.id, h]
+                    clause.append(v)
+                self.add_clause(clause)
 
         # Add phi lexicography
         for pwc in self.pw_comparisons:
@@ -315,7 +322,7 @@ class SatRMP():
             bp = AlternativePerformances(profile, {})
             for c in self.criteria:
                 xi = sorted(self.x[c.id])
-                bp.performances[c.id] = xi[-1]
+                bp.performances[c.id] = xi[-1] + self.epsilon * c.direction
                 for xij in xi:
                     var = self.variables[('x', c.id, profile, xij)]
                     val = solution[var]
@@ -337,7 +344,7 @@ class SatRMP():
         return coalitions
 
     def __parse_solution(self, solution):
-        self.model.profiles = self.__parse_profile_order(solution)
+#        self.model.profiles = self.__parse_profile_order(solution)
         self.model.bpt = self.__parse_profiles(solution)
         self.model.coalition_relations = self.__parse_coalitions(solution)
 
@@ -352,75 +359,124 @@ class SatRMP():
         return True
 
 if __name__ == "__main__":
+    from pymcda.types import Alternative
     from pymcda.types import PairwiseRelations
+    from pymcda.types import PerformanceTable
     from pymcda.generate import generate_alternatives
     from pymcda.generate import generate_criteria
     from pymcda.generate import generate_random_profiles
     from pymcda.generate import generate_random_criteria_values
+    from pymcda.generate import generate_random_alternative_performances
     from pymcda.generate import generate_random_performance_table
     from pymcda.rmp import RMP
     import random
 
-    ncriteria = 5
-    nalternatives = 1000
-    nprofiles = 2
+    seed = 1
+    ncriteria = 3
+    nprofiles = 3
+    nalternatives = 100
 
-    random.seed(123)
+    random.seed(seed)
     c = generate_criteria(ncriteria)
     cv = generate_random_criteria_values(c)
     b = [ "b%d" % i for i in range(1, nprofiles + 1)]
     bpt = generate_random_profiles(b, c)
+    random.shuffle(b)
     model = RMP(c, cv, b, bpt)
 
-    a1 = generate_alternatives(nalternatives, "x")
-    pt1 = generate_random_performance_table(a1, c)
-    a2 = generate_alternatives(nalternatives, "y")
-    pt2 = generate_random_performance_table(a2, c)
-
+    i = 0
     pwcs = PairwiseRelations()
-    for i in range(1, len(pt1) + 1):
-        pwc = model.compare(pt1["x%d" % i], pt2["y%d" % i])
+    pt = PerformanceTable()
+    while i != nalternatives:
+        x = Alternative("x%d" % (i + 1))
+        y = Alternative("y%d" % (i + 1))
+        apx = generate_random_alternative_performances(x, c)
+        apy = generate_random_alternative_performances(y, c)
+        pwc = model.compare(apx, apy)
+        if pwc.relation == pwc.INDIFFERENT:
+            continue
+        if apx.dominates(apy, c) or apy.dominates(apx, c):
+            continue
+
+        pt.append(apx)
+        pt.append(apy)
         pwcs.append(pwc)
+        i += 1
 
     pwcs.weaker_to_preferred()
-    pwcs = pwcs.get_preferred()
-    print(len(pwcs))
-
-    pt = PerformanceTable()
-    for ap in pt1:
-        pt.append(ap)
-    for ap in pt2:
-        pt.append(ap)
 
     model2 = RMP(c, None, b, None)
+
     satrmp = SatRMP(model2, pt, pwcs)
     solution = satrmp.solve()
     if solution is False:
-        print("Problem is UNSAT!")
-        sys.exit(1);
+        print("Warning: solution is UNSAT")
+        sys.exit(1)
 
     pwcs2 = PairwiseRelations()
     for pwc in pwcs:
         pwc2 = model2.compare(pt[pwc.a], pt[pwc.b])
-        pwcs2.append(pwc2)
 
-    #print("Performance table")
-    #print(pt)
-
-    #print("Original model")
-    #print(model.profiles)
-    #print(model.bpt)
-    #print(pwcs)
-
-    #print("Learned model")
-    #print(model2.profiles)
-    #print(model2.bpt)
-    #print(pwcs2)
-
-    for pwc, pwc2 in zip(pwcs, pwcs2):
         if pwc != pwc2:
             print("%s != %s" % (pwc, pwc2))
+            print(pt[pwc.a])
+            print(pt[pwc.b])
+    print(model.profiles)
+    print(model.bpt)
+    print(model2.profiles)
+    print(model2.bpt)
 
+#    a1 = generate_alternatives(nalternatives, "x")
+#    pt1 = generate_random_performance_table(a1, c)
+#    a2 = generate_alternatives(nalternatives, "y")
+#    pt2 = generate_random_performance_table(a2, c)
+#
+#    pwcs = PairwiseRelations()
+#    for i in range(1, len(pt1) + 1):
+#        pwc = model.compare(pt1["x%d" % i], pt2["y%d" % i])
+#        pwcs.append(pwc)
+#
+#    pwcs.weaker_to_preferred()
+##    pwcs = pwcs.get_preferred()
+#    print(len(pwcs))
+#
+#    pt = PerformanceTable()
+#    for ap in pt1:
+#        pt.append(ap)
+#    for ap in pt2:
+#        pt.append(ap)
+#
+#    model2 = RMP(c, None, b, None)
+#    satrmp = SatRMP(model2, pt, pwcs)
+#    solution = satrmp.solve()
+#    if solution is False:
+#        print("Problem is UNSAT!")
+#        sys.exit(1);
+#
+#    pwcs2 = PairwiseRelations()
+#    for pwc in pwcs:
+#        pwc2 = model2.compare(pt[pwc.a], pt[pwc.b])
+#        pwcs2.append(pwc2)
+#
+#    #print("Performance table")
+#    #print(pt)
+#
+#    #print("Original model")
+#    #print(model.profiles)
+#    #print(model.bpt)
+#    #print(pwcs)
+#
+#    #print("Learned model")
+#    #print(model2.profiles)
+#    #print(model2.bpt)
+#    #print(pwcs2)
+#
+#    for pwc, pwc2 in zip(pwcs, pwcs2):
+#        if pwc != pwc2:
+#            print("%s != %s" % (pwc, pwc2))
+#            print(pt[pwc.a])
+#            print(pt[pwc.b])
+#
 #    ncriteria = 2
 #
 #    c = generate_criteria(ncriteria)
