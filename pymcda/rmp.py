@@ -31,8 +31,8 @@ class RMP(object):
         return sum([c.value for c in self.cvs
                     if c.id_issubset(criteria_set) is True])
 
-    def compare(self, ap1, ap2):
-        for profile in self.profiles:
+    def compare_get_profile(self, ap1, ap2):
+        for i, profile in enumerate(self.profiles):
             bp = self.bpt[profile]
             c1 = self.__criteria_coalition(ap1, bp)
             c2 = self.__criteria_coalition(ap2, bp)
@@ -44,26 +44,30 @@ class RMP(object):
                 c1 = tuple(sorted(list(c1)))
                 c2 = tuple(sorted(list(c2)))
                 if self.coalition_relations[c1][c2] is True:
-                    return PairwiseRelation(ap1.id, ap2.id,
-                                            PairwiseRelation.PREFERRED)
+                    return (PairwiseRelation(ap1.id, ap2.id,
+                                             PairwiseRelation.PREFERRED), i)
 
                 if self.coalition_relations[c2][c1] is True:
-                    return PairwiseRelation(ap1.id, ap2.id,
-                                            PairwiseRelation.WEAKER)
+                    return (PairwiseRelation(ap1.id, ap2.id,
+                                             PairwiseRelation.WEAKER), i)
 
             else:
                 c1 = self.__concordance(c1)
                 c2 = self.__concordance(c2)
 
                 if c1 > c2:
-                    return PairwiseRelation(ap1.id, ap2.id,
-                                            PairwiseRelation.PREFERRED)
+                    return (PairwiseRelation(ap1.id, ap2.id,
+                                             PairwiseRelation.PREFERRED), i)
 
                 if c1 < c2:
-                    return PairwiseRelation(ap1.id, ap2.id,
-                                            PairwiseRelation.WEAKER)
+                    return (PairwiseRelation(ap1.id, ap2.id,
+                                            PairwiseRelation.WEAKER), i)
 
-        return PairwiseRelation(ap1.id, ap2.id, PairwiseRelation.INDIFFERENT)
+        return (PairwiseRelation(ap1.id, ap2.id, PairwiseRelation.INDIFFERENT),
+                None)
+
+    def compare(self, ap1, ap2):
+        return self.compare_get_profile(ap1, ap2)[0]
 
 if __name__ == "__main__":
     import random
