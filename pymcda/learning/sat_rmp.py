@@ -51,6 +51,9 @@ class SatRMP():
         for clause in self.clauses:
             self.print_clause(clause)
 
+    def number_of_clauses(self):
+        return len(self.clauses)
+
     def print_clause_with_solution(self, clause, solution):
         var_map = {v: '_'.join(tuple(map(str, k))) for k, v in self.variables.items()}
         sign = lambda a: '' if a > 0 else '-' if a < 0 else 0
@@ -298,7 +301,7 @@ class SatRMP():
                 self.add_clause([-v1, -v2])
 
     def __update_sat(self):
-        self.solver = pycryptosat.Solver()
+        self.solver = pycryptosat.Solver(threads=1)
         self.__create_variables()
         self.__update_constraints()
 
@@ -371,8 +374,8 @@ if __name__ == "__main__":
     from pymcda.rmp import RMP
     import random
 
-    seed = 1
-    ncriteria = 3
+    seed = 2
+    ncriteria = 4
     nprofiles = 3
     nalternatives = 100
 
@@ -425,6 +428,9 @@ if __name__ == "__main__":
     print(model.bpt)
     print(model2.profiles)
     print(model2.bpt)
+
+#    satrmp.print_clauses()
+    print("Number of clauses %d" % satrmp.number_of_clauses())
 
 #    a1 = generate_alternatives(nalternatives, "x")
 #    pt1 = generate_random_performance_table(a1, c)
