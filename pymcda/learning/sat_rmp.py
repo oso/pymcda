@@ -48,11 +48,14 @@ class SatRMP():
         print(txt)
 
     def print_clauses(self):
-        for clause in self.clauses:
+        for (clause, w) in self.clauses:
             self.print_clause(clause)
 
     def number_of_clauses(self):
         return len(self.clauses)
+
+    def number_of_variables(self):
+        return len(self.variables)
 
     def print_clause_with_solution(self, clause, solution):
         var_map = {v: '_'.join(tuple(map(str, k))) for k, v in self.variables.items()}
@@ -66,12 +69,19 @@ class SatRMP():
         print(txt + ': ' + str(txt2))
 
     def print_clauses_with_solution(self, solution):
-        for clause in self.clauses:
+        for (clause, w) in self.clauses:
             self.print_clause_with_solution(clause, solution)
 
-    def add_clause(self, clause):
-        self.clauses.append(clause)
-        self.solver.add_clause(clause)
+    def clause_to_dimacs(self, f):
+#        f = open(fname, "w+")
+        f.write("p wcnf %d %d\n" % (self.number_of_variables(),
+                                    self.number_of_clauses()))
+        for (clause, w) in self.clauses:
+            f.write(str(w) + " " + " ".join(map(str, clause)) + " 0\n")
+#        f.close()
+
+    def add_clause(self, clause, weight = 1000):
+        self.clauses.append((clause, weight))
 
     def __add_variable(self, name):
         self.nvariables += 1
@@ -275,7 +285,7 @@ class SatRMP():
                 for h in self.model.profiles:
                     v = self.variables['s', pwc.id, h]
                     clause.append(v)
-                self.add_clause(clause)
+                self.add_clause(clause, 1)
 
         # Add phi lexicography
         for pwc in self.pw_comparisons:
@@ -352,13 +362,39 @@ class SatRMP():
         self.model.coalition_relations = self.__parse_coalitions(solution)
 
     def solve(self):
+        for (clause, w) in self.clauses:
+            self.solver.add_clause(clause)
+
         sat, solution = self.solver.solve()
         if sat is False:
             return False
 
         #self.print_clauses_with_solution(solution)
+        #print(solution[0], len(solution))
         self.__parse_solution(solution)
 
+        return True
+
+    def solveMAXSat(self):
+        import tempfile
+        import subprocess
+        f = tempfile.NamedTemporaryFile(delete = False)
+        self.clause_to_dimacs(f)
+        f.flush()
+        output = subprocess.check_output(["maxhs", f.name])
+        output = output.decode("ascii",errors="ignore")
+
+        for line in output.splitlines():
+            print(line)
+            if line.startswith("v "):
+                solution = line[2:]
+                #break
+        f.close()
+
+        solution = [None] + [True if int(sol) >= 0 else False
+                    for sol in solution.split(" ")]
+        print(len(solution))
+        self.__parse_solution(solution)
         return True
 
 if __name__ == "__main__":
@@ -375,9 +411,9 @@ if __name__ == "__main__":
     import random
 
     seed = 2
-    ncriteria = 4
-    nprofiles = 3
-    nalternatives = 100
+    ncriteria = 7
+    nprofiles = 1
+    npairs = 37
 
     random.seed(seed)
     c = generate_criteria(ncriteria)
@@ -390,7 +426,7 @@ if __name__ == "__main__":
     i = 0
     pwcs = PairwiseRelations()
     pt = PerformanceTable()
-    while i != nalternatives:
+    while i != npairs:
         x = Alternative("x%d" % (i + 1))
         y = Alternative("y%d" % (i + 1))
         apx = generate_random_alternative_performances(x, c)
@@ -401,6 +437,14 @@ if __name__ == "__main__":
         if apx.dominates(apy, c) or apy.dominates(apx, c):
             continue
 
+        if i < 5:
+            print(pwc)
+            if pwc.relation == pwc.PREFERRED:
+                pwc.relation = pwc.WEAKER
+            else:
+                pwc.relation = pwc.PREFERRED
+            print(pwc)
+
         pt.append(apx)
         pt.append(apy)
         pwcs.append(pwc)
@@ -410,7 +454,8 @@ if __name__ == "__main__":
 
     model2 = RMP(c, None, b, None)
 
-    satrmp = SatRMP(model2, pt, pwcs)
+#    satrmp = SatRMP(model2, pt, pwcs)
+    solution = satrmp.solveMAXSat()
     solution = satrmp.solve()
     if solution is False:
         print("Warning: solution is UNSAT")
