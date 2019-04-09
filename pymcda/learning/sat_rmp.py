@@ -72,14 +72,6 @@ class SatRMP():
         for (clause, w) in self.clauses:
             self.print_clause_with_solution(clause, solution)
 
-    def clause_to_dimacs(self, f):
-#        f = open(fname, "w+")
-        f.write("p wcnf %d %d\n" % (self.number_of_variables(),
-                                    self.number_of_clauses()))
-        for (clause, w) in self.clauses:
-            f.write(str(w) + " " + " ".join(map(str, clause)) + " 0\n")
-#        f.close()
-
     def add_clause(self, clause, weight = 1000):
         self.clauses.append((clause, weight))
 
@@ -356,7 +348,7 @@ class SatRMP():
 
         return coalitions
 
-    def __parse_solution(self, solution):
+    def _parse_solution(self, solution):
 #        self.model.profiles = self.__parse_profile_order(solution)
         self.model.bpt = self.__parse_profiles(solution)
         self.model.coalition_relations = self.__parse_coalitions(solution)
@@ -371,30 +363,37 @@ class SatRMP():
 
         #self.print_clauses_with_solution(solution)
         #print(solution[0], len(solution))
-        self.__parse_solution(solution)
+        self._parse_solution(solution)
 
         return True
 
-    def solveMAXSat(self):
+
+class MaxSatRMP(SatRMP):
+
+    def clauses_to_dimacs(self, f):
+        f.write("p wcnf %d %d\n" % (self.number_of_variables(),
+                                    self.number_of_clauses()))
+        for (clause, w) in self.clauses:
+            f.write(str(w) + " " + " ".join(map(str, clause)) + " 0\n")
+
+    def solve(self):
         import tempfile
         import subprocess
         f = tempfile.NamedTemporaryFile(delete = False)
-        self.clause_to_dimacs(f)
+        self.clauses_to_dimacs(f)
         f.flush()
         output = subprocess.check_output(["maxhs", f.name])
         output = output.decode("ascii",errors="ignore")
 
         for line in output.splitlines():
-            print(line)
             if line.startswith("v "):
                 solution = line[2:]
-                #break
+                break
         f.close()
 
         solution = [None] + [True if int(sol) >= 0 else False
                     for sol in solution.split(" ")]
-        print(len(solution))
-        self.__parse_solution(solution)
+        self._parse_solution(solution)
         return True
 
 if __name__ == "__main__":
@@ -411,9 +410,10 @@ if __name__ == "__main__":
     import random
 
     seed = 2
-    ncriteria = 7
+    ncriteria = 5
     nprofiles = 1
-    npairs = 37
+    npairs = 30
+    nbinversions = 5
 
     random.seed(seed)
     c = generate_criteria(ncriteria)
@@ -437,7 +437,7 @@ if __name__ == "__main__":
         if apx.dominates(apy, c) or apy.dominates(apx, c):
             continue
 
-        if i < 5:
+        if i < nbinversions:
             print(pwc)
             if pwc.relation == pwc.PREFERRED:
                 pwc.relation = pwc.WEAKER
@@ -454,12 +454,16 @@ if __name__ == "__main__":
 
     model2 = RMP(c, None, b, None)
 
-#    satrmp = SatRMP(model2, pt, pwcs)
-    solution = satrmp.solveMAXSat()
+    satrmp = SatRMP(model2, pt, pwcs)
     solution = satrmp.solve()
+
     if solution is False:
         print("Warning: solution is UNSAT")
-        sys.exit(1)
+        satrmp = MaxSatRMP(model2, pt, pwcs)
+        solution = satrmp.solve()
+        if solution is False:
+            print("Warning: no MaxSAT solution")
+            sys.exit(1)
 
     pwcs2 = PairwiseRelations()
     for pwc in pwcs:
