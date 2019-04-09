@@ -479,4 +479,5 @@ if __name__ == "__main__":
     print(model2.bpt)
 
 #    satrmp.print_clauses()
-    print("Number of clauses %d" % satrmp.number_of_clauses())
+    print("Number of variables: %d" % satrmp.number_of_variables())
+    print("Number of clauses: %d" % satrmp.number_of_clauses())
