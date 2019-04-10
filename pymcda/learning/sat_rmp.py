@@ -363,12 +363,12 @@ class SatRMP():
 
         return coalitions
 
-    def _parse_solution(self, solution):
+    def __parse_solution(self, solution):
 #        self.model.profiles = self.__parse_profile_order(solution)
         self.model.bpt = self.__parse_profiles(solution)
         self.model.coalition_relations = self.__parse_coalitions(solution)
 
-    def solve(self):
+    def solve_sat(self):
         for (clause, w) in self.clauses:
             self.solver.add_clause(clause)
 
@@ -378,24 +378,22 @@ class SatRMP():
 
         #self.print_clauses_with_solution(solution)
         #print(solution[0], len(solution))
-        self._parse_solution(solution)
+        self.__parse_solution(solution)
 
         return True
 
-
-class MaxSatRMP(SatRMP):
-
-    def clauses_to_dimacs(self, f):
+    def __clauses_to_dimacs(self, f):
         f.write("p wcnf %d %d\n" % (self.number_of_variables(),
                                     self.number_of_clauses()))
         for (clause, w) in self.clauses:
             f.write(str(w) + " " + " ".join(map(str, clause)) + " 0\n")
 
-    def solve(self):
+
+    def solve_maxsat(self):
         import tempfile
         import subprocess
         f = tempfile.NamedTemporaryFile(delete = False)
-        self.clauses_to_dimacs(f)
+        self.__clauses_to_dimacs(f)
         f.flush()
         output = subprocess.check_output(["maxhs", f.name])
         output = output.decode("ascii",errors="ignore")
@@ -408,8 +406,14 @@ class MaxSatRMP(SatRMP):
 
         solution = [None] + [True if int(sol) >= 0 else False
                     for sol in solution.split(" ")]
-        self._parse_solution(solution)
+        self.__parse_solution(solution)
         return True
+
+    def solve(self, maxsat = False):
+        if maxsat is True:
+            return self.solve_maxsat()
+
+        return self.solve_sat()
 
 if __name__ == "__main__":
     from pymcda.types import Alternative
@@ -474,8 +478,7 @@ if __name__ == "__main__":
 
     if solution is False:
         print("Warning: solution is UNSAT")
-        satrmp = MaxSatRMP(model2, pt, pwcs)
-        solution = satrmp.solve()
+        solution = satrmp.solve(True)
         if solution is False:
             print("Warning: no MaxSAT solution")
             sys.exit(1)
