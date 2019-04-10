@@ -156,12 +156,18 @@ class SatRMP():
                 if not set(combi).issubset(set(combi2)):
                     continue
 
+                if len(set(combi)) != len(set(combi2)) - 1:
+                    continue
+
                 v1 = self.variables[('y', combi2, combi)]
                 self.add_clause([v1])
 
         # Add phi completeness
         for combi in self.criteria_combinations:
             for combi2 in self.criteria_combinations:
+                if len(set(combi)) != len(set(combi2)) - 1:
+                    continue
+
                 v1 = self.variables[('y', combi, combi2)]
                 v2 = self.variables[('y', combi2, combi)]
                 self.add_clause([v1, v2])
@@ -170,6 +176,15 @@ class SatRMP():
         for combi in self.criteria_combinations:
             for combi2 in self.criteria_combinations:
                 for combi3 in self.criteria_combinations:
+                    if set(combi).issubset(set(combi2)):
+                        continue
+
+                    if set(combi2).issubset(set(combi3)):
+                        continue
+
+                    if set(combi3).issubset(set(combi)):
+                        continue
+
                     v1 = self.variables[('y', combi, combi2)]
                     v2 = self.variables[('y', combi2, combi3)]
                     v3 = self.variables[('y', combi, combi3)]
