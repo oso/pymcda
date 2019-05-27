@@ -3,6 +3,7 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 import csv
 import datetime
+import math
 import time
 import random
 from itertools import product
@@ -23,7 +24,7 @@ from test_utils import save_to_xmcda
 
 DATADIR = os.getenv('DATADIR', '%s/pymcda-data' % os.path.expanduser('~'))
 
-def test_sat_rmp(seed, na, nc, nprofiles, na_gen):
+def test_sat_rmp(seed, na, nc, nprofiles, na_gen, pcerrors):
 
     random.seed(2 ** seed + 3 ** na + 5 ** nc + 7 ** nprofiles)
 
@@ -34,6 +35,8 @@ def test_sat_rmp(seed, na, nc, nprofiles, na_gen):
     random.shuffle(b)
     bpt = generate_random_profiles(b, c)
     model = RMP(c, cv, b, bpt)
+
+    ninversions = math.ceil(pcerrors * na / 100)
 
     i = 0
     pwcs = PairwiseRelations()
@@ -50,6 +53,12 @@ def test_sat_rmp(seed, na, nc, nprofiles, na_gen):
         if apx.dominates(apy, c) or apy.dominates(apx, c):
             continue
 
+        if i < ninversions:
+            if pwc.relation == pwc.PREFERRED:
+                pwc.relation = pwc.WEAKER
+            else:
+                pwc.relation = pwc.PREFERRED
+
         pt.append(apx)
         pt.append(apy)
         pwcs.append(pwc)
@@ -63,7 +72,7 @@ def test_sat_rmp(seed, na, nc, nprofiles, na_gen):
     model2 = RMP(c, None, b, None)
 
     satrmp = SatRMP(model2, pt, pwcs)
-    solution = satrmp.solve()
+    solution = satrmp.solve(True)
     if solution is False:
         print("Warning: solution is UNSAT")
 
@@ -98,8 +107,8 @@ def test_sat_rmp(seed, na, nc, nprofiles, na_gen):
     ra_test = float(ok) / na_gen
 
     # Save all infos in test_result class
-    t = test_result("%s-%d-%d-%d-%d" % (seed, na, nc, nprofiles,
-                    na_gen))
+    t = test_result("%s-%d-%d-%d-%d-%d" % (seed, na, nc, nprofiles,
+                    na_gen, pcerrors))
 
     # Input params
     t['seed'] = seed
@@ -107,6 +116,7 @@ def test_sat_rmp(seed, na, nc, nprofiles, na_gen):
     t['nc'] = nc
     t['nprofiles'] = nprofiles
     t['na_gen'] = na_gen
+    t['pcerrors'] = pcerrors
 
     # Output params
     t['ra_learning'] = ra_learning
@@ -115,7 +125,15 @@ def test_sat_rmp(seed, na, nc, nprofiles, na_gen):
 
     return t
 
-def run_tests(na, nc, nprofiles, na_gen, nseeds, filename):
+def run_tests(options):
+    na = options.na
+    nc = options.nc
+    nprofiles = options.nprofiles
+    na_gen = options.na_gen
+    pcerrors = options.pcerrors
+    nseeds = options.nseeds
+    filename = options.filename
+
     # Create the CSV writer
     f = open(filename, 'wb')
     writer = csv.writer(f)
@@ -126,6 +144,7 @@ def run_tests(na, nc, nprofiles, na_gen, nseeds, filename):
     writer.writerow(['nc', nc])
     writer.writerow(['nprofiles', nprofiles])
     writer.writerow(['na_gen', na_gen])
+    writer.writerow(['pcerrors', pcerrors])
     writer.writerow(['nseeds', nseeds])
     writer.writerow(['', ''])
 
@@ -137,15 +156,15 @@ def run_tests(na, nc, nprofiles, na_gen, nseeds, filename):
 
     # Run the algorithm
     initialized = False
-    for _na, _nc, _nprofiles, _na_gen, seed \
-        in product(na, nc, nprofiles, na_gen, seeds):
+    for _na, _nc, _nprofiles, _na_gen, _pcerrors, seed \
+        in product(na, nc, nprofiles, na_gen, pcerrors, seeds):
 
         t1 = time.time()
-        t = test_sat_rmp(seed, _na, _nc, _nprofiles, _na_gen)
+        t = test_sat_rmp(seed, _na, _nc, _nprofiles, _na_gen, _pcerrors)
         t2 = time.time()
 
         if initialized is False:
-            fields = ['seed', 'na', 'nc', 'nprofiles', 'na_gen',
+            fields = ['seed', 'na', 'nc', 'nprofiles', 'na_gen', 'pcerrors',
                       'ra_learning', 'ra_test', 't_total']
             writer.writerow(fields)
             initialized = True
@@ -160,7 +179,7 @@ def run_tests(na, nc, nprofiles, na_gen, nseeds, filename):
     # Perform a summary
     writer.writerow(['', ''])
 
-    t = results.summary(['na', 'nc', 'nprofiles', 'na_gen'],
+    t = results.summary(['na', 'nc', 'nprofiles', 'na_gen', 'pcerrors'],
                          ['ra_learning', 'ra_test', 't_total'])
     t.tocsv(writer)
 
@@ -179,6 +198,9 @@ if __name__ == "__main__":
     parser.add_option("-p", "--nprofiles", action = "store", type="string",
                       dest = "nprofiles",
                       help = "number of profiles")
+    parser.add_option("-e", "--errors", action = "store", type="string",
+                      dest = "pcerrors",
+                      help = "ratio of errors in the learning set")
     parser.add_option("-g", "--na_gen", action = "store", type="string",
                       dest = "na_gen",
                       help = "number of generalization pairwise comparisons")
@@ -199,6 +221,8 @@ if __name__ == "__main__":
     options.nprofiles = read_multiple_integer(options.nprofiles, "Number of profiles")
     options.na_gen = read_multiple_integer(options.na_gen, "Number of " \
                                            "generalization pairwise comparisons")
+    options.pcerrors = read_multiple_integer(options.pcerrors,
+                                             "Ratio of errors")
     options.nseeds = read_single_integer(options.nseeds, "Number of seeds")
 
     dt = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -209,7 +233,6 @@ if __name__ == "__main__":
 #    if not os.path.exists(directory):
 #        os.makedirs(directory)
 
-    run_tests(options.na, options.nc, options.nprofiles, options.na_gen,
-              options.nseeds, options.filename)
+    run_tests(options)
 
     print("Results saved in '%s'" % options.filename)
