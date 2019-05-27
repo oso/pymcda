@@ -16,6 +16,9 @@ from pymcda.utils import powerset
 
 import pycryptosat
 
+#MAXSAT_SOLVER = "maxhs"
+MAXSAT_SOLVER = "maxino-2015-kdyn"
+
 class SatRMP():
 
     epsilon = 0.001
@@ -39,6 +42,9 @@ class SatRMP():
 
         self.clauses = []
         self.__update_sat()
+
+    def solver(self):
+        return MAXSAT_SOLVER
 
     def print_clause(self, clause):
         var_map = {v: '_'.join(tuple(map(str, k))) for k, v in self.variables.items()}
@@ -395,7 +401,16 @@ class SatRMP():
         f = tempfile.NamedTemporaryFile(delete = False)
         self.__clauses_to_dimacs(f)
         f.flush()
-        output = subprocess.check_output(["maxhs", f.name])
+        try:
+            output = subprocess.check_output([MAXSAT_SOLVER, f.name])
+        except subprocess.CalledProcessError as exception:
+            if exception.returncode != 10 and MAXSAT_SOLVER != "maxino-2015-kdyn":
+                import traceback
+                traceback.print_exc()
+                raise Exception("Solver (%s) returned %d" % (MAXSAT_SOLVER, exception.returncode))
+
+            output = exception.output
+
         output = output.decode("ascii",errors="ignore")
 
         for line in output.splitlines():
