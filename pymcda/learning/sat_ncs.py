@@ -39,7 +39,7 @@ class SatNCS():
         self.nvariables = 0
 
         # z_{i,h,k}
-        self.x = pt.get_unique_values()
+        self.x = self.performance_table.get_unique_values()
         for c in self.criteria:
             for cp in self.categories_profiles:
                 xi = self.x[c.id]
