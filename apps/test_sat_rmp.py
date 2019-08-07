@@ -24,7 +24,7 @@ from test_utils import save_to_xmcda
 
 DATADIR = os.getenv('DATADIR', '%s/pymcda-data' % os.path.expanduser('~'))
 
-def test_sat_rmp(seed, na, nc, nprofiles, na_gen, pcerrors):
+def test_sat_rmp(seed, na, nc, nprofiles, nprofiles2, na_gen, pcerrors):
 
     random.seed(2 ** seed + 3 ** na + 5 ** nc + 7 ** nprofiles)
 
@@ -69,7 +69,11 @@ def test_sat_rmp(seed, na, nc, nprofiles, na_gen, pcerrors):
     # Run the SAT
     t1 = time.time()
 
-    model2 = RMP(c, None, b, None)
+    if nprofiles != nprofiles2:
+        b2 = [ "b%d" % i for i in range(1, nprofiles2 + 1)]
+    else:
+        b2 = b
+    model2 = RMP(c, None, b2, None)
 
     satrmp = SatRMP(model2, pt, pwcs)
     solution = satrmp.solve(True)
@@ -115,6 +119,7 @@ def test_sat_rmp(seed, na, nc, nprofiles, na_gen, pcerrors):
     t['na'] = na
     t['nc'] = nc
     t['nprofiles'] = nprofiles
+    t['nprofiles2'] = nprofiles2
     t['na_gen'] = na_gen
     t['pcerrors'] = pcerrors
 
@@ -129,6 +134,7 @@ def run_tests(options):
     na = options.na
     nc = options.nc
     nprofiles = options.nprofiles
+    nprofiles2 = options.nprofiles2
     na_gen = options.na_gen
     pcerrors = options.pcerrors
     nseeds = options.nseeds
@@ -143,6 +149,7 @@ def run_tests(options):
     writer.writerow(['na', na])
     writer.writerow(['nc', nc])
     writer.writerow(['nprofiles', nprofiles])
+    writer.writerow(['nprofiles2', nprofiles2])
     writer.writerow(['na_gen', na_gen])
     writer.writerow(['pcerrors', pcerrors])
     writer.writerow(['nseeds', nseeds])
@@ -156,16 +163,17 @@ def run_tests(options):
 
     # Run the algorithm
     initialized = False
-    for _na, _nc, _nprofiles, _na_gen, _pcerrors, seed \
-        in product(na, nc, nprofiles, na_gen, pcerrors, seeds):
+    for _na, _nc, _nprofiles, _nprofiles2,  _na_gen, _pcerrors, seed \
+        in product(na, nc, nprofiles, nprofiles2, na_gen, pcerrors, seeds):
 
         t1 = time.time()
-        t = test_sat_rmp(seed, _na, _nc, _nprofiles, _na_gen, _pcerrors)
+        t = test_sat_rmp(seed, _na, _nc, _nprofiles, _nprofiles2, _na_gen,
+                         _pcerrors)
         t2 = time.time()
 
         if initialized is False:
-            fields = ['seed', 'na', 'nc', 'nprofiles', 'na_gen', 'pcerrors',
-                      'ra_learning', 'ra_test', 't_total']
+            fields = ['seed', 'na', 'nc', 'nprofiles', 'nprofiles2', 'na_gen',
+                      'pcerrors', 'ra_learning', 'ra_test', 't_total']
             writer.writerow(fields)
             initialized = True
 
@@ -179,8 +187,9 @@ def run_tests(options):
     # Perform a summary
     writer.writerow(['', ''])
 
-    t = results.summary(['na', 'nc', 'nprofiles', 'na_gen', 'pcerrors'],
-                         ['ra_learning', 'ra_test', 't_total'])
+    t = results.summary(['na', 'nc', 'nprofiles', 'nprofiles2', 'na_gen',
+                         'pcerrors'],
+                        ['ra_learning', 'ra_test', 't_total'])
     t.tocsv(writer)
 
 if __name__ == "__main__":
@@ -198,6 +207,9 @@ if __name__ == "__main__":
     parser.add_option("-p", "--nprofiles", action = "store", type="string",
                       dest = "nprofiles",
                       help = "number of profiles")
+    parser.add_option("-q", "--nprofiles2", action = "store", type="string",
+                      dest = "nprofiles2",
+                      help = "number of profiles of learned model")
     parser.add_option("-e", "--errors", action = "store", type="string",
                       dest = "pcerrors",
                       help = "ratio of errors in the learning set")
@@ -218,7 +230,10 @@ if __name__ == "__main__":
     options.na = read_multiple_integer(options.na,
                                        "Number of pairwise comparisons")
     options.nc = read_multiple_integer(options.nc, "Number of criteria")
-    options.nprofiles = read_multiple_integer(options.nprofiles, "Number of profiles")
+    options.nprofiles = read_multiple_integer(options.nprofiles,
+                                              "Number of profiles")
+    options.nprofiles2 = read_multiple_integer(options.nprofiles2,
+                                               "Number of profiles of learned model")
     options.na_gen = read_multiple_integer(options.na_gen, "Number of " \
                                            "generalization pairwise comparisons")
     options.pcerrors = read_multiple_integer(options.pcerrors,
