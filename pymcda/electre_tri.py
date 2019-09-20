@@ -297,7 +297,7 @@ class MRSort(ElectreTri):
 
     def __init__(self, criteria = None, cv = None, bpt = None,
                  lbda = None, categories_profiles = None, veto = None,
-                 veto_weights = None, veto_lbda = None, id = None):
+                 veto_weights = None, veto_lbda = None):
         super(MRSort, self).__init__(criteria, cv, bpt, lbda,
                                      categories_profiles)
         self.veto = veto
