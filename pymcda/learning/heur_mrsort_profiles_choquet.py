@@ -177,7 +177,7 @@ class MetaMRSortProfilesChoquet():
         for i in range(len(cids)):
             for c in  combinations(cids, i + 1):
                 s = frozenset(c)
-                wsum = self.model.coalition_weight(s)
+                wsum = self.model.coalition_weight(s, self.model.cv)
                 self.mobius[s] = wsum
 
     def rebuild_tables(self):

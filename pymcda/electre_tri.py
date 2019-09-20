@@ -342,8 +342,8 @@ class MRSort(ElectreTri):
         return sum([c.value for c in self.cv
                     if c.id_issubset(criteria_set) is True])
 
-    def coalition_weight(self, criteria_coalition):
-        return sum([c.value for c in self.cv
+    def coalition_weight(self, criteria_coalition, cv):
+        return sum([c.value for c in cv
                    if c.id_issubset(criteria_coalition) is True])
 
     def veto_concordance(self, ap, profile):
