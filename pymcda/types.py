@@ -1160,6 +1160,9 @@ class AlternativePerformances(McdaObject):
 
         return string[:string.rfind('\n')]
 
+    def __getitem__(self, key):
+        return self.performances[key]
+
     def __mathop(self, value, op):
         out = AlternativePerformances(self.id)
         if type(value) == float or type(value) == int:
