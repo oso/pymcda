@@ -78,6 +78,17 @@ class MipSnr(object):
     def add_constraints(self):
         constraints = self.lp.linear_constraints
 
+        constraints.add(names = ["wsum"],
+                        lin_expr =
+                            [
+                                [["w_%s" % j
+                                  for j in self.model.criteria.keys()],
+                                 [1 for j in self.model.criteria.keys()]]
+                            ],
+                        senses = ["E"],
+                        rhs = [1]
+                       )
+
         for j, bh, a in product(self.model.criteria.keys(), self.profiles, self.aa.keys()):
             constraints.add(names = ["dsup_%s_%s_%s" % (j, a, bh)],
                             lin_expr =
@@ -95,10 +106,10 @@ class MipSnr(object):
                                 [
                                  [["delta_%s_%s_%s" % (j, a, bh),
                                    "%s_%s" % (bh, j)],
-                                  [1, 1]]
+                                  [self.bigm, 1]]
                                 ],
                             senses = ["L"],
-                            rhs = [self.pt[a][j] + 1]
+                            rhs = [self.pt[a][j] + self.bigm]
                            )
 
             constraints.add(names = ["wj1_%s_%s_%s" % (j, a, bh)],
@@ -164,6 +175,39 @@ class MipSnr(object):
                             rhs = [self.bigm]
                            )
 
+        for aa in self.aa.values():
+            a = aa.id
+            ci = self.categories.index(aa.category_id)
+
+            for i in range(ci):
+                bh = self.profiles[i]
+                constraints.add(names = ["omega_inf_%s_%s" % (a, bh)],
+                                lin_expr =
+                                    [
+                                     [["omega_%s_%s_%s" % (j, a, bh)
+                                       for j in self.model.criteria.keys()] +
+                                       ["lambda"],
+                                      [1 for j in self.model.criteria.keys()]
+                                       + [-1]]
+                                    ],
+                                senses = ["G"],
+                                rhs = [0]
+                               )
+
+            for i in range(ci, len(self.categories) - 1):
+                bh = self.profiles[i]
+                constraints.add(names = ["omega_sup_%s_%s" % (a, bh)],
+                                lin_expr =
+                                    [
+                                     [["omega_%s_%s_%s" % (j, a, bh)
+                                       for j in self.model.criteria.keys()] +
+                                       ["lambda"],
+                                      [1 for j in self.model.criteria.keys()]
+                                       + [-1]]
+                                    ],
+                                senses = ["L"],
+                                rhs = [-self.epsilon]
+                               )
 
         for pwc in self.pwcs:
             constraints.add(names = ["dom_%s_%s" % (pwc.a, pwc.b)],
@@ -235,7 +279,7 @@ class MipSnr(object):
                                      [["e_%s_%s_%s" % (pwc.a, pwc.b, bh),
                                        "delta2_%s_%s_%s" % (bhmin, pwc.a, pwc.b),
                                        "delta2_%s_%s_%s" % (bh, pwc.a, pwc.b)],
-                                      [self.bigm, -self.bigm, -1]]
+                                      [self.bigm, -self.bigm, -0.5]]
                                     ],
                                 senses = ["L"],
                                 rhs = [self.bigm])
@@ -258,7 +302,7 @@ class MipSnr(object):
             cvs.append(cv)
         self.model.cv = cvs
 
-        self.model.lbda = self.lp.solution.get_values("lambda")
+        self.model.lbda = round(self.lp.solution.get_values("lambda"), 5)
 
         pt = PerformanceTable()
         for bh in self.profiles:
@@ -331,6 +375,7 @@ if __name__ == "__main__":
     categories_cvs = {"cat1": cvs1, "cat2": cvs2, "cat3": cvs3}
 
     snr = SortAndRank(criteria, cvs, bpt, lbda, cpbs, categories_cvs)
+    print(snr.cv)
 
     pwc1 = snr.compare(ap1, ap2)
     pwc2 = snr.compare(ap2, ap3)
@@ -339,11 +384,17 @@ if __name__ == "__main__":
     pwc5 = snr.compare(ap5, ap6)
     pwcs = PairwiseRelations([pwc1, pwc2, pwc3, pwc4, pwc5])
 
+    print(pt)
+    print(bpt)
     aa = snr.get_assignments(pt)
     print(aa)
 
     mip = MipSnr(snr, pt, aa, pwcs)
     mip.solve()
 
+    print(snr.bpt)
+    print(snr.cv)
+    print(snr.lbda)
+    print(pt)
     aa = snr.get_assignments(pt)
     print(aa)
