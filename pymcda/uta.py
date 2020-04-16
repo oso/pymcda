@@ -6,6 +6,7 @@ from pymcda.types import AlternativeAssignment
 from pymcda.types import AlternativesAssignments
 from pymcda.types import Criteria, CriteriaValues, CriteriaFunctions
 from pymcda.types import CategoriesValues
+from pymcda.types import PairwiseRelation
 from pymcda.types import find_xmcda_tag
 from itertools import product
 from xml.etree import ElementTree
@@ -45,6 +46,16 @@ class Uta(object):
             au.append(av)
 
         return au
+
+    def compare(self, ap1, ap2):
+        u1 = self.global_utility(ap1)
+        u2 = self.global_utility(ap2)
+        if u1.value > u2.value:
+            return PairwiseRelation(ap1.id, ap2.id, PairwiseRelation.PREFERRED)
+        elif u1.value < u2.value:
+            return PairwiseRelation(ap1.id, ap2.id, PairwiseRelation.WEAKER)
+
+        return PairwiseRelation(ap1.id, ap2.id, PairwiseRelation.INDIFFERENT)
 
     def set_equal_weights(self):
         self.cvs.normalize_sum_to_unity()
