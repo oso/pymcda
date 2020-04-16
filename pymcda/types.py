@@ -131,12 +131,12 @@ class McdaDict(object):
     def iterkeys(self):
         """Return an iterator over the MCDA dictionary's object IDs"""
 
-        return self._d.iterkeys()
+        return iter(self._d.keys())
 
     def itervalues(self):
         """Return an iterator over the MCDA dictionary's object IDs"""
 
-        return self._d.itervalues()
+        return iter(self._d.values())
 
     def keys(self):
         """Return the list of MCDA object IDs contained in the MCDA
