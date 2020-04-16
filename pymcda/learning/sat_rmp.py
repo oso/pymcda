@@ -398,7 +398,7 @@ class SatRMP():
     def solve_maxsat(self):
         import tempfile
         import subprocess
-        f = tempfile.NamedTemporaryFile(delete = False)
+        f = tempfile.NamedTemporaryFile(delete = False, mode="w+")
         self.__clauses_to_dimacs(f)
         f.flush()
         try:
