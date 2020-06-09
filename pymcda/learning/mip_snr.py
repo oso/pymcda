@@ -13,7 +13,7 @@ class MipSnr(object):
         self.pwcs = pwcs
 
         self.bigm = 10000
-        self.epsilon = 0.00001
+        self.epsilon = 0.0001
 
         self.ap_min = pt.get_min()
         self.ap_max = pt.get_max()
@@ -69,9 +69,6 @@ class MipSnr(object):
                                for pwc in self.pwcs
                                for bh in self.profiles])
         variables.add(names = ["delta2_%s_%s_%s" % (bh, pwc.a, pwc.b)
-                               for bh in self.profiles
-                               for pwc in self.pwcs],
-                      types = [self.lp.variables.type.binary
                                for bh in self.profiles
                                for pwc in self.pwcs])
 
@@ -258,7 +255,6 @@ class MipSnr(object):
                                     ],
                                 senses = ["E"],
                                 rhs = [0])
-
                 if h == 0:
                     continue
 
@@ -363,15 +359,24 @@ if __name__ == "__main__":
     cpb2 = CategoryProfile("b2", Limits("cat2", "cat3"))
     cpbs = CategoriesProfiles([cpb1, cpb2])
 
-    cvs1 = CriteriaValues([CriterionValue("c1", 40),
-                           CriterionValue("c2", 25),
-                           CriterionValue("c3", 35)])
-    cvs2 = CriteriaValues([CriterionValue("c1", 35),
-                           CriterionValue("c2", 40),
-                           CriterionValue("c3", 25)])
-    cvs3 = CriteriaValues([CriterionValue("c1", 25),
-                           CriterionValue("c2", 35),
-                           CriterionValue("c3", 40)])
+    cvs1 = CriteriaValues([CriterionValue("c1", 1),
+                           CriterionValue("c2", 1),
+                           CriterionValue("c3", 1)])
+    cvs2 = CriteriaValues([CriterionValue("c1", 1),
+                           CriterionValue("c2", 1),
+                           CriterionValue("c3", 1)])
+    cvs3 = CriteriaValues([CriterionValue("c1", 1),
+                           CriterionValue("c2", 1),
+                           CriterionValue("c3", 1)])
+#    cvs1 = CriteriaValues([CriterionValue("c1", 40),
+#                           CriterionValue("c2", 25),
+#                           CriterionValue("c3", 35)])
+#    cvs2 = CriteriaValues([CriterionValue("c1", 35),
+#                           CriterionValue("c2", 40),
+#                           CriterionValue("c3", 25)])
+#    cvs3 = CriteriaValues([CriterionValue("c1", 25),
+#                           CriterionValue("c2", 35),
+#                           CriterionValue("c3", 40)])
     categories_cvs = {"cat1": cvs1, "cat2": cvs2, "cat3": cvs3}
 
     snr = SortAndRank(criteria, cvs, bpt, lbda, cpbs, categories_cvs)
@@ -383,6 +388,7 @@ if __name__ == "__main__":
     pwc4 = snr.compare(ap4, ap5)
     pwc5 = snr.compare(ap5, ap6)
     pwcs = PairwiseRelations([pwc1, pwc2, pwc3, pwc4, pwc5])
+    print(pwcs)
 
     print(pt)
     print(bpt)
@@ -397,4 +403,11 @@ if __name__ == "__main__":
     print(snr.lbda)
     print(pt)
     aa = snr.get_assignments(pt)
+    pwc1 = snr.compare(ap1, ap2)
+    pwc2 = snr.compare(ap2, ap3)
+    pwc3 = snr.compare(ap3, ap4)
+    pwc4 = snr.compare(ap4, ap5)
+    pwc5 = snr.compare(ap5, ap6)
+    pwcs = PairwiseRelations([pwc1, pwc2, pwc3, pwc4, pwc5])
+    print(pwcs)
     print(aa)
