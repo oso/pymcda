@@ -12,7 +12,7 @@ class MipSnr(object):
         self.aa = aa
         self.pwcs = pwcs
 
-        self.bigm = 10000
+        self.bigm = 10
         self.epsilon = 0.0001
 
         self.ap_min = pt.get_min()
@@ -56,18 +56,18 @@ class MipSnr(object):
                       lb = [0 for j in self.model.criteria.keys()
                               for a in self.aa.keys()
                               for bh in self.profiles])
-        variables.add(names = ["y_%s_%s" % (a, bh)
+        variables.add(names = ["y_%s_%s" % (a, cat)
                                for a in self.aa.keys()
-                               for bh in self.profiles],
+                               for cat in self.categories],
                       types = [self.lp.variables.type.binary
                                for a in self.aa.keys()
-                               for bh in self.profiles])
-        variables.add(names = ["e_%s_%s_%s" % (pwc.a, pwc.b, bh)
+                               for cat in self.categories])
+        variables.add(names = ["e_%s_%s_%s" % (pwc.a, pwc.b, cat)
                                for pwc in self.pwcs
-                               for bh in self.profiles],
+                               for cat in self.categories],
                       types = [self.lp.variables.type.binary
                                for pwc in self.pwcs
-                               for bh in self.profiles])
+                               for cat in self.categories])
         variables.add(names = ["delta2_%s_%s_%s" % (bh, pwc.a, pwc.b)
                                for bh in self.profiles
                                for pwc in self.pwcs])
@@ -143,33 +143,53 @@ class MipSnr(object):
                             rhs = [-1]
                            )
 
-        for bh, a in product(self.profiles, self.aa.keys()):
-            constraints.add(names = ["yah1_%s_%s" % (a, bh)],
-                            lin_expr =
-                                [
-                                 [["omega_%s_%s_%s" % (j, a, bh)
-                                   for j in self.model.criteria.keys()] +
-                                   ["lambda"] +
-                                   ["y_%s_%s" % (a, bh)],
-                                  [1 for j in self.model.criteria.keys()]
-                                   + [-1, self.bigm]]
-                                ],
-                            senses = ["L"],
-                            rhs = [self.bigm - self.epsilon]
-                           )
+        lower_profile = [None] + self.profiles
+        upper_profile = self.profiles + [None]
+        categories_lower_profile = dict(zip(self.categories, lower_profile))
+        categories_upper_profile = dict(zip(self.categories, upper_profile))
+        for cat, a in product(self.categories, self.aa.keys()):
+            bh = categories_lower_profile[cat]
+            bhup = categories_upper_profile[cat]
 
-            constraints.add(names = ["yah2_%s_%s" % (a, bh)],
+            if bhup is not None:
+                constraints.add(names = ["yah1_%s_%s" % (a, cat)],
+                                lin_expr =
+                                    [
+                                     [["omega_%s_%s_%s" % (j, a, bhup)
+                                       for j in self.model.criteria.keys()] +
+                                       ["lambda"] +
+                                       ["y_%s_%s" % (a, cat)],
+                                      [1 for j in self.model.criteria.keys()]
+                                       + [-1, self.bigm]]
+                                    ],
+                                senses = ["L"],
+                                rhs = [self.bigm - self.epsilon]
+                               )
+
+            if bh is not None:
+                constraints.add(names = ["yah2_%s_%s" % (a, cat)],
+                                lin_expr =
+                                    [
+                                     [["omega_%s_%s_%s" % (j, a, bh)
+                                       for j in self.model.criteria.keys()] +
+                                       ["lambda"] +
+                                       ["y_%s_%s" % (a, cat)],
+                                      [-1 for j in self.model.criteria.keys()]
+                                       + [1, self.bigm]]
+                                    ],
+                                senses = ["L"],
+                                rhs = [self.bigm]
+                               )
+
+        for a in self.aa.keys():
+            constraints.add(names = ["yah3_%s" % a],
                             lin_expr =
                                 [
-                                 [["omega_%s_%s_%s" % (j, a, bh)
-                                   for j in self.model.criteria.keys()] +
-                                   ["lambda"] +
-                                   ["y_%s_%s" % (a, bh)],
-                                  [-1 for j in self.model.criteria.keys()]
-                                   + [1, self.bigm]]
+                                 [["y_%s_%s" % (a, cat) for cat in self.categories],
+                                  [1 for cat in self.categories]]
                                 ],
-                            senses = ["L"],
-                            rhs = [self.bigm]
+                            senses = ["E"],
+                            rhs = [1]
                            )
 
         for aa in self.aa.values():
@@ -210,81 +230,120 @@ class MipSnr(object):
             constraints.add(names = ["dom_%s_%s" % (pwc.a, pwc.b)],
                             lin_expr =
                                 [
-                                 [["y_%s_%s" % (pwc.a, bh)
-                                   for bh in self.profiles] +
-                                  ["y_%s_%s" % (pwc.b, bh)
-                                   for bh in self.profiles],
-                                  [i for i in range(len(self.profiles))]
-                                   + [-i for i in range(len(self.profiles))]]
+                                 [["y_%s_%s" % (pwc.b, cat)
+                                   for cat in self.categories[1:]] +
+                                  ["y_%s_%s" % (pwc.a, cat)
+                                   for cat in self.categories[1:]],
+                                  [i for i in range(2, len(self.categories) + 1)]
+                                   + [-i for i in range(2, len(self.categories) + 1)]]
                                 ],
                             senses = ["L"],
                             rhs = [0])
 
-            for h, bh in enumerate(self.profiles):
-                constraints.add(names = ["eps1_%s_%s_%s" % (pwc.a, pwc.b, bh)],
+            for cat in self.categories:
+                bh = categories_lower_profile[cat]
+                bhup = categories_upper_profile[cat]
+                constraints.add(names = ["eps1_%s_%s_%s" % (pwc.a, pwc.b, cat)],
                                 lin_expr =
                                     [
-                                     [["e_%s_%s_%s" % (pwc.a, pwc.b, bh),
-                                       "y_%s_%s" % (pwc.a, bh)],
+                                     [["e_%s_%s_%s" % (pwc.a, pwc.b, cat),
+                                       "y_%s_%s" % (pwc.a, cat)],
                                       [1, -1]]
                                     ],
                                 senses = ["L"],
                                 rhs = [0])
 
-                constraints.add(names = ["eps2_%s_%s_%s" % (pwc.a, pwc.b, bh)],
+                constraints.add(names = ["eps2_%s_%s_%s" % (pwc.a, pwc.b, cat)],
                                 lin_expr =
                                     [
-                                     [["e_%s_%s_%s" % (pwc.a, pwc.b, bh),
-                                       "y_%s_%s" % (pwc.b, bh)],
+                                     [["e_%s_%s_%s" % (pwc.a, pwc.b, cat),
+                                       "y_%s_%s" % (pwc.b, cat)],
                                       [1, -1]]
                                     ],
                                 senses = ["L"],
                                 rhs = [0])
 
-                constraints.add(names = ["delta2_%s_%s_%s" % (bh, pwc.a, pwc.b)],
+                constraints.add(names = ["eps3_%s_%s_%s" % (pwc.a, pwc.b, cat)],
                                 lin_expr =
                                     [
-                                     [["delta2_%s_%s_%s" % (bh, pwc.a, pwc.b)] +
-                                      ["omega_%s_%s_%s" % (j, pwc.a, bh)
-                                       for j in self.model.criteria.keys()] +
-                                      ["omega_%s_%s_%s" % (j, pwc.b, bh)
-                                       for j in self.model.criteria.keys()],
-                                     [1] +
-                                     [-1 for j in self.model.criteria.keys()] +
-                                     [1 for j in self.model.criteria.keys()]]
-                                    ],
-                                senses = ["E"],
-                                rhs = [0])
-                if h == 0:
-                    continue
-
-                bhmin = self.profiles[h - 1]
-                constraints.add(names = ["eps2a_%s_%s_%s" % (bh, pwc.a, pwc.b)],
-                                lin_expr =
-                                    [
-                                     [["e_%s_%s_%s" % (pwc.a, pwc.b, bh),
-                                       "delta2_%s_%s_%s" % (bhmin, pwc.a, pwc.b)],
-                                      [self.bigm, -1]]
+                                     [["e_%s_%s_%s" % (pwc.a, pwc.b, cat),
+                                       "y_%s_%s" % (pwc.a, cat),
+                                       "y_%s_%s" % (pwc.b, cat)],
+                                      [-1, 1, 1]]
                                     ],
                                 senses = ["L"],
-                                rhs = [self.bigm])
+                                rhs = [1])
 
-                constraints.add(names = ["eps2a_%s_%s_%s" % (bh, pwc.a, pwc.b)],
-                                lin_expr =
-                                    [
-                                     [["e_%s_%s_%s" % (pwc.a, pwc.b, bh),
-                                       "delta2_%s_%s_%s" % (bhmin, pwc.a, pwc.b),
-                                       "delta2_%s_%s_%s" % (bh, pwc.a, pwc.b)],
-                                      [self.bigm, -self.bigm, -0.5]]
-                                    ],
-                                senses = ["L"],
-                                rhs = [self.bigm])
+                if bh is not None:
+                    constraints.add(names = ["delta2a_%s_%s_%s" % (bh, pwc.a, pwc.b)],
+                                    lin_expr =
+                                        [
+                                         [["delta2_%s_%s_%s" % (bh, pwc.a, pwc.b)] +
+                                          ["omega_%s_%s_%s" % (j, pwc.a, bh)
+                                           for j in self.model.criteria.keys()] +
+                                          ["omega_%s_%s_%s" % (j, pwc.b, bh)
+                                           for j in self.model.criteria.keys()],
+                                         [1] +
+                                         [-1 for j in self.model.criteria.keys()] +
+                                         [1 for j in self.model.criteria.keys()]]
+                                        ],
+                                    senses = ["E"],
+                                    rhs = [0])
+
+                    constraints.add(names = ["delta2b_%s_%s_%s" % (bh, pwc.a, pwc.b)],
+                                    lin_expr =
+                                        [
+                                         [["e_%s_%s_%s" % (pwc.a, pwc.b, cat),
+                                           "delta2_%s_%s_%s" % (bh, pwc.a, pwc.b)],
+                                          [self.bigm, -1]]
+                                        ],
+                                    senses = ["L"],
+                                    rhs = [self.bigm])
+
+                    if bhup is not None:
+                        constraints.add(names = ["delta2c_%s_%s_%s" % (bh, pwc.a, pwc.b)],
+                                        lin_expr =
+                                            [
+                                             [["e_%s_%s_%s" % (pwc.a, pwc.b, cat),
+                                               "delta2_%s_%s_%s" % (bh, pwc.a, pwc.b),
+                                               "delta2_%s_%s_%s" % (bhup, pwc.a, pwc.b)],
+                                              [self.bigm, -0.5 * self.bigm, -1]]
+                                            ],
+                                        senses = ["L"],
+                                        rhs = [self.bigm])
+                else:
+                    constraints.add(names = ["delta2d_%s_%s_%s" % (bhup, pwc.a, pwc.b)],
+                                    lin_expr =
+                                        [
+                                         [["e_%s_%s_%s" % (pwc.a, pwc.b, cat),
+                                           "delta2_%s_%s_%s" % (bhup, pwc.a, pwc.b)],
+                                          [self.bigm, -1]]
+                                        ],
+                                    senses = ["L"],
+                                    rhs = [self.bigm])
+
 
     def add_objective(self):
-        pass
+        return
 
     def solve(self):
         self.lp.solve()
+#        print(self.lp.solution.get_values('e_%s_%s_%s' % ("c", "d", "cat2")))
+        print(self.lp.solution.get_values('e_%s_%s_%s' % ("a", "b", "cat1")))
+        print(self.lp.solution.get_values('e_%s_%s_%s' % ("b", "c", "cat1")))
+        print(self.lp.solution.get_values('e_%s_%s_%s' % ("c", "d", "cat1")))
+        print(self.lp.solution.get_values('e_%s_%s_%s' % ("d", "e", "cat1")))
+        print(self.lp.solution.get_values('e_%s_%s_%s' % ("e", "f", "cat1")))
+        print(self.lp.solution.get_values('e_%s_%s_%s' % ("a", "b", "cat2")))
+        print(self.lp.solution.get_values('e_%s_%s_%s' % ("b", "c", "cat2")))
+        print(self.lp.solution.get_values('e_%s_%s_%s' % ("c", "d", "cat2")))
+        print(self.lp.solution.get_values('e_%s_%s_%s' % ("d", "e", "cat2")))
+        print(self.lp.solution.get_values('e_%s_%s_%s' % ("e", "f", "cat2")))
+        print(self.lp.solution.get_values('e_%s_%s_%s' % ("a", "b", "cat3")))
+        print(self.lp.solution.get_values('e_%s_%s_%s' % ("b", "c", "cat3")))
+        print(self.lp.solution.get_values('e_%s_%s_%s' % ("c", "d", "cat3")))
+        print(self.lp.solution.get_values('e_%s_%s_%s' % ("d", "e", "cat3")))
+        print(self.lp.solution.get_values('e_%s_%s_%s' % ("e", "f", "cat3")))
 
         status = self.lp.solution.get_status()
         if status != self.lp.solution.status.MIP_optimal:
