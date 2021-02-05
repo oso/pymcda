@@ -10,6 +10,7 @@ from pymcda.types import PairwiseRelation
 from pymcda.types import PairwiseRelations
 from pymcda.rmp import RMP
 from pymcda.learning.sat_rmp import SatRMP
+from pymcda.utils import compute_minimal_winning_coalitions
 
 c1 = Criterion("pp")
 c2 = Criterion("tp")
@@ -113,7 +114,11 @@ solution = satrmp.solve()
 
 if solution is False:
     print("Warning: solution is UNSAT")
+    import time
+    t1 = time.time()
     solution = satrmp.solve(True)
+    t2 = time.time()
+    print("Computing time: %d sec" % (t2 - t1))
     if solution is False:
         print("Warning: no MaxSAT solution")
         sys.exit(1)
@@ -127,6 +132,46 @@ for pwc in pwcs:
         print(pt[pwc.a])
         print(pt[pwc.b])
 
+    pwcs2.append(pwc2)
+
 print(model.profiles)
 print(model.bpt)
-#print(model.coalition_relations)
+print(model.coalition_relations)
+
+orig_stdout = sys.stdout
+with open("liu_et_al-%d-profils.csv" % nprofiles, "w") as f:
+    sys.stdout = f
+
+    print("nprofiles,%d\n" % nprofiles)
+    print("," + ",".join(model.criteria.keys()))
+    for profile in model.profiles:
+        print(profile, end = ",")
+        for c in model.criteria.keys():
+            print(model.bpt[profile][c], end = ",")
+        print("")
+    print("")
+
+    for cb1 in satrmp.criteria_combinations:
+        print("-".join(cb1), end = ',')
+    print("")
+    for cb1 in satrmp.criteria_combinations:
+        if len(cb1) == 0:
+            continue
+
+        print("-".join(cb1), end = ',')
+        for cb2 in satrmp.criteria_combinations:
+            if len(cb2) == 0:
+                continue
+
+            print(model.coalition_relations[tuple(cb1)][tuple(cb2)], end = ",")
+
+        print("")
+    print("")
+
+    print("Pairwise relations")
+    for pwc in pwcs2:
+        print("%s,%s,%s" % (pwc.a, pwc.relation_string(), pwc.b))
+
+    f.close()
+
+sys.stdout = orig_stdout
