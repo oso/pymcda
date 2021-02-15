@@ -187,6 +187,18 @@ class SatRMP():
                     v3 = self.variables[('y', combi, combi3)]
                     self.add_clause([-v1, -v2, v3])
 
+        # Ceteris paribus
+        for combi in self.criteria_combinations:
+            for combi2 in self.criteria_combinations:
+                v1 = self.variables[('y', combi, combi2)]
+
+                c1 = tuple(sorted(set(combi) - set(combi2)))
+                c2 = tuple(sorted(set(combi2) - set(combi)))
+                v2 = self.variables[('y', c1, c2)]
+
+                self.add_clause([v1, -v2])
+                self.add_clause([-v1, v2])
+
         # Add phi outranking 1
         for a in self.criteria_combinations:
             for b in self.criteria_combinations:
