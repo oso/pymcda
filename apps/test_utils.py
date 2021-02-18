@@ -13,6 +13,8 @@ from xml.etree import ElementTree
 from pymcda.types import Alternatives, Criteria, PerformanceTable
 from pymcda.types import AlternativesAssignments, Categories
 
+raw_input = input
+
 class test_result():
 
     def __init__(self, test_name):
@@ -97,13 +99,15 @@ class test_results(list):
             tr.set_attributes_order(order)
 
     def summary(self, unique_fields, average_fields, min_fields = None,
-                max_fields = None, std_fields = None):
+                max_fields = None, std_fields = None, ic_fields = None):
         if min_fields is None:
             min_fields = average_fields
         if max_fields is None:
             max_fields = average_fields
         if std_fields is None:
             std_fields = average_fields
+        if ic_fields is None:
+            ic_fields = average_fields
 
         # Research uniques values for each field
         unique_values = {}
@@ -154,6 +158,12 @@ class test_results(list):
                         max_values = [ max(x) for x in v ]
                         for i, val in enumerate(max_values):
                             tr["%s%d_max" % (af, i)] = val
+
+                    if af in ic_fields:
+                        ic_values = [1.83 * len(x) ** -0.5 * (1 / (len(x) - 1) * sum((xi - sum(x) / len(x)) ** 2 for xi in x)) for x in v]
+                        for i, val in enumerate(ic_values):
+                            tr["%s%d_ic" % (af, i)] = val
+
                 else:
                     v = [ r[af] for r in l ]
                     tr["%s_avg" % af] = sum(v) / len(v)
@@ -166,6 +176,8 @@ class test_results(list):
                         tr["%s_min" % af] = min(v)
                     if af in max_fields:
                         tr["%s_max" % af] = max(v)
+                    if af in ic_fields:
+                        tr["%s_ic" % af] = 1.83 * len(v) ** -0.5 * (1 / (len(v) - 1) * sum((xi - sum(v) / len(v)) ** 2 for xi in v))
 
             trs.append(tr)
 
