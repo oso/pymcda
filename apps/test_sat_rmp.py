@@ -141,7 +141,7 @@ def run_tests(options):
     filename = options.filename
 
     # Create the CSV writer
-    f = open(filename, 'wb')
+    f = open(filename, 'w')
     writer = csv.writer(f)
 
     # Write the test options
