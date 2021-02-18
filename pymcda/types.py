@@ -2640,16 +2640,19 @@ class PairwiseRelation(McdaObject):
         self.b = b
         self.relation = relation
 
+    def relation_string(self):
+        if self.relation == self.WEAKER:
+            return "<"
+        elif self.relation == self.INDIFFERENT:
+            return "="
+        elif self.relation == self.PREFERRED:
+            return ">"
+        else:
+            return "?"
+
     def __repr__(self):
         """Manner to represent the MCDA object"""
-        if self.relation == self.WEAKER:
-            rel = "<"
-        elif self.relation == self.INDIFFERENT:
-            rel = "="
-        elif self.relation == self.PREFERRED:
-            rel = ">"
-        else:
-            rel = "?"
+        rel = self.relation_string()
 
         return "PairwiseRelation(%s %s %s)" % (self.a, rel, self.b)
 
