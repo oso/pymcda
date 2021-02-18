@@ -163,7 +163,7 @@ with open("liu_et_al-%d-profils.csv" % nprofiles, "w") as f:
             if len(cb2) == 0:
                 continue
 
-            print(model.coalition_relations[tuple(cb1)][tuple(cb2)], end = ",")
+            print(1 if model.coalition_relations[tuple(cb1)][tuple(cb2)] is True else 0, end = ",")
 
         print("")
     print("")
@@ -171,6 +171,27 @@ with open("liu_et_al-%d-profils.csv" % nprofiles, "w") as f:
     print("Pairwise relations")
     for pwc in pwcs2:
         print("%s,%s,%s" % (pwc.a, pwc.relation_string(), pwc.b))
+    print("")
+
+    print("Preorder on criteria coalition")
+    score_coalitions = {}
+    for coa, relation in model.coalition_relations.items():
+        s = sum(relation.values())
+        if s in score_coalitions:
+            score_coalitions[s].append(coa)
+        else:
+            score_coalitions[s] = [coa]
+
+    for s in sorted(score_coalitions):
+        print("[", end = "")
+        l = []
+        for coa in score_coalitions[s]:
+            l.append("-".join(coa))
+        print(", ".join(l), end = "")
+        print("]",)
+    print("")
+    print("Number of classes")
+    print(len(score_coalitions))
 
     f.close()
 
