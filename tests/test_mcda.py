@@ -159,7 +159,7 @@ class tests_Segment(unittest.TestCase):
         p1 = Point(0, 0)
         p2 = Point(5, 5)
         s = Segment('s1', p1, p2)
-        self.assertEquals(s.y(0), 0)
+        self.assertEqual(s.y(0), 0)
 
     def test005(self):
         p1 = Point(0, 0)
@@ -177,7 +177,7 @@ class tests_Segment(unittest.TestCase):
         p1 = Point(0, 0)
         p2 = Point(5, 5)
         s = Segment('s1', p1, p2, True, True)
-        self.assertEquals(s.y(5), 5)
+        self.assertEqual(s.y(5), 5)
 
 class tests_PiecewiseLinear(unittest.TestCase):
 
@@ -191,7 +191,7 @@ class tests_PiecewiseLinear(unittest.TestCase):
         s2 = Segment('s2', p3, p4)
 
         plf = PiecewiseLinear([s1, s2])
-        self.assertEquals(plf.y(3), 7)
+        self.assertEqual(plf.y(3), 7)
 
     def test002(self):
         p1 = Point(0, 0)
@@ -203,7 +203,7 @@ class tests_PiecewiseLinear(unittest.TestCase):
         s2 = Segment('s2', p3, p4)
 
         plf = PiecewiseLinear([s1, s2])
-        self.assertEquals(plf.y(0.5), 0.5)
+        self.assertEqual(plf.y(0.5), 0.5)
 
     def test003(self):
         p1 = Point(0, 0)
@@ -215,7 +215,7 @@ class tests_PiecewiseLinear(unittest.TestCase):
         s2 = Segment('s2', p3, p4)
 
         plf = PiecewiseLinear([s1, s2])
-        self.assertEquals(plf.y(0), 0)
+        self.assertEqual(plf.y(0), 0)
 
     def test004(self):
         p1 = Point(0, 0)
@@ -227,7 +227,7 @@ class tests_PiecewiseLinear(unittest.TestCase):
         s2 = Segment('s2', p3, p4)
 
         plf = PiecewiseLinear([s1, s2])
-        self.assertEquals(plf.y(1), 5)
+        self.assertEqual(plf.y(1), 5)
 
     def test005(self):
         p1 = Point(0, 0)
@@ -239,7 +239,7 @@ class tests_PiecewiseLinear(unittest.TestCase):
         s2 = Segment('s2', p3, p4)
 
         plf = PiecewiseLinear([s1, s2])
-        self.assertEquals(plf.y(0), 0)
+        self.assertEqual(plf.y(0), 0)
 
     def test006(self):
         p1 = Point(0, 0)
