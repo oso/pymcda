@@ -282,7 +282,7 @@ class ElectreTri(McdaObject):
 
         self.id = xmcda.get('id')
         value = xmcda.find(".//methodParameters/parameter/value[@id='lambda']")
-        self.lbda = unmarshal(value.getchildren()[0])
+        self.lbda = unmarshal(list(value)[0])
 
         setattr(self, 'criteria', Criteria().from_xmcda(xmcda, 'criteria'))
         setattr(self, 'cv', CriteriaValues().from_xmcda(xmcda, 'cv'))
@@ -508,7 +508,7 @@ class MRSort(ElectreTri):
         xmcda = find_xmcda_tag(xmcda, 'ElectreTri', id)
         value = xmcda.find(".//methodParameters/parameter/value[@id='veto_lbda']")
         if value is not None:
-            self.veto_lbda = unmarshal(value.getchildren()[0])
+            self.veto_lbda = unmarshal(list(value)[0])
 
         if xmcda.find(".//criteriaValues[@id='veto_weights']") is not None:
             setattr(self, 'veto_weights',
