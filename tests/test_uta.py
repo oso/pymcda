@@ -99,7 +99,7 @@ class tests_avfsort(unittest.TestCase):
         ap1 = AlternativePerformances("a1",
                                        {"c1": 2.5, "c2": 2.5, "c3": 2.5})
         aa1 = model.get_assignment(ap1)
-        self.assertEquals(aa1.category_id, "cat2")
+        self.assertEqual(aa1.category_id, "cat2")
 
     def test002(self):
         model = self.generate_model()
@@ -108,7 +108,7 @@ class tests_avfsort(unittest.TestCase):
         ap2 = AlternativePerformances("a2",
                                        {"c1": 0, "c2": 0, "c3": 0})
         aa2 = model.get_assignment(ap2)
-        self.assertEquals(aa2.category_id, "cat1")
+        self.assertEqual(aa2.category_id, "cat1")
 
     def test003(self):
         model = self.generate_model()
@@ -117,7 +117,7 @@ class tests_avfsort(unittest.TestCase):
         ap3 = AlternativePerformances("a3",
                 {"c1": 5, "c2": 5, "c3": 5})
         aa3 = model.get_assignment(ap3)
-        self.assertEquals(aa3.category_id, "cat3")
+        self.assertEqual(aa3.category_id, "cat3")
 
     def test004(self):
         model = self.generate_model()
@@ -141,9 +141,9 @@ class tests_avfsort(unittest.TestCase):
 
         assignments = model.get_assignments(pt)
 
-        self.assertEquals(assignments["a1"].category_id, "cat2")
-        self.assertEquals(assignments["a2"].category_id, "cat1")
-        self.assertEquals(assignments["a3"].category_id, "cat3")
+        self.assertEqual(assignments["a1"].category_id, "cat2")
+        self.assertEqual(assignments["a2"].category_id, "cat1")
+        self.assertEqual(assignments["a3"].category_id, "cat3")
 
 class tests_indicators(unittest.TestCase):
 
