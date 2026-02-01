@@ -3,21 +3,22 @@ import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../../")
 import colorsys
 from itertools import combinations
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 
 def display_electre_tri_models(etri, worst = list(), best = list(),
                                aps = list(), aps2 = list(), aps3 = list(),
                                aps4 = list()):
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
 
-    sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,
-                                   QtGui.QSizePolicy.Expanding)
+    sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                   QtWidgets.QSizePolicy.Expanding)
     sizePolicy.setHorizontalStretch(1)
     sizePolicy.setVerticalStretch(0)
     sizePolicy.setHeightForWidth(sizePolicy.hasHeightForWidth())
 
-    layout = QtGui.QGridLayout()
+    layout = QtWidgets.QGridLayout()
 
     ncol = len(etri) / 2
     i = j = 0
@@ -36,7 +37,7 @@ def display_electre_tri_models(etri, worst = list(), best = list(),
         views[n] = view
         layout.addWidget(view, i, j, 1, 1)
 
-    dialog = QtGui.QDialog()
+    dialog = QtWidgets.QDialog()
     dialog.setLayout(layout)
     dialog.resize(1024, 768)
 
@@ -70,17 +71,17 @@ def display_electre_tri_models(etri, worst = list(), best = list(),
     dialog.show()
     app.exec_()
 
-class _MyGraphicsview(QtGui.QGraphicsView):
+class _MyGraphicsview(QtWidgets.QGraphicsView):
 
     def __init__(self, parent = None):
-        super(QtGui.QGraphicsView, self).__init__(parent)
+        super(QtWidgets.QGraphicsView, self).__init__(parent)
 
     def resizeEvent(self, event):
         scene = self.scene()
         scene.update(self.size())
         self.resetCachedContent()
 
-class QGraphicsSceneEtri(QtGui.QGraphicsScene):
+class QGraphicsSceneEtri(QtWidgets.QGraphicsScene):
 
     def __init__(self, model, worst, best, size, criteria_order = None,
                  parent = None):
@@ -89,8 +90,7 @@ class QGraphicsSceneEtri(QtGui.QGraphicsScene):
         if criteria_order:
             self.criteria_order = criteria_order
         else:
-            self.criteria_order = self.model.criteria.keys()
-            self.criteria_order.sort()
+            self.criteria_order = sorted(self.model.criteria.keys())
         self.worst = worst
         self.best = best
 
@@ -117,7 +117,7 @@ class QGraphicsSceneEtri(QtGui.QGraphicsScene):
         self.setSceneRect(self.itemsBoundingRect())
 
     def __create_axis(self, xmin, xmax, ymin, ymax, direction):
-        item = QtGui.QGraphicsPathItem()
+        item = QtWidgets.QGraphicsPathItem()
 
         path = item.path()
         path.moveTo(xmin, ymin)
@@ -160,15 +160,15 @@ class QGraphicsSceneEtri(QtGui.QGraphicsScene):
             self.addItem(axis)
             self.axis_items[id] = axis
 
-            if self.model.veto_weights is None:
+            if not hasattr(self.model, "veto_weights") or self.model.veto_weights is None:
                 txt = "%s<br>(%g)" % (criterion.id, self.model.cv[id].value)
             else:
                 txt = "%s<br>(%g)<br>(%g)" % (criterion.id, self.model.cv[id].value,
                                    self.model.veto_weights[id].value)
 
-            text = QtGui.QGraphicsTextItem()
+            text = QtWidgets.QGraphicsTextItem()
             text.setHtml("<div align=\"center\">%s</div>" % txt)
-            text.setTextWidth(text.boundingRect().width())
+            text.setTextWidth(text.boundingRect().width() + 2)
             font = QtGui.QFont()
             font.setBold(True)
             text.setFont(font)
@@ -192,7 +192,7 @@ class QGraphicsSceneEtri(QtGui.QGraphicsScene):
         return self.ymin + num / den * (self.ymax - self.ymin)
 
     def __create_text_value(self, value):
-        item = QtGui.QGraphicsTextItem()
+        item = QtWidgets.QGraphicsTextItem()
 
         item.setPlainText(value)
 
@@ -208,7 +208,7 @@ class QGraphicsSceneEtri(QtGui.QGraphicsScene):
                          color = QtGui.QColor("red"),
                          link = True,
                          points = False):
-        item = QtGui.QGraphicsPathItem()
+        item = QtWidgets.QGraphicsPathItem()
 
         pen = QtGui.QPen()
         pen.setBrush(color)
@@ -266,10 +266,10 @@ class QGraphicsSceneEtri(QtGui.QGraphicsScene):
     def __get_category_color(self, i):
         n = len(self.model.categories)
         g = 255 - 220 * (n - i) / n
-        return QtGui.QColor(0, g, 0)
+        return QtGui.QColor(0, int(g), 0)
 
     def __create_category(self, i, path_below, path_above):
-        item = QtGui.QGraphicsPathItem()
+        item = QtWidgets.QGraphicsPathItem()
 
         path = item.path()
         path.addPath(path_above)
@@ -313,7 +313,7 @@ class QGraphicsSceneEtri(QtGui.QGraphicsScene):
             b = combi[1].path()
             c = a.intersected(b)
 
-            item = QtGui.QGraphicsPathItem(c)
+            item = QtWidgets.QGraphicsPathItem(c)
             brush = QtGui.QBrush(QtGui.QColor("yellow"))
             item.setBrush(brush)
             self.addItem(item)
@@ -439,10 +439,10 @@ if __name__ == "__main__":
 
     model = ElectreTri(c, cv, bpt, lbda, cps)
 
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
 
-    sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,
-                                   QtGui.QSizePolicy.Expanding)
+    sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                   QtWidgets.QSizePolicy.Expanding)
     sizePolicy.setHorizontalStretch(1)
     sizePolicy.setVerticalStretch(0)
     sizePolicy.setHeightForWidth(sizePolicy.hasHeightForWidth())
