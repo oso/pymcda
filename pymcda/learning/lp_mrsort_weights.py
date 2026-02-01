@@ -147,7 +147,7 @@ class LpMRSortWeights(object):
         constraints = self.lp.linear_constraints
         w_vars = ['w'+c.id for c in self.model.criteria]
         for dj in self.c_xi:
-            coef = map(float, list(dj))
+            coef = list(map(float, list(dj)))
 
             # sum(w_j(a_i,b_h-1) - x_i + x'_i = lbda
             constraints.add(names=['cinf'+dj],
@@ -161,7 +161,7 @@ class LpMRSortWeights(object):
                            )
 
         for dj in self.c_yi:
-            coef = map(float, list(dj))
+            coef = list(map(float, list(dj)))
 
             # sum(w_j(a_i,b_h) + y_i - y'_i = lbda - delta
             constraints.add(names=['csup'+dj],
@@ -185,9 +185,9 @@ class LpMRSortWeights(object):
 
     def add_objective_cplex(self):
         self.lp.objective.set_sense(self.lp.objective.sense.minimize)
-        for dj, coef in self.c_xi.iteritems():
+        for dj, coef in self.c_xi.items():
             self.lp.objective.set_linear('xp'+dj, coef)
-        for dj, coef in self.c_yi.iteritems():
+        for dj, coef in self.c_yi.items():
             self.lp.objective.set_linear('yp'+dj, coef)
 
     def solve_cplex(self):
@@ -392,7 +392,7 @@ if __name__ == "__main__":
     # Assign the alternative with the model
     aa = model.pessimist(pt)
 
-    a_learn = random.sample(a, int(nlearn*len(a)))
+    a_learn = random.sample(list(a), int(nlearn*len(a)))
     aa_learn = AlternativesAssignments([ aa[alt.id] for alt in a_learn ])
     pt_learn = PerformanceTable([ pt[alt.id] for alt in a_learn ])
 

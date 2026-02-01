@@ -1068,8 +1068,7 @@ class PerformanceTable(McdaDict):
             criterion_ids = next(self.itervalues()).performances.keys()
             criterion_ids.sort()
         if alternative_ids is None:
-            alternative_ids = self.keys()
-            alternative_ids.sort()
+            alternative_ids = sorted(self.keys())
         if fmt is None:
             fmt = {cid: "%5g" for cid in criterion_ids}
 

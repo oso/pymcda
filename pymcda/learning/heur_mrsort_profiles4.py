@@ -133,7 +133,7 @@ class MetaMRSortProfiles4():
         return h_below
 
     def histogram_choose(self, h, current):
-        key = random.choice(h.keys())
+        key = random.choice(list(h.keys()))
         val = h[key]
         diff = abs(current - key)
         for k, v in h.items():
@@ -210,7 +210,7 @@ class MetaMRSortProfiles4():
             self.aa[a].category_id = new_cat
 
     def optimize_profile(self, profile, below, above, cat_b, cat_a):
-        cids = self.model.criteria.keys()
+        cids = list(self.model.criteria.keys())
         random.shuffle(cids)
 
         for cid in cids:
