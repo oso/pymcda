@@ -592,8 +592,7 @@ if __name__ == "__main__":
     # Display model parameters
     print('Original model')
     print('==============')
-    cids = model.criteria.keys()
-    cids.sort()
+    cids = sorted(model.criteria.keys())
     model.bpt.display(criterion_ids = cids)
     model.cv.display(criterion_ids = cids)
     print("lambda: %.7s" % model.lbda)
