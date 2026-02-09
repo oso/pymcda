@@ -7,6 +7,7 @@ from pymcda.types import AlternativePerformances
 from pymcda.types import Criteria, CriteriaValues, PerformanceTable
 from pymcda.types import CategoriesProfiles
 from pymcda.types import McdaObject
+from pymcda.types import PairwiseRelation
 from pymcda.types import marshal, unmarshal
 from pymcda.types import find_xmcda_tag
 from xml.etree import ElementTree
@@ -518,3 +519,43 @@ class MRSort(ElectreTri):
                     PerformanceTable().from_xmcda(xmcda, 'veto'))
 
         return self
+
+    def compare(self, ap1, ap2):
+        aa1 = self.get_assignment(ap1)
+        aa2 = self.get_assignment(ap2)
+
+        cat_aa1_rank = self.categories.index(aa1.category_id)
+        cat_aa2_rank = self.categories.index(aa2.category_id)
+
+        # larger value = better category
+        if cat_aa1_rank > cat_aa2_rank:
+            return PairwiseRelation(aa1.id, aa2.id, PairwiseRelation.PREFERRED)
+        elif cat_aa1_rank < cat_aa2_rank:
+            return PairwiseRelation(aa1.id, aa2.id, PairwiseRelation.WEAKER)
+
+        # get upper and lower profiles
+        lower_profile = self.categories_profiles.get_lower_profile(aa1.category_id)
+        upper_profile = self.categories_profiles.get_upper_profile(aa1.category_id)
+
+        for profile in [lower_profile, upper_profile]:
+            if profile is None:
+                continue
+
+            bp = self.bpt[profile]
+            conc_a1 = self.concordance(ap1, bp)
+            conc_a2 = self.concordance(ap2, bp)
+            if conc_a1 > conc_a2:
+                return PairwiseRelation(aa1.id, aa2.id, PairwiseRelation.PREFERRED)
+            elif conc_a1 < conc_a2:
+                return PairwiseRelation(aa1.id, aa2.id, PairwiseRelation.WEAKER)
+
+        return PairwiseRelation(aa1.id, aa2.id, PairwiseRelation.INDIFFERENT)
+
+if __name__ == "__main__":
+    from generate import generate_alternatives, generate_criteria
+
+    a = generate_alternatives(4)
+    c = generate_criteria(4)
+
+    for i in c.keys():
+        print(i)

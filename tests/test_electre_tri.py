@@ -11,6 +11,7 @@ from pymcda.types import CriteriaSet
 from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import AlternativePerformances, PerformanceTable
 from pymcda.types import AlternativeAssignment, AlternativesAssignments
+from pymcda.types import PairwiseRelation
 from pymcda.utils import add_errors_in_assignments
 import unittest
 
@@ -447,13 +448,62 @@ class tests_mrsort_choquet(unittest.TestCase):
         self.assertEqual(aa['a7'].category_id, "cat1")
         self.assertEqual(aa['a8'].category_id, "cat1")
 
+class tests_sort_and_rank(unittest.TestCase):
+
+    def test001(self):
+        c = generate_criteria(3)
+        cv1 = CriterionValue('c1', 0.25)
+        cv2 = CriterionValue('c2', 0.25)
+        cv3 = CriterionValue('c3', 0.50)
+        cvs = CriteriaValues([cv1, cv2, cv3])
+
+        cat = generate_categories(3)
+        cps = generate_categories_profiles(cat)
+
+        bp1 = AlternativePerformances('b1', {'c1': 0.75, 'c2': 0.75, 'c3': 0.75})
+        bp2 = AlternativePerformances('b2', {'c1': 0.25, 'c2': 0.25, 'c3': 0.25})
+        bpt = PerformanceTable([bp1, bp2])
+
+        lbda = 0.6
+
+        model = MRSort(c, cvs, bpt, lbda, cps)
+
+        ap1 = AlternativePerformances('a1', {'c1': 0.1, 'c2': 0.1, 'c3': 0.1})
+        ap2 = AlternativePerformances('a2', {'c1': 0.2, 'c2': 0.2, 'c3': 0.2})
+        ap3 = AlternativePerformances('a3', {'c1': 0.5, 'c2': 0.2, 'c3': 0.2})
+        ap4 = AlternativePerformances('a4', {'c1': 0.1, 'c2': 0.5, 'c3': 0.5})
+        ap5 = AlternativePerformances('a5', {'c1': 0.5, 'c2': 0.5, 'c3': 0.5})
+        ap6 = AlternativePerformances('a6', {'c1': 0.6, 'c2': 0.6, 'c3': 0.6})
+        ap7 = AlternativePerformances('a7', {'c1': 0.2, 'c2': 0.6, 'c3': 0.8})
+        ap8 = AlternativePerformances('a8', {'c1': 0.8, 'c2': 0.8, 'c3': 0.6})
+        ap9 = AlternativePerformances('a9', {'c1': 0.8, 'c2': 0.8, 'c3': 0.8})
+
+        pwr1 = model.compare(ap1, ap2)
+        pwr2 = model.compare(ap1, ap3)
+        pwr3 = model.compare(ap2, ap4)
+        pwr4 = model.compare(ap2, ap5)
+        pwr5 = model.compare(ap5, ap6)
+        pwr6 = model.compare(ap6, ap7)
+        pwr7 = model.compare(ap6, ap8)
+        pwr8 = model.compare(ap8, ap9)
+        self.assertEqual(pwr1.relation, PairwiseRelation.INDIFFERENT)
+        self.assertEqual(pwr2.relation, PairwiseRelation.WEAKER)
+        self.assertEqual(pwr3.relation, PairwiseRelation.WEAKER)
+        self.assertEqual(pwr4.relation, PairwiseRelation.WEAKER)
+        self.assertEqual(pwr5.relation, PairwiseRelation.INDIFFERENT)
+        self.assertEqual(pwr6.relation, PairwiseRelation.PREFERRED)
+        self.assertEqual(pwr7.relation, PairwiseRelation.WEAKER)
+        self.assertEqual(pwr8.relation, PairwiseRelation.WEAKER)
+
 test_classes = [tests_electre_tri, tests_electre_tri_new_threshold,
                 tests_mrsort, test_indicator, test_xmcda,
-                tests_mrsort_vc, tests_mrsort_choquet]
+                tests_mrsort_vc, tests_mrsort_choquet,
+                tests_sort_and_rank]
 
 if __name__ == "__main__":
     suite = []
     for tclass in test_classes:
         suite.append(unittest.TestLoader().loadTestsFromTestCase(tclass))
     alltests = unittest.TestSuite(suite)
+    alltests = unittest.TestLoader().loadTestsFromTestCase(tests_sort_and_rank)
     unittest.TextTestRunner(verbosity=2).run(alltests)

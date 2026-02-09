@@ -2288,6 +2288,20 @@ class CategoriesProfiles(McdaDict):
             categories.append(self[profile].value.upper)
         return categories
 
+    def get_lower_profile(self, category_id):
+        for cp in self:
+            if cp.value.upper == category_id:
+                return cp.id
+
+        return None
+
+    def get_upper_profile(self, category_id):
+        for cp in self:
+            if cp.value.lower == category_id:
+                return cp.id
+
+        return None
+
     def to_categories(self):
         cats = Categories()
         for i, cat in enumerate(reversed(self.get_ordered_categories())):
