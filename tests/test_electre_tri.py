@@ -495,6 +495,51 @@ class tests_sort_and_rank(unittest.TestCase):
         self.assertEqual(pwr7.relation, PairwiseRelation.WEAKER)
         self.assertEqual(pwr8.relation, PairwiseRelation.WEAKER)
 
+    def test002(self):
+        c = generate_criteria(4)
+        cv1 = CriterionValue('c1', 0.1)
+        cv2 = CriterionValue('c2', 0.2)
+        cv3 = CriterionValue('c3', 0.3)
+        cv4 = CriterionValue('c4', 0.4)
+        cvs = CriteriaValues([cv1, cv2, cv3, cv4])
+
+        cat = generate_categories(3)
+        cps = generate_categories_profiles(cat)
+
+        bp1 = AlternativePerformances('b1', {'c1': 6, 'c2': 6, 'c3': 6, 'c4': 6})
+        bp2 = AlternativePerformances('b2', {'c1': 3, 'c2': 3, 'c3': 3, 'c4': 3})
+        bpt = PerformanceTable([bp1, bp2])
+
+        lbda = 0.6
+
+        model = MRSort(c, cvs, bpt, lbda, cps)
+
+        ap1 = AlternativePerformances('a1', {'c1': 4, 'c2': 8, 'c3': 6, 'c4': 7})
+        ap2 = AlternativePerformances('a2', {'c1': 7, 'c2': 7, 'c3': 7, 'c4': 4})
+        ap3 = AlternativePerformances('a3', {'c1': 1, 'c2': 2, 'c3': 4, 'c4': 8})
+        ap4 = AlternativePerformances('a4', {'c1': 2, 'c2': 5, 'c3': 2, 'c4': 7})
+        ap5 = AlternativePerformances('a5', {'c1': 5, 'c2': 4, 'c3': 6, 'c4': 2})
+        ap6 = AlternativePerformances('a6', {'c1': 1, 'c2': 8, 'c3': 4, 'c4': 2})
+        pt = PerformanceTable([ap1, ap2, ap3, ap4, ap5, ap6])
+
+        aa = model.pessimist(pt)
+
+        self.assertEqual(aa['a1'].category_id, 'cat1')
+        self.assertEqual(aa['a2'].category_id, 'cat1')
+        self.assertEqual(aa['a3'].category_id, 'cat2')
+        self.assertEqual(aa['a4'].category_id, 'cat2')
+        self.assertEqual(aa['a5'].category_id, 'cat2')
+        self.assertEqual(aa['a6'].category_id, 'cat3')
+
+        pwr1 = model.compare(ap1, ap2)
+        pwr2 = model.compare(ap3, ap4)
+        pwr3 = model.compare(ap3, ap5)
+        pwr4 = model.compare(ap4, ap5)
+        self.assertEqual(pwr1.relation, PairwiseRelation.PREFERRED)
+        self.assertEqual(pwr2.relation, PairwiseRelation.PREFERRED)
+        self.assertEqual(pwr3.relation, PairwiseRelation.PREFERRED)
+        self.assertEqual(pwr4.relation, PairwiseRelation.PREFERRED)
+
 test_classes = [tests_electre_tri, tests_electre_tri_new_threshold,
                 tests_mrsort, test_indicator, test_xmcda,
                 tests_mrsort_vc, tests_mrsort_choquet,
