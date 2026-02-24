@@ -2641,6 +2641,14 @@ class PairwiseRelations(McdaDict):
 
         return pws
 
+    def get_alternatives(self):
+        a = []
+        for pwc in self.values():
+            a.append(pwc.a)
+            a.append(pwc.b)
+
+        return list(set(a))
+
 class PairwiseRelation(McdaObject):
 
     WEAKER = 0
