@@ -6,7 +6,7 @@ from pymcda.types import CriterionValue, CriteriaValues
 from pymcda.types import AlternativePerformances, PerformanceTable
 from pymcda.types import PairwiseRelations, PairwiseRelation
 
-verbose = False
+verbose = True
 
 class MipJNCSR():
 
@@ -20,7 +20,12 @@ class MipJNCSR():
 
         self.epsilon = epsilon
 
-        self.__alternatives = set(self.aa.keys()) | set(self.pwcs.get_alternatives())
+        self.__alternatives = set()
+        if aa:
+            self.__alternatives |= set(self.aa.keys())
+        else:
+            self.aa = set()
+        self.__alternatives |= set(self.pwcs.get_alternatives())
         self.__profiles = self.cps.get_ordered_profiles()
         self.__categories = self.cps.get_ordered_categories()
 
@@ -118,6 +123,44 @@ class MipJNCSR():
                                        for a in self.__alternatives
                                        for h in self.__categories])
 
+        # sigma^{cat}(x,x')
+        self.lp.variables.add(names = ["sigmac(%s,%s)" % (pwc.a, pwc.b)
+                                       for pwc in self.pwcs],
+                              lb = [0 for pwc in self.pwcs],
+                              ub = [1 for pwc in self.pwcs])
+
+        # epsilon_{x,x',h}
+        self.lp.variables.add(names = ["epsilon_{%s,%s,%s}" % (pwc.a, pwc.b, h)
+                                       for pwc in self.pwcs
+                                       for h in self.__categories],
+                              types = [self.lp.variables.type.binary
+                                       for pwc in self.pwcs
+                                       for h in self.__categories])
+
+        # sigma1(x,x',h)
+        self.lp.variables.add(names = ["sigma1(%s,%s,%s)" % (pwc.a, pwc.b, h)
+                                       for pwc in self.pwcs
+                                       for h in self.__categories],
+                              lb = [0 for pwc in self.pwcs
+                                      for h in self.__categories],
+                              ub = [1 for pwc in self.pwcs
+                                      for h in self.__categories])
+
+        # sigma2(x,x',h)
+        self.lp.variables.add(names = ["sigma2(%s,%s,%s)" % (pwc.a, pwc.b, h)
+                                       for pwc in self.pwcs
+                                       for h in self.__categories],
+                              lb = [0 for pwc in self.pwcs
+                                      for h in self.__categories],
+                              ub = [1 for pwc in self.pwcs
+                                      for h in self.__categories])
+
+        # compm(x,x')
+        self.lp.variables.add(names = ["compm(%s,%s)" % (pwc.a, pwc.b)
+                                       for pwc in self.pwcs],
+                              types = [self.lp.variables.type.binary
+                                       for pwc in self.pwcs])
+
     def add_dominance_constraint_cplex(self):
         constraints = self.lp.linear_constraints
 
@@ -211,31 +254,6 @@ class MipJNCSR():
                             senses = ["G"],
                             rhs = [-1])
 
-#        for a in self.__alternatives:
-#            bigm = 2
-#            worst_cat = self.__categories[0]
-#            best_cat = self.__categories[-1]
-#
-#            # - \lambda + M y_{x, h = p} <= M - \epsilon
-#            constraints.add(names = ["ysupmax(%s)" % a],
-#                            lin_expr =
-#                                [
-#                                 [["lambda", "y_{%s,%s}" % (a, best_cat)],
-#                                  [-1, bigm]]
-#                                ],
-#                            senses = ["L"],
-#                            rhs = [bigm - self.epsilon])
-#
-#            # - \lambda - M y_{x, h = 0} >= M - 1
-#            constraints.add(names = ["yinfmax(%s)" % a],
-#                            lin_expr =
-#                                [
-#                                 [["lambda", "y_{%s,%s}" % (a, worst_cat)],
-#                                  [-1, -bigm]]
-#                                ],
-#                            senses = ["G"],
-#                            rhs = [bigm - 1])
-
         for a, h in product(self.__alternatives, self.__profiles):
             bigm = 2
             i = self.__profiles.index(h)
@@ -289,17 +307,194 @@ class MipJNCSR():
                             senses = "E",
                             rhs = [1])
 
+    def add_pairwise_constraints_cplex(self):
+        constraints = self.lp.linear_constraints
+
+        for pwc in self.pwcs:
+            # \sum_{h=1}^p h * (y_{x,h} - y_{x',h}) + \sigmac(x,x') >= 0
+            constraints.add(names = ["sigmac(%s,%s)" % (pwc.a, pwc.b)],
+                            lin_expr =
+                                [
+                                 [["y_{%s,%s}" % (pwc.a, h)
+                                   for h in self.__categories]
+                                  + ["y_{%s,%s}" % (pwc.b, h)
+                                     for h in self.__categories]
+                                  + ["sigmac(%s,%s)" % (pwc.a, pwc.b)],
+                                 [i for i in range(1, len(self.__categories) + 1)]
+                                  + [-i for i in range(1, len(self.__categories) + 1)]
+                                  + [1]]
+                                ],
+                            senses = "G",
+                            rhs = [0])
+
+        for pwc, h in product(self.pwcs, self.__categories):
+            # \epsilon_{x,x',h} - y_{x,h} <= 0
+            constraints.add(names = ["eps1(%s,%s,%s)" % (pwc.a, pwc.b, h)],
+                            lin_expr =
+                                [
+                                 [["epsilon_{%s,%s,%s}" % (pwc.a, pwc.b, h),
+                                  "y_{%s,%s}" % (pwc.a, h)],
+                                  [1, -1]]
+                                ],
+                            senses = "L",
+                            rhs = [0])
+
+            # \epsilon_{x,x',h} - y_{x',h} <= 0
+            constraints.add(names = ["eps2(%s,%s,%s)" % (pwc.a, pwc.b, h)],
+                            lin_expr =
+                                [
+                                 [["epsilon_{%s,%s,%s}" % (pwc.a, pwc.b, h),
+                                  "y_{%s,%s}" % (pwc.b, h)],
+                                  [1, -1]]
+                                ],
+                            senses = "L",
+                            rhs = [0])
+
+            # \epsilon_{x,x',h} - y_{x,h} - y_{x',h} >= -1
+            constraints.add(names = ["eps3(%s,%s,%s)" % (pwc.a, pwc.b, h)],
+                            lin_expr =
+                                [
+                                 [["epsilon_{%s,%s,%s}" % (pwc.a, pwc.b, h),
+                                  "y_{%s,%s}" % (pwc.a, h),
+                                  "y_{%s,%s}" % (pwc.b, h)],
+                                  [1, -1, -1]]
+                                ],
+                            senses = "G",
+                            rhs = [-1])
+
+        # Delta_{h-1) (x,x') > 0
+        for pwc in pwcs:
+            bigm = 2
+            h = self.__profiles[-1]
+            cat = self.__categories[-1]
+
+            # M \epsilon_{x,x',h} - \sigma1(x,x',h) - \Delta_{h-1}(x,x') <= M - \epsilon
+            constraints.add(names = ["sigma1(%s,%s,%s)" % (pwc.a, pwc.b, h)],
+                            lin_expr =
+                                [
+                                 [["epsilon_{%s,%s,%s}" % (pwc.a, pwc.b, cat),
+                                   "sigma1(%s,%s,%s)" % (pwc.a, pwc.b, cat)]
+                                   + ["w_%s(%s,%s)" % (c.id, pwc.a, h)
+                                      for c in self.criteria]
+                                   + ["w_%s(%s,%s)" % (c.id, pwc.b, h)
+                                      for c in self.criteria],
+                                  [bigm, -1] + [-1 for c in self.criteria]
+                                   + [1 for c in self.criteria]]
+                                ],
+                            senses = "L",
+                            rhs = [bigm - self.epsilon])
+
+        # Delta_{h-1) (x,x') >= 0
+        for pwc, h in product(self.pwcs, self.__profiles[:-1]):
+            bigm = 2
+            i = self.__profiles.index(h)
+            lcat = self.__categories[i]
+            ucat = self.__categories[i + 1]
+
+            # M \epsilon_{x,x',h} - \sigma1(x,x',h) - \Delta_{h-1}(x,x') <= M
+            constraints.add(names = ["sigma1(%s,%s,%s)" % (pwc.a, pwc.b, h)],
+                            lin_expr =
+                                [
+                                 [["epsilon_{%s,%s,%s}" % (pwc.a, pwc.b, ucat),
+                                   "sigma1(%s,%s,%s)" % (pwc.a, pwc.b, ucat)]
+                                   + ["w_%s(%s,%s)" % (c.id, pwc.a, h)
+                                      for c in self.criteria]
+                                   + ["w_%s(%s,%s)" % (c.id, pwc.b, h)
+                                      for c in self.criteria],
+                                  [bigm, -1] + [-1 for c in self.criteria]
+                                   + [1 for c in self.criteria]]
+                                ],
+                            senses = "L",
+                            rhs = [bigm])
+
+        # Alternatives in worst category
+        for pwc in self.pwcs:
+            bigm = 2
+            h = self.__profiles[0]
+            cat = self.__categories[0]
+
+            # M \epsilon_{x,x',h} - \sigma2(x,x',h) - \Delta_h(x,x')
+            #   <= M - \epsilon
+            constraints.add(names = ["sigma2p(%s,%s,%s)" % (pwc.a, pwc.b, cat)],
+                            lin_expr =
+                                [
+                                 [["epsilon_{%s,%s,%s}" % (pwc.a, pwc.b, cat),
+                                   "sigma2(%s,%s,%s)" % (pwc.a, pwc.b, cat)]
+                                   + ["w_%s(%s,%s)" % (c.id, pwc.a, h)
+                                      for c in self.criteria]
+                                   + ["w_%s(%s,%s)" % (c.id, pwc.b, h)
+                                      for c in self.criteria],
+                                  [bigm, -1]
+                                   + [-1 for c in self.criteria]
+                                   + [1 for c in self.criteria]]
+                                ],
+                            senses = "L",
+                            rhs = [bigm - self.epsilon])
+
+        # \Delta_{h} (x,x') < 0
+        for pwc, h in product(self.pwcs, self.__profiles[1:]):
+            bigm = 2
+            i = self.__profiles.index(h)
+            hm1 = self.__profiles[i - 1]
+            lcat = self.__categories[i]
+            ucat = self.__categories[i + 1]
+
+            # M \epsilon_{x,x',h} - M \sigma1(x, x', h) - M \Delta_{h-1}(x,x')
+            #   - \sigma2(x,x',h) - \Delta_h(x,x') <= M - \epsilon
+            constraints.add(names = ["sigma2(%s,%s,%s)" % (pwc.a, pwc.b, h)],
+                            lin_expr =
+                                [
+                                 [["epsilon_{%s,%s,%s}" % (pwc.a, pwc.b, lcat),
+                                   "sigma1(%s,%s,%s)" % (pwc.a, pwc.b, lcat),
+                                   "sigma2(%s,%s,%s)" % (pwc.a, pwc.b, lcat)]
+                                   + ["w_%s(%s,%s)" % (c.id, pwc.a, h)
+                                      for c in self.criteria]
+                                   + ["w_%s(%s,%s)" % (c.id, pwc.b, h)
+                                      for c in self.criteria]
+                                   + ["w_%s(%s,%s)" % (c.id, pwc.a, hm1)
+                                      for c in self.criteria]
+                                   + ["w_%s(%s,%s)" % (c.id, pwc.b, hm1)
+                                      for c in self.criteria],
+                                  [bigm, -bigm, -1]
+                                   + [-1 for c in self.criteria]
+                                   + [1 for c in self.criteria]
+                                   + [-bigm for c in self.criteria]
+                                   + [bigm for c in self.criteria]]
+                                ],
+                            senses = "L",
+                            rhs = [bigm  - self.epsilon])
+
+        for pwc in self.pwcs:
+            bigm = 100
+            # M compm(x,x') + \sigmac(x,x') + \sum_{h=1,...,p} (\sigma1(x,x',h) + \sigma2(x,x',h)) <= M
+            constraints.add(names = ["compm(%s,%s)" % (pwc.a, pwc.b)],
+                            lin_expr =
+                                [
+                                 [["compm(%s,%s)" % (pwc.a, pwc.b),
+                                   "sigmac(%s,%s)" % (pwc.a, pwc.b)]
+                                   + ["sigma1(%s,%s,%s)" % (pwc.a, pwc.b, cat) for cat in self.__categories]
+                                   + ["sigma2(%s,%s,%s)" % (pwc.a, pwc.b, cat) for cat in self.__categories],
+                                  [bigm, 1]
+                                   + [1 for cat in self.__categories]
+                                   + [1 for cat in self.__categories]]
+                                ],
+                            senses = "L",
+                            rhs = [bigm])
+
     def add_constraints_cplex(self):
         constraints = self.lp.linear_constraints
 
         self.add_dominance_constraint_cplex()
         self.add_weights_constraint_cplex()
         self.add_assignment_constraints_cplex()
+        self.add_pairwise_constraints_cplex()
 
     def add_objective_cplex(self):
         self.lp.objective.set_sense(self.lp.objective.sense.maximize)
         self.lp.objective.set_linear([("y_{%s,%s}" % (aa.id, aa.category_id), 1)
-                                      for aa in self.aa])
+                                      for aa in self.aa]
+                                     + [("compm(%s,%s)" % (pwc.a, pwc.b), 1)
+                                        for pwc in self.pwcs])
 
     def solve_cplex(self):
         self.lp.solve()
@@ -334,6 +529,11 @@ class MipJNCSR():
 
         return obj
 
+    def dump_variables(self, filename=None):
+        with open(filename, 'w') as f:
+            for v in self.lp.variables.get_names():
+                print(f"{v} = {self.lp.solution.get_values(v)}", file=f)
+
     def solve(self):
         return self.solve_function()
 
@@ -344,6 +544,7 @@ if __name__ == "__main__":
     from pymcda.utils import print_pt_and_assignments
     from pymcda.ui.graphic import display_electre_tri_models
     from itertools import combinations
+    import time
 
     seed = 12
     ncrit = 5
@@ -361,7 +562,7 @@ if __name__ == "__main__":
     print("lambda: %.7s" % model.lbda)
 
     # Generate a set of alternatives
-    a = generate_alternatives(100)
+    a = generate_alternatives(25)
     pt = generate_random_performance_table(a, model.criteria)
 
     worst = pt.get_worst(model.criteria)
@@ -384,12 +585,15 @@ if __name__ == "__main__":
 
     # Run the MIP
     model2 = model.copy()
-    model2.cv = model.cv
-    model2.bpt = None
-    model2.lbda = model.lbda
 
-    mip = MipJNCSR(model2, pt, aa, pwcs)
+    mip = MipJNCSR(model2, pt, None, pwcs)
+
+    t1 = time.time()
     mip.solve()
+    t2 = time.time()
+
+    print(f"Solving time: {t2-t1:.2f} s.")
+    mip.dump_variables("mip_jncsr-variables.txt")
 
     # Display learned model parameters
     print('Learned model')
@@ -407,16 +611,27 @@ if __name__ == "__main__":
     anok = []
     for alt in a:
         if aa(alt.id) != aa2(alt.id):
-            anok.append(alt)
+            anok.append(alt.id)
             nok += 1
 
     print("Good assignments: %3g %%" % (float(total-nok)/total*100))
     print("Bad assignments : %3g %%" % (float(nok)/total*100))
 
-#    if len(anok) > 0:
-#        print("Alternatives wrongly assigned:")
-#        print_pt_and_assignments(anok, model.criteria.keys(),
-#                                 [aa, aa2], pt)
+    if len(anok) > 0:
+        print("Alternatives wrongly assigned:")
+        print_pt_and_assignments(anok, model.criteria.keys(),
+                                 [aa, aa2], pt)
+
+    errors = 0
+    for pwc in pwcs:
+        pwc2 = model2.compare(pt[pwc.a], pt[pwc.b])
+        if pwc2.relation != pwc.relation:
+            errors += 1
+            print("Pairwise error: (%s != %s)" %(pwc, pwc2))
+            print_pt_and_assignments([pwc.a, pwc.b], model.criteria.keys(),
+                                     [aa, aa2], pt)
+
+    print("Pairwise errors: %d" % errors)
 
     # Display models
     display_electre_tri_models([model, model2],
