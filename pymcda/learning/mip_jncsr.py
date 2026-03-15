@@ -139,20 +139,20 @@ class MipJNCSR():
         # sigma1(x,x',h)
         self.lp.variables.add(names = ["sigma1(%s,%s,%s)" % (pwc.a, pwc.b, h)
                                        for pwc in self.pwcs
-                                       for h in self.__categories],
+                                       for h in self.__categories[1:]],
                               lb = [0 for pwc in self.pwcs
-                                      for h in self.__categories],
+                                    for h in self.__categories[1:]],
                               ub = [1 for pwc in self.pwcs
-                                      for h in self.__categories])
+                                    for h in self.__categories[1:]])
 
         # sigma2(x,x',h)
         self.lp.variables.add(names = ["sigma2(%s,%s,%s)" % (pwc.a, pwc.b, h)
                                        for pwc in self.pwcs
-                                       for h in self.__categories],
+                                       for h in self.__categories[:-1]],
                               lb = [0 for pwc in self.pwcs
-                                      for h in self.__categories],
+                                      for h in self.__categories[:-1]],
                               ub = [1 for pwc in self.pwcs
-                                      for h in self.__categories])
+                                      for h in self.__categories[:-1]])
 
         # compm(x,x')
         self.lp.variables.add(names = ["compm(%s,%s)" % (pwc.a, pwc.b)
@@ -471,8 +471,8 @@ class MipJNCSR():
                                 [
                                  [["compm(%s,%s)" % (pwc.a, pwc.b),
                                    "sigmac(%s,%s)" % (pwc.a, pwc.b)]
-                                   + ["sigma1(%s,%s,%s)" % (pwc.a, pwc.b, cat) for cat in self.__categories]
-                                   + ["sigma2(%s,%s,%s)" % (pwc.a, pwc.b, cat) for cat in self.__categories],
+                                   + ["sigma1(%s,%s,%s)" % (pwc.a, pwc.b, cat) for cat in self.__categories[1:]]
+                                   + ["sigma2(%s,%s,%s)" % (pwc.a, pwc.b, cat) for cat in self.__categories[:-1]],
                                   [bigm, 1]
                                    + [1 for cat in self.__categories]
                                    + [1 for cat in self.__categories]]
