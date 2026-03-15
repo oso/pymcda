@@ -550,7 +550,7 @@ class MipJNCSR():
             ap = AlternativePerformances(p)
             for c in self.criteria:
                 perf = self.lp.solution.get_values("b_%s^%s" % (c.id, p))
-                ap.performances[c.id] = round(perf, 5)
+                ap.performances[c.id] = perf
             pt.append(ap)
 
         self.model.bpt = pt
