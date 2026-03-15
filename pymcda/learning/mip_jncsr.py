@@ -464,7 +464,7 @@ class MipJNCSR():
                             rhs = [bigm  - self.epsilon])
 
         for pwc in self.pwcs:
-            bigm = 100
+            bigm = 3 * len(self.__categories) + 1
             # M compm(x,x') + \sigmac(x,x') + \sum_{h=1,...,p} (\sigma1(x,x',h) + \sigma2(x,x',h)) <= M
             constraints.add(names = ["compm(%s,%s)" % (pwc.a, pwc.b)],
                             lin_expr =
