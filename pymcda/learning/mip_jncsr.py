@@ -516,7 +516,14 @@ class MipJNCSR():
         self.lp.objective.set_linear([("y_{%s,%s}" % (aa.id, aa.category_id), 1)
                                       for aa in self.aa]
                                      + [("compm(%s,%s)" % (pwc.a, pwc.b), 1)
-                                        for pwc in self.pwcs])
+                                        for pwc in self.pwcs]
+#                                     + [("sigmac(%s,%s)" % (pwc.a, pwc.b), -0.0001)
+#                                        for pwc in self.pwcs]
+#                                     + [("sigma1(%s,%s,%s)" % (pwc.a, pwc.b, cat), -0.0001)
+#                                        for pwc, cat in product(self.pwcs, self.__categories[1:])]
+#                                     + [("sigma2(%s,%s,%s)" % (pwc.a, pwc.b, cat), -0.0001)
+#                                        for pwc, cat in product(self.pwcs, self.__categories[:-1])]
+                                    )
 
     def solve_cplex(self):
         self.lp.solve()
