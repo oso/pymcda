@@ -563,6 +563,9 @@ class MipJNCSR():
             for v in self.lp.variables.get_names():
                 print(f"{v} = {self.lp.solution.get_values(v)}", file=f)
 
+    def dump_constraints(self, filename=None):
+        self.lp.write(filename)
+
     def solve(self):
         return self.solve_function()
 
@@ -623,6 +626,7 @@ if __name__ == "__main__":
 
     print(f"Solving time: {t2-t1:.2f} s.")
     mip.dump_variables("mip_jncsr-variables.txt")
+    mip.dump_constraints("mip_jncsr-constraints.txt")
 
     # Display learned model parameters
     print('Learned model')
