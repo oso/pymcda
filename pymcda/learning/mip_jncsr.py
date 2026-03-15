@@ -12,7 +12,7 @@ class MipJNCSR():
 
     def __init__(self, model, pt, aa, pwcs, epsilon = 0.0001):
         self.pt = pt
-        self.aa = aa
+        self.aa = aa if aa is not None else set()
         self.pwcs = pwcs
         self.model = model
         self.criteria = model.criteria.get_active()
@@ -23,9 +23,8 @@ class MipJNCSR():
         self.__alternatives = set()
         if aa:
             self.__alternatives |= set(self.aa.keys())
-        else:
-            self.aa = set()
-        self.__alternatives |= set(self.pwcs.get_alternatives())
+        if pwcs:
+            self.__alternatives |= set(self.pwcs.get_alternatives())
         self.__profiles = self.cps.get_ordered_profiles()
         self.__categories = self.cps.get_ordered_categories()
 
