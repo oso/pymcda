@@ -180,16 +180,39 @@ class MipJNCSR():
     def add_weights_constraint_cplex(self):
         constraints = self.lp.linear_constraints
 
-        # sum w_j = 1
-        constraints.add(names = ["wsum"],
-                        lin_expr =
-                            [
-                             [["w_%s" % c.id for c in self.criteria],
-                              [1 for c in self.criteria]],
-                            ],
-                        senses = ["E"],
-                        rhs = [1]
-                        )
+        if self.model.cv is None:
+            # sum w_j = 1
+            constraints.add(names = ["wsum"],
+                            lin_expr =
+                                [
+                                 [["w_%s" % c.id for c in self.criteria],
+                                  [1 for c in self.criteria]],
+                                ],
+                            senses = ["E"],
+                            rhs = [1]
+                            )
+        else:
+            for c in self.criteria:
+                constraints.add(names = ["w_%s" % c.id],
+                                lin_expr =
+                                    [
+                                     [["w_%s" % c.id],
+                                      [1]]
+                                    ],
+                                senses = ["E"],
+                                rhs = [self.model.cv[c.id].value]
+                               )
+
+        if self.model.lbda is not None:
+            constraints.add(names = ["lambda"],
+                            lin_expr =
+                                [
+                                 [["lambda"],
+                                  [1]]
+                                ],
+                            senses = ["E"],
+                            rhs = [self.model.lbda]
+                           )
 
     def add_assignment_constraints_cplex(self):
         constraints = self.lp.linear_constraints
