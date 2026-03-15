@@ -126,7 +126,7 @@ class MipJNCSR():
         self.lp.variables.add(names = ["sigmac(%s,%s)" % (pwc.a, pwc.b)
                                        for pwc in self.pwcs],
                               lb = [0 for pwc in self.pwcs],
-                              ub = [1 for pwc in self.pwcs])
+                              ub = [len(self.__categories) - 1 for pwc in self.pwcs])
 
         # epsilon_{x,x',h}
         self.lp.variables.add(names = ["epsilon_{%s,%s,%s}" % (pwc.a, pwc.b, h)
