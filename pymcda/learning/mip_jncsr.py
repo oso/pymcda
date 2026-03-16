@@ -177,6 +177,18 @@ class MipJNCSR():
                             rhs = [0]
                            )
 
+        if self.model.bpt is not None:
+            for bp, c in product(self.model.bpt, self.model.criteria):
+                constraints.add(names = ["b_%s^%s" % (c.id, bp.id)],
+                                lin_expr =
+                                    [
+                                     [["b_%s^%s" % (c.id, bp.id)],
+                                      [1]]
+                                     ],
+                                senses = ["E"],
+                                rhs = [bp.performances[c.id]]
+                               )
+
     def add_weights_constraint_cplex(self):
         constraints = self.lp.linear_constraints
 
