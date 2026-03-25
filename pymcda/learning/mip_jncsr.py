@@ -136,6 +136,14 @@ class MipJNCSR():
                                        for pwc in self.pwcs
                                        for h in self.__categories])
 
+        # eta{x,x',h}
+        self.lp.variables.add(names = ["eta(%s,%s,%s)" % (pwc.a, pwc.b, h)
+                                       for pwc in self.pwcs
+                                       for h in self.__categories],
+                              types = [self.lp.variables.type.binary
+                                       for pwc in self.pwcs
+                                       for h in self.__categories])
+
         # sigma1(x,x',h)
         self.lp.variables.add(names = ["sigma1(%s,%s,%s)" % (pwc.a, pwc.b, h)
                                        for pwc in self.pwcs
@@ -473,27 +481,54 @@ class MipJNCSR():
             lcat = self.__categories[i]
             ucat = self.__categories[i + 1]
 
+            # 2 - \varepsilon + \Delta_{h-1}(x,x') - \epsilon(x,x',h) >= \eta_h(x,x')
+            # \eta_h(x,x') - \Delta_{h-1}(x,x') + epsilon(x,x',h) <= 2 - \epsilon
+            constraints.add(names = ["eta1(%s,%s,%s)" % (pwc.a, pwc.b, h)],
+                            lin_expr =
+                                [
+                                 [["eta(%s,%s,%s)" % (pwc.a, pwc.b, lcat),
+                                   "epsilon_{%s,%s,%s}" % (pwc.a, pwc.b, lcat)]
+                                   + ["w_%s(%s,%s)" % (c.id, pwc.a, hm1)
+                                      for c in self.criteria]
+                                   + ["w_%s(%s,%s)" % (c.id, pwc.b, hm1)
+                                      for c in self.criteria],
+                                  [1, 1] + [-1 for c in self.criteria]
+                                   + [1 for c in self.criteria]]
+                                ],
+                            senses = "L",
+                            rhs = [2 - self.epsilon])
+
+            # - \eta_h(x,x') + \Delta_{h-1} (x,x') + \epsilon_{xx'h} <= 1
+            constraints.add(names = ["eta2(%s,%s,%s)" % (pwc.a, pwc.b, h)],
+                            lin_expr =
+                                [
+                                 [["eta(%s,%s,%s)" % (pwc.a, pwc.b, lcat),
+                                   "epsilon_{%s,%s,%s}" % (pwc.a, pwc.b, lcat)]
+                                   + ["w_%s(%s,%s)" % (c.id, pwc.a, hm1)
+                                      for c in self.criteria]
+                                   + ["w_%s(%s,%s)" % (c.id, pwc.b, hm1)
+                                      for c in self.criteria],
+                                  [-1, 1] + [1 for c in self.criteria]
+                                   + [-1 for c in self.criteria]]
+                                ],
+                            senses = "L",
+                            rhs = [1])
+
             # M \epsilon_{x,x',h} - M \sigma1(x, x', h) - M \Delta_{h-1}(x,x')
             #   - \sigma2(x,x',h) - \Delta_h(x,x') <= M - \epsilon
             constraints.add(names = ["sigma2(%s,%s,%s)" % (pwc.a, pwc.b, h)],
                             lin_expr =
                                 [
                                  [["epsilon_{%s,%s,%s}" % (pwc.a, pwc.b, lcat),
-                                   "sigma1(%s,%s,%s)" % (pwc.a, pwc.b, lcat),
+                                   "eta(%s,%s,%s)" % (pwc.a, pwc.b, lcat),
                                    "sigma2(%s,%s,%s)" % (pwc.a, pwc.b, lcat)]
                                    + ["w_%s(%s,%s)" % (c.id, pwc.a, h)
                                       for c in self.criteria]
                                    + ["w_%s(%s,%s)" % (c.id, pwc.b, h)
-                                      for c in self.criteria]
-                                   + ["w_%s(%s,%s)" % (c.id, pwc.a, hm1)
-                                      for c in self.criteria]
-                                   + ["w_%s(%s,%s)" % (c.id, pwc.b, hm1)
                                       for c in self.criteria],
                                   [bigm, -bigm, -1]
                                    + [-1 for c in self.criteria]
-                                   + [1 for c in self.criteria]
-                                   + [-bigm for c in self.criteria]
-                                   + [bigm for c in self.criteria]]
+                                   + [1 for c in self.criteria]]
                                 ],
                             senses = "L",
                             rhs = [bigm  - self.epsilon])
@@ -550,19 +585,19 @@ class MipJNCSR():
         for c in self.criteria:
             cv = CriterionValue()
             cv.id = c.id
-            cv.value = self.lp.solution.get_values('w_' + c.id)
+            cv.value = round(self.lp.solution.get_values('w_' + c.id), 5)
             cvs.append(cv)
 
         self.model.cv = cvs
 
-        self.model.lbda = self.lp.solution.get_values("lambda")
+        self.model.lbda = round(self.lp.solution.get_values("lambda"), 5)
 
         pt = PerformanceTable()
         for p in self.__profiles:
             ap = AlternativePerformances(p)
             for c in self.criteria:
                 perf = self.lp.solution.get_values("b_%s^%s" % (c.id, p))
-                ap.performances[c.id] = perf
+                ap.performances[c.id] = round(perf, 5)
             pt.append(ap)
 
         self.model.bpt = pt
@@ -590,7 +625,7 @@ if __name__ == "__main__":
     from itertools import combinations
     import time
 
-    seed = 12
+    seed = 9
     ncrit = 5
     ncat = 3
 
@@ -621,6 +656,13 @@ if __name__ == "__main__":
         pwc = model.compare(pt[pwa[0]], pt[pwa[1]])
         if pwc.relation == PairwiseRelation.INDIFFERENT:
             continue
+#        if aa[pwc.a].category_id != aa[pwc.b].category_id:
+#            continue
+#        if aa[pwc.a].category_id != "cat2":
+#            continue
+#        if pwc.a != 'a17' or pwc.b != 'a20':
+#            continue
+
         pwcs.append(pwc)
 
     pwcs.weaker_to_preferred();
@@ -629,6 +671,9 @@ if __name__ == "__main__":
 
     # Run the MIP
     model2 = model.copy()
+    model2.cvs = None
+    model2.lbda = None
+    model2.bpt = None
 
     mip = MipJNCSR(model2, pt, None, pwcs)
 
@@ -637,8 +682,8 @@ if __name__ == "__main__":
     t2 = time.time()
 
     print(f"Solving time: {t2-t1:.2f} s.")
-    mip.dump_variables("mip_jncsr-variables.txt")
-    mip.dump_constraints("mip_jncsr-constraints.txt")
+    mip.dump_variables("mip_jncsr-variables.lp")
+    mip.dump_constraints("mip_jncsr-constraints.lp")
 
     # Display learned model parameters
     print('Learned model')
