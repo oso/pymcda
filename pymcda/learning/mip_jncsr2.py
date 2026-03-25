@@ -51,24 +51,6 @@ class MipJNCSR():
             self.ap_max.performances[c.id] += self.epsilon
             self.ap_range.performances[c.id] += 2 * self.epsilon * 100
 
-#        solver = os.getenv('SOLVER', 'cplex')
-#        if solver == 'cplex':
-#            import cplex
-#            solver_max_threads = int(os.getenv('SOLVER_MAX_THREADS', 0))
-#            self.lp = cplex.Cplex()
-#            self.lp.parameters.threads.set(solver_max_threads)
-#            self.add_variables_cplex()
-##            self.add_constraints_cplex()
-##            self.add_objective_cplex()
-##            self.solve_function = self.solve_cplex
-#            if verbose is False:
-#                self.lp.set_log_stream(None)
-#                self.lp.set_results_stream(None)
-##                self.lp.set_warning_stream(None)
-##                self.lp.set_error_stream(None)
-#        else:
-#            raise NameError('Invalid solver selected')
-
         self.pt.update_direction(model.criteria)
         if self.model.bpt is not None:
             self.model.bpt.update_direction(model.criteria)
@@ -124,12 +106,17 @@ class MipJNCSR():
         # sigma1(x,x',h)
         for pwc, h in product(self.pwcs, self.__categories[1:]):
             name = f"sigma1({pwc.a},{pwc.b},{h})"
-            variables[name] = pulp.LpVariable(name, lowBound=0, upBound=1)
+            variables[name] = pulp.LpVariable(name, cat='Binary')
 
         # sigma2(x,x',h)
         for pwc, h in product(self.pwcs, self.__categories[:-1]):
             name = f"sigma2({pwc.a},{pwc.b},{h})"
-            variables[name] = pulp.LpVariable(name, lowBound=0, upBound=1)
+            variables[name] = pulp.LpVariable(name, cat='Binary')
+
+        # eta(x,x',h)
+        for pwc, h in product(self.pwcs, self.__categories[1:-1]):
+            name = f"eta({pwc.a},{pwc.b},{h})"
+            variables[name] = pulp.LpVariable(name, cat='Binary')
 
         # compm(x,x')
         for pwc in self.pwcs:
@@ -149,7 +136,7 @@ class MipJNCSR():
 
         if self.model.bpt is not None:
             for bp, c in product(self.model.bpt, self.model.criteria):
-                lp += v[f"b_{c.id}^{profiles[h]}"] == bp.performances[c.id]
+                lp += v[f"b_{c.id}^{bp.id}"] == bp.performances[c.id]
 
     def add_weights_constraint(self):
         lp = self.lp
@@ -231,9 +218,9 @@ class MipJNCSR():
             lp += v[f"epsilon_{pwc.a},{pwc.b},{h}"] - v[f"y_{pwc.a},{h}"] \
                     - v[f"y_{pwc.b},{h}"] >= -1
 
-        # Delta_{h-1) (x,x') > 0
+        # Alternatives in best category
         for pwc in pwcs:
-            bigm = 2
+            bigm = 3
             h = self.__profiles[-1]
             cat = self.__categories[-1]
 
@@ -244,55 +231,64 @@ class MipJNCSR():
                     + pulp.lpSum(v[f"w_{c.id}({pwc.b},{h})"] for c in self.criteria) \
                     <= bigm - self.epsilon
 
-        # Delta_{h-1) (x,x') >= 0
-        for pwc, h in product(self.pwcs, self.__profiles[:-1]):
-            bigm = 2
-            i = self.__profiles.index(h)
-            ucat = self.__categories[i + 1]
-
-            # M \epsilon_{x,x',h} - \sigma1(x,x',h) - \Delta_{h-1}(x,x') <= M
-            lp += bigm * v[f"epsilon_{pwc.a},{pwc.b},{ucat}"] \
-                    - v[f"sigma1({pwc.a},{pwc.b},{ucat})"] \
-                    - pulp.lpSum(v[f"w_{c.id}({pwc.a},{h})"] for c in self.criteria) \
-                    + pulp.lpSum(v[f"w_{c.id}({pwc.b},{h})"] for c in self.criteria) \
-                    <= bigm
-
         # Alternatives in worst category
-        for pwc in self.pwcs:
-            bigm = 2
+        for pwc in pwcs:
+            bigm = 3
             h = self.__profiles[0]
             cat = self.__categories[0]
 
-            # M \epsilon_{x,x',h} - \sigma2(x,x',h) - \Delta_h(x,x')
-            #   <= M - \epsilon
+            # M \epsilon_{x,x',h} - \sigma2(x,x',h) - \Delta_{h}(x,x') <= M - \epsilon
             lp += bigm * v[f"epsilon_{pwc.a},{pwc.b},{cat}"] \
                     - v[f"sigma2({pwc.a},{pwc.b},{cat})"] \
                     - pulp.lpSum(v[f"w_{c.id}({pwc.a},{h})"] for c in self.criteria) \
                     + pulp.lpSum(v[f"w_{c.id}({pwc.b},{h})"] for c in self.criteria) \
                     <= bigm - self.epsilon
 
-        # \Delta_{h} (x,x') < 0
-        for pwc, h in product(self.pwcs, self.__profiles[1:]):
-            bigm = 20
+        # Alternatives in middle category (comparison to h-1)
+        for pwc, h in product(self.pwcs, self.__profiles[:-1]):
+            bigm = 3
             i = self.__profiles.index(h)
-            hm1 = self.__profiles[i - 1]
-            lcat = self.__categories[i]
-            ucat = self.__categories[i + 1]
+            cat = self.__categories[i + 1]
 
-            # M \epsilon_{x,x',h} - M \sigma1(x, x', h) - M \Delta_{h-1}(x,x')
-            #   - \sigma2(x,x',h) - \Delta_h(x,x') <= M - \epsilon
-            lp += bigm * v[f"epsilon_{pwc.a},{pwc.b},{lcat}"] \
-                    - bigm * v[f"sigma1({pwc.a},{pwc.b},{lcat})"] \
-                    - v[f"sigma2({pwc.a},{pwc.b},{lcat})"] \
+            # M \epsilon_{x,x',h} - \sigma1(x,x',h) - \Delta_{h-1}(x,x') <= M
+            lp += bigm * v[f"epsilon_{pwc.a},{pwc.b},{cat}"] \
+                    - v[f"sigma1({pwc.a},{pwc.b},{cat})"] \
                     - pulp.lpSum(v[f"w_{c.id}({pwc.a},{h})"] for c in self.criteria) \
                     + pulp.lpSum(v[f"w_{c.id}({pwc.b},{h})"] for c in self.criteria) \
-                    - bigm * pulp.lpSum(v[f"w_{c.id}({pwc.a},{hm1})"] for c in self.criteria) \
-                    + bigm * pulp.lpSum(v[f"w_{c.id}({pwc.b},{hm1})"] for c in self.criteria) \
+                    <= bigm
+
+        # Alternatives in middle category (comparison to h)
+        for pwc, h in product(self.pwcs, self.__profiles[1:]):
+            bigm = 3
+            i = self.__profiles.index(h)
+            hm1 = self.__profiles[i - 1]
+            cat = self.__categories[i]
+
+            # \eta_h(x,x') - \Delta_{h-1}(x,x') + epsilon(x,x',h) <= 2 - \epsilon
+            lp += v[f"eta({pwc.a},{pwc.b},{cat})"] \
+                    + v[f"epsilon_{pwc.a},{pwc.b},{cat}"] \
+                    - pulp.lpSum(v[f"w_{c.id}({pwc.a},{hm1})"] for c in self.criteria) \
+                    + pulp.lpSum(v[f"w_{c.id}({pwc.b},{hm1})"] for c in self.criteria) \
+                    <= 2 - self.epsilon
+
+            # - \eta_h(x,x') + \Delta_{h-1} (x,x') + \epsilon_{xx'h} <= 1
+            lp += v[f"epsilon_{pwc.a},{pwc.b},{cat}"] \
+                    - v[f"eta({pwc.a},{pwc.b},{cat})"] \
+                    + pulp.lpSum(v[f"w_{c.id}({pwc.a},{hm1})"] for c in self.criteria) \
+                    - pulp.lpSum(v[f"w_{c.id}({pwc.b},{hm1})"] for c in self.criteria) \
+                    <= 1
+
+            # M \epsilon_{x,x',h} - M \eta_h(x,x') - \sigma2(x,x',h) - \Delta_h(x,x') <= M - \epsilon
+            lp += bigm * v[f"epsilon_{pwc.a},{pwc.b},{cat}"] \
+                    - bigm * v[f"eta({pwc.a},{pwc.b},{cat})"] \
+                    - v[f"sigma1({pwc.a},{pwc.b},{cat})"] \
+                    - pulp.lpSum(v[f"w_{c.id}({pwc.a},{h})"] for c in self.criteria) \
+                    + pulp.lpSum(v[f"w_{c.id}({pwc.b},{h})"] for c in self.criteria) \
                     <= bigm - self.epsilon
 
         for pwc in self.pwcs:
             bigm = 3 * len(self.__categories) + 1
-            # M compm(x,x') + \sigmac(x,x') + \sum_{h=1,...,p} (\sigma1(x,x',h) + \sigma2(x,x',h)) <= M
+            # M compm(x,x') + \sigmac(x,x') + \sum_{h=1,...,p} \eta(x,x',h) <= M
             lp += bigm * v[f"compm({pwc.a},{pwc.b})"] \
                     + v[f"sigmac({pwc.a},{pwc.b})"] \
                     + pulp.lpSum(v[f"sigma1({pwc.a},{pwc.b},{cat})"] for cat in self.__categories[1:]) \
@@ -308,7 +304,7 @@ class MipJNCSR():
     def add_objective(self):
         v = self.variables
         self.lp += pulp.lpSum(v[f"y_{aa.id},{aa.category_id}"] for aa in self.aa) \
-                    + pulp.lpSum(v[f"compm({pwc.a},{pwc.b})"])
+                    + pulp.lpSum(v[f"compm({pwc.a},{pwc.b})"] for pwc in self.pwcs)
 
     def solve(self):
         solver = pulp.GUROBI(manageEnv=True)
@@ -316,7 +312,6 @@ class MipJNCSR():
         self.lp.solve(solver)
 
         status = pulp.LpStatus[self.lp.status]
-        print(status)
         if status != "Optimal":
             raise RuntimeError("Solver status: %s" % status)
 
@@ -326,22 +321,19 @@ class MipJNCSR():
         for c in self.criteria:
             cv = CriterionValue()
             cv.id = c.id
-            cv.value = self.variables[f"w_{c.id}"].varValue
-            print(cv.value)
+            cv.value = round(self.variables[f"w_{c.id}"].varValue, 5)
             cvs.append(cv)
 
         self.model.cv = cvs
 
-        self.model.lbda = self.variables["lambda"].varValue
-        print(self.model.lbda)
+        self.model.lbda = round(self.variables["lambda"].varValue, 5)
 
         pt = PerformanceTable()
         for p in self.__profiles:
             ap = AlternativePerformances(p)
             for c in self.criteria:
                 perf = self.variables[f"b_{c.id}^{p}"].varValue
-                print(perf)
-                ap.performances[c.id] = perf
+                ap.performances[c.id] = round(perf, 5)
             pt.append(ap)
 
         self.model.bpt = pt
@@ -350,10 +342,12 @@ class MipJNCSR():
         return obj
 
     def dump_variables(self, filename=None):
-        pass
+        with open(filename, "w+") as f:
+            for v in self.lp.variables():
+                print(f"{v.name} = {v.varValue}", file=f)
 
     def dump_constraints(self, filename=None):
-        pass
+        self.lp.writeLP(filename)
 
 if __name__ == "__main__":
     from pymcda.generate import generate_random_mrsort_model
@@ -395,12 +389,6 @@ if __name__ == "__main__":
         pwc = model.compare(pt[pwa[0]], pt[pwa[1]])
         if pwc.relation == PairwiseRelation.INDIFFERENT:
             continue
-#        if aa[pwc.a].category_id != aa[pwc.b].category_id:
-#            continue
-#        if aa[pwc.a].category_id != "cat2":
-#            continue
-#        if pwc.a != 'a17' or pwc.b != 'a20':
-#            continue
 
         pwcs.append(pwc)
 
@@ -410,11 +398,11 @@ if __name__ == "__main__":
 
     # Run the MIP
     model2 = model.copy()
-#    model2.cvs = None
-#    model2.lbda = None
-#    model2.bpt = None
+    model2.cvs = None
+    model2.lbda = None
+    model2.bpt = None
 
-    mip = MipJNCSR(model2, pt, aa, pwcs)
+    mip = MipJNCSR(model2, pt, None, pwcs)
 
     t1 = time.time()
     mip.solve()
@@ -461,8 +449,6 @@ if __name__ == "__main__":
                                      [aa, aa2], pt)
 
     print("Pairwise errors: %d" % errors)
-
-    print_pt_and_assignments(["a1", "a12"], model.criteria.keys(), [aa, aa2], pt)
 
     # Display models
     display_electre_tri_models([model, model2],
