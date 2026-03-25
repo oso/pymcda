@@ -73,7 +73,7 @@ class MipJNCSR():
 
         # b_i^h
         for c, h in product(self.criteria, self.__profiles):
-            name = f"b_{c.id}^{h}"
+            name = f"b_{c.id},{h}"
             variables[name] = pulp.LpVariable(name,
                                               lowBound=self.ap_min.performances[c.id],
                                               upBound=self.ap_max.performances[c.id] + self.epsilon)
@@ -132,11 +132,11 @@ class MipJNCSR():
         profiles = self.cps.get_ordered_profiles()
         for h, c in product(range(len(profiles) - 1), self.criteria):
             # g_j(b_h) <= g_j(b_{h+1})
-            lp += v[f"b_{c.id}^{profiles[h]}"] - v[f"b_{c.id}^{profiles[h + 1]}"] <= 0
+            lp += v[f"b_{c.id},{profiles[h]}"] - v[f"b_{c.id},{profiles[h + 1]}"] <= 0
 
         if self.model.bpt is not None:
             for bp, c in product(self.model.bpt, self.model.criteria):
-                lp += v[f"b_{c.id}^{bp.id}"] == bp.performances[c.id]
+                lp += v[f"b_{c.id},{bp.id}"] == bp.performances[c.id]
 
     def add_weights_constraint(self):
         lp = self.lp
@@ -160,10 +160,10 @@ class MipJNCSR():
             bigm = self.ap_range.performances[c.id]
 
             # M \delta_i(x,b^h) + b_i^h >= x_i + \epsilon
-            lp += bigm * v[f"delta_{c.id}({a},{h})"] + v[f"b_{c.id}^{h}"] >= self.pt[a].performances[c.id] + self.epsilon
+            lp += bigm * v[f"delta_{c.id}({a},{h})"] + v[f"b_{c.id},{h}"] >= self.pt[a].performances[c.id] + self.epsilon
 
             # M \delta_i(x,b^h) + b_i^h <= x_i + M
-            lp += bigm * v[f"delta_{c.id}({a},{h})"] + v[f"b_{c.id}^{h}"] <= self.pt[a].performances[c.id] + bigm
+            lp += bigm * v[f"delta_{c.id}({a},{h})"] + v[f"b_{c.id},{h}"] <= self.pt[a].performances[c.id] + bigm
 
             # \delta_i(x, b^h) - w_i(x, b^h) >= 0
             lp += v[f"delta_{c.id}({a},{h})"] - v[f"w_{c.id}({a},{h})"] >= 0
@@ -309,6 +309,9 @@ class MipJNCSR():
     def solve(self):
         solver = pulp.GUROBI(manageEnv=True)
         #solver = pulp.GUROBI_CMD()
+        #solver = pulp.CPLEX_CMD()
+        #solver = pulp.GLPK_CMD()
+        #solver = pulp.HiGHS_CMD()
         self.lp.solve(solver)
 
         status = pulp.LpStatus[self.lp.status]
@@ -332,7 +335,7 @@ class MipJNCSR():
         for p in self.__profiles:
             ap = AlternativePerformances(p)
             for c in self.criteria:
-                perf = self.variables[f"b_{c.id}^{p}"].varValue
+                perf = self.variables[f"b_{c.id},{p}"].varValue
                 ap.performances[c.id] = round(perf, 5)
             pt.append(ap)
 
