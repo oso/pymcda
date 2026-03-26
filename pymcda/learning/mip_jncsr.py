@@ -479,7 +479,6 @@ class MipJNCSR():
             i = self.__profiles.index(h)
             hm1 = self.__profiles[i - 1]
             lcat = self.__categories[i]
-            ucat = self.__categories[i + 1]
 
             # 2 - \varepsilon + \Delta_{h-1}(x,x') - \epsilon(x,x',h) >= \eta_h(x,x')
             # \eta_h(x,x') - \Delta_{h-1}(x,x') + epsilon(x,x',h) <= 2 - \epsilon
