@@ -397,7 +397,7 @@ if __name__ == "__main__":
 
     # Run the MIP
     model2 = model.copy()
-    model2.cvs = None
+    model2.cv = None
     model2.lbda = None
     model2.bpt = None
 
