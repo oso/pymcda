@@ -193,10 +193,6 @@ class MipJNCSR():
         for a in self.__alternatives:
             lp += pulp.lpSum(v[f"y_{a},{h}"] for h in self.__categories) == 1
 
-        # assignment examples
-        for aa in self.aa:
-            lp += v[f"y_{aa.id},{aa.category_id}"] == 1
-
     def add_pairwise_constraints(self):
         lp = self.lp
         v = self.variables
@@ -264,7 +260,7 @@ class MipJNCSR():
             hm1 = self.__profiles[i - 1]
             cat = self.__categories[i]
 
-            # \eta_h(x,x') - \Delta_{h-1}(x,x') + epsilon(x,x',h) <= 2 - \epsilon
+            # \eta_h(x,x') - \Delta_{h-1}(x,x') + epsilon(x,x',h) <= 2 - \varepsilon
             lp += v[f"eta({pwc.a},{pwc.b},{cat})"] \
                     + v[f"epsilon_{pwc.a},{pwc.b},{cat}"] \
                     - pulp.lpSum(v[f"w_{c.id}({pwc.a},{hm1})"] for c in self.criteria) \
@@ -281,14 +277,14 @@ class MipJNCSR():
             # M \epsilon_{x,x',h} - M \eta_h(x,x') - \sigma2(x,x',h) - \Delta_h(x,x') <= M - \epsilon
             lp += bigm * v[f"epsilon_{pwc.a},{pwc.b},{cat}"] \
                     - bigm * v[f"eta({pwc.a},{pwc.b},{cat})"] \
-                    - v[f"sigma1({pwc.a},{pwc.b},{cat})"] \
+                    - v[f"sigma2({pwc.a},{pwc.b},{cat})"] \
                     - pulp.lpSum(v[f"w_{c.id}({pwc.a},{h})"] for c in self.criteria) \
                     + pulp.lpSum(v[f"w_{c.id}({pwc.b},{h})"] for c in self.criteria) \
                     <= bigm - self.epsilon
 
         for pwc in self.pwcs:
             bigm = 3 * len(self.__categories) + 1
-            # M compm(x,x') + \sigmac(x,x') + \sum_{h=1,...,p} \eta(x,x',h) <= M
+            # M compm(x,x') + \sigmac(x,x') + \sum_{h=1,...,p} \sigma1(x,x',h) + \sigma2(x,x',h) <= M
             lp += bigm * v[f"compm({pwc.a},{pwc.b})"] \
                     + v[f"sigmac({pwc.a},{pwc.b})"] \
                     + pulp.lpSum(v[f"sigma1({pwc.a},{pwc.b},{cat})"] for cat in self.__categories[1:]) \
