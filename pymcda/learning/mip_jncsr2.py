@@ -354,6 +354,7 @@ if __name__ == "__main__":
     from pymcda.generate import generate_random_performance_table
     from pymcda.utils import print_pt_and_assignments
     from pymcda.ui.graphic import display_electre_tri_models
+    from pymcda.utils import add_errors_in_assignments
     from itertools import combinations
     import time
 
@@ -383,11 +384,16 @@ if __name__ == "__main__":
     aa = model.pessimist(pt)
 
     # Add pairwise comparisons
+    errors = 5
     pwcs = PairwiseRelations()
     for pwa in combinations(a.keys(), 2):
         pwc = model.compare(pt[pwa[0]], pt[pwa[1]])
         if pwc.relation == PairwiseRelation.INDIFFERENT:
             continue
+
+        if errors > 0:
+            pwc.a, pwc.b = pwc.b, pwc.a
+            errors -= 1
 
         pwcs.append(pwc)
 
@@ -401,7 +407,10 @@ if __name__ == "__main__":
     model2.lbda = None
     model2.bpt = None
 
-    mip = MipJNCSR(model2, pt, None, pwcs)
+#    aa2 = aa.get_subset([f"a{i+1}" for i in range(10)])
+    aa2 = add_errors_in_assignments(aa, model.categories, 0.2)
+    print(f"Added errors: {aa2}")
+    mip = MipJNCSR(model2, pt, aa, pwcs)
 
     t1 = time.time()
     mip.solve()
