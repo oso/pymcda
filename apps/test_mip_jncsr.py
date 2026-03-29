@@ -167,6 +167,7 @@ def run_test(params):
 
         row = list(params.values()) + list(results.values())
         writer.writerow(row)
+        f.flush()
 
 def parse_args():
     import argparse
