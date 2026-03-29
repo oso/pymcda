@@ -215,7 +215,7 @@ class MipJNCSR():
                     - v[f"y_{pwc.b},{h}"] >= -1
 
         # Alternatives in best category
-        for pwc in pwcs:
+        for pwc in self.pwcs:
             bigm = 3
             h = self.__profiles[-1]
             cat = self.__categories[-1]
@@ -228,7 +228,7 @@ class MipJNCSR():
                     <= bigm - self.epsilon
 
         # Alternatives in worst category
-        for pwc in pwcs:
+        for pwc in self.pwcs:
             bigm = 3
             h = self.__profiles[0]
             cat = self.__categories[0]
