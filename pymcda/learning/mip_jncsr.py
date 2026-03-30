@@ -302,8 +302,8 @@ class MipJNCSR():
         self.lp += pulp.lpSum(v[f"y_{aa.id},{aa.category_id}"] for aa in self.aa) \
                     + pulp.lpSum(v[f"compm({pwc.a},{pwc.b})"] for pwc in self.pwcs)
 
-    def solve(self):
-        solver = pulp.GUROBI(manageEnv=True)
+    def solve(self, time_limit=None):
+        solver = pulp.GUROBI(manageEnv=True, timeLimit=time_limit)
         #solver = pulp.GUROBI_CMD()
         #solver = pulp.CPLEX_CMD()
         #solver = pulp.GLPK_CMD()
