@@ -22,6 +22,7 @@ from pymcda.utils import compute_ca
 from test_utils import save_to_xmcda
 
 DATADIR = os.getenv('DATADIR', '%s/pymcda-data' % os.path.expanduser('~')) + '/'
+TIME_LIMIT = 3600
 
 def generate_random_strict_preferences(n, model):
     i = 0
@@ -71,7 +72,7 @@ def test_mip_jncsr(params):
     mip = MipJNCSR(m2, pt, aa, pwcs)
 
     t1 = time.time()
-    obj = mip.solve()
+    obj = mip.solve(time_limit = TIME_LIMIT)
     t2 = time.time()
 
     aa_m2 = m2.pessimist(pt_aa)
@@ -130,9 +131,6 @@ def test_mip_jncsr(params):
 
     return data, results
 
-def save_data(params, data, directory):
-    pass
-
 def run_test(params):
     nseed = params.pop("nseed")
     fname = params.pop("filename")
@@ -157,7 +155,12 @@ def run_test(params):
             continue
 
         params["seed"] = i
-        data, results = test_mip_jncsr(params)
+        try:
+            data, results = test_mip_jncsr(params)
+        except:
+            print("Time limit exceeded")
+            open(dataf, 'a').close()
+            continue
         save_to_xmcda(dataf, data['m1'], data['m2'],
                       data['pt'], data['pt_test'])
 
