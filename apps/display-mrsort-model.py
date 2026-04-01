@@ -1,12 +1,13 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + "/../")
 from xml.etree import ElementTree
 import bz2
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtWidgets
 from pymcda.electre_tri import MRSort
 from pymcda.types import AlternativePerformances
 from pymcda.ui.graphic import QGraphicsSceneEtri
@@ -31,6 +32,7 @@ for f in sys.argv[1:]:
     root = tree.getroot()
 
     xmcda_models += root.findall(".//ElectreTri")
+    xmcda_pt += root.findall(".//PerformanceTable")
 
 models = []
 for xmcda_model in xmcda_models:
@@ -91,15 +93,15 @@ for xmcda_model in xmcda_models:
     models.append(m)
 
 
-app = QtGui.QApplication(sys.argv)
+app = QtWidgets.QApplication(sys.argv)
 
-sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,
-                               QtGui.QSizePolicy.Expanding)
+sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                   QtWidgets.QSizePolicy.Expanding)
 sizePolicy.setHorizontalStretch(1)
 sizePolicy.setVerticalStretch(0)
 sizePolicy.setHeightForWidth(sizePolicy.hasHeightForWidth())
 
-layout = QtGui.QGridLayout()
+layout = QtWidgets.QGridLayout()
 
 for m in models:
     worst = m.bpt.get_worst(m.criteria)
@@ -137,7 +139,7 @@ for m in models:
     view.setScene(graph)
     layout.addWidget(view)
 
-dialog = QtGui.QDialog()
+dialog = QtWidgets.QDialog()
 dialog.setLayout(layout)
 dialog.resize(1024, 768)
 dialog.show()
