@@ -302,6 +302,9 @@ class MipJNCSR():
         self.lp += pulp.lpSum(v[f"y_{aa.id},{aa.category_id}"] for aa in self.aa) \
                     + pulp.lpSum(v[f"compm({pwc.a},{pwc.b})"] for pwc in self.pwcs)
 
+    def status_string(self):
+        return pulp.LpStatus[self.lp.status]
+
     def solve(self, time_limit=None):
         solver = pulp.GUROBI(manageEnv=True, timeLimit=time_limit)
         #solver = pulp.GUROBI_CMD()
@@ -310,9 +313,9 @@ class MipJNCSR():
         #solver = pulp.HiGHS_CMD()
         self.lp.solve(solver)
 
-        status = pulp.LpStatus[self.lp.status]
-        if status != "Optimal":
-            raise RuntimeError("Solver status: %s" % status)
+        status = self.lp.status
+        if status < 0:
+            raise RuntimeError(f"Solver status: {status} ({status_string()})")
 
         obj = pulp.value(self.lp.objective)
 
@@ -338,7 +341,7 @@ class MipJNCSR():
         self.model.bpt = pt
         self.model.bpt.update_direction(self.model.criteria)
 
-        return obj
+        return status, obj
 
     def dump_variables(self, filename=None):
         with open(filename, "w+") as f:
@@ -413,10 +416,12 @@ if __name__ == "__main__":
     mip = MipJNCSR(model2, pt, aa, pwcs)
 
     t1 = time.time()
-    mip.solve()
+    status, obj = mip.solve()
     t2 = time.time()
 
     print(f"Solving time: {t2-t1:.2f} s.")
+    print(f"Status: {mip.status_string()}")
+    print(f"Objective: {obj}")
     mip.dump_variables("mip_jncsr-variables.lp")
     mip.dump_constraints("mip_jncsr-constraints.lp")
 
