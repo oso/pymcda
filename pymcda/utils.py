@@ -6,7 +6,25 @@ import random
 from itertools import chain, combinations, product
 from math import factorial, ceil
 from pymcda.types import AlternativesAssignments
+from pymcda.types import PairwiseRelations
+from pymcda.types import PairwiseRelation
 from collections import OrderedDict
+
+def add_errors_in_pwcs(pwcs, eratio, relations = [PairwiseRelation.INDIFFERENT,
+                                                  PairwiseRelation.WEAKER,
+                                                  PairwiseRelation.PREFERRED]):
+    epwcs = pwcs.copy()
+
+    n = int(len(epwcs)*eratio)
+    pwcs_erroned = random.sample(list(epwcs), n)
+
+    for pwc in pwcs_erroned:
+        relation = new_relation = pwc.relation
+        while relation == new_relation:
+            new_relation = random.sample(relations, 1)[0]
+        pwc.relation = new_relation
+
+    return epwcs
 
 def add_errors_in_assignments(aa, category_ids, errors_pc):
     n = int(len(aa)*errors_pc)
