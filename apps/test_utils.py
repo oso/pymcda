@@ -530,14 +530,14 @@ def save_to_xmcda(filepath, *elems):
 
 def get_file_compression(filepath):
     magic_dict = {
-        "\x1f\x8b\x08": "gz",
-        "\x42\x5a\x68": "bz2",
-        "\x50\x4b\x03\x04": "zip"
+        b"\x1f\x8b\x08": "gz",
+        b"\x42\x5a\x68": "bz2",
+        b"\x50\x4b\x03\x04": "zip"
     }
 
     max_len = max(len(x) for x in magic_dict)
 
-    with open(filepath) as f:
+    with open(filepath, mode='rb') as f:
         file_start = f.read(max_len)
 
     for magic, filetype in magic_dict.items():
