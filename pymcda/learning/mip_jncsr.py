@@ -320,12 +320,12 @@ class MipJNCSR():
         for c in self.criteria:
             cv = CriterionValue()
             cv.id = c.id
-            cv.value = round(self.variables[f"w_{c.id}"].varValue, 5)
+            cv.value = self.variables[f"w_{c.id}"].varValue
             cvs.append(cv)
 
         self.model.cv = cvs
 
-        self.model.lbda = round(self.variables["lambda"].varValue, 5)
+        self.model.lbda = self.variables["lambda"].varValue
 
         pt = PerformanceTable()
         for p in self.__profiles:
