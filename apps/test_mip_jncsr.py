@@ -72,7 +72,7 @@ def test_mip_jncsr(params):
     mip = MipJNCSR(m2, pt, aa, pwcs)
 
     t1 = time.time()
-    obj = mip.solve(time_limit = TIME_LIMIT)
+    status, obj = mip.solve(time_limit = TIME_LIMIT)
     t2 = time.time()
 
     aa_m2 = m2.pessimist(pt_aa)
@@ -122,6 +122,7 @@ def test_mip_jncsr(params):
     data["pwcs_test"] = pwcs_test
 
     results = OrderedDict()
+    results["status"] = status
     results["objective"] = obj
     results["time"] = f"{t2-t1:.2f}"
     results["ca"] = ca
@@ -158,7 +159,7 @@ def run_test(params):
         try:
             data, results = test_mip_jncsr(params)
         except:
-            print("Time limit exceeded")
+            print("Unexpected error")
             open(dataf, 'a').close()
             continue
         save_to_xmcda(dataf, data['m1'], data['m2'],
