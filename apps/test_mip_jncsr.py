@@ -17,6 +17,7 @@ from pymcda.types import PairwiseRelations, PairwiseRelation
 from pymcda.types import AlternativePerformances
 from pymcda.types import PerformanceTable
 from pymcda.utils import add_errors_in_assignments
+from pymcda.utils import add_errors_in_pwcs
 from pymcda.utils import compute_ca
 
 from test_utils import save_to_xmcda
@@ -60,6 +61,17 @@ def test_mip_jncsr(params):
     pt_aa_test = generate_random_performance_table(a_aa_test, m1.criteria)
     pwcs_test, pt_pwcs_test = generate_random_strict_preferences(params["npwcs_test"], m1)
 
+    if params["eratio"] > 0:
+        aa_errors = aa.copy()
+        add_errors_in_assignments(aa_errors, m1.categories, params["eratio"])
+        pwcs_errors = add_errors_in_pwcs(pwcs, params["eratio"],
+                                         [PairwiseRelation.WEAKER,
+                                          PairwiseRelation.PREFERRED])
+        pwcs_errors.weaker_to_preferred()
+    else:
+        aa_errors = aa
+        pwcs_errors = pwcs
+
     pt = PerformanceTable()
     pt.update(pt_aa)
     pt.update(pt_pwcs)
@@ -69,24 +81,24 @@ def test_mip_jncsr(params):
 
     m2 = m1.copy()
     m2.cv = m2.lbda = m2.bpt = None
-    mip = MipJNCSR(m2, pt, aa, pwcs)
+    mip = MipJNCSR(m2, pt, aa_errors, pwcs_errors)
 
     t1 = time.time()
     status, obj = mip.solve(time_limit = TIME_LIMIT)
     t2 = time.time()
 
     aa_m2 = m2.pessimist(pt_aa)
-    ca = compute_ca(aa, aa_m2)
+    ca = compute_ca(aa_errors, aa_m2)
 
     pwa = 0
-    for pwc in pwcs:
+    for pwc in pwcs_errors:
         ap1 = pt_pwcs[pwc.a]
         ap2 = pt_pwcs[pwc.b]
         pwc_m2 = m2.compare(ap1, ap2)
         pwc_m2.weaker_to_preferred()
         if pwc == pwc_m2:
             pwa += 1
-    pwa /= len(pwcs)
+    pwa /= len(pwcs_errors)
 
     aa_test = m1.pessimist(pt_aa_test)
     aa_test_m2 = m2.pessimist(pt_aa_test)
@@ -106,9 +118,11 @@ def test_mip_jncsr(params):
     m2.id = 'learned'
     pt.id = 'learning_set'
     pt_test.id = 'test_set'
-    aa.id = 'learning_set'
+    aa.id = 'learning_set_no_errors'
+    aa_errors.id = 'learning_set'
     aa_test.id = 'test_set'
-    pwcs.id = 'learning_set'
+    pwcs.id = 'learning_set_no_errors'
+    pwcs_errors.id = 'learning_set'
     pwcs_test.id = 'test_set'
 
     data = OrderedDict()
@@ -116,9 +130,11 @@ def test_mip_jncsr(params):
     data["m2"] = m2
     data["pt"] = pt
     data["pt_test"] = pt_test
-    data["aa"] = aa
+    data["aa"] = aa_errors
+    data["aa_no_errors"] = aa
     data["aa_test"] = aa_test
-    data["pwcs"] = pwcs
+    data["pwcs"] = pwcs_errors
+    data["pwcs_no_errors"] = pwcs
     data["pwcs_test"] = pwcs_test
 
     results = OrderedDict()
