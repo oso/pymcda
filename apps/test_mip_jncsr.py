@@ -194,15 +194,3 @@ def parse_args():
 if __name__ == "__main__":
     params = parse_args()
     run_test(params)
-#    print(args)
-#
-#    params = {}
-#    params["seed"] = 0
-#    params["ncrit"] = 3
-#    params["ncat"] = 2
-#    params["naa"] = 100
-#    params["npwcs"] = 100
-#    params["eratio"] = 0
-#    params["naa_test"] = 1000
-#    params["npwcs_test"] = 50000
-
