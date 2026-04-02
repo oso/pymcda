@@ -11,7 +11,7 @@ verbose = True
 
 class MipJNCSR():
 
-    def __init__(self, model, pt, aa, pwcs, epsilon = 0.0001):
+    def __init__(self, model, pt, aa, pwcs, epsilon = 0.0002):
         self.pt = pt
         self.aa = aa if aa is not None else set()
         self.pwcs = pwcs
